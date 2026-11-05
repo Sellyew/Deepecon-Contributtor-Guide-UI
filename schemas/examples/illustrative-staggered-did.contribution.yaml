@@ -2,8 +2,8 @@
 # Purpose: show how the schema records provenance, bilingual text, a failure mode, a flawed
 # variant, consequence evidence, and a task candidate. Nothing here describes a real study.
 x-illustrative: true
-schema_version: 0.1.0
-protocol_version: 0.1.0
+schema_version: 0.2.0
+protocol_version: 0.2.0
 rubric_version: 0.1.0
 contribution_id: ex-2026-0001
 created_at: "2026-11-05T09:00:00Z"
@@ -138,6 +138,7 @@ failure_modes:
         model: { provider: anthropic, model_id: claude-opus-5-5, client: "illustrative" }
         created_at: "2026-11-05T10:05:00Z"
         endorsement: edited_then_endorsed
+        exposure: not_applicable
         endorsed_by: econ-001
         endorsed_at: "2026-11-05T10:07:00Z"
         validation: unvalidated
@@ -156,8 +157,13 @@ failure_modes:
           - { lang: en, text: "Standard practice before 2020 and still common in RA code; the contributor's own first draft used it.", is_original: true }
         provenance: { origin: contributor, actor_id: econ-001, created_at: "2026-11-05T10:10:00Z", endorsement: endorsed, validation: unvalidated }
       warrant_types: [contributor_research_experience, methodological_literature]
+      observed_in_practice: own_project
     validity_layer: statistical
     status: conditional
+    status_claimed_by_contributor: conditional
+    status_classifications:
+      - { classifier_id: reviewer-01, status: conditional, rationale: "Effects grow over event time in the paper's event study.", blind: true, round: 1 }
+      - { classifier_id: reviewer-02, status: conditional, rationale: "Bias under heterogeneous timing effects is established; heterogeneity is documented here.", blind: true, round: 1 }
     conditions:
       - statement_id: s-013
         text:
@@ -165,6 +171,7 @@ failure_modes:
         provenance: { origin: contributor, actor_id: econ-001, created_at: "2026-11-05T10:11:00Z", endorsement: endorsed, validation: unvalidated }
     predicted_consequence:
       direction: [point_estimate_down]
+      category: changes_magnitude_material
       magnitude_note: "Roughly halves the estimate."
       predicted_at: "2026-11-05T10:12:00Z"
       predicted_by: econ-001

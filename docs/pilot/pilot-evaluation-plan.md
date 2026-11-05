@@ -56,15 +56,20 @@ Both slices share the architecture-independent core (protocol assets, schema, va
 
 **RA-assisted condition.** At least one non-fluent participant per arm works with a research assistant who performs operationalization (S5) from the hand-off specification.
 
+**Randomized suggestion phase.** Within each session, the gated suggestion phase (protocol §7) is switched on or off at random for each critical decision. Comparing decisions with and without suggestions estimates the net valid yield of suggestions and how much of their content contributors absorb — the only way to measure influence that self-reports miss.
+
+**Session length.** Sessions are capped at 45–60 minutes (protocol §5); each arm may take more than one session.
+
 **Order of activities.**
 
-1. **Dry runs** with simulated contributors (interview protocol §15) on both slices, to fix mechanical problems before involving experts.
-2. **Setup test** on participants' own machines: B-slice installation and A-slice sign-up, timed, without staff help unless requested (requests are logged).
-3. **Sessions** (recorded with consent).
-4. **Asynchronous completion:** operationalization and package finalization within one week.
-5. **Debrief interview** (20 minutes, semi-structured).
-6. **Blind review:** two independent economists and one benchmark reviewer rate every package with the rubric subset RV-1 to RV-4, GT-2, GT-3, and SP-3, without knowing which workflow produced it. Inter-rater agreement is reported.
-7. **Shepherding:** the project converts the best candidate from each arm into a full task (Stages 5–6), recording hours, so that the pilot also yields a proposed task, an initial verifier, and a complete standardized package (the Deliverable 8 requirements).
+1. **Dry runs** with simulated contributors (interview protocol §15: baseline arm, replicates, pushback and deference personas) on both slices, to fix mechanical problems before involving experts.
+2. **Cognitive-interview pretest** of the probe library with three to five economists per language.
+3. **Setup test** on participants' own machines: B-slice installation and A-slice sign-up, timed, without staff help unless requested (requests are logged).
+4. **Sessions** (recorded with consent).
+5. **Asynchronous completion:** operationalization and package finalization within one week.
+6. **Debrief interview** (20 minutes, semi-structured).
+7. **Blind review:** two independent economists and one benchmark reviewer rate every package with the rubric subset RV-1 to RV-4, GT-2, GT-3, and SP-3, without knowing which workflow produced it. Inter-rater agreement is reported.
+8. **Shepherding:** the project converts the best candidate from each arm into a full task (Stages 5–6), recording hours, so that the pilot also yields a proposed task, an initial verifier, and a complete standardized package (the Deliverable 8 requirements).
 
 ## 5. Measures
 
@@ -75,8 +80,8 @@ Both slices share the architecture-independent core (protocol assets, schema, va
 | M3 | Candidate yield: failure modes endorsed; operationalized; validated with a material consequence | Packages; shepherd records | PQ2, PQ4 |
 | M4 | Recall of the sealed known-issues key; number of novel items rated valid by reviewers | Key comparison; blind review | PQ2, PQ7 |
 | M5 | Blind quality ratings (rubric subset) and inter-rater agreement | Reviewer forms | PQ2 |
-| M6 | LLM-origin share of endorsed items; share of weak endorsements | Provenance fields; suggestion ledger | PQ3, PQ7 |
-| M7 | Perceived ownership ("The dossier reflects my reasoning") and perceived interviewer quality | Post-session questionnaire (Likert items, defined before the pilot) | PQ3 |
+| M6 | **Measured AI influence:** LLM-originated, post-exposure, and LLM-influenced shares of endorsed items; false-endorsement rate on known-valid controls; weak endorsements | Free-recall lists; exposure flags; suggestion ledger | PQ3, PQ7 |
+| M7 | Perceived ownership and perceived interviewer quality — **an experience measure only**, not evidence of validity: self-rated ownership did not distinguish experts who followed an AI's planted lean ([R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md) §3.4) | Post-session questionnaire (items defined before the pilot) | PQ1 |
 | M8 | Usability | A validated short instrument (e.g., UMUX-Lite or SUS; choose one before the pilot) | PQ1 |
 | M9 | Tokens, list-price cost, staff support minutes, shepherd hours per admitted task | Usage logs; time sheets | PQ5 |
 | M10 | Comfort with data flows; anything participants declined to share | Questionnaire items; debrief | PQ6 |
@@ -98,7 +103,8 @@ Writing these down before the pilot keeps the architecture decision honest.
 | Non-fluent participants cannot complete B-slice setup unaided | A, or a hybrid with hosted onboarding | Fewer than 3 of 4 non-fluent participants complete setup within 30 minutes without help |
 | Hand-off execution (A1) stalls operationalization | B, or A2 (hosted execution) | Under half of A1 contributions reach a run flawed variant within one week |
 | Blind quality ratings are similar across arms | Decide on accessibility, cost, privacy, and sustainability | Median rating difference within one rubric level |
-| LLM-origin share is high in one arm | That arm's interaction design needs revision before scaling, whichever is chosen | More than 50% of endorsed items LLM-originated |
+| AI influence is high in one arm | That arm's interaction design needs revision before scaling, whichever is chosen | LLM-influenced share above 50% of endorsed items, or false endorsement of more than a quarter of known-valid controls |
+| Suggestions add little net valid yield | Drop or narrow the suggestion phase in both arms | Decisions with suggestions yield no more validated items than decisions without |
 | Participants decline to share materials in one arm | The other arm, or a design change to the data flow | Two or more participants decline |
 | Inference cost per contribution is small relative to shepherd time | Do not let inference cost drive the decision | Inference below 10% of total per-task cost |
 
@@ -112,7 +118,16 @@ Writing these down before the pilot keeps the architecture decision honest.
 4. An **available expert**, ideally an original author (Path B).
 5. Moderate fame: very famous papers are well-understood (good for recall measurement) but heavily memorized (bad for the eventual task); the pilot mainly tests workflows, so this is secondary here.
 
-**Candidate archetypes** (illustrations to be verified by the team before selection; none is a recommendation yet):
+**Candidates verified in [R8](../research/evidence/R8-replication-standards-and-econometric-pitfalls.md) §5** (no recommendation). All four are Top-5 papers with small public data copied into methods packages, and all are canonical teaching examples. That makes contamination high, which is acceptable for a pilot comparing workflows but not for released tasks:
+
+| Candidate | Design | Data facts | Concerns |
+|---|---|---|---|
+| Stevenson & Wolfers (2006, *QJE*) | Staggered DiD (the illustration in Goodman-Bacon 2021) | `divorce` data in the CRAN package `bacondecomp` (MIT); 3,366 × 147; 692 KB [P-page] | No codebook; provenance and licence of the data [U] |
+| Ludwig & Miller (2007, *QJE*) | Sharp RD (Head Start) | `headstart.csv`, 2,810 counties, 511 KB, with a pre-period placebo outcome; R, Stata, and Python code in a methods repository without a licence file [P-page] | Noisy outcome |
+| Meyersson (2014, *Econometrica*) | Sharp RD | `polecon`, 2,629 municipalities, 311 KB; no licence file [P-page] | The main teaching example of a widely used RD primer |
+| Autor, Dorn & Hanson (2013, *AER*) | Shift-share | Copies in ShiftShareSE (GPL-3), Goldsmith-Pinkham–Sorkin–Swift (MIT), and Borusyak–Hull–Jaravel (GPL-3; 11.5 MB) [P-page] | Licensing of derived data; Stata-version sensitivity. Three independent reference implementations are an advantage |
+
+The original replication-package locations for all four are [U]. Earlier archetype illustrations:
 
 | Archetype | What makes it attractive | What to verify |
 |---|---|---|
@@ -135,7 +150,7 @@ The choice of paper — and whether a collaborator can contribute their own pape
 |---|---|
 | 1–2 | Select paper; build and independently check reference implementations; seal known-issues key; ethics submission |
 | 2–5 | Build the two thin slices on the shared core (estimates in the [decision brief](../architecture/architecture-decision-brief.md)) |
-| 5–6 | Simulated-contributor dry runs; fixes |
+| 5–6 | Simulated-contributor dry runs; cognitive-interview pretest of probes (EN/ZH); fixes |
 | 6–9 | Setup tests, sessions, asynchronous completion, debriefs |
 | 9–11 | Blind review; shepherding two candidates into full tasks; validation ladder |
 | 11–12 | Pilot report and decision memo for collaborators |

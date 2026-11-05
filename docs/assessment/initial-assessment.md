@@ -24,7 +24,7 @@
 1. **Negative controls built in.** Every expert-designed flawed variant is a test the verifier must fail. Weak verifiers that accept wrong answers are a known failure of agent benchmarks ([R1](../research/evidence/R1-terminal-bench-science.md) §3–§4; [R4](../research/evidence/R4-replication-benchmarks.md) summary). Terminal-Bench-Science already requires "measured separation" from structurally independent comparators [P-full]; DeepEcon's comparators would be *realistic research mistakes* rather than author-invented ones.
 2. **Realism by construction.** The mistakes come from people who know which errors matter, with a recorded realism warrant. That directly addresses Safeguard G (real errors versus artificial mutations).
 3. **A construct that is not yet saturated.** Plain reproduction is close to solved for frontier agents (Claude Code reaches 93.4% on SocSci-Repro-Bench) [P-page]. DeepEcon targets the *decisions* that make results credible, which existing economics benchmarks do not grade as executable outcomes ([R4](../research/evidence/R4-replication-benchmarks.md) §4–§5).
-4. **Procedure tested through outcomes.** Agents deliver code; verifiers re-run it on hidden data variants and check econometric metamorphic relations (e.g., duplicating a panel with new cluster identifiers must shrink cluster-robust standard errors by about 1/√2). This reconciles *Good Benchmarks*' "grade outcomes, not process" with the brief's "correct output is not correct procedure" ([verifier protocol](../methodology/verifier-validation-protocol.md) §5).
+4. **Procedure tested through outcomes.** Agents deliver code; verifiers re-run it on hidden data variants and check econometric metamorphic relations. The strongest is **additive effect injection**: add a known effect to treated outcomes in the real data, and a correct estimator must move by exactly the estimand's weighting of that effect. In a numerical check, an imputation estimator moved by the target ATT of 2.062 while two-way fixed effects moved by 1.421 ([R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) Appendix A). This reconciles *Good Benchmarks*' "grade outcomes, not process" with the brief's "correct output is not correct procedure" ([verifier protocol](../methodology/verifier-validation-protocol.md) §5).
 5. **Pre-registered consequences.** Contributors predict how a mistake will change the estimate before it is run. This tests understanding and prevents post-hoc rationalization.
 6. **By-products with independent value.** A citable catalogue of credibility criteria, replacing journal-rank intuitions (brief §3.4); and flawed packages that double as planted-defect fixtures for validating AI reviewers.
 
@@ -32,7 +32,7 @@
 
 | Failure mode | Why it matters | Guard |
 |---|---|---|
-| **Equivalent mutants**: the flawed procedure gives the same number as the correct one on the evaluation data | No outcome check can then detect the mistake | Hidden data variants that separate them; semi-synthetic data; otherwise drop the variant ([validation ladder](../methodology/verifier-validation-protocol.md) L7) |
+| **"Same number, wrong procedure"**: the flawed procedure matches the correct one on the evaluation data | Six distinct cases ([verifier protocol](../methodology/verifier-validation-protocol.md) §2). Most can be caught with new inputs or more outputs. Identification-equivalence cannot be caught by any outcome check | Effect injection and other separating hidden variants; requiring standard errors and diagnostics as outputs; structured expert judgment for identification-equivalent cases |
 | **Verifier co-designed with one solution** | Correct alternatives rejected; the many-analysts literature shows real legitimate dispersion | Acceptance regions calibrated on validated alternatives; the "two experts, two verifiers" test; tighten the estimand (*Good Benchmarks* §4, §7) |
 | **Contamination**: published results and public packages | Agents can recall or look up answers; one study reports perfect scores on non-anonymized materials [S] | Offline task environments; perturbed or semi-synthetic data; re-execution on hidden data; restyled code; private held-out set (O-001) |
 | **"One-sentence-fact" tasks** | Disclosing one fact (e.g., the right clustering level) may make a task trivial; *Good Benchmarks* §9 calls such tasks weak | Explicit policy (O-004): keep only when recognizing the fact from the disclosed design is the capability under test |
@@ -40,7 +40,7 @@
 | **AI-driven drift in contributions** | Experts agreeing with an AI interviewer can produce artificial tasks (*Good Benchmarks* §9) | Contributor-first elicitation, provenance, LLM-origin monitoring, human-authored instructions |
 | **Errors in the "correct" package** | Published packages contain real errors (the I4R catalogue lists 122 across 12 papers [P-page]) | Independent checks; treat discoveries as findings; label clean controls "no known consequential error" |
 | **Effort and yield** | Hard tasks can take more than 40 hours of expert and reviewer time (*Good Benchmarks* §10) | Quality over quantity; shepherd role; measure in the pilot |
-| **Environment** (Stata, data licences) | Proprietary software and restricted data break reproducible evaluation | R/Python ports checked for numerical equivalence; a licensed track; semi-synthetic data; restricted data never shipped |
+| **Environment** (Stata, data licences) | Stata appears in 71.6% of packages [S]; about 72% of AEA intake cases involve restricted data [P-full] ([R8](../research/evidence/R8-replication-standards-and-econometric-pitfalls.md)) | R/Python ports checked for numerical equivalence on two platforms; effect-injected or semi-synthetic data; restricted data never shipped; a licensed Stata track only with leakage controls |
 | **Novelty window** | Others are moving toward error-based evaluation in economics ([R4](../research/evidence/R4-replication-benchmarks.md) §5) [S] | Prioritize the distinctive parts; consider partnering (e.g., I4R, O-015) |
 
 ### What still needs methodological validation
@@ -51,25 +51,32 @@ How many consequential, discriminating mistakes an interview yields per paper; w
 
 > *How can an adaptive AI-guided interview extract economists' tacit knowledge about consequential research mistakes, while avoiding leading questions, fabricated errors, and superficial discussion?*
 
+### The key risk, from evidence rather than intuition
+
+The strongest danger is not that the AI asks bad questions. It is that experts **absorb the AI's views without noticing**. In a 2026 Anthropic study, 50 analysts with causal-inference experience worked with a Claude agent secretly given a random lean on four design choices. They followed the lean **86%** of the time; 77% repeated its arguments, and only 15% credited it. Self-rated ownership did not distinguish who had been swayed ([R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md) §3.4) [P-page]. The study has limits: no human-only control, one task, one model. But it is the closest evidence to our situation. Asking for the expert's view first is necessary but not sufficient, and influence must be **measured by design**.
+
 ### Approach
 
-The [protocol](../interview/expert-interview-protocol.md) adapts knowledge-elicitation methods from cognitive task analysis, which retrospectively probe specific hard incidents (verification of these methods' literature: [R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md)). It moves from the paper's design (S1), to the decisions that made it credible (S2), to plausible wrong alternatives (S3), their consequences and classification (S4), their code-level operationalization (S5), and task design (S6), ending with the contributor's review and sign-off (S7).
+The [protocol](../interview/expert-interview-protocol.md) (v0.2.0) adapts two established knowledge-elicitation methods to discovering consequential research mistakes:
+- the **Critical Decision Method**: an incident, the contributor's own timeline, cues, options and their basis, and "what would a novice do?";
+- **Applied Cognitive Task Analysis**: a record per decision of the difficult element, why it is difficult, common errors, and the cues and strategies used.
 
-The research lead's example progression ("What was the most difficult challenge?" → "What would an RA have done instead?" → "What would that change?" → "Where in the code?" → "How could a verifier tell?") is built in as probes, not as a script.
+It moves from the paper's design (S1), to the decisions that made it credible (S2), to plausible wrong alternatives (S3), to their consequences and classification (S4), to code-level operationalization (S5) and task design (S6), and ends with the contributor's review and sign-off (S7). Sessions last 45–60 minutes. The research lead's example progression is built in as probes, not as a script.
 
 ### Safeguards
 
 | Risk | Safeguards |
 |---|---|
-| **Leading questions and anchoring** | Contributor-first rule: the AI offers suggestions only after the contributor's own ideas are exhausted, at most two or three at a time, framed neutrally with "not a mistake here" as an equal answer. A rejected suggestion is never re-raised. Every suggestion's disposition is logged, and a high share of AI-originated items triggers review. |
-| **Fabricated errors** | No item enters the dossier without the contributor's own reasoning, a code location, a pre-registered predicted consequence, and — before admission — executed evidence and an independent domain review. The interviewer is forbidden to invent errors to fill a template; empty fields are acceptable. |
-| **Superficial discussion** | Evidence-first questioning: the interviewer reads paper and code first and never asks what the artifacts already say. Laddering ("Why would it move in that direction?") continues until the mechanism is stated in terms of an estimand, an assumption, or an inference property. Vagueness and triviality checks raise visible flags. |
-| **Sycophancy in either direction** | The interviewer disagrees with evidence ("At file:line the code clusters by county…") but never insists. It never flatters and never calls anything validated. Literature claims are checked by a separate, fresh-context verifier that does not see the draft (adopted from `interview-me`). |
-| **Authority** | Every statement carries provenance (contributor, research assistant, AI-suggested, AI-summarized, reviewer) and the contributor's disposition. The contributor can edit, reject, or withdraw anything. Agent-facing task text must be human-written or substantially human-edited. |
+| **Experts absorbing the AI's views** | A **free-recall lock**: the contributor's unaided, timestamped list comes before any suggestion or code pointer. Exposure tracking on every statement. Influence reported as **measured** shares (LLM-originated, post-exposure, LLM-influenced) plus a false-endorsement rate on disclosed known-valid controls. The pilot randomizes whether suggestions are offered at all (O-017). |
+| **Leading questions** | Ask before pointing: the contributor locates decisions in the code before the AI shows them. No yes/no endorsements; two-sided suggestions with rotated order; at most three per decision, from a vetted pitfall taxonomy only. A rejected suggestion is never re-raised. |
+| **Fabricated errors** | "No realistic mistake here" is stated to be a complete answer, and there are no quotas. A mandatory realism warrant records whether the mistake was observed (where) or is hypothetical. An **evidence bundle** is required: the mechanism, the warrant, a test that distinguishes correct from flawed, and a cited rule. The status of each mistake (established, conditional, or contested) is set by **at least two independent, blind classifications** by other economists, not in the conversation. |
+| **Superficial discussion** | Evidence-first: the AI reads the paper and code before asking, and never asks what they already say. Laddering continues until the mechanism is stated as an estimand, assumption, measurement, or inference property. The interviewer's own turns are short, so they cannot become the sophisticated-but-irrelevant discussion the brief warns about. |
+| **Sycophancy, model toward expert** | No evaluative remarks. Disagreements cite file and line, and are never retracted without new evidence. Unresolved disagreements go to the shepherd. Checkers (citations, triviality, leakage) run in a fresh context without the conversation. |
+| **Authority** | Statement-level provenance and contributor disposition. The contributor can edit, reject, or withdraw anything. Stage summaries use the contributor's own words, with a 1–4 accuracy rating. Agent-facing task text must be human-written or substantially human-edited. |
 
 ### How we will know it works
 
-A simulated-contributor test suite checks protocol mechanics: recall of a persona's known items; planting rate; challenging a persona's mistaken belief; one-or-two-questions discipline; stopping behaviour. The pilot then measures real yield, recall of a sealed known-issues key, blind quality ratings, AI-origin share, and perceived ownership.
+The protocol is first tested the way a checker is tested: against a baseline interviewer, with replicates, and with model-played personas (one that pushes back, one holding a wrong belief, one prone to deference). Transcripts are coded by two coders for leading questions and judgemental remarks. The pilot then measures real yield, recall of a sealed known-issues key, blind quality ratings, and measured AI influence, with the suggestion phase randomized. Perceived ownership is kept as an experience measure only, because it did not track influence in the deference study.
 
 ## Question 3 — Hosted contributor platform (Option A)
 
@@ -79,7 +86,15 @@ A simulated-contributor test suite checks protocol mechanics: recall of a person
 
 **A hosted interview does not require hosted execution.** The proposed MVP (A1) runs the interview on project servers while code runs under the contributor's control: generated run kits are executed by the contributor or a research assistant, and only outputs are uploaded. Execution can also happen on staff machines during shepherding, which suits *Good Benchmarks*' division of labour. A hosted R/Python sandbox (A2) can be added later for public-data papers. Stata in a hosted sandbox raises licensing questions [pending R9].
 
-**Lightweight paths.** Reuse an open-source AI-interview platform, or run the same skill as Option B server-side through the Claude Agent SDK [pending R2/R9]. Effort: about 11–18 engineer-weeks beyond the shared core (A1). Inference ≈ $17 per contribution at list prices.
+**Reference stack, verified** ([R9](../research/evidence/R9-hosted-stack-and-compliance.md)):
+- a custom Next.js application on the Claude Messages API, with next-intl, Better Auth (magic links, ORCID through OpenID Connect), Neon Postgres, Cloudflare R2 (EU), and Langfuse (EU);
+- hosting costs about **$13–210 a month** from pilot to 200 contributors.
+
+Existing open-source interview platforms use non-commercial licences, so we reuse their ideas, not their code. Running the same skill server-side through the Agent SDK is technically feasible. Anthropic's terms, however, say customers running Claude Code in their products "may not pay for … Claude usage on their end users' behalf", so that variant needs confirmation (O-018).
+
+**Regional constraint.** The Usage Policy prohibits facilitating access for users in unsupported regions, "including end users". A Claude-based platform therefore cannot serve contributors located in mainland China, Hong Kong, or Macau (O-007).
+
+Effort: about 12–19 engineer-weeks beyond the shared core (A1 plus staff execution). Inference ≈ $17 per contribution at list prices.
 
 ## Question 4 — Local Claude Code skill (Option B)
 
@@ -87,15 +102,29 @@ A simulated-contributor test suite checks protocol mechanics: recall of a person
 
 **Implementation.** A Claude Code plugin containing the interview skill (orchestration rules plus stage cards, probe library, and pitfall taxonomy loaded on demand), a schema-validating helper for state and provenance, run wrappers for Stata, R, and Python, layered protection of original files (read-only workspace, permission rules, a hook, an integrity checksum before export), a package doctor, and locale assets. Details: [Option B design](../architecture/option-b-local-skill.md).
 
-**Requirements for contributors.** Claude Code (terminal or desktop app) and model access through their own plan or project-provided access [plan details pending R3]; the paper's software; and comfort installing a plugin — or a research assistant who has it.
+**Requirements for contributors.**
+- **Claude Code:** in a terminal (macOS 13+, Windows 10 1809+, Linux) or in the desktop app's Code tab, the no-terminal path. Cowork is unsuitable because it runs code on Anthropic's servers rather than with the contributor's Stata.
+- **A paid plan or project-provided access:** Pro is $20 a month; Free cannot run Claude Code.
+- **Location:** a supported region (mainland China, Hong Kong, and Macau are not supported).
+- **Software:** Python for helper scripts and the paper's own software.
+- **Setup:** comfort installing a plugin and workspace template, or a research assistant who has it.
 
-**Benefits.** Real local execution, including Stata. No project custody of unpublished materials. Lower project engineering (≈ 7–12 engineer-weeks beyond the shared core) and near-zero hosting.
+Sources: [R2](../research/evidence/R2-claude-code-platform.md), [R3](../research/evidence/R3-access-pricing-policy-portability.md).
 
-**Limitations.** Setup burden for non-technical economists. Interviewer consistency varies unless the project provides model access. Data-use terms vary with each contributor's account: consumer plans with training enabled would expose hidden materials [pending R3]. The plugin depends on a fast-moving client. Availability by region.
+**Benefits.** Real local execution, including Stata, which appears in 71.6% of economics replication packages [S]. No project custody of unpublished materials. Lower project engineering and near-zero hosting.
+
+**Limitations.**
+- **Setup burden** for non-technical economists.
+- **No enforced model.** A plugin cannot require a model; consistency needs project-controlled accounts or a gateway.
+- **Default modes work against an interview.** Auto mode is the default and "nudges Claude to keep working without stopping for clarifying questions", so the skill must make waiting explicit.
+- **Weak guarantees on file access.** Plugins cannot ship permission rules (hence a workspace template). Read-deny rules do not stop subprocesses from reading files.
+- **Varying data terms.** Consumer plans train on data unless the user opts out, with feedback and safety exceptions. That exposes hidden materials unless the project provides commercial access.
+- **Fast-moving client.** It ships several releases a week and marketplaces do not auto-update.
+- **Regional limits** on who can use it.
 
 **Costs.**
-- **Contributors:** a plan, unless the project provides access, plus time.
-- **Project:** development, plugin maintenance (≈ 0.05–0.15 FTE), and higher per-contributor support. Inference cost to the project is $0, or ≈ $17 per contribution if access is provided.
+- **Contributors:** a paid plan (from $20 a month), unless the project provides access, plus time.
+- **Project:** development (≈ 8–14 engineer-weeks beyond the shared core), plugin maintenance (≈ 0.05–0.15 FTE), and higher per-contributor support. Inference cost to the project is $0, or ≈ $17 per contribution if access is provided, subject to the terms question O-018. Reimbursing one month of Pro for 200 contributors ($4,000) would cost more than direct API inference (≈ $3,400).
 
 ## Question 5 — Architectural comparison
 

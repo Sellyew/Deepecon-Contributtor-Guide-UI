@@ -1,10 +1,11 @@
 """Per-contribution LLM inference cost model (planning estimate).
-Prices: Anthropic first-party list prices per million tokens, from the claude-api skill (cached 2026-10-06).
+Prices: Anthropic first-party list prices per million tokens: Opus 5.5 from the API reference (cached 2026-10-06), confirmed
+on the pricing page on 2026-11-05 (evidence note R3); Sonnet 5.5 cache read per the pricing page (R3).
 Cache: reads at the model's cache-read price; writes 1.25x base input (5-min TTL) or 2x (1-hour TTL).
 """
 PRICES = {  # $ per million tokens
     "opus-5.5":   {"in": 4.00, "out": 20.00, "cache_read": 0.20},
-    "sonnet-5.5": {"in": 2.00, "out": 10.00, "cache_read": 0.20},
+    "sonnet-5.5": {"in": 2.00, "out": 10.00, "cache_read": 0.10},  # Anthropic pricing page read 2026-11-05 (R3); the 2026-10-06 API-reference cache listed $0.20
 }
 SCENARIOS = {
     # interview turns, avg cached prefix per turn, new tokens written per turn, output per turn (incl. thinking),

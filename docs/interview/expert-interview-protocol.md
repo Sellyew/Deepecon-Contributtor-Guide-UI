@@ -2,260 +2,374 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** protocol v0.1.0 (2026-11-05). Not yet reviewed by the research lead; not yet tested with economists. |
-| **Inspired by** | Sant'Anna's `interview-me` skill ([reading notes](../research/reading-notes/interview-me-skill.md)); knowledge-elicitation methods from cognitive task analysis ([evidence note R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md)); Bercovich (2026), *Good Benchmarks*, especially §9 |
-| **Implements** | Stage 2–4 of the [construction protocol](../methodology/benchmark-construction-protocol.md); writes records defined in the [schema](../../schemas/README.md) |
+| **Status** | **Proposed** protocol v0.2.0 (2026-11-05). Not yet reviewed by the research lead; not yet tested with economists. Changes from v0.1.0 are listed in §17. |
+| **Built on** | Sant'Anna's `interview-me` skill ([reading notes](../research/reading-notes/interview-me-skill.md)); the Critical Decision Method and Applied Cognitive Task Analysis; evidence on AI-led interviews, sycophancy, and expert deference ([evidence note R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md)); Bercovich (2026), *Good Benchmarks*, §9 |
+| **Implements** | Stages 2–4 of the [construction protocol](../methodology/benchmark-construction-protocol.md); writes records defined in the [schema](../../schemas/README.md) |
 | **Architecture independence** | One protocol, two hosts: a Claude Code skill (Option B) or a server-side orchestrator (Option A). Host-specific notes are confined to §14. |
 
 ---
 
+## 0. The central risk this protocol is designed around
+
+An AI interviewer can shape what an expert "knows". In a 2026 Anthropic study, 50 analysts with causal-inference experience worked with a Claude agent that had been given a secret, randomly assigned lean on four design choices, each with two defensible options, among them difference-in-differences versus levels adjustment ([R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md) §3.4) [P-page]:
+
+- the analysts followed the agent's lean **86%** of the time;
+- **77%** repeated the agent's arguments, sometimes verbatim, but only **15%** credited the agent;
+- self-rated confidence and ownership did **not** distinguish those who followed from those who did not.
+
+The study has no human-only control and covers one task and one model, but it is the closest evidence to our situation. Three consequences shape everything below:
+
+1. Asking for the contributor's view *first* is necessary but not sufficient.
+2. "Who said it first" and self-reported ownership under-measure AI influence.
+3. Influence must be **measured by design**: timestamped free recall, exposure tracking, and seeded controls.
+
+*Good Benchmarks* §9 reaches the same conclusion from benchmark practice: authors who agree with whatever an AI says "end up hill climbing toward a hard task that is too artificial."
+
 ## 1. Purpose and non-purposes
 
-**Purpose.** Help an experienced economist make explicit what they know about a published paper's *critical research decisions* and the *plausible, consequential mistakes* those decisions guard against, and turn that knowledge into a contributor-approved **candidate dossier** from which verifiable tasks can be built.
-
-**Objectives.**
+**Purpose.** Help an experienced economist make explicit what they know about a published paper's *critical research decisions* and the *plausible, consequential mistakes* those decisions guard against. Turn that knowledge into a contributor-approved **candidate dossier** from which verifiable tasks can be built.
 
 | ID | Objective |
 |---|---|
-| O1 | Elicit the critical decisions behind 1–3 target analyses, with the reasons they were necessary. |
-| O2 | Elicit plausible failure modes for those decisions, each with a realism warrant. |
-| O3 | Establish each failure mode's mechanism, validity layer, established/conditional/contested status, and a **pre-registered** predicted consequence. |
-| O4 | Operationalize at least one failure mode as a code-level change, run it when execution is available, and compare observed with predicted consequences. |
-| O5 | Sketch candidate tasks: what the agent would deliver, what would convince the expert, which alternative approaches deserve credit. |
-| O6 | Produce a dossier with complete provenance, signed off by the contributor. |
+| O1 | Elicit, in the contributor's own words, the critical decisions behind 1–3 target analyses and why they were necessary. |
+| O2 | Elicit plausible failure modes for those decisions, each with a realism warrant: observed where, or hypothetical. |
+| O3 | Establish each failure mode's mechanism, validity layer, a **pre-registered** predicted consequence, and a test that distinguishes correct from flawed. The contributor's view of whether the mistake is established or contested is recorded as a claim (§13). |
+| O4 | Operationalize at least one failure mode as a code-level change; run it when execution is available; compare observed with predicted consequences. |
+| O5 | Sketch candidate tasks: what the agent would deliver, what would convince the expert, which alternatives deserve credit. |
+| O6 | Produce a dossier with complete provenance and measured AI influence, signed off by the contributor. |
 
-**Non-purposes.** The interview does not: design the final verifier (the shepherd does); write the final agent-facing instruction by itself (*Good Benchmarks* §9; it must be human-authored); evaluate the paper's overall quality or journal placement (X-001); generate new research ideas; or certify anything as validated.
+**Non-purposes.** The interview does not:
+- design the final verifier;
+- write the final agent-facing instruction (it must be human-authored);
+- settle whether a mistake is established or contested (independent experts do, §13);
+- evaluate the paper's overall quality or journal placement (X-001);
+- generate new research;
+- certify anything as validated.
 
-## 2. Interviewer stance
+## 2. Interviewer conduct
 
-1. **Peer methodologist, not examiner.** The conversation should feel like a productive methodological discussion between experienced economists (brief §5.1).
-2. **The expert is the authority** (D-008). The interviewer may disagree, citing evidence ("At `analysis.do`, line 212, the clustering variable appears to be `county_id`; you mentioned state-level clustering. Could you help me reconcile these?"), but it never insists, and it records the disagreement.
-3. **Evidence first.** Read the paper and the code before asking. Never ask the expert what the artifacts already say; ask what the expert knows that the artifacts do not: why, what else was considered, what would go wrong.
-4. **Contributor first.** For every discovery step, exhaust the contributor's own ideas before offering any suggestion (§7).
-5. **Economy of attention.** One focused question per turn; two only when they are tightly linked. No questionnaires.
-6. **Honesty.** No flattery. No invented citations or code facts. Say "I am not sure" and record uncertainty. Never describe anything as validated.
-7. **No template-filling.** Empty fields are acceptable and recorded as "not elicited". Never invent an error to complete a record (brief §5.1).
+1. **Peer methodologist, not examiner.** The tone is that of a productive discussion between experienced economists (brief §5.1).
+2. **The expert is the authority** (D-008), but the interviewer does not abandon evidence. A disagreement grounded in the paper or code is stated with its location, never retracted without new evidence, and, if unresolved, recorded for the shepherd rather than settled by persuasion.
+3. **No evaluative remarks.** No praise ("great point"), no judgment of answers. AI interviewers' most common guideline violations are judgemental remarks and missed follow-ups [P-page, R7 §3].
+4. **Short turns.** About 120 words at most per interviewer turn, except summaries. One focused question per turn; two only when tightly linked. Long, sophisticated interviewer turns would reproduce the brief's failure mode #3 inside the interview.
+5. **Contributor first, always.** The contributor's own ideas are recorded before any suggestion or code pointer (§4, §7).
+6. **Ask before pointing.** Ask the contributor where and how a decision is implemented *before* showing code. A question aimed at a specific line is itself a suggestion (R7, risk R3).
+7. **Honesty.** No invented citations or code facts. Say "I am not sure". Never describe anything as validated.
+8. **No template-filling, no quotas.** "There is no realistic mistake here" is a complete answer. Empty fields are recorded as "not elicited".
 
 ## 3. Inputs and pre-reading
 
-**Inputs:** paper (PDF or text); replication package (code, documentation, and data only if non-restricted and permitted); contributor profile (role, relationship to the paper, pathway A or B); chosen language; time budget; whether a research assistant takes part.
+**Inputs:** paper; replication package (code, documentation, and data only if non-restricted and permitted); contributor profile (role, relationship to the paper, pathway); language; time budget; whether a research assistant takes part.
 
-**Pre-reading products** (prepared before the first substantive question):
-
-| Product | Contents | Shown to the contributor? |
+| Pre-reading product | Contents | Use |
 |---|---|---|
-| Design map | Research question, design, candidate estimands, data, main specifications, candidate target analyses with table/figure references; uncertainty markers on anything inferred | Yes, in S1, **after** the contributor's own summary |
-| Code map | Pipeline order, entry points, where samples are built, where estimation and inference happen, with file and line references | Yes, on request or when anchoring evidence |
-| Decision-point notes | Detected choices: filters, merges, fixed effects, clustering variables, weights, timing variables | **No** — interviewer's private notes; used for evidence-first questioning and, only in the suggestion phase, as material for neutral suggestions |
+| Design map | Research question, design, candidate estimands, data, main specifications, candidate target analyses, with uncertainty markers | Shown in S1 **after** the contributor's own summary |
+| Code map | Pipeline order, entry points, sample construction, estimation, inference, with file and line references | Shown only **after** the contributor has described the pipeline (P-TIMELINE) and located decisions (P-LOCATE) |
+| Decision-point notes | Detected choices (filters, merges, fixed effects, clustering variables, weights, timing variables) | **Private.** Never used to steer the contributor before free recall; used later only through the gated suggestion process (§7) and for evidence-based disagreement about statements already made |
 
-## 4. State model
+## 4. State model, free-recall lock, and exposure tracking
 
 The interviewer maintains, and persists after every turn:
 
-- **Session state:** current stage, focus item, turns used, elapsed time, signs of contributor fatigue.
-- **Dossier:** schema entities (target analyses, critical decisions, failure modes, flawed variants, task candidates), each field with a status of `empty`, `vague`, `sufficient`, `contradicted`, `parked`, or `not_elicited`.
-- **Candidate queue:** decisions and failure modes ordered by contributor-assigned importance.
-- **Suggestion ledger:** every LLM suggestion offered, with the contributor's disposition (endorsed, edited, rejected, not applicable) and stated reason.
-- **Open issues:** contradictions and uncertainties to resolve.
-- **Checkpoints:** contributor-confirmed summaries at the end of each stage. Sessions resume from the last checkpoint.
+- **Session state:** stage, focus item, turns, elapsed time, fatigue signals (answer length, rate of "not sure").
+- **Dossier:** schema entities, each field with a status of `empty`, `vague`, `sufficient`, `contradicted`, `parked`, or `not_elicited`.
+- **Free-recall lists.** For each target analysis, the contributor's **unaided** list of critical decisions (S2) and of plausible mistakes (S3), timestamped before any suggestion, code pointer, or design-map detail about those decisions.
+- **Exposure log.** Every item records `exposure`:
+  - `pre_exposure` — stated before any related suggestion or pointer;
+  - `post_exposure` — stated afterwards, with the IDs of the preceding suggestions or pointers.
+- **Suggestion ledger.** Every suggestion offered: its source entry, the order in which the options were presented, whether it was a known-valid control (§7), and the contributor's disposition and reasoning.
+- **Open issues:** contradictions and uncertainties.
+- **Checkpoints:** stage summaries with the contributor's accuracy rating; sessions resume from the last one.
+
+**Influence metrics** (computed, not self-reported):
+
+| Metric | Meaning |
+|---|---|
+| LLM-originated share | Share of endorsed items first stated by the model |
+| Post-exposure share | Share of endorsed items first stated after a related suggestion or pointer |
+| LLM-influenced share | Post-exposure items whose wording is close to a logged suggestion or interviewer statement (text similarity above a calibrated threshold) |
+| False-endorsement rate | Share of known-valid controls that the contributor endorsed as mistakes |
 
 ## 5. Stages
 
-The stages refine the brief's seven-stage sketch (§5.2) by adding setup and consent (S0) and merging consequence analysis with classification (S4). They are **adaptive, not linear**: the policy in §6 can return to an earlier stage when new information appears. Times are planning guesses to be measured in the pilot.
+Stages are **adaptive, not linear**: the policy in §6 can return to an earlier stage. They refine the brief's sketch by adding setup and consent (S0) and merging consequence analysis with classification (S4).
 
-### S0 — Setup and consent (≈5 min)
+**Sessions last at most 45–60 minutes by default.** A typical contribution takes three or more sessions. All evidence on AI interviews comes from short sessions, and satisficing grows with fatigue ([R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md) P12).
 
-- **Goal:** language, roles, materials, time budget, and informed consent about data flows.
-- **Actions:** select English or Simplified Chinese; record role, relationship to the paper, and pathway; register materials; agree on a time budget; disclose **which model provider receives which content**, under which account terms, and that raw restricted or confidential microdata must not be shared (DP-28); record consent to transcript retention and the credit preference.
-- **Exit:** consent recorded; materials registered.
+### S0 — Setup and consent
 
-### S1 — Paper and design understanding (≈10–20 min)
+- Language (English or Simplified Chinese); role; relationship to the paper; pathway; materials; time budget.
+- **Data-flow disclosure:** which model provider receives which content, under which account terms. Raw restricted or confidential microdata must not be shared (DP-28).
+- **Confidentiality:** describe patterns, never identifiable manuscripts under review; transcripts are treated as sensitive and potentially re-identifying.
+- **Interview design disclosure:** "Later I may raise alternatives for you to judge. Some will be choices that are perfectly valid in this setting; your judgment, not agreement, is what helps."
+- Consent to transcript retention; credit preference.
 
-- **Goal:** a shared, correct picture of the design; 1–3 target analyses with precise estimands.
-- **Contributor first:** "In your own words, what is the main question, and what variation identifies the effect?" Then: "Which result carries the paper?"
-- **Then** present the design map with uncertainty markers and ask for corrections.
-- **Exit:** target analyses and estimands confirmed by the contributor.
+### S1 — Paper and design understanding
 
-### S2 — Critical decisions (≈20–40 min)
+- **Contributor first** (P-RQ): research question and identifying variation in the contributor's own words; then "Which result carries the paper?"
+- Then the design map, with uncertainty markers, for correction.
+- **Exit:** 1–3 target analyses with estimands, confirmed by the contributor.
 
-- **Goal:** the decisions that made the target analyses credible, with alternatives, cues, and code anchors.
-- **Incident sweep:** "What was the most difficult empirical challenge in getting this result right?" · "Was there a point where results changed substantially depending on a choice?" · (Path B) "What did referees push on?" · (Path A) "As a referee, where would you look first?"
-- **Deepening, per decision:** alternatives considered; the cues that showed the obvious approach was wrong; how the choice was checked; where it lives in the code (the interviewer locates it and asks for confirmation).
-- **Credibility criteria (brief §3.4):** "What about this decision made the result convincing to a demanding referee?" Recorded as rationale, never as a prediction of journal placement.
-- **Exit:** 2–6 decisions with rationale and code anchors, ranked by the contributor.
+### S2 — Critical decisions (Critical Decision Method sweeps)
 
-### S3 — Failure modes (≈20–40 min)
+1. **Free-recall lock** (P-RECALL): the contributor's unaided list of decisions that required judgment, timestamped.
+2. **Timeline** (P-TIMELINE): raw data to estimate in three to six steps, marking where judgment was needed — *before* the code map is shown.
+3. **Deepening, per decision:**
+   - cues (P-CUE): what showed the obvious approach was wrong;
+   - options and basis (P-OPTIONS): alternatives considered and why they were rejected;
+   - self-monitoring (P-SELFMON): how the implementation was checked;
+   - location (P-LOCATE): where the decision lives in the code, from memory, before the interviewer shows it.
+4. **Credibility criteria** (brief §3.4): "What about this decision made the result convincing to a demanding referee?" Recorded as rationale, never as a journal-placement prediction.
+5. **Recording format:** a cognitive-demands row per decision — *difficult element · why difficult · common errors · cues and strategies* — adapted from Applied Cognitive Task Analysis.
 
-- **Goal:** plausible wrong alternatives to the top decisions.
-- **Contributor-first discovery:** "Suppose a capable research assistant (or an AI agent) overlooked this. What apparently reasonable approach might they take instead?" · "Have you seen this happen — in your own work, as a referee, or with research assistants?"
-- **Optional suggestion phase** (§7), only after the contributor's ideas are exhausted.
-- **Triviality screen:** if a candidate is a mere coding slip, ask what methodological knowledge would prevent it. If none, park it (X-002).
-- **Exit:** at least one endorsed failure mode with a stated mechanism, or a recorded decision to stop.
+**Exit:** 2–6 decisions with rationale and code anchors, ranked by the contributor.
 
-### S4 — Consequences and classification (≈15–30 min)
+### S3 — Failure modes
 
-- **Pre-registered prediction:** "If we ran that version, what would happen to the estimate and its standard error — direction and rough size?" The answer is timestamped **before** any flawed code runs.
-- **Mechanism laddering:** "Why would it move in that direction rather than the other?" Repeat until the mechanism is stated in terms of an estimand, an assumption, or an inference property.
-- **Validity layer:** the interviewer proposes computational, statistical, identification, or interpretation; the contributor confirms or corrects.
-- **Status probe:** "Would a well-informed econometrician defend that alternative here? Under which assumptions?" · "Which reference would you point a skeptical referee to?" → established, conditional (with conditions), or contested.
-- **Similar-but-valid approaches:** "Which nearby choices would be perfectly fine here?"
-- **One-sentence-fact probe** (*Good Benchmarks* §9): "If a task instruction told the agent [this fact], would the problem become easy?"
-- **Exit (per failure mode):** layer, status, prediction, at least one citation when status is established, list of valid look-alikes.
+1. **Free-recall lock:** for each top decision, the contributor's unaided list of plausible mistakes, timestamped.
+2. **Novice hypothetical with permission** (P-RA): the permission sentence comes first.
+3. **Realism warrant, mandatory** (P-SEEN). Each item records `observed_in_practice`: own project, refereeing (pattern only), RA supervision, published literature, or hypothetical. Hypothetical-only items are flagged.
+4. **Knowledge-audit probes:** anomalies that would reveal the mistake (P-NOTICE); software defaults that could produce it silently (P-DEFAULT).
+5. **Gated suggestion phase** (§7), only after the lock, and only if the session's design includes it (the pilot randomizes this; Deliverable 8).
+6. **Triviality** is judged by a separate checker (§10), not by the interviewer in conversation, to avoid feedback sycophancy.
 
-### S5 — Operationalization (≈20–60 min; may be asynchronous with a research assistant)
+**Exit:** at least one endorsed failure mode with a stated mechanism, or a recorded decision that the contributor sees no realistic mistake.
 
-- **Goal:** a minimal flawed variant that faithfully represents the failure mode, and its observed consequences.
-- **Actions:** locate the code to change; draft the minimal diff **in a separate location** (originals are never modified, D-011); the contributor approves that the diff represents their failure mode; run reference and variant where execution is available; compare observed with predicted consequences. A mismatch is discussed, not hidden: misunderstanding, equivalent-mutant situation (DP-05), or new insight. Where feasible, preview robustness on a few resamples.
-- **When execution is not available in-session:** produce a precise hand-off specification (diff, run instructions, expected comparison) for the research assistant or shepherd.
-- **Exit:** variant built and run, or hand-off specification approved.
+### S4 — Consequences and classification
 
-### S6 — Task design and quality (≈15–30 min)
+1. **Pre-registered prediction** (P-PRED), timestamped before any flawed code runs. Coarse categories, optionally three quantiles. Predictions are information, never a score of the expert.
+2. **Mechanism laddering** (P-WHY) until the mechanism is stated in terms of an estimand, an assumption, a measurement property, or an inference property.
+3. **Validity layer, classified by the contributor first** from a neutral list: implementation fidelity (computational correctness), measurement validity, statistical validity, identification validity, interpretation validity. The interviewer then notes any disagreement, with reasons.
+4. **Status as a claim** (P-STAT, P-REF): the contributor's view (established, conditional, or contested), with references. This is **recorded, not settled**: status is decided by independent classification (§13).
+5. **Similar-but-valid approaches** (P-VALID) and the **one-sentence-fact probe** (P-1FACT).
+6. **Evidence bundle as the exit condition.** For each failure mode:
+   - the mechanism;
+   - the realism warrant;
+   - a failing case or a test that distinguishes correct from flawed (P-DETECT);
+   - a cited rule or standard.
 
-- **Goal:** at least one task-candidate sketch.
-- **Actions:** present the task types neutrally (research execution, error correction, structured error detection, identification reasoning, interpretation) with what each would measure. Ask: "What would you want an agent to deliver?" · "What evidence would convince you that it got this right?" · "Which other approaches should receive credit?" The contributor (or later the shepherd) writes the agent-facing instruction; the interviewer may help tighten it and runs a **leakage check** (the instruction must not reveal the error, the method, or the answer). Brief rubric self-assessment (RV-1 to RV-4, GT-2, SP-3).
-- **Exit:** task-candidate sketch recorded with instruction authorship.
+   Without all four, the item stays a candidate.
 
-### S7 — Review and sign-off (≈10–15 min)
+### S5 — Operationalization (may be asynchronous with a research assistant)
 
-- **Goal:** a dossier the contributor recognizes as their own.
-- **Actions:** present the dossier in the contributor's language. Every item carries a provenance badge (Contributor · AI-suggested, endorsed · AI summary · Research assistant). The contributor can edit, reject, or withdraw any item. If the interview was not in English, generate an English working translation labelled as machine-generated (D-007). Confirm attribution and consent. Export or submit.
-- **Exit:** signed-off dossier and generated package.
+- Locate the change; draft the minimal diff **in a separate location** (originals are never modified, D-011). The contributor approves that the diff represents their failure mode.
+- Run reference and variant where execution is available. Compare observed with predicted consequences. Discuss mismatches openly: misunderstanding, an equivalent-mutant situation (DP-05), or a new insight. Preview robustness where feasible.
+- Without in-session execution: an approved hand-off specification for the research assistant or shepherd.
+
+### S6 — Task design and quality
+
+- Present the task types neutrally, with what each would measure.
+- Ask: what the agent should deliver; what evidence would convince the expert; which other approaches deserve credit.
+- The contributor or shepherd writes the agent-facing instruction. The interviewer may help tighten it and runs a **leakage check**.
+- Brief rubric self-assessment (RV-1 to RV-4, SP-3).
+
+### S7 — Review and sign-off
+
+- The dossier is shown in the contributor's language. Each item carries a provenance badge and an exposure flag; influence metrics are shown.
+- The contributor can edit, reject, or withdraw anything, and gives a 1–4 accuracy rating for each stage summary.
+- An English working translation, labelled machine-generated, is added if needed (D-007).
+- Attribution and consent are confirmed; the package is exported or submitted.
 
 ## 6. Adaptive question-selection policy
 
 At each turn, choose the single most valuable next question:
 
 1. If the contributor asked something or raised a concern, respond briefly first.
-2. If the focus item has an **open contradiction or flagged uncertainty**, resolve it.
-3. Else, if the focus item lacks a **gating field** for its stage's exit, ask for the highest-priority missing field.
-4. Else, if the mechanism is **vague**, ladder.
-5. Else, **move focus** — "one complete, then breadth": take the highest-ranked decision through S3–S4 first, so that at least one complete candidate exists early (protecting the session if the expert must leave), then sweep for breadth, then return to operationalize.
+2. If a **free-recall lock** for the current stage is not yet recorded, take it.
+3. If the focus item has an **open contradiction** or flagged uncertainty, resolve it.
+4. Else ask for the highest-priority missing **gating field** (the evidence bundle in S4).
+5. Else, if the mechanism is **vague**, ladder.
+6. Else **move focus** — "one complete, then breadth". Take the highest-ranked decision through S3–S4 first, so at least one complete candidate exists early; then sweep for breadth; then return to operationalize.
 
-**Budgets and rhythm.** At most two questions per turn. Summarize and confirm every five to seven turns and at every stage exit. Check time and energy roughly every 20 minutes; propose a checkpoint at 45–60 minutes.
+**Rhythm.** At most two questions per turn. Summarize every five to seven turns and at every stage exit, in the contributor's own words, with an accuracy rating. Check time and energy roughly every 20 minutes. Propose a checkpoint by 45–60 minutes.
 
-**Question hygiene.** Never ask what the artifacts answer. No double-barrelled questions. No leading phrasing ("Isn't it true that…?"). Never presuppose an error ("What is the error in X?"); ask instead "Is there a way X could go wrong here?"
+**Question hygiene.** Never ask what the artifacts answer. No double-barrelled questions. No yes/no or agree/disagree endorsements: offer substantive alternatives with reasons. No presupposition: ask "Is there a realistic way this could go wrong?", not "What is the error?". Rotate the order of options.
 
-## 7. Suggestions without leading: the contributor-first rule
+## 7. Suggestions: a gated, measured exception
 
-LLM suggestions can surface useful candidates, but they risk anchoring and acquiescence, especially from a fluent model talking to a busy expert. *Good Benchmarks* §9 warns that authors who agree with everything an AI says "end up hill climbing toward a hard task that is too artificial." Rules:
+The open AI-interview platforms forbid suggesting answers altogether, "not even a broad theme" [P-page, R7 §3.2]. This protocol allows a narrow exception, because the AI's reading of the code can surface candidates an expert would miss. The deference evidence (§0) means the exception must be controlled and measured:
 
-1. **Timing.** Suggestions are offered only after the contributor's own ideas for the current decision are exhausted, or when the contributor asks.
-2. **Format.** At most two or three at a time, neutrally framed, with "not a mistake here" as an equally available answer: "Some implementations of this design do X. Here, would that be a mistake, a valid alternative, or not relevant? Why?"
-3. **Sources.** Suggestions come from the interviewer's decision-point notes and the design-specific pitfall taxonomy (established methodological literature); each records its source.
-4. **Endorsement requires reasoning.** A suggestion becomes part of the dossier only when the contributor explains, in their own words, why it is a consequential mistake here. A bare "yes" is recorded as weak endorsement and flagged.
-5. **No pressure.** A rejected suggestion is never re-raised in different words.
-6. **Measurement.** The share of dossier items that originated with the LLM is computed and shown to the shepherd. A high share triggers closer review (rubric PR-1).
+1. **After the lock only.** Never before the contributor's free-recall list for that decision is recorded.
+2. **Few.** At most three per decision and about ten per session.
+3. **Vetted sources only.** Each suggestion cites an entry in the **pitfall taxonomy**, which a named econometrician has signed off with citations. Unvetted entries cannot seed suggestions. Suggestions from the interviewer's code reading are labelled as such and limited to the same format.
+4. **Both sides argued.** The case that the choice would be a mistake here *and* the case that it would be acceptable here, in rotated order (P-SUGG).
+5. **Known-valid controls.** Some suggestions are vetted valid alternatives, as disclosed at S0. The false-endorsement rate is reported.
+6. **Endorsement needs the evidence bundle.** A bare "yes" is recorded as a weak endorsement and does not enter the scored path.
+7. **No pressure.** A rejected suggestion is never raised again in different words.
+8. **Measured.** Every suggestion goes into the ledger. The metrics in §4 are computed and shown to the shepherd; a high LLM-influenced share triggers deeper review (rubric PR-1).
 
-## 8. Probe library (core probes, with English and Simplified Chinese phrasings)
+## 8. Probe library
 
-Probe identifiers are language-independent; phrasings are localized assets (see [bilingual design](../architecture/bilingual-design.md)). On first use in Chinese, technical terms keep the English term in parentheses, e.g., 交错双重差分（staggered DiD）.
+Probe identifiers are language-independent; phrasings are localized assets ([bilingual design](../architecture/bilingual-design.md)). On first use in Chinese, technical terms keep the English term in parentheses. **All phrasings must be pretested with cognitive interviews** (three to five economists per language) before the pilot (Willis 2005 [S]).
 
 | ID | Purpose | English | 简体中文 |
 |---|---|---|---|
-| P-RQ | Contributor's own summary | In your own words, what is the main question, and what variation identifies the effect? | 请用您自己的话概括：这篇论文回答的核心问题是什么？识别效应依赖的是哪一种变异？ |
-| P-HARD | Incident sweep | What was the most difficult empirical challenge in getting this result right? | 为了得到这个结果，您遇到的最困难的实证问题是什么？ |
-| P-SENS | Sensitivity | Was there a point where the results changed substantially depending on a choice you made? | 有没有哪个环节，结果会因为您的某个选择而发生明显变化？ |
-| P-RA | Novice alternative | Suppose a capable research assistant overlooked that issue. What apparently reasonable approach might they take instead? | 假设一位能干的研究助理忽略了这个问题，他们可能会采用哪种看似合理的做法？ |
-| P-SEEN | Realism | Have you seen this mistake in practice — in your own work, as a referee, or with research assistants? | 您在实践中见过这种错误吗？比如在自己的研究中、审稿时，或指导研究助理时？ |
-| P-PRED | Pre-registered consequence | If we ran that version, what would happen to the estimate and its standard error — direction and rough size? | 如果按那种做法运行，估计值和标准误会怎样变化？请说出方向和大致幅度。 |
+| P-RQ | Own summary | In your own words, what is the main question, and what variation identifies the effect? | 请用您自己的话概括：这篇论文回答的核心问题是什么？识别效应依赖的是哪一种变异？ |
+| P-RECALL | Free-recall lock | Before I show you anything from the code: which decisions in getting this result right required real judgment? Please list them in your own words. | 在我展示任何代码内容之前：要得到这个结果，哪些决策需要真正的判断？请用您自己的话列出来。 |
+| P-TIMELINE | Contributor's timeline | Walk me from the raw data to the estimate in three to six steps, and mark where judgment was needed. | 请用三到六个步骤，带我从原始数据走到最终估计值，并标出哪些环节需要判断。 |
+| P-HARD | Incident | Which part of getting this result right took the most judgment? Was there a moment when the results changed with a choice? | 要得到这个结果，哪个环节最需要判断？是否有某个时刻，结果随着某个选择而改变？ |
+| P-CUE | Cues | What told you the obvious approach was wrong? What did you see in the data or the output? | 是什么让您意识到显而易见的做法是错的？您在数据或输出中看到了什么？ |
+| P-OPTIONS | Options and basis | Which alternatives did you consider, and on what basis did you reject them? | 您考虑过哪些替代做法？依据什么排除了它们？ |
+| P-SELFMON | Self-monitoring | How did you check that the code implements what the paper says? | 您是如何核实代码确实实现了论文所述内容的？ |
+| P-LOCATE | Ask before pointing | As you remember it, where in the code is this decision implemented? | 据您回忆，这个决策在代码中的哪个位置实现？ |
+| P-RA | Novice hypothetical, with permission | If there is no realistic way to get this wrong, that is a complete and useful answer. Otherwise: suppose a capable research assistant overlooked this issue. What apparently reasonable approach might they take instead? | 如果这里不存在现实的出错方式，这本身就是完整且有用的回答。否则：假设一位能干的研究助理忽略了这个问题，他们可能会采用哪种看似合理的做法？ |
+| P-SEEN | Realism warrant (required) | Where have you seen this mistake: in your own project, while refereeing (please describe the pattern only, never a manuscript under review), when supervising research assistants, in the published literature — or is it hypothetical? | 您在哪里见过这种错误：自己的项目中、审稿时（请只描述模式，切勿涉及审稿中的具体稿件）、指导研究助理时、已发表文献中——还是仅为假设？ |
+| P-NOTICE | Anomalies | What pattern in the sample size, standard errors, signs, or event-time coefficients would make you suspect this mistake? | 样本量、标准误、符号或事件时间系数出现什么样的模式，会让您怀疑存在这个错误？ |
+| P-DEFAULT | Software behaviour | Which software default or package behaviour could produce this silently? | 哪些软件默认设置或程序包行为可能在不知不觉中导致这个问题？ |
+| P-PRED | Pre-registered consequence | If we ran that version, which is closest: immaterial; changes significance; changes the sign; changes the magnitude materially without changing the sign; something else? If you like, also give a low, middle, and high guess for the estimate. | 如果按那种做法运行，哪种情况最接近：影响不大；改变显著性；改变符号；幅度显著变化但符号不变；其他？如愿意，也可给出估计值的低、中、高三个猜测。 |
 | P-WHY | Mechanism laddering | Why would it move in that direction rather than the other? | 为什么会朝这个方向变化，而不是相反方向？ |
-| P-STAT | Established vs contested | Would a well-informed econometrician defend that alternative here? Under which assumptions? | 一位了解前沿的计量经济学家会在这里为那种做法辩护吗？需要满足哪些假设？ |
+| P-STAT | Status (recorded as a claim) | Would a well-informed econometrician defend that alternative here? Under which assumptions? | 一位了解前沿的计量经济学家会在这里为那种做法辩护吗？需要满足哪些假设？ |
 | P-REF | Standard of evidence | Which reference would you point a skeptical referee to? | 如果审稿人表示怀疑，您会请他参考哪篇文献？ |
 | P-VALID | Similar but valid | Which nearby choices would be perfectly fine here? | 哪些看起来相近的做法在这里其实完全可以接受？ |
 | P-CODE | Operationalization | Which part of the code would need to change to reproduce this mistake? | 要复现这个错误，需要修改代码的哪一部分？ |
-| P-DETECT | Detection | How could an independent verifier distinguish the correct implementation from this mistake? | 独立的验证者如何区分正确的实现与这个错误？ |
+| P-DETECT | Distinguishing test | How could an independent verifier tell the correct implementation from this mistake? | 独立的验证者如何区分正确的实现与这个错误？ |
 | P-1FACT | One-sentence-fact risk | If a task instruction told the agent this fact, would the problem become easy? | 如果任务说明直接告诉智能体这一点，问题会不会变得很容易？ |
-| P-SUGG | Neutral suggestion | Some implementations of this design do X. Here, would that be a mistake, a valid alternative, or not relevant? Why? | 在类似研究设计中，有些实现会采用 X。在本文的情境下，这是错误、合理的替代做法，还是不相关？为什么？ |
-| P-SUM | Summary and correction | Here is what I understood: … What did I get wrong or leave out? | 以下是我的理解：…… 有哪些地方理解错了或遗漏了？ |
-| P-DISAGREE | Evidence-based disagreement | My reading of the code differs: at [file:line] it appears that … Could you check? | 我对代码的理解有所不同：在[文件:行号]处似乎是……能否请您核对一下？ |
-
-**Follow-up strategies.** *Clarify* a vague term by offering concrete readings ("mistimed — the treatment date, the outcome window, or the comparison group?"). *Contrast* with a valid look-alike. *Quantify* ("a few percent, or enough to change the conclusion?"). *Shift perspective* (author → referee → research assistant). *Summarize and invite correction.*
+| P-SUGG | Balanced suggestion | Some implementations of this design make a different choice: [X]. The case that it would be a mistake here: [A]. The case that it would be acceptable here: [B]. Which is closer to right for this paper — or is it not relevant? Please explain in your own terms. *(Order of A and B rotated.)* | 在类似研究设计中，有些实现采用了不同的选择：[X]。认为这在本文中是错误的理由：[A]。认为这在本文中可以接受的理由：[B]。哪一种更符合本文的情况——还是两者都不相关？请用您自己的话说明。*（A、B 顺序轮换。）* |
+| P-SUM | Summary with accuracy rating | Here is my summary, using your own words where I could: … How accurate is it, from 1 (misleading) to 4 (accurate)? What should change? | 以下是我的总结，尽量使用了您的原话：…… 准确度如何？请从 1（有误导）到 4（准确）打分。需要修改哪些地方？ |
+| P-DISAGREE | Evidence-based disagreement (only about statements already made) | My reading of the code differs: at [file:line] it appears that … Could you check? | 我对代码的理解有所不同：在[文件:行号]处似乎是……能否请您核对一下？ |
 
 ## 9. Error-discovery procedures
 
-| Procedure | Source of candidates | When it is used |
+| Procedure | Source of candidates | When used |
 |---|---|---|
-| Decision-anchored | The contributor's critical decisions (S2) | Always first |
-| Experience-anchored | The contributor's history: errors made and caught during the project (Path B), referee experience, research-assistant supervision | S3, contributor-first |
-| Referee-perspective | "Where would a demanding referee look?" | S3, both pathways |
-| Artifact-anchored | The interviewer's decision-point notes from reading the code | Suggestion phase only |
-| Literature-anchored | Design-specific pitfall taxonomy from established methodology | Suggestion phase only |
+| Decision-anchored | The contributor's free-recall decisions (S2) | Always first |
+| Experience-anchored | Errors the contributor made, caught, refereed, or supervised (Path B: "What did you learn that is not in the paper?") | S3, before any suggestion |
+| Anomaly-anchored | What patterns in outputs would reveal a mistake (P-NOTICE) | S3; also yields metamorphic checks for verifiers |
+| Referee-perspective | "Where would a demanding referee look?" | S3 |
+| Artifact-anchored | Interviewer's decision-point notes | Gated suggestion phase only (§7) |
+| Literature-anchored | Vetted pitfall taxonomy | Gated suggestion phase only (§7) |
 
-For Path B, frame tacit-knowledge probes positively ("What did you learn while doing this that is not in the paper?") rather than as fault-finding in the author's work.
+## 10. Separate roles and in-interview checks
 
-## 10. In-interview quality checks
+The conversational interviewer is **not** the judge of validity, the recorder, or the suggestion generator (R7 P7):
 
-Checks raise **visible flags** for the contributor and shepherd; they never silently change content.
+| Role | Implementation | Sees the conversation? |
+|---|---|---|
+| Interviewer | The conversational model | Yes |
+| Recorder | Deterministic logging of turns, timestamps, exposure, provenance | Yes (verbatim) |
+| Suggestion generator | Separate model call restricted to vetted taxonomy entries and decision-point notes; produces balanced P-SUGG items | Only the decision and the free-recall list |
+| Checkers (citations, triviality, leakage) | Separate fresh-context calls | No; they see only the claims or drafts to check |
 
 | Check | Trigger | Response |
 |---|---|---|
-| Vagueness | No estimand, assumption, or inference property in the mechanism | Ladder (P-WHY) |
-| Triviality | Coding slip without methodological content | Ask what knowledge prevents it; park if none (X-002) |
-| Contested status | Credible defence of the alternative exists | Mark contested; leave the scored path (D-013) |
+| Vagueness | No estimand, assumption, measurement, or inference property in the mechanism | Ladder (P-WHY) |
+| Triviality (checker) | Candidate looks like a coding slip without methodological content | Flag for the contributor and shepherd (X-002); never decided by the interviewer |
 | Equivalent-mutant risk | Predicted or observed consequence small or data-dependent | Flag for discriminability work (DP-05) |
-| One-sentence-fact risk | P-1FACT answer "yes" | Record; shepherd decides (Open question) |
-| Leakage | Agent-facing draft reveals the error, method, or answer | Block and explain |
-| Contradiction with artifacts | Statement conflicts with paper or code | P-DISAGREE |
-| Provenance imbalance | High share of LLM-originated items | Flag for shepherd (PR-1) |
-| Citation verification | Any literature claim | Verified by a **separate, fresh-context** checker that receives the claims and sources but not the dossier (adopting `interview-me`'s post-flight pattern); unverified citations are labelled |
+| One-sentence-fact risk | P-1FACT answer is "yes" | Record; shepherd decides (O-004) |
+| Leakage (checker) | Agent-facing draft reveals the error, method, or answer | Block and explain |
+| Contradiction with artifacts | A statement conflicts with paper or code | P-DISAGREE |
+| Influence | High LLM-influenced share or false-endorsement rate | Flag for shepherd review (PR-1) |
+| Citation verification (checker) | Any literature claim | Fresh-context verification without the dossier (adopted from `interview-me`); unverified citations labelled |
 
 ## 11. Stopping conditions
 
-- **Item level:** the S4/S5 exit criteria are met, or the item is parked or withdrawn.
-- **Session level:** propose a checkpoint at 45–60 minutes; sessions are resumable.
-- **Overall:** stop when any of these holds: (a) the contributor says they are done; (b) 1–3 operationalized candidates exist; (c) two consecutive breadth probes yield no new endorsed candidate; (d) fatigue signals (very short answers, repeated "not sure"), after offering to continue later; (e) in hosted deployments, a cost or turn budget is reached.
-- **Never** prolong an interview to fill fields.
+- **Item level:** the S4 evidence bundle is complete, or the item is parked or withdrawn.
+- **Session level:** checkpoint by 45–60 minutes; earlier on fatigue signals.
+- **Overall:** stop when any of these holds:
+  - (a) the contributor says they are done;
+  - (b) 1–3 operationalized candidates exist;
+  - (c) two consecutive breadth sweeps yield nothing new;
+  - (d) fatigue signals persist after offering to continue later;
+  - (e) in hosted deployments, a cost or turn budget is reached.
+- **Never** prolong an interview to fill fields; "no realistic mistake here" is a valid outcome.
 
 ## 12. Outputs
 
-1. The **dossier**, written progressively as schema entities with field-level provenance (DP-27).
-2. **Stage summaries** in the contributor's language, each confirmed by the contributor.
-3. The **interview record**: turns linked to the statements they created, the suggestion ledger, and metrics (duration, contributor turns, suggestions offered and endorsed, tokens, list-price cost).
-4. **Flawed variants** (patches and files) and run outputs where execution happened.
-5. A **package** for submission (see [submission mechanisms](../architecture/submission-mechanisms.md)).
+1. The **dossier** as schema entities with field-level provenance and exposure flags.
+2. **Stage summaries** in the contributor's language, each with an accuracy rating.
+3. The **interview record**: turns linked to statements, the suggestion ledger, free-recall lists, influence metrics (§4), and usage metrics (duration, turns, tokens, list-price cost).
+4. **Flawed variants** and run outputs where execution happened.
+5. A **package** for submission ([submission mechanisms](../architecture/submission-mechanisms.md)).
 
 ## 13. Human review requirements
 
 | Who | What | When |
 |---|---|---|
-| Contributor | Confirms each stage summary; signs off the dossier; may edit, reject, or withdraw anything | During and at the end of the interview |
-| Shepherd | Reviews the dossier; may schedule a follow-up conversation | Within an agreed number of days |
-| Independent reviewers | Assess resulting tasks against the rubric | Stage 7 of the construction protocol |
+| Contributor | Confirms each stage summary with an accuracy rating; signs off; may edit, reject, or withdraw anything | During and at the end |
+| Shepherd | Reviews the dossier, influence metrics, and flags; may schedule a follow-up | Within an agreed number of days |
+| **Independent status classification** | At least two economists not involved in the contribution classify each failure mode (established / conditional / contested) **independently and blind** to one another, with reasons; a second round only with stated reasons; the default is "needs review" | Before task construction (feeds rubric GT-2) |
+| Independent reviewers | Assess resulting tasks against the rubric | Construction Stage 7 |
 
-The interviewer never marks content as validated; validation status comes only from shepherd and reviewer actions.
+The interviewer never marks content as validated. The contributor's status judgment is a claim; status comes from independent classification. This follows structured expert-judgment practice for contested questions: Cooke's classical model, SHELF, and Delphi [S]; see D-013.
 
-**Research-assistant mode.** An economist and an RA can share a session (speakers are attributed) or split it: the economist completes S1–S4 and S6–S7 conversationally; the RA performs S5 from the hand-off specification. Provenance records who did what, preserving the economist's intellectual contribution without requiring software fluency.
+**Research-assistant mode.** An economist and an RA can share a session (speakers attributed) or split it: the economist completes S1–S4 and S6–S7; the RA performs S5 from the hand-off specification. Provenance records who did what.
 
 ## 14. Implementing the protocol in either architecture
 
-The protocol is delivered as **host-independent assets**, kept in [`protocol/`](../../protocol/) in Phase 5:
-
+Host-independent assets, kept in [`protocol/`](../../protocol/) in Phase 5:
 1. this specification;
-2. **stage cards** (machine-readable: goals, gating fields, exit criteria, probe IDs);
-3. the **probe library** (IDs with localized phrasings);
-4. the **pitfall taxonomy** by research design (with citations);
-5. the **EN–ZH terminology glossary**;
-6. output templates; and
+2. **stage cards** (goals, gating fields, exit criteria, probe IDs);
+3. the **probe library** with localized, pretested phrasings;
+4. the **vetted pitfall taxonomy** (entries signed off by a named econometrician, with citations; also lists known-valid alternatives for use as controls). It is seeded from the 21-entry catalogue in [R8](../research/evidence/R8-replication-standards-and-econometric-pitfalls.md) §3, whose entries are not yet vetted;
+5. the **EN–ZH glossary**;
+6. output templates;
 7. the [schema](../../schemas/deepecon-contribution.schema.json).
 
 | Concern | Option B — Claude Code skill | Option A — hosted orchestrator |
 |---|---|---|
-| Orchestration instructions | `SKILL.md` body plus stage cards loaded on demand | Server-side system prompt assembled from the same assets |
-| State | Local dossier files updated through a small command-line helper (schema-validated) | Database records updated through tool calls (`update_dossier`, `record_suggestion`) |
-| Pre-reading and code anchoring | The model reads local files directly | Uploaded code is indexed server-side, or the contributor runs a local helper |
-| Execution (S5) | Local Stata, R, or Python, with originals protected | A1: contributor or RA runs provided scripts locally; A2: hosted sandbox (R/Python) |
-| Fresh-context citation check | Separate subagent | Separate model call without the dossier |
+| Interviewer | `SKILL.md` plus stage cards loaded on demand | Server-side system prompt assembled from the same assets |
+| Recorder and state | Local dossier files written through a schema-validating helper that timestamps and tags exposure | Database records written through tool calls with the same validation |
+| Suggestion generator and checkers | Separate subagents with restricted inputs | Separate model calls with restricted inputs |
+| Execution (S5) | Local Stata, R, or Python with originals protected | Run kits (A1), staff execution, or hosted R/Python sandbox (A2) |
 | Packaging and validation | Shared validator and packager library | Same library, server-side |
 
-Details are in the [Option A](../architecture/option-a-hosted-platform.md) and [Option B](../architecture/option-b-local-skill.md) proposals.
+**Model requirements.** Long context (paper plus code), reliable tool use, strong instruction following, and competence in both languages. Each model must pass the evaluation in §15 before it is approved.
 
-**Model requirements.** Long context (paper plus code), reliable tool use, strong instruction following, competence in both languages. The protocol is tested per model through the evaluation suite in §15 before a model is approved.
+## 15. Evaluating the protocol
 
-## 15. Evaluating the protocol before and during the pilot
+Before any economist is interviewed, the protocol is evaluated the way a checker is evaluated ([R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md), principle P14):
 
-1. **Simulated-contributor suite.** Model-played economist personas with hidden scripts: each persona knows some real failure modes, holds one mistaken belief, and tires after a set number of turns. Measured: recall of the persona's known items; how often the interviewer plants items the persona did not hold; whether the interviewer challenges the mistaken belief with evidence; adherence to one-or-two questions per turn; stopping behaviour. Simulations test protocol mechanics only; they are not evidence about real experts.
-2. **Pilot with economists** ([Deliverable 8](../pilot/pilot-evaluation-plan.md)): yield and quality of candidates as rated by blinded independent reviewers, LLM-origin share, contributor experience, time used.
+1. **Baseline arm.** A generic interviewer prompt without this protocol, run on the same personas, so improvements are measured, not assumed.
+2. **Manipulation check.** Confirm that each protocol rule actually changes behaviour (e.g., the suggestion gate).
+3. **Replicates.** At least three runs per persona and model, with a variance gate.
+4. **Personas.** Model-played economists with hidden scripts:
+   - a persona that knows specific real failure modes, to measure recall;
+   - one holding a wrong belief, to see whether the interviewer challenges it with evidence;
+   - one that pushes back on correct observations;
+   - one attached to a favourite but invalid candidate;
+   - one prone to deference, to measure how much the interviewer plants.
+
+   The formats follow published sycophancy test sets [P-page].
+5. **Qualified automated checks.** Every automated check (leakage, triviality, influence metrics) is tested on seeded defects and clean controls before it is trusted.
+6. **Transcript coding by two coders.** The coding scheme uses the categories from Wuttke et al. (guidance, judgement, follow-up, active listening, naturalness), plus leading-question and presupposition codes; agreement is reported.
+
+Simulations test mechanics only; they are not evidence about real experts. The [pilot](../pilot/pilot-evaluation-plan.md) then measures real behaviour, including a randomized on/off suggestion phase.
 
 ## 16. Versioning
 
-`protocol_version` follows semantic versioning and is recorded in every interview record. Changes are logged in the [decision log](../decisions/decision-log.md). A session started under one protocol version finishes under that version; dossiers move to a newer version only through an explicit migration.
+`protocol_version` follows semantic versioning and is recorded in every interview record. A session started under one version finishes under it; dossiers move to a newer version only through an explicit migration. Changes are logged in the [decision log](../decisions/decision-log.md).
+
+## 17. Changes from v0.1.0
+
+Driven by the evidence and critique in [R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md) §6 (risk and improvement IDs refer to that note):
+
+- Added §0, the deference evidence.
+- **Free-recall locks, exposure tracking, and influence metrics** replace "who said it first" provenance alone (I-1, I-2).
+- Suggestions redesigned: gated, few, vetted, two-sided, order-rotated, with known-valid controls (I-3, I-14).
+- **Ask before pointing**; private decision-point notes no longer steer questions (I-4).
+- Permission sentence and **mandatory realism warrant** (I-5).
+- **S2–S4 restructured** around Critical Decision Method sweeps and an ACTA-style cognitive-demands record (I-6).
+- **Evidence bundle** as the S4 exit (I-7).
+- Status recorded as a claim and **classified independently** by at least two economists (I-8).
+- The contributor classifies validity layers first; "measurement validity" added (I-9).
+- Categorical predictions with optional quantiles (I-10).
+- Conduct rules: no evaluative remarks, short turns, summaries with accuracy ratings (I-11).
+- Separate roles (I-12).
+- Sessions of 45–60 minutes (I-13).
+- An evaluation suite with a baseline, replicates, and personas (I-15).
+- Pilot randomization of the suggestion phase and ownership used only as an experience measure (I-16).
+- Cognitive-interview pretest of the probe library (I-17).
+- Confidentiality instruction (I-18).
+
+## References for the elicitation methods
+
+Verified at [S] level in [R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md) §2.1. Specific probe lists attributed to these sources remain [U] until checked against the originals.
+
+- Klein, G. A., Calderwood, R., & MacGregor, D. (1989). Critical decision method for eliciting knowledge. *IEEE Transactions on Systems, Man, and Cybernetics*, 19(3), 462–472.
+- Hoffman, R. R., Crandall, B., & Shadbolt, N. (1998). *Human Factors*, 40(2), 254–276 (the subtitle varies across records; check the journal page before citing).
+- Militello, L. G., & Hutton, R. (1998). Applied cognitive task analysis (ACTA): A practitioner's toolkit for understanding cognitive task demands. *Ergonomics*, 41(11), 1618–1641.
+- Crandall, B., Klein, G., & Hoffman, R. R. (2006). *Working Minds: A Practitioner's Guide to Cognitive Task Analysis*. MIT Press.
+- Willis, G. B. (2005). *Cognitive Interviewing: A Tool for Improving Questionnaire Design*. Sage.
+- Schuman, H., & Presser, S. (1981). *Questions and Answers in Attitude Surveys*. Academic Press. Krosnick, J. A. (1999). Survey research. *Annual Review of Psychology*, 50, 537–567.
+- Expert-judgment methods for contested questions: Cooke (1991); O'Hagan (2019), *The American Statistician* 73(sup1); Dalkey & Helmer (1963), *Management Science* 9(3).
+- Herdağdelen, Joren & Tamkin (2026), "How AI agents shape experts' judgment calls", Anthropic [P-page].

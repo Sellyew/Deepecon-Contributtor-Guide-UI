@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | **Proposed** v0.1.0 (2026-11-05). Not yet reviewed by the research lead. The glossary in the appendix has **not** been reviewed by bilingual economists. |
 | **Requirement** | Brief §9 (D-007): both architectures support English and Simplified Chinese from the beginning; language-independent schema; contributors' original statements preserved; machine translations labelled; extensible to more languages. |
-| **Evidence labels** | Framework and product facts marked [U] await confirmation in evidence notes [R2](../research/evidence/R2-claude-code-platform.md) and [R9](../research/evidence/R9-hosted-stack-and-compliance.md). |
+| **Evidence labels** | Framework and product facts verified in evidence notes [R2](../research/evidence/R2-claude-code-platform.md) and [R9](../research/evidence/R9-hosted-stack-and-compliance.md); remaining [U] items are marked. |
 
 ---
 
@@ -41,16 +41,16 @@
 
 ### Option A — hosted platform
 
-- **Framework (proposed, pending R9):** a mature internationalization library for the chosen web framework, supporting ICU MessageFormat (plurals, select) and locale-prefixed routes (`/en/...`, `/zh/...`). For a Next.js App Router stack, `next-intl` is the usual choice; `react-i18next` and FormatJS are alternatives [U].
+- **Framework (proposed):** `next-intl` (current 4.x) for a Next.js stack, with ICU MessageFormat and locale-prefixed routes (`/en/...`, `/zh/...`). Use Lingui instead if translators work in standard translation-management tools [P-page, R9].
 - **Language switcher** on every page; the choice is remembered per account and per browser.
-- **Fonts:** a CJK-capable font stack. Fonts should be self-hosted rather than loaded from third-party font services, which may be unreachable from mainland China [U].
+- **Fonts:** a CJK-capable stack using system fonts (PingFang SC, Microsoft YaHei, Noto Sans CJK) or self-hosted subsets. A single full Noto Sans SC file is 17.8 MB [P-page]. Whether third-party font services are reachable from mainland China is contested [S], so do not depend on them.
 - **Server-side:** the model's system prompt is assembled from the same protocol assets, with a locale parameter selecting probe phrasings and templates; the glossary is injected as reference material.
 
 ### Option B — local Claude Code skill
 
 - **Model-facing instructions stay in English, in one place.** `SKILL.md` and the stage cards are not duplicated per language; they instruct the model to converse in the selected language and to follow the glossary.
 - **User-facing assets are per language:** `locales/en/` and `locales/zh-Hans/` hold templates (summaries, consent text, export instructions) and probe phrasings.
-- **Language selection:** asked at the start of the skill, stored in the local session state, and reused on resume. Whether Claude Code offers a documented response-language setting that the plugin can rely on is pending R2 [U].
+- **Language selection:** asked at the start of the skill, stored in the local session state, and reused on resume. Claude Code has a documented `language` setting, but a plugin cannot set it. The workspace template sets it, and the skill also states the language explicitly [P-page, R2].
 - **Helper scripts** (state, validation, packaging) print messages from small message catalogs.
 - **Documentation:** `README.md` and `README.zh-Hans.md`; installation guides in both languages.
 

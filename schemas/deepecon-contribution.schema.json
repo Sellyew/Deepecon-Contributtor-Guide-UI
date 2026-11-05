@@ -1,522 +1,1766 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://deepecon.example/schemas/deepecon-contribution/0.1.0",
+  "$id": "https://deepecon.example/schemas/deepecon-contribution/0.2.0",
   "title": "DeepEcon contribution package (manifest and records)",
-  "description": "Language-independent, architecture-independent record of one expert contribution: paper, reference and flawed implementations, interview-derived knowledge with provenance, candidate tasks, validation evidence, reviews, and submission metadata. Status: PROPOSED draft 0.1.0 (2026-11-05); not yet approved by the research lead. Every entity carries a visibility tier: contributor | internal | agent | hidden. Only 'agent'-tier material may ever be placed in an evaluated agent's environment.",
+  "description": "Language-independent, architecture-independent record of one expert contribution: paper, reference and flawed implementations, interview-derived knowledge with provenance, candidate tasks, validation evidence, reviews, and submission metadata. Status: PROPOSED draft 0.2.0 (2026-11-05); not yet approved by the research lead. Every entity carries a visibility tier: contributor | internal | agent | hidden. Only 'agent'-tier material may ever be placed in an evaluated agent's environment.",
   "type": "object",
-  "required": ["schema_version", "protocol_version", "contribution_id", "created_at", "status", "pathway", "languages", "contributors", "consent", "paper", "source_package", "target_analyses"],
+  "required": [
+    "schema_version",
+    "protocol_version",
+    "contribution_id",
+    "created_at",
+    "status",
+    "pathway",
+    "languages",
+    "contributors",
+    "consent",
+    "paper",
+    "source_package",
+    "target_analyses"
+  ],
   "properties": {
-    "schema_version": { "$ref": "#/$defs/semver", "description": "Version of this schema the record conforms to." },
-    "protocol_version": { "$ref": "#/$defs/semver", "description": "Version of the expert interview protocol used." },
-    "rubric_version": { "$ref": "#/$defs/semver", "description": "Version of the task-quality rubric applied in quality assessments." },
-    "contribution_id": { "$ref": "#/$defs/id" },
-    "created_at": { "$ref": "#/$defs/dateTime" },
-    "updated_at": { "$ref": "#/$defs/dateTime" },
+    "schema_version": {
+      "$ref": "#/$defs/semver",
+      "description": "Version of this schema the record conforms to."
+    },
+    "protocol_version": {
+      "$ref": "#/$defs/semver",
+      "description": "Version of the expert interview protocol used."
+    },
+    "rubric_version": {
+      "$ref": "#/$defs/semver",
+      "description": "Version of the task-quality rubric applied in quality assessments."
+    },
+    "contribution_id": {
+      "$ref": "#/$defs/id"
+    },
+    "created_at": {
+      "$ref": "#/$defs/dateTime"
+    },
+    "updated_at": {
+      "$ref": "#/$defs/dateTime"
+    },
     "status": {
-      "enum": ["draft", "submitted", "under_review", "revisions_requested", "accepted_as_candidate", "admitted_to_release", "admitted_to_experimental_track", "rejected", "withdrawn"],
+      "enum": [
+        "draft",
+        "submitted",
+        "under_review",
+        "revisions_requested",
+        "accepted_as_candidate",
+        "admitted_to_release",
+        "admitted_to_experimental_track",
+        "rejected",
+        "withdrawn"
+      ],
       "description": "Lifecycle status. Submissions are candidates until independently reviewed (Decision D-010)."
     },
-    "pathway": { "enum": ["A_reproduce_curated_paper", "B_own_paper"], "description": "Contribution pathway (Decision D-002)." },
+    "pathway": {
+      "enum": [
+        "A_reproduce_curated_paper",
+        "B_own_paper"
+      ],
+      "description": "Contribution pathway (Decision D-002)."
+    },
     "languages": {
       "type": "object",
-      "required": ["interview", "ui"],
+      "required": [
+        "interview",
+        "ui"
+      ],
       "properties": {
-        "interview": { "$ref": "#/$defs/lang", "description": "Language in which the interview was conducted." },
-        "ui": { "$ref": "#/$defs/lang" },
-        "working_translation": { "$ref": "#/$defs/lang", "description": "Language of labelled machine translations produced for reviewers, if any." }
+        "interview": {
+          "$ref": "#/$defs/lang",
+          "description": "Language in which the interview was conducted."
+        },
+        "ui": {
+          "$ref": "#/$defs/lang"
+        },
+        "working_translation": {
+          "$ref": "#/$defs/lang",
+          "description": "Language of labelled machine translations produced for reviewers, if any."
+        }
       },
       "additionalProperties": false
     },
-    "contributors": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/contributorRole" } },
-    "consent": { "$ref": "#/$defs/consent" },
-    "paper": { "$ref": "#/$defs/paper" },
-    "source_package": { "$ref": "#/$defs/sourcePackage" },
-    "target_analyses": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/targetAnalysis" } },
-    "reference_implementations": { "type": "array", "items": { "$ref": "#/$defs/referenceImplementation" } },
-    "critical_decisions": { "type": "array", "items": { "$ref": "#/$defs/criticalDecision" } },
-    "failure_modes": { "type": "array", "items": { "$ref": "#/$defs/failureMode" } },
-    "flawed_variants": { "type": "array", "items": { "$ref": "#/$defs/flawedVariant" } },
-    "task_candidates": { "type": "array", "items": { "$ref": "#/$defs/taskCandidate" } },
-    "interview_records": { "type": "array", "items": { "$ref": "#/$defs/interviewRecord" } },
-    "validation_runs": { "type": "array", "items": { "$ref": "#/$defs/validationRun" } },
-    "reviews": { "type": "array", "items": { "$ref": "#/$defs/reviewDecision" } },
-    "submission": { "$ref": "#/$defs/submission" },
-    "licenses": { "type": "array", "items": { "$ref": "#/$defs/licenseRecord" } },
-    "files": { "type": "array", "items": { "$ref": "#/$defs/fileRef" }, "description": "Inventory of every file in the package with its tier and checksum." }
+    "contributors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/contributorRole"
+      }
+    },
+    "consent": {
+      "$ref": "#/$defs/consent"
+    },
+    "paper": {
+      "$ref": "#/$defs/paper"
+    },
+    "source_package": {
+      "$ref": "#/$defs/sourcePackage"
+    },
+    "target_analyses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/targetAnalysis"
+      }
+    },
+    "reference_implementations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/referenceImplementation"
+      }
+    },
+    "critical_decisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/criticalDecision"
+      }
+    },
+    "failure_modes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/failureMode"
+      }
+    },
+    "flawed_variants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/flawedVariant"
+      }
+    },
+    "task_candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/taskCandidate"
+      }
+    },
+    "interview_records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/interviewRecord"
+      }
+    },
+    "validation_runs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/validationRun"
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/reviewDecision"
+      }
+    },
+    "submission": {
+      "$ref": "#/$defs/submission"
+    },
+    "licenses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/licenseRecord"
+      }
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/fileRef"
+      },
+      "description": "Inventory of every file in the package with its tier and checksum."
+    }
   },
-  "patternProperties": { "^x-": {} },
+  "patternProperties": {
+    "^x-": {}
+  },
   "additionalProperties": false,
-
   "$defs": {
-    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{1,79}$" },
-    "semver": { "type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z.-]+)?$" },
-    "dateTime": { "type": "string", "format": "date-time" },
-    "date": { "type": "string", "format": "date" },
-    "lang": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?$", "description": "BCP 47 tag. Use 'en' and 'zh-Hans' for content; region subtags allowed (e.g., 'zh-Hans-CN')." },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{1,79}$"
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z.-]+)?$"
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "lang": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?$",
+      "description": "BCP 47 tag. Use 'en' and 'zh-Hans' for content; region subtags allowed (e.g., 'zh-Hans-CN')."
+    },
     "visibility": {
-      "enum": ["contributor", "internal", "agent", "hidden"],
+      "enum": [
+        "contributor",
+        "internal",
+        "agent",
+        "hidden"
+      ],
       "description": "contributor: shown to and approved by the contributor; internal: task construction and validation material for the benchmark team; agent: safe to place in an evaluated agent's environment; hidden: evaluation material that must never reach an evaluated agent (Decision D-009)."
     },
-    "evidenceLevel": { "enum": ["P-full", "P-page", "S", "U"], "description": "P-full primary source read in full; P-page primary abstract/landing page/official doc; S secondary; U unverified." },
-
+    "evidenceLevel": {
+      "enum": [
+        "P-full",
+        "P-page",
+        "S",
+        "U"
+      ],
+      "description": "P-full primary source read in full; P-page primary abstract/landing page/official doc; S secondary; U unverified."
+    },
     "textVersion": {
       "type": "object",
-      "required": ["lang", "text", "is_original"],
+      "required": [
+        "lang",
+        "text",
+        "is_original"
+      ],
       "properties": {
-        "lang": { "$ref": "#/$defs/lang" },
-        "text": { "type": "string", "minLength": 1 },
-        "is_original": { "type": "boolean", "description": "True for the statement as originally written or spoken." },
-        "machine_translated": { "type": "boolean", "default": false },
-        "translation_of": { "$ref": "#/$defs/lang", "description": "Language of the version this text was translated from." },
-        "translator": { "type": "string", "description": "Model identifier or person who produced the translation." },
-        "created_at": { "$ref": "#/$defs/dateTime" }
+        "lang": {
+          "$ref": "#/$defs/lang"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "is_original": {
+          "type": "boolean",
+          "description": "True for the statement as originally written or spoken."
+        },
+        "machine_translated": {
+          "type": "boolean",
+          "default": false
+        },
+        "translation_of": {
+          "$ref": "#/$defs/lang",
+          "description": "Language of the version this text was translated from."
+        },
+        "translator": {
+          "type": "string",
+          "description": "Model identifier or person who produced the translation."
+        },
+        "created_at": {
+          "$ref": "#/$defs/dateTime"
+        }
       },
       "allOf": [
-        { "if": { "properties": { "is_original": { "const": false } } }, "then": { "required": ["translation_of", "machine_translated"] } }
+        {
+          "if": {
+            "properties": {
+              "is_original": {
+                "const": false
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "translation_of",
+              "machine_translated"
+            ]
+          }
+        }
       ],
       "additionalProperties": false
     },
     "localizedText": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/textVersion" },
-      "contains": { "type": "object", "properties": { "is_original": { "const": true } }, "required": ["is_original"] },
+      "items": {
+        "$ref": "#/$defs/textVersion"
+      },
+      "contains": {
+        "type": "object",
+        "properties": {
+          "is_original": {
+            "const": true
+          }
+        },
+        "required": [
+          "is_original"
+        ]
+      },
       "minContains": 1,
       "maxContains": 1,
       "description": "Exactly one original version plus zero or more labelled translations (Decision D-007)."
     },
-
     "provenance": {
       "type": "object",
-      "required": ["origin", "endorsement", "validation", "created_at"],
+      "required": [
+        "origin",
+        "endorsement",
+        "validation",
+        "created_at"
+      ],
       "properties": {
         "origin": {
-          "enum": ["contributor", "research_assistant", "llm_suggested", "llm_summarized", "llm_extracted", "shepherd", "reviewer", "automated_check"],
+          "enum": [
+            "contributor",
+            "research_assistant",
+            "llm_suggested",
+            "llm_summarized",
+            "llm_extracted",
+            "shepherd",
+            "reviewer",
+            "automated_check"
+          ],
           "description": "Who first asserted the content. llm_suggested = proposed by the interviewer model; llm_summarized = model's summary of contributor speech; llm_extracted = model's reading of paper/code."
         },
-        "actor_id": { "type": "string" },
-        "model": { "$ref": "#/$defs/modelInfo" },
-        "created_at": { "$ref": "#/$defs/dateTime" },
+        "actor_id": {
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/modelInfo"
+        },
+        "created_at": {
+          "$ref": "#/$defs/dateTime"
+        },
         "endorsement": {
-          "enum": ["pending", "endorsed", "edited_then_endorsed", "rejected", "withdrawn", "not_applicable"],
+          "enum": [
+            "pending",
+            "endorsed",
+            "edited_then_endorsed",
+            "rejected",
+            "withdrawn",
+            "not_applicable"
+          ],
           "description": "Contributor's disposition (Decision D-008). Automated checks use not_applicable."
         },
-        "endorsed_by": { "type": "string" },
-        "endorsed_at": { "$ref": "#/$defs/dateTime" },
-        "validation": { "enum": ["unvalidated", "independently_validated", "disputed"] },
-        "validated_by": { "type": "array", "items": { "type": "string" } },
-        "evidence_refs": { "type": "array", "items": { "$ref": "#/$defs/evidenceRef" } }
+        "endorsed_by": {
+          "type": "string"
+        },
+        "endorsed_at": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "validation": {
+          "enum": [
+            "unvalidated",
+            "independently_validated",
+            "disputed"
+          ]
+        },
+        "validated_by": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidenceRef"
+          }
+        },
+        "exposure": {
+          "enum": [
+            "pre_exposure",
+            "post_exposure",
+            "not_applicable"
+          ],
+          "description": "Whether the content was first stated before or after any related LLM suggestion or code pointer (protocol §4)."
+        },
+        "preceding_suggestion_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Suggestion-ledger IDs that preceded a post-exposure statement."
+        }
       },
       "allOf": [
-        { "if": { "properties": { "origin": { "enum": ["llm_suggested", "llm_summarized", "llm_extracted"] } } }, "then": { "required": ["model"] } }
+        {
+          "if": {
+            "properties": {
+              "origin": {
+                "enum": [
+                  "llm_suggested",
+                  "llm_summarized",
+                  "llm_extracted"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "model"
+            ]
+          }
+        }
       ],
       "additionalProperties": false
     },
     "statement": {
       "type": "object",
-      "required": ["statement_id", "text", "provenance"],
+      "required": [
+        "statement_id",
+        "text",
+        "provenance"
+      ],
       "properties": {
-        "statement_id": { "$ref": "#/$defs/id" },
-        "text": { "$ref": "#/$defs/localizedText" },
-        "provenance": { "$ref": "#/$defs/provenance" },
-        "visibility": { "$ref": "#/$defs/visibility", "default": "internal" }
+        "statement_id": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "visibility": {
+          "$ref": "#/$defs/visibility",
+          "default": "internal"
+        }
       },
       "additionalProperties": false
     },
     "modelInfo": {
       "type": "object",
-      "required": ["provider", "model_id"],
+      "required": [
+        "provider",
+        "model_id"
+      ],
       "properties": {
-        "provider": { "type": "string", "description": "e.g., anthropic, aws-bedrock, google-vertex, other" },
-        "model_id": { "type": "string", "description": "Exact model identifier as reported by the API or client." },
-        "effort": { "type": "string" },
-        "client": { "type": "string", "description": "e.g., hosted-platform 0.3.1, claude-code 2.x with plugin 0.2.0" }
+        "provider": {
+          "type": "string",
+          "description": "e.g., anthropic, aws-bedrock, google-vertex, other"
+        },
+        "model_id": {
+          "type": "string",
+          "description": "Exact model identifier as reported by the API or client."
+        },
+        "effort": {
+          "type": "string"
+        },
+        "client": {
+          "type": "string",
+          "description": "e.g., hosted-platform 0.3.1, claude-code 2.x with plugin 0.2.0"
+        }
       },
       "additionalProperties": false
     },
     "citation": {
       "type": "object",
-      "required": ["title", "year", "evidence_level"],
+      "required": [
+        "title",
+        "year",
+        "evidence_level"
+      ],
       "properties": {
-        "doi": { "type": "string" },
-        "title": { "type": "string" },
-        "authors": { "type": "array", "items": { "type": "string" } },
-        "year": { "type": "integer", "minimum": 1800, "maximum": 2100 },
-        "venue": { "type": "string" },
-        "url": { "type": "string", "format": "uri" },
-        "locator": { "type": "string", "description": "Section, page, theorem, or equation supporting the claim." },
-        "evidence_level": { "$ref": "#/$defs/evidenceLevel" }
+        "doi": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1800,
+          "maximum": 2100
+        },
+        "venue": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "locator": {
+          "type": "string",
+          "description": "Section, page, theorem, or equation supporting the claim."
+        },
+        "evidence_level": {
+          "$ref": "#/$defs/evidenceLevel"
+        }
       },
       "additionalProperties": false
     },
     "evidenceRef": {
       "type": "object",
-      "required": ["kind"],
+      "required": [
+        "kind"
+      ],
       "properties": {
-        "kind": { "enum": ["paper_location", "code_location", "output_value", "citation", "simulation", "expert_statement", "validation_run", "external_document"] },
-        "paper_location": { "type": "string", "description": "e.g., 'Table 2, column 3' or 'p. 14, footnote 22'." },
-        "file": { "type": "string", "description": "Package-relative path." },
-        "line_start": { "type": "integer", "minimum": 1 },
-        "line_end": { "type": "integer", "minimum": 1 },
-        "file_sha256": { "$ref": "#/$defs/sha256" },
-        "output_id": { "type": "string" },
-        "citation": { "$ref": "#/$defs/citation" },
-        "statement_id": { "type": "string" },
-        "run_id": { "type": "string" },
-        "url": { "type": "string", "format": "uri" },
-        "note": { "type": "string" }
+        "kind": {
+          "enum": [
+            "paper_location",
+            "code_location",
+            "output_value",
+            "citation",
+            "simulation",
+            "expert_statement",
+            "validation_run",
+            "external_document"
+          ]
+        },
+        "paper_location": {
+          "type": "string",
+          "description": "e.g., 'Table 2, column 3' or 'p. 14, footnote 22'."
+        },
+        "file": {
+          "type": "string",
+          "description": "Package-relative path."
+        },
+        "line_start": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "line_end": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "output_id": {
+          "type": "string"
+        },
+        "citation": {
+          "$ref": "#/$defs/citation"
+        },
+        "statement_id": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "note": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
-    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
     "fileRef": {
       "type": "object",
-      "required": ["path", "visibility"],
+      "required": [
+        "path",
+        "visibility"
+      ],
       "properties": {
-        "path": { "type": "string", "description": "Package-relative POSIX path; must sit under the directory of its tier (contributor/, internal/, agent/, hidden/)." },
-        "visibility": { "$ref": "#/$defs/visibility" },
-        "sha256": { "$ref": "#/$defs/sha256" },
-        "bytes": { "type": "integer", "minimum": 0 },
-        "media_type": { "type": "string" },
-        "role": { "type": "string", "description": "e.g., code, data, patch, output, transcript, instruction, verifier, documentation" },
-        "license_ref": { "type": "string" }
+        "path": {
+          "type": "string",
+          "description": "Package-relative POSIX path; must sit under the directory of its tier (contributor/, internal/, agent/, hidden/)."
+        },
+        "visibility": {
+          "$ref": "#/$defs/visibility"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "description": "e.g., code, data, patch, output, transcript, instruction, verifier, documentation"
+        },
+        "license_ref": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "softwareEnv": {
       "type": "object",
-      "required": ["languages"],
+      "required": [
+        "languages"
+      ],
       "properties": {
         "languages": {
-          "type": "array", "minItems": 1,
+          "type": "array",
+          "minItems": 1,
           "items": {
-            "type": "object", "required": ["name", "version"],
-            "properties": { "name": { "enum": ["stata", "r", "python", "julia", "matlab", "sas", "fortran", "cpp", "other"] }, "version": { "type": "string" } },
+            "type": "object",
+            "required": [
+              "name",
+              "version"
+            ],
+            "properties": {
+              "name": {
+                "enum": [
+                  "stata",
+                  "r",
+                  "python",
+                  "julia",
+                  "matlab",
+                  "sas",
+                  "fortran",
+                  "cpp",
+                  "other"
+                ]
+              },
+              "version": {
+                "type": "string"
+              }
+            },
             "additionalProperties": false
           }
         },
         "packages": {
           "type": "array",
           "items": {
-            "type": "object", "required": ["ecosystem", "name", "version"],
-            "properties": { "ecosystem": { "enum": ["ssc", "cran", "pypi", "conda", "julia", "other"] }, "name": { "type": "string" }, "version": { "type": "string" } },
+            "type": "object",
+            "required": [
+              "ecosystem",
+              "name",
+              "version"
+            ],
+            "properties": {
+              "ecosystem": {
+                "enum": [
+                  "ssc",
+                  "cran",
+                  "pypi",
+                  "conda",
+                  "julia",
+                  "other"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              }
+            },
             "additionalProperties": false
           }
         },
-        "os": { "type": "string" },
-        "container_image": { "type": "string", "description": "Pinned image reference with digest when available." },
-        "proprietary_licenses_required": { "type": "array", "items": { "type": "string" }, "description": "e.g., ['Stata/MP 18']. Tasks for public evaluation should avoid these (Good Benchmarks: robust environments)." },
+        "os": {
+          "type": "string"
+        },
+        "container_image": {
+          "type": "string",
+          "description": "Pinned image reference with digest when available."
+        },
+        "proprietary_licenses_required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "e.g., ['Stata/MP 18']. Tasks for public evaluation should avoid these (Good Benchmarks: robust environments)."
+        },
         "hardware": {
           "type": "object",
-          "properties": { "cpus": { "type": "integer", "minimum": 1 }, "memory_gb": { "type": "number", "minimum": 0 }, "gpu": { "type": "string" } },
+          "properties": {
+            "cpus": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "memory_gb": {
+              "type": "number",
+              "minimum": 0
+            },
+            "gpu": {
+              "type": "string"
+            }
+          },
           "additionalProperties": false
         },
-        "expected_runtime_minutes": { "type": "number", "minimum": 0 },
-        "network_required": { "type": "boolean", "default": false }
+        "expected_runtime_minutes": {
+          "type": "number",
+          "minimum": 0
+        },
+        "network_required": {
+          "type": "boolean",
+          "default": false
+        }
       },
       "additionalProperties": false
     },
     "numericResult": {
       "type": "object",
-      "required": ["output_id", "label"],
+      "required": [
+        "output_id",
+        "label"
+      ],
       "properties": {
-        "output_id": { "$ref": "#/$defs/id" },
-        "label": { "type": "string" },
-        "value": { "type": "number" },
-        "std_error": { "type": "number", "minimum": 0 },
-        "ci_lower": { "type": "number" },
-        "ci_upper": { "type": "number" },
-        "ci_level": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1 },
-        "p_value": { "type": "number", "minimum": 0, "maximum": 1 },
-        "n_obs": { "type": "integer", "minimum": 0 },
-        "n_clusters": { "type": "integer", "minimum": 0 },
-        "units": { "type": "string" },
-        "published_value": { "type": "number", "description": "Value printed in the paper, if any." },
-        "tolerance": { "$ref": "#/$defs/tolerance" }
+        "output_id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "std_error": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ci_lower": {
+          "type": "number"
+        },
+        "ci_upper": {
+          "type": "number"
+        },
+        "ci_level": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "p_value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "n_obs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "n_clusters": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "units": {
+          "type": "string"
+        },
+        "published_value": {
+          "type": "number",
+          "description": "Value printed in the paper, if any."
+        },
+        "tolerance": {
+          "$ref": "#/$defs/tolerance"
+        }
       },
       "additionalProperties": false
     },
     "tolerance": {
       "type": "object",
-      "required": ["kind", "value"],
+      "required": [
+        "kind",
+        "value"
+      ],
       "properties": {
-        "kind": { "enum": ["absolute", "relative", "in_reference_se_units", "exact"] },
-        "value": { "type": "number", "minimum": 0 },
-        "justification": { "type": "string" }
+        "kind": {
+          "enum": [
+            "absolute",
+            "relative",
+            "in_reference_se_units",
+            "exact"
+          ]
+        },
+        "value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "justification": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
-
     "contributorRole": {
       "type": "object",
-      "required": ["person_id", "role", "relationship_to_paper"],
+      "required": [
+        "person_id",
+        "role",
+        "relationship_to_paper"
+      ],
       "properties": {
-        "person_id": { "$ref": "#/$defs/id" },
-        "display_name": { "type": "string" },
-        "role": { "enum": ["contributing_economist", "research_assistant", "shepherd", "reviewer"] },
-        "relationship_to_paper": { "enum": ["original_author", "coauthor", "replicator", "referee_or_editor", "independent_expert", "none"] },
-        "affiliation": { "type": "string" },
-        "orcid": { "type": "string", "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[\\dX]$" },
-        "contact_email": { "type": "string", "format": "email", "description": "Internal tier only; strip from any exported or public artifact." },
-        "conflicts_of_interest": { "type": "string" }
+        "person_id": {
+          "$ref": "#/$defs/id"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "contributing_economist",
+            "research_assistant",
+            "shepherd",
+            "reviewer"
+          ]
+        },
+        "relationship_to_paper": {
+          "enum": [
+            "original_author",
+            "coauthor",
+            "replicator",
+            "referee_or_editor",
+            "independent_expert",
+            "none"
+          ]
+        },
+        "affiliation": {
+          "type": "string"
+        },
+        "orcid": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[\\dX]$"
+        },
+        "contact_email": {
+          "type": "string",
+          "format": "email",
+          "description": "Internal tier only; strip from any exported or public artifact."
+        },
+        "conflicts_of_interest": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "consent": {
       "type": "object",
-      "required": ["disclosure_version", "accepted_at", "model_providers_disclosed", "allow_transcript_retention", "credit_preference"],
+      "required": [
+        "disclosure_version",
+        "accepted_at",
+        "model_providers_disclosed",
+        "allow_transcript_retention",
+        "credit_preference"
+      ],
       "properties": {
-        "disclosure_version": { "$ref": "#/$defs/semver", "description": "Version of the data-flow disclosure the contributor accepted (Safeguard E)." },
-        "accepted_at": { "$ref": "#/$defs/dateTime" },
-        "model_providers_disclosed": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-        "contributor_account_terms": { "enum": ["project_commercial_account", "contributor_commercial_account", "contributor_consumer_account_training_opt_out", "contributor_consumer_account_training_opt_in", "other_provider", "unknown"], "description": "Terms under which the interview model was accessed; consumer accounts with training enabled create a leakage risk for hidden materials." },
-        "allow_transcript_retention": { "type": "boolean" },
-        "allow_research_use_of_transcript": { "type": "boolean", "description": "Use of anonymized transcripts to study and improve the interview protocol." },
-        "credit_preference": { "enum": ["named", "anonymous"] },
-        "attribution_name": { "type": "string" }
+        "disclosure_version": {
+          "$ref": "#/$defs/semver",
+          "description": "Version of the data-flow disclosure the contributor accepted (Safeguard E)."
+        },
+        "accepted_at": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "model_providers_disclosed": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "contributor_account_terms": {
+          "enum": [
+            "project_commercial_account",
+            "contributor_commercial_account",
+            "contributor_consumer_account_training_opt_out",
+            "contributor_consumer_account_training_opt_in",
+            "other_provider",
+            "unknown"
+          ],
+          "description": "Terms under which the interview model was accessed; consumer accounts with training enabled create a leakage risk for hidden materials."
+        },
+        "allow_transcript_retention": {
+          "type": "boolean"
+        },
+        "allow_research_use_of_transcript": {
+          "type": "boolean",
+          "description": "Use of anonymized transcripts to study and improve the interview protocol."
+        },
+        "credit_preference": {
+          "enum": [
+            "named",
+            "anonymous"
+          ]
+        },
+        "attribution_name": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "paper": {
       "type": "object",
-      "required": ["title", "authors", "journal", "year"],
+      "required": [
+        "title",
+        "authors",
+        "journal",
+        "year"
+      ],
       "properties": {
-        "paper_id": { "$ref": "#/$defs/id" },
-        "title": { "type": "string" },
-        "authors": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-        "journal": { "type": "string" },
-        "year": { "type": "integer", "minimum": 1900, "maximum": 2100 },
-        "volume": { "type": "string" },
-        "issue": { "type": "string" },
-        "pages": { "type": "string" },
-        "doi": { "type": "string" },
-        "url": { "type": "string", "format": "uri" },
-        "jel_codes": { "type": "array", "items": { "type": "string", "pattern": "^[A-Z][0-9]{0,2}$" } },
-        "curated_collection_id": { "type": "string", "description": "Identifier in the project's curated list (Path A)." },
-        "pdf_included": { "type": "boolean", "default": false },
-        "pdf_license": { "type": "string" }
+        "paper_id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string"
+        },
+        "authors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "journal": {
+          "type": "string"
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1900,
+          "maximum": 2100
+        },
+        "volume": {
+          "type": "string"
+        },
+        "issue": {
+          "type": "string"
+        },
+        "pages": {
+          "type": "string"
+        },
+        "doi": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "jel_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][0-9]{0,2}$"
+          }
+        },
+        "curated_collection_id": {
+          "type": "string",
+          "description": "Identifier in the project's curated list (Path A)."
+        },
+        "pdf_included": {
+          "type": "boolean",
+          "default": false
+        },
+        "pdf_license": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "sourcePackage": {
       "type": "object",
-      "required": ["repository", "data_availability", "included_in_contribution"],
+      "required": [
+        "repository",
+        "data_availability",
+        "included_in_contribution"
+      ],
       "properties": {
-        "doi_or_url": { "type": "string" },
-        "repository": { "enum": ["openicpsr", "dataverse", "zenodo", "journal_site", "author_site", "private", "none", "other"] },
-        "version": { "type": "string" },
-        "retrieved_at": { "$ref": "#/$defs/date" },
-        "archive_sha256": { "$ref": "#/$defs/sha256" },
-        "license": { "type": "string" },
-        "data_availability": { "enum": ["all_public_redistributable", "public_not_redistributable", "restricted_access", "confidential", "mixed", "unknown"] },
-        "software": { "$ref": "#/$defs/softwareEnv" },
-        "included_in_contribution": { "type": "boolean", "description": "False when only a reference (DOI, checksum) is recorded because redistribution is not permitted." }
+        "doi_or_url": {
+          "type": "string"
+        },
+        "repository": {
+          "enum": [
+            "openicpsr",
+            "dataverse",
+            "zenodo",
+            "journal_site",
+            "author_site",
+            "private",
+            "none",
+            "other"
+          ]
+        },
+        "version": {
+          "type": "string"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/date"
+        },
+        "archive_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "license": {
+          "type": "string"
+        },
+        "data_availability": {
+          "enum": [
+            "all_public_redistributable",
+            "public_not_redistributable",
+            "restricted_access",
+            "confidential",
+            "mixed",
+            "unknown"
+          ]
+        },
+        "software": {
+          "$ref": "#/$defs/softwareEnv"
+        },
+        "included_in_contribution": {
+          "type": "boolean",
+          "description": "False when only a reference (DOI, checksum) is recorded because redistribution is not permitted."
+        }
       },
       "additionalProperties": false
     },
     "targetAnalysis": {
       "type": "object",
-      "required": ["target_id", "description", "paper_location", "estimand"],
+      "required": [
+        "target_id",
+        "description",
+        "paper_location",
+        "estimand"
+      ],
       "properties": {
-        "target_id": { "$ref": "#/$defs/id" },
-        "description": { "$ref": "#/$defs/localizedText" },
-        "paper_location": { "type": "string" },
+        "target_id": {
+          "$ref": "#/$defs/id"
+        },
+        "description": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "paper_location": {
+          "type": "string"
+        },
         "estimand": {
           "type": "object",
-          "required": ["description", "design"],
+          "required": [
+            "description",
+            "design"
+          ],
           "properties": {
-            "description": { "$ref": "#/$defs/localizedText" },
-            "parameter": { "type": "string", "description": "e.g., ATT, LATE, ITT, elasticity, event-time effect at k=2." },
-            "population": { "type": "string" },
-            "treatment": { "type": "string" },
-            "outcome": { "type": "string" },
-            "design": { "enum": ["rct", "did_two_period", "did_staggered", "event_study", "iv", "rd_sharp", "rd_fuzzy", "synthetic_control", "shift_share", "panel_fixed_effects", "selection_on_observables", "structural", "descriptive", "other"] },
-            "identifying_assumptions": { "type": "array", "items": { "$ref": "#/$defs/statement" } }
+            "description": {
+              "$ref": "#/$defs/localizedText"
+            },
+            "parameter": {
+              "type": "string",
+              "description": "e.g., ATT, LATE, ITT, elasticity, event-time effect at k=2."
+            },
+            "population": {
+              "type": "string"
+            },
+            "treatment": {
+              "type": "string"
+            },
+            "outcome": {
+              "type": "string"
+            },
+            "design": {
+              "enum": [
+                "rct",
+                "did_two_period",
+                "did_staggered",
+                "event_study",
+                "iv",
+                "rd_sharp",
+                "rd_fuzzy",
+                "synthetic_control",
+                "shift_share",
+                "panel_fixed_effects",
+                "selection_on_observables",
+                "structural",
+                "descriptive",
+                "other"
+              ]
+            },
+            "identifying_assumptions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/statement"
+              }
+            }
           },
           "additionalProperties": false
         },
-        "outputs": { "type": "array", "items": { "$ref": "#/$defs/numericResult" } },
-        "data_description": { "$ref": "#/$defs/localizedText" }
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/numericResult"
+          }
+        },
+        "data_description": {
+          "$ref": "#/$defs/localizedText"
+        }
       },
       "additionalProperties": false
     },
     "referenceImplementation": {
       "type": "object",
-      "required": ["impl_id", "target_ids", "kind", "environment", "files", "expected_outputs", "validation", "visibility"],
+      "required": [
+        "impl_id",
+        "target_ids",
+        "kind",
+        "environment",
+        "files",
+        "expected_outputs",
+        "validation",
+        "visibility"
+      ],
       "properties": {
-        "impl_id": { "$ref": "#/$defs/id" },
-        "target_ids": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-        "kind": { "enum": ["original_package", "cleaned_original", "independent_reimplementation", "alternative_valid_implementation"] },
-        "entrypoint": { "type": "string" },
-        "environment": { "$ref": "#/$defs/softwareEnv" },
-        "files": { "type": "array", "items": { "$ref": "#/$defs/fileRef" } },
-        "run_instructions": { "$ref": "#/$defs/localizedText" },
-        "sample_construction": { "$ref": "#/$defs/localizedText" },
-        "variable_definitions": { "type": "array", "items": { "$ref": "#/$defs/statement" } },
-        "expected_outputs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/numericResult" } },
+        "impl_id": {
+          "$ref": "#/$defs/id"
+        },
+        "target_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "kind": {
+          "enum": [
+            "original_package",
+            "cleaned_original",
+            "independent_reimplementation",
+            "alternative_valid_implementation"
+          ]
+        },
+        "entrypoint": {
+          "type": "string"
+        },
+        "environment": {
+          "$ref": "#/$defs/softwareEnv"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/fileRef"
+          }
+        },
+        "run_instructions": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "sample_construction": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "variable_definitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/statement"
+          }
+        },
+        "expected_outputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/numericResult"
+          }
+        },
         "intermediate_outputs": {
           "type": "array",
           "items": {
-            "type": "object", "required": ["output_id", "description"],
+            "type": "object",
+            "required": [
+              "output_id",
+              "description"
+            ],
             "properties": {
-              "output_id": { "$ref": "#/$defs/id" },
-              "description": { "type": "string" },
-              "value": { "type": ["number", "string", "integer"] },
-              "file": { "$ref": "#/$defs/fileRef" }
+              "output_id": {
+                "$ref": "#/$defs/id"
+              },
+              "description": {
+                "type": "string"
+              },
+              "value": {
+                "type": [
+                  "number",
+                  "string",
+                  "integer"
+                ]
+              },
+              "file": {
+                "$ref": "#/$defs/fileRef"
+              }
             },
             "additionalProperties": false
           }
         },
         "validation": {
           "type": "object",
-          "required": ["reproduces_published"],
+          "required": [
+            "reproduces_published"
+          ],
           "properties": {
-            "reproduces_published": { "enum": ["exact", "within_tolerance", "no", "not_applicable"] },
-            "discrepancies": { "type": "array", "items": { "$ref": "#/$defs/statement" } },
+            "reproduces_published": {
+              "enum": [
+                "exact",
+                "within_tolerance",
+                "no",
+                "not_applicable"
+              ]
+            },
+            "discrepancies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/statement"
+              }
+            },
             "independent_check": {
               "type": "object",
               "properties": {
-                "performed": { "type": "boolean" },
-                "method": { "enum": ["independent_reimplementation", "cross_language_reimplementation", "line_by_line_code_review", "simulation_check", "other"] },
-                "performed_by": { "type": "string" },
-                "agrees": { "type": "boolean" },
-                "evidence_refs": { "type": "array", "items": { "$ref": "#/$defs/evidenceRef" } }
+                "performed": {
+                  "type": "boolean"
+                },
+                "method": {
+                  "enum": [
+                    "independent_reimplementation",
+                    "cross_language_reimplementation",
+                    "line_by_line_code_review",
+                    "simulation_check",
+                    "other"
+                  ]
+                },
+                "performed_by": {
+                  "type": "string"
+                },
+                "agrees": {
+                  "type": "boolean"
+                },
+                "evidence_refs": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/evidenceRef"
+                  }
+                }
               },
               "additionalProperties": false
             }
           },
           "additionalProperties": false
         },
-        "visibility": { "const": "internal" }
+        "visibility": {
+          "const": "internal"
+        }
       },
       "additionalProperties": false
     },
     "criticalDecision": {
       "type": "object",
-      "required": ["decision_id", "target_ids", "category", "validity_layer", "description", "chosen_option"],
+      "required": [
+        "decision_id",
+        "target_ids",
+        "category",
+        "validity_layer",
+        "description",
+        "chosen_option"
+      ],
       "properties": {
-        "decision_id": { "$ref": "#/$defs/id" },
-        "target_ids": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-        "category": { "enum": ["estimand_definition", "sample_construction", "variable_construction", "treatment_timing", "estimator_choice", "control_selection", "fixed_effects", "inference_procedure", "weighting", "functional_form", "data_cleaning", "robustness_design", "interpretation", "other"] },
-        "validity_layer": { "enum": ["computational", "statistical", "identification", "interpretation"], "description": "Which kind of validity the decision protects (DP-01)." },
-        "description": { "$ref": "#/$defs/statement" },
-        "chosen_option": { "$ref": "#/$defs/statement" },
-        "alternatives_considered": { "type": "array", "items": { "$ref": "#/$defs/statement" } },
-        "rationale": { "$ref": "#/$defs/statement" },
-        "importance": { "enum": ["critical", "important", "minor"] },
-        "evidence_refs": { "type": "array", "items": { "$ref": "#/$defs/evidenceRef" } },
-        "visibility": { "const": "internal" }
+        "decision_id": {
+          "$ref": "#/$defs/id"
+        },
+        "target_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "category": {
+          "enum": [
+            "estimand_definition",
+            "sample_construction",
+            "variable_construction",
+            "treatment_timing",
+            "estimator_choice",
+            "control_selection",
+            "fixed_effects",
+            "inference_procedure",
+            "weighting",
+            "functional_form",
+            "data_cleaning",
+            "robustness_design",
+            "interpretation",
+            "other"
+          ]
+        },
+        "validity_layer": {
+          "enum": [
+            "computational",
+            "measurement",
+            "statistical",
+            "identification",
+            "interpretation"
+          ],
+          "description": "Which kind of validity the decision protects: computational (implementation fidelity), measurement, statistical, identification, interpretation (DP-01; protocol v0.2.0 S4)."
+        },
+        "description": {
+          "$ref": "#/$defs/statement"
+        },
+        "chosen_option": {
+          "$ref": "#/$defs/statement"
+        },
+        "alternatives_considered": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/statement"
+          }
+        },
+        "rationale": {
+          "$ref": "#/$defs/statement"
+        },
+        "importance": {
+          "enum": [
+            "critical",
+            "important",
+            "minor"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidenceRef"
+          }
+        },
+        "visibility": {
+          "const": "internal"
+        }
       },
       "additionalProperties": false
     },
     "failureMode": {
       "type": "object",
-      "required": ["failure_mode_id", "decision_id", "description", "why_incorrect", "realism_warrant", "validity_layer", "status", "lifecycle"],
+      "required": [
+        "failure_mode_id",
+        "decision_id",
+        "description",
+        "why_incorrect",
+        "realism_warrant",
+        "validity_layer",
+        "status",
+        "lifecycle"
+      ],
       "properties": {
-        "failure_mode_id": { "$ref": "#/$defs/id" },
-        "decision_id": { "type": "string" },
-        "title": { "$ref": "#/$defs/localizedText" },
-        "description": { "$ref": "#/$defs/statement", "description": "Brief §3.3 item 1." },
+        "failure_mode_id": {
+          "$ref": "#/$defs/id"
+        },
+        "decision_id": {
+          "type": "string"
+        },
+        "title": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "description": {
+          "$ref": "#/$defs/statement",
+          "description": "Brief §3.3 item 1."
+        },
         "why_incorrect": {
-          "type": "object", "required": ["statement"],
-          "properties": { "statement": { "$ref": "#/$defs/statement" }, "citations": { "type": "array", "items": { "$ref": "#/$defs/citation" } } },
+          "type": "object",
+          "required": [
+            "statement"
+          ],
+          "properties": {
+            "statement": {
+              "$ref": "#/$defs/statement"
+            },
+            "citations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/citation"
+              }
+            }
+          },
           "additionalProperties": false,
           "description": "Brief §3.3 items 2 and 10: reasoning and evidence that it is genuinely incorrect rather than an alternative valid approach."
         },
         "realism_warrant": {
-          "type": "object", "required": ["statement", "warrant_types"],
+          "type": "object",
+          "required": [
+            "statement",
+            "warrant_types",
+            "observed_in_practice"
+          ],
           "properties": {
-            "statement": { "$ref": "#/$defs/statement" },
-            "warrant_types": { "type": "array", "minItems": 1, "items": { "enum": ["contributor_research_experience", "refereeing_or_editing_experience", "supervising_research_assistants", "published_comment_or_replication", "methodological_literature", "observed_ai_agent_behavior"] } },
-            "citations": { "type": "array", "items": { "$ref": "#/$defs/citation" } }
+            "statement": {
+              "$ref": "#/$defs/statement"
+            },
+            "warrant_types": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "enum": [
+                  "contributor_research_experience",
+                  "refereeing_or_editing_experience",
+                  "supervising_research_assistants",
+                  "published_comment_or_replication",
+                  "methodological_literature",
+                  "observed_ai_agent_behavior"
+                ]
+              }
+            },
+            "citations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/citation"
+              }
+            },
+            "observed_in_practice": {
+              "enum": [
+                "own_project",
+                "refereeing_pattern",
+                "research_assistant_supervision",
+                "published_literature",
+                "hypothetical"
+              ],
+              "description": "Where the contributor has seen the mistake (probe P-SEEN; mandatory). Refereeing entries describe patterns only, never a manuscript under review."
+            }
           },
           "additionalProperties": false,
           "description": "Brief §3.3 item 3: why the mistake is realistic and easy to overlook (DP-10)."
         },
-        "validity_layer": { "enum": ["computational", "statistical", "identification", "interpretation"] },
-        "status": { "enum": ["established", "conditional", "contested"], "description": "DP-11. Contested items never receive binary answer keys (Decision D-013)." },
-        "status_justification": { "$ref": "#/$defs/statement" },
-        "conditions": { "type": "array", "items": { "$ref": "#/$defs/statement" }, "description": "For 'conditional': the assumptions under which the alternative is wrong, and why they hold here." },
+        "validity_layer": {
+          "enum": [
+            "computational",
+            "measurement",
+            "statistical",
+            "identification",
+            "interpretation"
+          ]
+        },
+        "status": {
+          "enum": [
+            "needs_review",
+            "established",
+            "conditional",
+            "contested"
+          ],
+          "default": "needs_review",
+          "description": "Determined by independent classification (protocol §13), not by the interview. Contested items never receive binary answer keys (D-013)."
+        },
+        "status_justification": {
+          "$ref": "#/$defs/statement"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/statement"
+          },
+          "description": "For 'conditional': the assumptions under which the alternative is wrong, and why they hold here."
+        },
         "predicted_consequence": {
-          "type": "object", "required": ["direction", "predicted_at", "predicted_by"],
+          "type": "object",
+          "required": [
+            "direction",
+            "predicted_at",
+            "predicted_by"
+          ],
           "properties": {
-            "direction": { "type": "array", "minItems": 1, "items": { "enum": ["point_estimate_up", "point_estimate_down", "sign_flip", "std_error_up", "std_error_down", "significance_change", "sample_size_change", "identification_invalidated", "interpretation_change", "unknown"] } },
-            "magnitude_note": { "type": "string" },
-            "predicted_at": { "$ref": "#/$defs/dateTime" },
-            "predicted_by": { "type": "string" }
+            "direction": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "enum": [
+                  "point_estimate_up",
+                  "point_estimate_down",
+                  "sign_flip",
+                  "std_error_up",
+                  "std_error_down",
+                  "significance_change",
+                  "sample_size_change",
+                  "identification_invalidated",
+                  "interpretation_change",
+                  "unknown"
+                ]
+              }
+            },
+            "magnitude_note": {
+              "type": "string"
+            },
+            "predicted_at": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "predicted_by": {
+              "type": "string"
+            },
+            "category": {
+              "enum": [
+                "immaterial",
+                "changes_significance",
+                "changes_sign",
+                "changes_magnitude_material",
+                "other"
+              ],
+              "description": "Coarse pre-registered prediction (probe P-PRED)."
+            },
+            "quantiles": {
+              "type": "object",
+              "properties": {
+                "low": {
+                  "type": "number"
+                },
+                "mid": {
+                  "type": "number"
+                },
+                "high": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "description": "Optional low / middle / high guesses for the flawed estimate."
+            }
           },
           "additionalProperties": false,
           "description": "Recorded BEFORE the flawed variant is run (DP-22), to test understanding and prevent post-hoc rationalization."
         },
-        "scientific_consequence": { "$ref": "#/$defs/statement", "description": "Brief §3.3 item 8." },
-        "detection_procedure": { "$ref": "#/$defs/statement", "description": "Brief §3.3 item 9." },
-        "similar_but_valid_approaches": { "type": "array", "items": { "$ref": "#/$defs/statement" }, "description": "Look-alike choices that are NOT errors, so that verifiers do not penalize them." },
+        "scientific_consequence": {
+          "$ref": "#/$defs/statement",
+          "description": "Brief §3.3 item 8."
+        },
+        "detection_procedure": {
+          "$ref": "#/$defs/statement",
+          "description": "Brief §3.3 item 9."
+        },
+        "similar_but_valid_approaches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/statement"
+          },
+          "description": "Look-alike choices that are NOT errors, so that verifiers do not penalize them."
+        },
         "one_sentence_fact_risk": {
-          "type": "object", "required": ["level"],
-          "properties": { "level": { "enum": ["low", "medium", "high"] }, "note": { "type": "string" } },
+          "type": "object",
+          "required": [
+            "level"
+          ],
+          "properties": {
+            "level": {
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            },
+            "note": {
+              "type": "string"
+            }
+          },
           "additionalProperties": false,
           "description": "Would disclosing a single fact make the task trivial? (Good Benchmarks §9.)"
         },
-        "lifecycle": { "enum": ["proposed", "endorsed", "operationalized", "validated", "parked", "withdrawn", "rejected_in_review"] },
-        "visibility": { "const": "hidden" }
+        "lifecycle": {
+          "enum": [
+            "proposed",
+            "endorsed",
+            "operationalized",
+            "validated",
+            "parked",
+            "withdrawn",
+            "rejected_in_review"
+          ]
+        },
+        "visibility": {
+          "const": "hidden"
+        },
+        "status_claimed_by_contributor": {
+          "enum": [
+            "established",
+            "conditional",
+            "contested",
+            "unsure"
+          ],
+          "description": "The contributor's own view, recorded as a claim (protocol S4)."
+        },
+        "status_classifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "classifier_id",
+              "status",
+              "rationale",
+              "blind",
+              "round"
+            ],
+            "properties": {
+              "classifier_id": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "established",
+                  "conditional",
+                  "contested",
+                  "needs_review"
+                ]
+              },
+              "rationale": {
+                "type": "string"
+              },
+              "citations": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/citation"
+                }
+              },
+              "blind": {
+                "type": "boolean",
+                "description": "Classified without seeing other classifiers' answers."
+              },
+              "round": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Independent classifications by at least two economists not involved in the contribution."
+        }
       },
       "additionalProperties": false
     },
     "flawedVariant": {
       "type": "object",
-      "required": ["variant_id", "failure_mode_id", "base_impl_id", "patch", "observed_outputs", "consequence", "visibility"],
+      "required": [
+        "variant_id",
+        "failure_mode_id",
+        "base_impl_id",
+        "patch",
+        "observed_outputs",
+        "consequence",
+        "visibility"
+      ],
       "properties": {
-        "variant_id": { "$ref": "#/$defs/id" },
-        "failure_mode_id": { "type": "string" },
-        "base_impl_id": { "type": "string" },
-        "patch": { "$ref": "#/$defs/fileRef", "description": "Unified diff against the reference implementation (brief §3.3 item 4); originals are never modified (Decision D-011)." },
-        "files": { "type": "array", "items": { "$ref": "#/$defs/fileRef" }, "description": "Full flawed code (brief §3.3 item 5)." },
-        "change_summary": { "$ref": "#/$defs/localizedText" },
-        "authored_by": { "type": "array", "items": { "enum": ["contributor", "research_assistant", "llm_under_contributor_direction", "shepherd"] } },
+        "variant_id": {
+          "$ref": "#/$defs/id"
+        },
+        "failure_mode_id": {
+          "type": "string"
+        },
+        "base_impl_id": {
+          "type": "string"
+        },
+        "patch": {
+          "$ref": "#/$defs/fileRef",
+          "description": "Unified diff against the reference implementation (brief §3.3 item 4); originals are never modified (Decision D-011)."
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/fileRef"
+          },
+          "description": "Full flawed code (brief §3.3 item 5)."
+        },
+        "change_summary": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "authored_by": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "contributor",
+              "research_assistant",
+              "llm_under_contributor_direction",
+              "shepherd"
+            ]
+          }
+        },
         "naturalness_review": {
           "type": "object",
           "properties": {
-            "tells_removed": { "type": "boolean", "description": "Comments, names, or formatting that would reveal the planted change have been removed." },
-            "reviewed_by": { "type": "string" },
-            "note": { "type": "string" }
+            "tells_removed": {
+              "type": "boolean",
+              "description": "Comments, names, or formatting that would reveal the planted change have been removed."
+            },
+            "reviewed_by": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            }
           },
           "additionalProperties": false
         },
-        "observed_outputs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/numericResult" }, "description": "Brief §3.3 item 6." },
-        "consequence": { "$ref": "#/$defs/consequenceEvidence" },
-        "visibility": { "const": "hidden" }
+        "observed_outputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/numericResult"
+          },
+          "description": "Brief §3.3 item 6."
+        },
+        "consequence": {
+          "$ref": "#/$defs/consequenceEvidence"
+        },
+        "visibility": {
+          "const": "hidden"
+        }
       },
       "additionalProperties": false
     },
     "consequenceEvidence": {
       "type": "object",
-      "required": ["comparisons", "prediction_matched"],
+      "required": [
+        "comparisons",
+        "prediction_matched"
+      ],
       "properties": {
         "comparisons": {
-          "type": "array", "minItems": 1,
+          "type": "array",
+          "minItems": 1,
           "items": {
-            "type": "object", "required": ["output_id", "reference_value", "flawed_value", "material"],
+            "type": "object",
+            "required": [
+              "output_id",
+              "reference_value",
+              "flawed_value",
+              "material"
+            ],
             "properties": {
-              "output_id": { "type": "string" },
-              "reference_value": { "type": "number" },
-              "flawed_value": { "type": "number" },
-              "difference": { "type": "number" },
-              "difference_in_reference_se": { "type": "number" },
-              "materiality_rule": { "type": "string", "description": "Pre-registered rule, e.g., '|diff| > 1 reference SE or significance change at 5%' (DP-04)." },
-              "material": { "type": "boolean" }
+              "output_id": {
+                "type": "string"
+              },
+              "reference_value": {
+                "type": "number"
+              },
+              "flawed_value": {
+                "type": "number"
+              },
+              "difference": {
+                "type": "number"
+              },
+              "difference_in_reference_se": {
+                "type": "number"
+              },
+              "materiality_rule": {
+                "type": "string",
+                "description": "Pre-registered rule, e.g., '|diff| > 1 reference SE or significance change at 5%' (DP-04)."
+              },
+              "material": {
+                "type": "boolean"
+              }
             },
             "additionalProperties": false
           },
           "description": "Brief §3.3 item 7."
         },
-        "prediction_matched": { "enum": ["matched", "partially_matched", "not_matched", "no_prediction_recorded"], "description": "Whether observed consequences match the pre-registered prediction. Values avoid yes/no, which YAML 1.1 parses as booleans." },
+        "prediction_matched": {
+          "enum": [
+            "matched",
+            "partially_matched",
+            "not_matched",
+            "no_prediction_recorded"
+          ],
+          "description": "Whether observed consequences match the pre-registered prediction. Values avoid yes/no, which YAML 1.1 parses as booleans."
+        },
         "robustness": {
           "type": "object",
           "properties": {
-            "method": { "enum": ["bootstrap", "subsample", "semi_synthetic", "metamorphic", "none"] },
-            "n_variants": { "type": "integer", "minimum": 0 },
-            "share_separated": { "type": "number", "minimum": 0, "maximum": 1, "description": "Share of hidden variants on which reference and flawed outputs are separated by the verifier (DP-04, DP-05)." },
-            "separation_margin": { "type": "number", "description": "Distance from the flawed output to the acceptance region, in tolerance units." }
+            "method": {
+              "enum": [
+                "bootstrap",
+                "subsample",
+                "semi_synthetic",
+                "metamorphic",
+                "none"
+              ]
+            },
+            "n_variants": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "share_separated": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Share of hidden variants on which reference and flawed outputs are separated by the verifier (DP-04, DP-05)."
+            },
+            "separation_margin": {
+              "type": "number",
+              "description": "Distance from the flawed output to the acceptance region, in tolerance units."
+            }
           },
           "additionalProperties": false
         }
@@ -525,216 +1769,873 @@
     },
     "taskCandidate": {
       "type": "object",
-      "required": ["task_id", "task_type", "verifiability_tier", "target_capability", "source_refs", "agent_facing", "hidden", "review_status"],
+      "required": [
+        "task_id",
+        "task_type",
+        "verifiability_tier",
+        "target_capability",
+        "source_refs",
+        "agent_facing",
+        "hidden",
+        "review_status"
+      ],
       "properties": {
-        "task_id": { "$ref": "#/$defs/id" },
-        "task_type": { "enum": ["research_execution", "error_detection", "error_correction", "identification_reasoning", "research_interpretation"] },
-        "verifiability_tier": { "enum": ["V1", "V2", "V3", "V4"], "description": "V1 deterministic computational; V2 statistical with known truth; V3 structured judgment with expert-consensus key; V4 open-ended judgment (DP-02)." },
-        "target_capability": { "$ref": "#/$defs/statement" },
+        "task_id": {
+          "$ref": "#/$defs/id"
+        },
+        "task_type": {
+          "enum": [
+            "research_execution",
+            "error_detection",
+            "error_correction",
+            "identification_reasoning",
+            "research_interpretation"
+          ]
+        },
+        "verifiability_tier": {
+          "enum": [
+            "V1",
+            "V2",
+            "V3",
+            "V4"
+          ],
+          "description": "V1 deterministic computational; V2 statistical with known truth; V3 structured judgment with expert-consensus key; V4 open-ended judgment (DP-02)."
+        },
+        "target_capability": {
+          "$ref": "#/$defs/statement"
+        },
         "source_refs": {
           "type": "object",
           "properties": {
-            "target_ids": { "type": "array", "items": { "type": "string" } },
-            "failure_mode_ids": { "type": "array", "items": { "type": "string" } },
-            "variant_ids": { "type": "array", "items": { "type": "string" } }
-          },
-          "additionalProperties": false
-        },
-        "agent_facing": {
-          "type": "object",
-          "required": ["visibility", "instruction", "instruction_authorship", "environment", "output_contract"],
-          "properties": {
-            "visibility": { "const": "agent" },
-            "instruction": { "$ref": "#/$defs/localizedText" },
-            "instruction_authorship": { "enum": ["human_written", "human_substantially_edited", "llm_drafted_unedited"], "description": "LLM-drafted unedited instructions are not admissible (DP-13; Good Benchmarks §9)." },
-            "provided_materials": { "type": "array", "items": { "$ref": "#/$defs/fileRef" } },
-            "output_contract": {
-              "type": "object", "required": ["description"],
-              "properties": {
-                "description": { "type": "string" },
-                "results_path": { "type": "string" },
-                "results_schema": { "type": "string", "description": "Path (agent tier) to a JSON Schema the agent can use to self-check its output format." },
-                "code_entrypoint_required": { "type": "boolean", "description": "True when the verifier re-executes the agent's code on hidden variants (DP-06)." }
-              },
-              "additionalProperties": false
-            },
-            "environment": { "$ref": "#/$defs/softwareEnv" },
-            "internet_access": { "type": "boolean", "default": false },
-            "time_limit_minutes": { "type": "number", "minimum": 1 }
-          },
-          "additionalProperties": false
-        },
-        "hidden": {
-          "type": "object",
-          "required": ["visibility", "verifier"],
-          "properties": {
-            "visibility": { "const": "hidden" },
-            "verifier": {
-              "type": "object", "required": ["methods"],
-              "properties": {
-                "methods": { "type": "array", "minItems": 1, "items": { "enum": ["numeric_tolerance", "acceptance_region", "hidden_variant_reexecution", "metamorphic_relations", "structured_answer_key", "rubric_llm_judge_with_human_audit", "human_expert_grading"] } },
-                "files": { "type": "array", "items": { "$ref": "#/$defs/fileRef" } },
-                "acceptance_criteria": { "$ref": "#/$defs/statement" },
-                "hidden_datasets": { "type": "array", "items": { "$ref": "#/$defs/fileRef" } }
-              },
-              "additionalProperties": false
-            },
-            "answer_key": { "$ref": "#/$defs/fileRef" },
-            "alternative_solution_impl_ids": { "type": "array", "items": { "type": "string" }, "description": "Validated alternative correct implementations the verifier must accept." },
-            "negative_controls": {
+            "target_ids": {
               "type": "array",
               "items": {
-                "type": "object", "required": ["variant_id", "expected_verdict"],
-                "properties": { "variant_id": { "type": "string" }, "expected_verdict": { "enum": ["reject", "accept"] } },
-                "additionalProperties": false
+                "type": "string"
+              }
+            },
+            "failure_mode_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "variant_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
               }
             }
           },
           "additionalProperties": false
         },
-        "quality_assessments": { "type": "array", "items": { "$ref": "#/$defs/rubricAssessment" } },
-        "unresolved_concerns": { "type": "array", "items": { "$ref": "#/$defs/statement" } },
-        "review_status": { "enum": ["draft", "contributor_approved", "shepherd_in_progress", "in_independent_review", "accepted_as_candidate", "admitted", "experimental_track", "rejected"] }
+        "agent_facing": {
+          "type": "object",
+          "required": [
+            "visibility",
+            "instruction",
+            "instruction_authorship",
+            "environment",
+            "output_contract"
+          ],
+          "properties": {
+            "visibility": {
+              "const": "agent"
+            },
+            "instruction": {
+              "$ref": "#/$defs/localizedText"
+            },
+            "instruction_authorship": {
+              "enum": [
+                "human_written",
+                "human_substantially_edited",
+                "llm_drafted_unedited"
+              ],
+              "description": "LLM-drafted unedited instructions are not admissible (DP-13; Good Benchmarks §9)."
+            },
+            "provided_materials": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/fileRef"
+              }
+            },
+            "output_contract": {
+              "type": "object",
+              "required": [
+                "description"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "results_path": {
+                  "type": "string"
+                },
+                "results_schema": {
+                  "type": "string",
+                  "description": "Path (agent tier) to a JSON Schema the agent can use to self-check its output format."
+                },
+                "code_entrypoint_required": {
+                  "type": "boolean",
+                  "description": "True when the verifier re-executes the agent's code on hidden variants (DP-06)."
+                },
+                "declared_choices_required": {
+                  "type": "boolean",
+                  "description": "The agent must declare its choices for decisions with more than one accepted option; the verifier grades against a conditional reference (verifier protocol §4)."
+                },
+                "intermediate_outputs_required": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Compact intermediate outputs the agent must report, e.g. estimation-sample identifiers or their hash, cohort sizes, number of clusters."
+                }
+              },
+              "additionalProperties": false
+            },
+            "environment": {
+              "$ref": "#/$defs/softwareEnv"
+            },
+            "internet_access": {
+              "type": "boolean",
+              "default": false
+            },
+            "time_limit_minutes": {
+              "type": "number",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "hidden": {
+          "type": "object",
+          "required": [
+            "visibility",
+            "verifier"
+          ],
+          "properties": {
+            "visibility": {
+              "const": "hidden"
+            },
+            "verifier": {
+              "type": "object",
+              "required": [
+                "methods"
+              ],
+              "properties": {
+                "methods": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "enum": [
+                      "numeric_tolerance",
+                      "acceptance_region",
+                      "hidden_variant_reexecution",
+                      "metamorphic_relations",
+                      "structured_answer_key",
+                      "rubric_llm_judge_with_human_audit",
+                      "human_expert_grading"
+                    ]
+                  }
+                },
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/fileRef"
+                  }
+                },
+                "acceptance_criteria": {
+                  "$ref": "#/$defs/statement"
+                },
+                "hidden_datasets": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/fileRef"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            "answer_key": {
+              "$ref": "#/$defs/fileRef"
+            },
+            "alternative_solution_impl_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Validated alternative correct implementations the verifier must accept."
+            },
+            "negative_controls": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "variant_id",
+                  "expected_verdict"
+                ],
+                "properties": {
+                  "variant_id": {
+                    "type": "string"
+                  },
+                  "expected_verdict": {
+                    "enum": [
+                      "reject",
+                      "accept"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "decision_space": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "decision_id",
+                  "option",
+                  "status",
+                  "source"
+                ],
+                "properties": {
+                  "decision_id": {
+                    "type": "string"
+                  },
+                  "option": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": [
+                      "reference",
+                      "accepted",
+                      "unjustifiable",
+                      "contested"
+                    ]
+                  },
+                  "source": {
+                    "enum": [
+                      "contributor",
+                      "reviewer",
+                      "llm",
+                      "literature"
+                    ]
+                  },
+                  "citations": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/citation"
+                    }
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "description": "Hidden, expert-validated decision space for alternative valid implementations (verifier protocol §4)."
+            },
+            "verifier_version": {
+              "$ref": "#/$defs/semver"
+            },
+            "verifier_frozen_at": {
+              "$ref": "#/$defs/dateTime",
+              "description": "Time the verifier was frozen for evaluation; later changes create a new task version."
+            }
+          },
+          "additionalProperties": false
+        },
+        "quality_assessments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rubricAssessment"
+          }
+        },
+        "unresolved_concerns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/statement"
+          }
+        },
+        "review_status": {
+          "enum": [
+            "draft",
+            "contributor_approved",
+            "shepherd_in_progress",
+            "in_independent_review",
+            "accepted_as_candidate",
+            "admitted",
+            "experimental_track",
+            "rejected"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "rubricAssessment": {
       "type": "object",
-      "required": ["rubric_version", "assessor_role", "assessed_at", "items", "overall"],
+      "required": [
+        "rubric_version",
+        "assessor_role",
+        "assessed_at",
+        "items",
+        "overall"
+      ],
       "properties": {
-        "rubric_version": { "$ref": "#/$defs/semver" },
-        "assessor_role": { "enum": ["contributor_self_assessment", "shepherd", "independent_domain_reviewer", "independent_benchmark_reviewer", "automated_check"] },
-        "assessor_id": { "type": "string" },
-        "assessed_at": { "$ref": "#/$defs/dateTime" },
+        "rubric_version": {
+          "$ref": "#/$defs/semver"
+        },
+        "assessor_role": {
+          "enum": [
+            "contributor_self_assessment",
+            "shepherd",
+            "independent_domain_reviewer",
+            "independent_benchmark_reviewer",
+            "automated_check"
+          ]
+        },
+        "assessor_id": {
+          "type": "string"
+        },
+        "assessed_at": {
+          "$ref": "#/$defs/dateTime"
+        },
         "items": {
-          "type": "array", "minItems": 1,
+          "type": "array",
+          "minItems": 1,
           "items": {
-            "type": "object", "required": ["criterion_id", "rating"],
+            "type": "object",
+            "required": [
+              "criterion_id",
+              "rating"
+            ],
             "properties": {
-              "criterion_id": { "type": "string", "description": "Identifier from docs/methodology/task-quality-rubric.md." },
-              "rating": { "enum": ["pass", "concern", "fail", "not_applicable"] },
-              "note": { "type": "string" }
+              "criterion_id": {
+                "type": "string",
+                "description": "Identifier from docs/methodology/task-quality-rubric.md."
+              },
+              "rating": {
+                "enum": [
+                  "pass",
+                  "concern",
+                  "fail",
+                  "not_applicable"
+                ]
+              },
+              "note": {
+                "type": "string"
+              }
             },
             "additionalProperties": false
           }
         },
-        "overall": { "enum": ["ready_for_next_stage", "needs_revision", "reject"] }
+        "overall": {
+          "enum": [
+            "ready_for_next_stage",
+            "needs_revision",
+            "reject"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "interviewRecord": {
       "type": "object",
-      "required": ["session_id", "started_at", "interface", "protocol_version", "model", "language", "turns", "visibility"],
+      "required": [
+        "session_id",
+        "started_at",
+        "interface",
+        "protocol_version",
+        "model",
+        "language",
+        "turns",
+        "visibility"
+      ],
       "properties": {
-        "session_id": { "$ref": "#/$defs/id" },
-        "started_at": { "$ref": "#/$defs/dateTime" },
-        "ended_at": { "$ref": "#/$defs/dateTime" },
-        "interface": { "enum": ["hosted_platform", "claude_code_plugin", "other_agent_harness", "human_interviewer"] },
-        "interface_version": { "type": "string" },
-        "protocol_version": { "$ref": "#/$defs/semver" },
-        "model": { "$ref": "#/$defs/modelInfo" },
-        "language": { "$ref": "#/$defs/lang" },
-        "stages_covered": { "type": "array", "items": { "enum": ["S0_setup_consent", "S1_paper_design", "S2_critical_decisions", "S3_failure_modes", "S4_consequences_classification", "S5_operationalization", "S6_task_design_quality", "S7_review_signoff"] } },
+        "session_id": {
+          "$ref": "#/$defs/id"
+        },
+        "started_at": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "ended_at": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "interface": {
+          "enum": [
+            "hosted_platform",
+            "claude_code_plugin",
+            "other_agent_harness",
+            "human_interviewer"
+          ]
+        },
+        "interface_version": {
+          "type": "string"
+        },
+        "protocol_version": {
+          "$ref": "#/$defs/semver"
+        },
+        "model": {
+          "$ref": "#/$defs/modelInfo"
+        },
+        "language": {
+          "$ref": "#/$defs/lang"
+        },
+        "stages_covered": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "S0_setup_consent",
+              "S1_paper_design",
+              "S2_critical_decisions",
+              "S3_failure_modes",
+              "S4_consequences_classification",
+              "S5_operationalization",
+              "S6_task_design_quality",
+              "S7_review_signoff"
+            ]
+          }
+        },
         "turns": {
           "type": "array",
           "items": {
-            "type": "object", "required": ["turn_index", "speaker", "text"],
+            "type": "object",
+            "required": [
+              "turn_index",
+              "speaker",
+              "text"
+            ],
             "properties": {
-              "turn_index": { "type": "integer", "minimum": 0 },
-              "speaker": { "enum": ["interviewer_model", "contributor", "research_assistant", "shepherd", "system"] },
-              "timestamp": { "$ref": "#/$defs/dateTime" },
-              "lang": { "$ref": "#/$defs/lang" },
-              "text": { "type": "string" },
-              "stage": { "type": "string" },
-              "statement_ids": { "type": "array", "items": { "type": "string" }, "description": "Dossier statements created or updated in this turn." }
+              "turn_index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "speaker": {
+                "enum": [
+                  "interviewer_model",
+                  "contributor",
+                  "research_assistant",
+                  "shepherd",
+                  "system"
+                ]
+              },
+              "timestamp": {
+                "$ref": "#/$defs/dateTime"
+              },
+              "lang": {
+                "$ref": "#/$defs/lang"
+              },
+              "text": {
+                "type": "string"
+              },
+              "stage": {
+                "type": "string"
+              },
+              "statement_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Dossier statements created or updated in this turn."
+              }
             },
             "additionalProperties": false
           }
         },
-        "transcript_file": { "$ref": "#/$defs/fileRef" },
+        "transcript_file": {
+          "$ref": "#/$defs/fileRef"
+        },
         "metrics": {
           "type": "object",
           "properties": {
-            "duration_minutes": { "type": "number", "minimum": 0 },
-            "n_contributor_turns": { "type": "integer", "minimum": 0 },
-            "n_llm_suggestions_offered": { "type": "integer", "minimum": 0 },
-            "n_llm_suggestions_endorsed": { "type": "integer", "minimum": 0 },
-            "input_tokens": { "type": "integer", "minimum": 0 },
-            "output_tokens": { "type": "integer", "minimum": 0 },
-            "cost_usd_list_price": { "type": "number", "minimum": 0 }
+            "duration_minutes": {
+              "type": "number",
+              "minimum": 0
+            },
+            "n_contributor_turns": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "n_llm_suggestions_offered": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "n_llm_suggestions_endorsed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "input_tokens": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "output_tokens": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cost_usd_list_price": {
+              "type": "number",
+              "minimum": 0
+            },
+            "llm_originated_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Share of endorsed items first stated by the model."
+            },
+            "post_exposure_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Share of endorsed items first stated after a related suggestion or pointer."
+            },
+            "llm_influenced_share": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Post-exposure items whose wording is close to a logged suggestion or interviewer statement."
+            },
+            "false_endorsement_rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Share of known-valid controls endorsed as mistakes."
+            },
+            "summary_accuracy_ratings": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4
+              },
+              "description": "Contributor's 1-4 accuracy rating of each stage summary."
+            }
           },
           "additionalProperties": false
         },
-        "visibility": { "const": "internal" }
+        "visibility": {
+          "const": "internal"
+        },
+        "free_recall_lists": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "stage",
+              "recorded_at",
+              "statement_ids"
+            ],
+            "properties": {
+              "stage": {
+                "enum": [
+                  "S2_critical_decisions",
+                  "S3_failure_modes"
+                ]
+              },
+              "target_id": {
+                "type": "string"
+              },
+              "decision_id": {
+                "type": "string"
+              },
+              "recorded_at": {
+                "$ref": "#/$defs/dateTime"
+              },
+              "statement_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Unaided lists recorded before any suggestion or code pointer (protocol §4)."
+        },
+        "suggestion_ledger": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "suggestion_id",
+              "offered_at",
+              "source_entry",
+              "is_known_valid_control",
+              "disposition"
+            ],
+            "properties": {
+              "suggestion_id": {
+                "type": "string"
+              },
+              "offered_at": {
+                "$ref": "#/$defs/dateTime"
+              },
+              "decision_id": {
+                "type": "string"
+              },
+              "source_entry": {
+                "type": "string",
+                "description": "Vetted pitfall-taxonomy entry ID, or 'code_reading'."
+              },
+              "is_known_valid_control": {
+                "type": "boolean"
+              },
+              "options_order": {
+                "type": "string",
+                "description": "Order in which the two sides were presented."
+              },
+              "disposition": {
+                "enum": [
+                  "endorsed",
+                  "weak_endorsement",
+                  "edited_then_endorsed",
+                  "rejected",
+                  "not_applicable",
+                  "pending"
+                ]
+              },
+              "contributor_reasoning": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
       },
       "additionalProperties": false
     },
     "validationRun": {
       "type": "object",
-      "required": ["run_id", "task_id", "kind", "subject", "executed_at", "expected_verdict", "observed"],
+      "required": [
+        "run_id",
+        "task_id",
+        "kind",
+        "subject",
+        "executed_at",
+        "expected_verdict",
+        "observed"
+      ],
       "properties": {
-        "run_id": { "$ref": "#/$defs/id" },
-        "task_id": { "type": "string" },
-        "kind": { "enum": ["oracle", "no_op", "negative_control", "alternative_solution", "metamorphic", "hidden_variant", "shortcut_attack", "guided_agent_fairness", "agent_trial", "repeat_stability"] },
-        "subject": { "type": "string", "description": "impl_id, variant_id, agent/model identifier, or attack name." },
-        "environment": { "$ref": "#/$defs/softwareEnv" },
-        "executed_at": { "$ref": "#/$defs/dateTime" },
-        "n_runs": { "type": "integer", "minimum": 1 },
-        "expected_verdict": { "enum": ["accept", "reject", "not_applicable"] },
+        "run_id": {
+          "$ref": "#/$defs/id"
+        },
+        "task_id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "oracle",
+            "no_op",
+            "negative_control",
+            "alternative_solution",
+            "metamorphic",
+            "hidden_variant",
+            "shortcut_attack",
+            "guided_agent_fairness",
+            "agent_trial",
+            "repeat_stability",
+            "tolerance_calibration",
+            "expert_calibration"
+          ]
+        },
+        "subject": {
+          "type": "string",
+          "description": "impl_id, variant_id, agent/model identifier, or attack name."
+        },
+        "environment": {
+          "$ref": "#/$defs/softwareEnv"
+        },
+        "executed_at": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "n_runs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_verdict": {
+          "enum": [
+            "accept",
+            "reject",
+            "not_applicable"
+          ]
+        },
         "observed": {
-          "type": "object", "required": ["n_accept", "n_reject", "n_error"],
-          "properties": { "n_accept": { "type": "integer", "minimum": 0 }, "n_reject": { "type": "integer", "minimum": 0 }, "n_error": { "type": "integer", "minimum": 0 } },
+          "type": "object",
+          "required": [
+            "n_accept",
+            "n_reject",
+            "n_error"
+          ],
+          "properties": {
+            "n_accept": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "n_reject": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "n_error": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
           "additionalProperties": false
         },
-        "log": { "$ref": "#/$defs/fileRef" },
-        "note": { "type": "string" },
-        "visibility": { "const": "hidden" }
+        "log": {
+          "$ref": "#/$defs/fileRef"
+        },
+        "note": {
+          "type": "string"
+        },
+        "visibility": {
+          "const": "hidden"
+        }
       },
       "additionalProperties": false
     },
     "reviewDecision": {
       "type": "object",
-      "required": ["review_id", "reviewer_role", "reviewer_id", "decided_at", "decision", "rationale"],
+      "required": [
+        "review_id",
+        "reviewer_role",
+        "reviewer_id",
+        "decided_at",
+        "decision",
+        "rationale"
+      ],
       "properties": {
-        "review_id": { "$ref": "#/$defs/id" },
-        "reviewer_role": { "enum": ["shepherd", "independent_domain_reviewer", "independent_benchmark_reviewer", "release_editor"] },
-        "reviewer_id": { "type": "string" },
-        "independent_of_contribution": { "type": "boolean" },
-        "conflicts_of_interest": { "type": "string" },
-        "scope": { "type": "array", "items": { "type": "string" }, "description": "task_ids or failure_mode_ids reviewed." },
-        "rubric_assessment": { "$ref": "#/$defs/rubricAssessment" },
-        "decided_at": { "$ref": "#/$defs/dateTime" },
-        "decision": { "enum": ["accept_as_candidate", "request_revision", "reject", "admit_to_release", "admit_to_experimental_track"] },
-        "rationale": { "type": "string" },
-        "visibility": { "const": "internal" }
+        "review_id": {
+          "$ref": "#/$defs/id"
+        },
+        "reviewer_role": {
+          "enum": [
+            "shepherd",
+            "independent_domain_reviewer",
+            "independent_benchmark_reviewer",
+            "release_editor"
+          ]
+        },
+        "reviewer_id": {
+          "type": "string"
+        },
+        "independent_of_contribution": {
+          "type": "boolean"
+        },
+        "conflicts_of_interest": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "task_ids or failure_mode_ids reviewed."
+        },
+        "rubric_assessment": {
+          "$ref": "#/$defs/rubricAssessment"
+        },
+        "decided_at": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "decision": {
+          "enum": [
+            "accept_as_candidate",
+            "request_revision",
+            "reject",
+            "admit_to_release",
+            "admit_to_experimental_track"
+          ]
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "visibility": {
+          "const": "internal"
+        }
       },
       "additionalProperties": false
     },
     "submission": {
       "type": "object",
-      "required": ["submission_id", "channel", "submitted_at", "package_sha256", "contains_restricted_microdata", "licenses_confirmed"],
+      "required": [
+        "submission_id",
+        "channel",
+        "submitted_at",
+        "package_sha256",
+        "contains_restricted_microdata",
+        "licenses_confirmed"
+      ],
       "properties": {
-        "submission_id": { "$ref": "#/$defs/id" },
-        "channel": { "enum": ["email", "upload_link", "private_git_repository", "hosted_platform_upload", "other"] },
-        "submitted_at": { "$ref": "#/$defs/dateTime" },
-        "submitted_by": { "type": "string" },
-        "package_sha256": { "$ref": "#/$defs/sha256" },
-        "package_bytes": { "type": "integer", "minimum": 0 },
-        "contains_restricted_microdata": { "const": false, "description": "Packages must never contain restricted or confidential microdata (DP-28)." },
-        "licenses_confirmed": { "type": "boolean" },
-        "client": { "type": "string", "description": "Tool and version that produced the package." },
-        "notes": { "type": "string" }
+        "submission_id": {
+          "$ref": "#/$defs/id"
+        },
+        "channel": {
+          "enum": [
+            "email",
+            "upload_link",
+            "private_git_repository",
+            "hosted_platform_upload",
+            "other"
+          ]
+        },
+        "submitted_at": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "submitted_by": {
+          "type": "string"
+        },
+        "package_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "package_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "contains_restricted_microdata": {
+          "const": false,
+          "description": "Packages must never contain restricted or confidential microdata (DP-28)."
+        },
+        "licenses_confirmed": {
+          "type": "boolean"
+        },
+        "client": {
+          "type": "string",
+          "description": "Tool and version that produced the package."
+        },
+        "notes": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "licenseRecord": {
       "type": "object",
-      "required": ["asset", "license", "redistribution"],
+      "required": [
+        "asset",
+        "license",
+        "redistribution"
+      ],
       "properties": {
-        "asset": { "type": "string", "description": "Path or identifier of the licensed asset." },
-        "license": { "type": "string", "description": "SPDX identifier where possible, otherwise a short description." },
-        "redistribution": { "enum": ["allowed", "allowed_with_attribution", "allowed_for_evaluation_only", "not_allowed", "unknown"] },
-        "source_url": { "type": "string", "format": "uri" }
+        "asset": {
+          "type": "string",
+          "description": "Path or identifier of the licensed asset."
+        },
+        "license": {
+          "type": "string",
+          "description": "SPDX identifier where possible, otherwise a short description."
+        },
+        "redistribution": {
+          "enum": [
+            "allowed",
+            "allowed_with_attribution",
+            "allowed_for_evaluation_only",
+            "not_allowed",
+            "unknown"
+          ]
+        },
+        "source_url": {
+          "type": "string",
+          "format": "uri"
+        }
       },
       "additionalProperties": false
     }

@@ -82,6 +82,19 @@ def test_rejects_failure_mode_outside_hidden_tier():
     assert not _validator().is_valid(inst)
 
 
+
+def test_rejects_failure_mode_without_observed_in_practice():
+    """Protocol v0.2.0 makes the realism warrant's observed/hypothetical field mandatory (probe P-SEEN)."""
+    inst = _example()
+    inst["failure_modes"][0]["realism_warrant"].pop("observed_in_practice")
+    assert not _validator().is_valid(inst)
+
+
+def test_rejects_unknown_validity_layer():
+    inst = _example()
+    inst["failure_modes"][0]["validity_layer"] = "vibes"
+    assert not _validator().is_valid(inst)
+
 if __name__ == "__main__":
     tests = [f for name, f in sorted(globals().items()) if name.startswith("test_")]
     for t in tests:

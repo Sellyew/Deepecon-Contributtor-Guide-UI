@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | **Proposed** v0.1.0 (2026-11-05). Not yet reviewed by the research lead. |
 | **Scope** | Brief §8: how contributors hand over completed work, evaluated **independently of the two interface architectures** (D-015). |
-| **Evidence labels** | Vendor limits marked [U] could not be verified from this environment (docs.github.com and several vendor sites are outside its allowed network domains); verify before relying on them. |
+| **Evidence labels** | GitHub limits verified from GitHub's documentation source repository ([R9](../research/evidence/R9-hosted-stack-and-compliance.md)) [P-page]. E-mail and file-request limits and reachability from mainland China remain [U]. Package sizes from the AEA Data Editor ([R8](../research/evidence/R8-replication-standards-and-econometric-pitfalls.md)) [P-full]. |
 
 ---
 
@@ -27,6 +27,7 @@ From the brief: contributor convenience; access and permission management; confi
 - **Leakage control.** Packages contain hidden-tier material (flawed variants, answer keys). Any channel that can make them public, or expose them to web crawlers, is unsuitable unless the release policy makes everything public (Open question O-001).
 - **Reachability for contributors in mainland China.** Several common services are blocked or unreliable there [U — needs verification with contributors on the ground].
 - **Withdrawal.** Contributors can withdraw (D-008), so the store must support deletion with an audit trail.
+- **Size.** The median AEA replication package is 40.4 MB, but about 20% exceed 2 GB and 5% exceed 20 GB [P-full, R8]. Packages carry data only when they are redistributable, but the channel must still handle large code and output bundles.
 - **Integrity.** Checksums are verified on receipt.
 
 ## 3. Options
@@ -34,13 +35,13 @@ From the brief: contributor convenience; access and permission management; confi
 ### 3.1 E-mail
 
 - **For:** universally familiar; no new account.
-- **Against:** attachment limits around 20–25 MB on common providers [U]; no access control after sending; copies persist in several mailboxes; weak audit trail; automated validation only through brittle mailbox parsing; easily forwarded — a leakage risk for hidden material.
+- **Against:** attachment limits around 20–25 MB on common providers [U], below the median package size; no access control after sending; copies persist in several mailboxes; weak audit trail; automated validation only through brittle mailbox parsing; easily forwarded — a leakage risk for hidden material.
 - **Assessment:** acceptable only as a fallback for small packages, ideally as an encrypted archive with the passphrase sent separately.
 
 ### 3.2 GitHub pull request to a dedicated repository
 
 - **Public repository:** excellent automation (continuous-integration checks on every pull request), review tooling, version history, and audit — this is how Terminal-Bench-Science works. But a public repository exposes hidden material to the world and to training-data crawlers. It is compatible with DeepEcon only if the benchmark itself is fully public and canary-marked (O-001).
-- **Private repository:** keeps the automation and history, but every contributor needs a GitHub account, an invitation, and working knowledge of Git. That is a barrier for many senior economists. GitHub rejects files above about 100 MB without Git LFS [U].
+- **Private repository:** keeps the automation and history, but every contributor needs a GitHub account, an invitation, and working knowledge of Git. That is a barrier for many senior economists. GitHub blocks files above 100 MiB; Git LFS allows 2, 4, or 5 GB per file depending on the plan [P-page, R9].
 - **Assessment:** ideal as the **internal review store** (L2), operated by staff. Optional transport for technically fluent contributors.
 
 ### 3.3 Hosted upload

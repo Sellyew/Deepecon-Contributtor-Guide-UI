@@ -62,9 +62,9 @@ Stages 2–4 interleave in practice: the interview identifies errors, the varian
 |---|---|---|
 | Venue | Top-5 at first (AER, Econometrica, JPE, QJE, REStud); leading field journals later | Brief §3 |
 | Replication package | Public package (e.g., openICPSR, Dataverse, Zenodo) or author-held package (Path B) | Evidence base for Stage 1 |
-| Data | Redistributable for evaluation, **or** substitutable by semi-synthetic data preserving the design | Tasks must run in a controlled, offline environment (*Good Benchmarks* #7); restricted microdata never enter packages (DP-28) |
+| Data | Redistributable for evaluation, **checked file by file**, **or** substitutable by effect-injected or semi-synthetic data preserving the design | Tasks must run in a controlled, offline environment (*Good Benchmarks* #7); restricted microdata never enter packages (DP-28). DCAS compliance or a CC BY deposit does not prove a file can be redistributed: in November 2024, for example, PSID extracts were removed from many AEA packages; PSID and WRDS data cannot be redistributed, while IPUMS extracts may be published to meet journal requirements [P-full, R8]. About 72% of AEA intake cases involve some access restriction [P-full], so semi-synthetic routes will be common. |
 | Compute | Target analysis runs in under ~1 hour on standard hardware | Agent-trial and verifier budgets |
-| Software | Any for contributor-side work; task environments use open-source software (R or Python) unless a licensed track is created | Proprietary licences break reproducible evaluation environments |
+| Software | Any for contributor-side work; task environments use open-source software (R or Python) unless a licensed track is created | Stata appears in 71.6% of packages [S, R8], so most tasks need an R or Python port, checked for numerical equivalence. A licensed Stata track has its own leakage problem (the evaluated agent could read the mounted licence file) and unclear terms for automated use [R8]. |
 | Design | Coverage across designs: difference-in-differences and event studies, IV, RD, randomized experiments, shift-share, synthetic control, panel fixed effects; structural work later | Breadth of capabilities |
 | Consequential decisions | At least one critical decision whose mis-handling is a known pitfall | Raw material for flawed variants |
 | Contamination | Note how famous the paper is; prefer designs where perturbed or semi-synthetic data neutralize memorized results | Leakage (Safeguard F) |
@@ -82,7 +82,7 @@ Stages 2–4 interleave in practice: the interview identifies errors, the varian
 1. Run the source package; record environment, outputs, and intermediate outputs (estimation-sample size, number of clusters, first-stage statistics, cohort sizes).
 2. Compare to published values; explain discrepancies.
 3. Define each target analysis's **estimand** precisely (parameter, population, treatment, outcome, design).
-4. **Independent check** (GT-1): a cross-language re-implementation (e.g., Stata → R) or a line-by-line review by someone other than the implementation's author. A cross-language implementation also yields the open-source version that task environments need.
+4. **Independent check** (GT-1): a cross-language re-implementation (e.g., Stata → R) or a line-by-line review by someone other than the implementation's author. A cross-language implementation also yields the open-source version that task environments need. Run reference implementations on at least two platforms, because Stata results can change with version and processor count [P-full, R8]. Passing a data-editor check is not proof of correctness: I4R found coding errors in about a quarter of economics studies it reproduced [S].
 5. Record known limitations of the original analysis, including any genuine problems discovered (they may become tasks, or disqualify the target).
 
 **Gate:** GT-1. **Automatable:** running, environment capture, output comparison, diffing implementations. **Human judgment:** estimand definition, explaining discrepancies, deciding that the reference is correct.
@@ -95,7 +95,7 @@ Stages 2–4 interleave in practice: the interview identifies errors, the varian
 
 The conversational protocol is specified in [Deliverable 3](../interview/expert-interview-protocol.md). Key properties: evidence-first (the interviewer reads the paper and code before asking), contributor-first (the contributor's own ideas before any LLM suggestion), one or two questions per turn, resumable sessions, explicit stopping rules, and human sign-off.
 
-**Gate:** RV-1 and RV-3 (preliminary), PR-1. **Automatable:** pre-reading, design-map drafting, transcription, structuring, provenance bookkeeping, consistency checks. **Human judgment:** everything scientific.
+**Gate:** RV-1 and RV-3 (preliminary), PR-1 (including measured AI influence). **Automatable:** pre-reading, design-map drafting, transcription, structuring, provenance and exposure bookkeeping, consistency checks. **Human judgment:** everything scientific.
 
 **Output:** `interview_records`, `critical_decisions`, preliminary `failure_modes`.
 
@@ -105,7 +105,7 @@ The conversational protocol is specified in [Deliverable 3](../interview/expert-
 
 **Activities.**
 1. Classify the validity layer.
-2. Assign a status with a **standard of evidence** (*Good Benchmarks* §9): citations for established pitfalls; demonstrated conditions for conditional ones. Contested items leave the scored path (D-013, X-003).
+2. Assign a status with a **standard of evidence** (*Good Benchmarks* §9): citations for established pitfalls; demonstrated conditions for conditional ones. The status comes from **at least two independent, blind classifications** by economists outside the contribution (interview protocol §13); the contributor's view is recorded as a claim. Contested items leave the scored path (D-013, X-003).
 3. Record the **realism warrant** (RV-3).
 4. Record the contributor's **predicted consequence** before any flawed code is run, to test understanding and prevent post-hoc rationalization.
 5. Record look-alike choices that are valid, so verifiers do not penalize them.

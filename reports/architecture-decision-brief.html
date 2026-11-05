@@ -163,7 +163,7 @@ footer.colophon code, .path { font-family: var(--font-mono); font-size: 0.8rem; 
             <li><strong>The interface matters less than the shared method.</strong> Both options run the same interview protocol, produce the same standardized package, and feed the same internal pipeline, in which a benchmark-team <em>shepherd</em> turns each candidate into a verified task. That shared core (≈ 9–16 engineer-weeks) is needed whichever option is chosen.</li>
             <li><strong>Money is not the main differentiator.</strong> At API list prices the AI interview costs about <span class="num">$17</span> per contribution (range <span class="num">$6–46</span>) under either option, about <span class="num">$3,400</span> for 200 contributions. Human effort dominates: about 20 shepherd hours per admitted task, roughly <span class="num">4,000</span> hours at 200 contributions.</li>
             <li><strong>Five real differences separate the options:</strong> access (a browser versus Claude Code plus a plan plus a plugin); who runs the code (local Stata/R/Python in <span class="opt b">B</span>, run kits, staff or a sandbox in <span class="opt a">A</span>); consistency and data-use terms (enforced in A, uniform in B only if the project provides model access); custody of unpublished materials; and upkeep (a web service versus a plugin tracking a fast-moving client).</li>
-            <li><strong>The hardest risks are shared:</strong> access for contributors in mainland China (needs legal review), shepherd capacity, contamination of tasks derived from public papers, and a name collision with an existing econometrics package called “deepecon”.</li>
+            <li><strong>The hardest risks are shared:</strong> <em>AI influence on experts</em> — in a 2026 study, analysts with causal-inference experience followed an AI agent's secretly randomized lean on design choices 86% of the time and rarely credited it, so the protocol measures influence rather than trusting self-reports; access for contributors in mainland China (needs legal review); shepherd capacity; contamination of tasks derived from public papers; and a name collision with an existing econometrics package called “deepecon”.</li>
           </ol>
           <p><strong>Recommendation, argued in §9.</strong> Build the shared core first. Then pilot thin slices of <em>both</em> options on the same paper, with decision thresholds agreed in advance. If a choice must be made earlier, choose by expected contributor population: <span class="opt a">Option A</span> for a largely non-technical, senior, bilingual cohort; <span class="opt b">Option B</span> with project-provided model access for technically fluent contributors and limited engineering capacity.</p>
         </div>
@@ -280,7 +280,7 @@ flowchart TB
               <tr><th scope="row">Contributors in mainland China cannot participate</th><td>Both</td><td>Legal review; alternative models with validation caveats; RA- or staff-led routes</td></tr>
               <tr><th scope="row">Shepherd capacity limits throughput</th><td>Both</td><td>Staffing plan; tooling; quality over quantity</td></tr>
               <tr><th scope="row">Tasks from public papers become solvable by memory or lookup</th><td>Both</td><td>Offline environments; perturbed or semi-synthetic data; re-execution on hidden data; private held-out set</td></tr>
-              <tr><th scope="row">Interview leads experts or fabricates errors</th><td>Both</td><td>Contributor-first rules; provenance; AI-origin monitoring; human-authored task text</td></tr>
+              <tr><th scope="row">Interview leads experts or fabricates errors (experts followed a planted AI lean 86% of the time in a 2026 study)</th><td>Both</td><td>Free-recall lock before suggestions; exposure tracking; measured influence and known-valid controls; independent status classification; human-authored task text; randomized suggestion phase in the pilot</td></tr>
               <tr><th scope="row">Name collision (“deepecon” Python package)</th><td>Both</td><td>Rename before public launch</td></tr>
             </tbody>
           </table>
@@ -373,7 +373,7 @@ flowchart TB
           <li><strong>界面不如共享方法重要。</strong>两种方案运行同一访谈规程，产出同一标准化贡献包，并进入同一内部流程，由基准团队的任务引导人（shepherd）把候选内容转化为经过验证的任务。这一共享核心约需 9–16 个工程师周，无论选择哪种方案都必须建设。</li>
           <li><strong>资金不是主要区别。</strong>按 API 标价计算，每份贡献的 AI 访谈成本约 17 美元（区间 6–46 美元），200 份贡献约 3,400 美元。人力投入占主导：每个入选任务约需 20 小时的引导人工时，200 份贡献约 4,000 小时。</li>
           <li><strong>真正的区别有五点：</strong>可及性（方案 A 只需浏览器；方案 B 需要安装 Claude Code、具备合适的订阅或由项目提供的访问权限，并安装插件）；代码由谁运行（方案 B 在贡献者本地运行 Stata、R 或 Python；方案 A 通过“运行包”、工作人员或托管沙箱执行）；一致性与数据使用条款（方案 A 统一固定模型并适用商业条款；方案 B 仅在项目提供模型访问时才能统一）；未发表材料的保管责任；以及维护方式（运营网络服务，或维护需跟进快速迭代客户端的插件）。</li>
-          <li><strong>最难的风险是共同的：</strong>中国大陆贡献者的可及性（需法律审查）、任务引导人的人手、基于公开论文的任务被“污染”的风险，以及项目工作名称与现有计量软件包“deepecon”重名。</li>
+          <li><strong>最难的风险是共同的：</strong>AI 对专家判断的影响——2026 年的一项研究中，具有因果推断经验的分析师在研究设计选择上 86% 的情况下采纳了 AI 智能体被秘密随机设定的倾向，且很少意识到这一点，因此访谈规程以测量而非自我报告来评估这种影响；中国大陆贡献者的可及性（需法律审查）；任务引导人的人手；基于公开论文的任务被“污染”的风险；以及项目工作名称与现有计量软件包“deepecon”重名。</li>
         </ol>
         <p><strong>建议（在完成比较之后提出）：</strong>先建设与架构无关的共享核心；然后在同一篇论文上对两种方案的精简原型进行试点，并事先约定决策阈值。如必须在试点前做出选择：若贡献者以不熟悉开发工具的资深双语经济学家为主，倾向方案 A（托管访谈，由研究助理或工作人员执行代码）；若以技术熟练者为主且工程资源有限，倾向由项目提供模型访问的方案 B。</p>
       </section>

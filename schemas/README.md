@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft 0.1.0 (2026-11-05). Not yet reviewed by the research lead. |
+| **Status** | **Proposed** draft 0.2.0 (2026-11-05). Not yet reviewed by the research lead. 0.2.0 adds exposure tracking, independent status classification, a measurement-validity layer, decision spaces, declared-choice contracts, influence metrics, and verifier freezing (see §8). |
 | **Machine-readable schema** | [`deepecon-contribution.schema.json`](deepecon-contribution.schema.json) (JSON Schema, draft 2020-12) |
 | **Illustrative instance** | [`examples/illustrative-staggered-did.contribution.yaml`](examples/illustrative-staggered-did.contribution.yaml) — fictional paper and numbers |
 | **Tests** | [`../tests/schema/test_schema.py`](../tests/schema/test_schema.py) |
@@ -26,8 +26,8 @@ One contribution — one paper, one contributor team — produces a **contributi
 | Four information tiers | Every entity and file carries `visibility`: `contributor`, `internal`, `agent`, `hidden`. Several entities fix their tier with `const` (e.g., failure modes and flawed variants are always `hidden`), so a mislabelled record fails validation. | §5.4; D-009 |
 | Candidate, not benchmark content | Lifecycle fields (`status`, `review_status`, `lifecycle`) separate contributor approval from independent review and admission. | §10D; D-010 |
 | Originals are never modified | Flawed variants are stored as a patch plus separate files referencing a base implementation. | §6; D-011 |
-| Three (plus one) validity layers | Critical decisions and failure modes carry `validity_layer`: computational, statistical, identification, interpretation. | §4; D-013 |
-| No artificial binary keys | Failure modes carry `status`: established, conditional, or contested; tasks carry a verifiability tier (V1–V4). | §4; D-013; X-003 |
+| Validity layers | Critical decisions and failure modes carry `validity_layer`: computational (implementation fidelity), measurement, statistical, identification, interpretation — the lead's three layers plus two. | §4; D-013 |
+| No artificial binary keys | Failure-mode `status` (established, conditional, contested; default needs_review) comes from independent blind classifications (`status_classifications`); the contributor's view is kept separately as a claim. Tasks carry a verifiability tier (V1–V4). | §4; D-013; X-003 |
 | No restricted microdata | `submission.contains_restricted_microdata` must be `false`. | §10E |
 | Versioned everything | `schema_version`, `protocol_version`, `rubric_version` (semantic versioning) on every package. | §7 (version management) |
 
@@ -103,7 +103,22 @@ Validation rules beyond what JSON Schema can express (to be implemented as part 
 - **Major** (x.0.0): breaking change, accompanied by a migration script and a note in the decision log.
 - Packages are never rewritten in place by a schema upgrade; a migration produces a new package version with provenance.
 
-## 7. Open points for review
+## 7. Measuring AI influence
+
+The interview protocol (v0.2.0, §0 and §4) treats AI influence on contributors as a measured quantity. The schema records: `provenance.exposure` and `preceding_suggestion_ids` on every statement; `interview_records[].free_recall_lists` (unaided lists recorded before any suggestion); a `suggestion_ledger` that includes known-valid controls; and the metrics `llm_originated_share`, `post_exposure_share`, `llm_influenced_share`, and `false_endorsement_rate`.
+
+## 8. Changes in 0.2.0
+
+- `validity_layer` gains `measurement`.
+- `provenance.exposure` and `preceding_suggestion_ids` added.
+- `realism_warrant.observed_in_practice` added and required.
+- Failure-mode status: default `needs_review`; `status_claimed_by_contributor` and `status_classifications` added.
+- `predicted_consequence.category` and optional `quantiles` added.
+- Task candidates: `hidden.decision_space`, `hidden.verifier_version`, `hidden.verifier_frozen_at`, plus output-contract fields `declared_choices_required` and `intermediate_outputs_required`.
+- Interview records: `free_recall_lists`, `suggestion_ledger`, influence metrics, and `summary_accuracy_ratings`.
+- Validation runs: `tolerance_calibration` and `expert_calibration` kinds.
+
+## 9. Open points for review
 
 - Whether to split `manifest.yaml` into a non-hidden manifest plus a `hidden/manifest.hidden.yaml`, so that the internal tier never carries hidden fields (stronger separation, more files).
 - Whether contributor identity fields (e-mail, ORCID) should live outside the package in a separate registry (data minimization).
