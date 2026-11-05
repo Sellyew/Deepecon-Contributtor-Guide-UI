@@ -91,7 +91,7 @@ Each stage's gate line copies the rubric's *Who / when* column: **Gate** lists t
 **Activities.**
 1. Run the source package; record environment, outputs, and intermediate outputs (estimation-sample size, number of clusters, first-stage statistics, cohort sizes).
 2. Compare to published values; explain discrepancies.
-3. **Separate estimand, assumptions, and estimator** (VVP §4 item 1; Lundberg, Johnson & Stewart 2021 [U]): (a) the **estimand**, in potential-outcome terms, with explicit weights over the treated (cohort, period) cells, the event window, and the population; (b) the **identifying assumptions** (comparison group, base period, anticipation), stated in the instruction or chosen from the benchmark-wide convention vocabulary; (c) the **estimator**, never part of the estimand. "Using not-yet-treated counties as controls" is thus an assumption, not part of the estimand.
+3. **Separate estimand, assumptions, and estimator** (VVP §4 item 1; Lundberg, Johnson & Stewart 2021 [U]): (a) the **estimand**, in potential-outcome terms, with explicit weights over treated (cohort, period) cells, the event window, and the population; (b) the **identifying assumptions** (comparison group, base period, anticipation), stated in the instruction or chosen from the benchmark-wide convention vocabulary; (c) the **estimator**, never part of the estimand. "Not-yet-treated counties as controls" is an assumption, not part of the estimand.
 4. **Independent check** (GT-1): a **clean-room re-implementation** from the paper, the estimand statement, and the codebook by someone who has not read the original code (not the shepherd), or a correct blind solve at Stage 5. The **open-source port** for task environments is a separate artifact, verified for numerical equivalence; it inherits the original's logic and natural errors (e.g., duplicated observations or a miscoded treatment [S, R8]), so it is not the check. Every disagreement is adjudicated and logged as a candidate natural error. Run reference implementations on at least two platforms, because Stata results can change with version and processor count [P-full, R8]. Passing a data-editor check is not proof of correctness: I4R found coding errors in about a quarter of economics studies it reproduced [S].
 5. Record known limitations of the original analysis, including any genuine problems discovered (they may become tasks, or disqualify the target).
 
@@ -155,15 +155,15 @@ The conversational protocol is specified in [Deliverable 3](../interview/expert-
 
 **Instruction authorship.** The final agent-facing instruction is written or substantially edited by a human (shepherd and contributor) and is short: goal first, practitioner language, "as broad as possible and as specific as necessary" (*Good Benchmarks* §4, §9). The authorship is recorded; unedited LLM-drafted instructions are not admissible (rubric SP-2).
 
-**Output contract and environment.** One results schema and one environment (a standard image or a dated offline CRAN/PyPI snapshot) per task type, offline, with data baked in (SP-4, EN-1). The contract never names a crux decision (VVP §4 item 4). For restricted sources, the fully synthetic data are built here and GT-1 and RV-2 re-run on them (EN-3).
+**Output contract and environment.** One results schema and one environment per task type (rubric SP-4, EN-1); the contract never names a crux decision (VVP §4 item 4). For restricted sources, the fully synthetic data are built here and GT-1 and RV-2 re-run on them (EN-3).
 
-**Blind specification test** (rubric SP-1). After the leakage scan (LK-1) and before verifier engineering, two outside economists who have seen only the agent tier write acceptance criteria and attempt the task (`expert_solve` runs); disagreements tighten the instruction. A correct blind solve can be GT-1's independent check and an L3 witness; solve times give DC-2's time estimate. Fallback: one blind solve per task, two on a random quarter of each task type.
+**Blind specification test** (rubric SP-1). After the leakage scan (LK-1) and before verifier engineering, two outside economists who have seen only the agent tier write acceptance criteria and attempt the task (`expert_solve` runs); only then are they unblinded. Disagreements tighten the instruction. A correct blind solve can be GT-1's independent check and an L3 witness; solve times give DC-2's time estimate. Fallback: one blind solve per task, two on a random quarter of each task type.
 
 **Gate:** RV-4, GT-1 (if a blind solve is the check), SP-1, EN-1, EN-3, LK-1. **Also assessed:** GT-3, SP-2, SP-4. **Automatable:** environment building, leakage scan, format validators. **Human judgment:** instruction wording, task-type choice, estimand framing, blind solves.
 
 ### Stage 6 — Verifier development and validation
 
-Build the verifier, then climb the VVP ladder L0–L11 (oracle, nulls, witnesses, negative controls, mutants, metamorphic relations, hidden variants, attacks, full-harness replay, hint ladder, agent trials). After any change, re-run the rungs the VVP re-run matrix names (§3.1); no edit is justified only by an agent's success. **Status classification** (GT-2) follows L7 and precedes L8, so that no agent trials are spent on a contested item; the rubric sets its classifiers and diagnostics. Contested items leave the scored path.
+Build the verifier, then climb the VVP ladder L0–L11, from static checks to agent trials with crux alignment. After any change, re-run the rungs the VVP re-run matrix names (§3.1); no edit is justified only by an agent's success. **Status classification** (GT-2: one or two outside classifiers, diagnostics on all grading data) follows L7 and precedes L8, so that no agent trials are spent on a contested item. Contested items leave the scored path.
 
 **Gate:** GT-2, SP-3, SO-1, VE-1, VE-2, VE-4, EN-1, EN-4, LK-1, LK-4. **Also assessed:** GT-4, SP-4, SO-2, SO-3, VE-3, VE-5, DF-1, DF-3, EN-2, LK-2, DC-1, DC-2. **Automatable:** nearly all runs. **Human judgment:** choosing alternatives and hidden variants, triaging mutants and failures, status, crux alignment.
 
@@ -175,7 +175,7 @@ The independent domain reviewer (a blind solver, now unblinded) and the independ
 
 ### Stage 8 — Benchmark admission
 
-The release editor, with the benchmark reviewer, admits tasks to a release or to the experimental track, or rejects them, with reasons recorded. Admitted tasks carry versioned metadata. Each release lists its calibration models, reports task counts by failure-mode category × data route, and is frozen: a withdrawal takes effect at the next version (VVP §8). After admission (L13), issue reports trigger task repair (as in Terminal-Bench-Science's repair pull requests), statuses are re-classified at each release against new literature, and new rubric gates reach admitted tasks before the next release.
+The release editor, with the benchmark reviewer, admits tasks to a release or to the experimental track, or rejects them, with reasons recorded. Admitted tasks carry versioned metadata. Each release lists its calibration models, reports task counts by failure-mode category × data route, and is frozen; a withdrawal takes effect at the next version (VVP §8). After admission (L13), issue reports trigger task repair (as in Terminal-Bench-Science's repair pull requests), statuses are re-classified at each release, and new rubric gates reach admitted tasks before the next release.
 
 **Gate:** LK-1, LK-5.
 
@@ -205,7 +205,7 @@ The release editor, with the benchmark reviewer, admits tasks to a release or to
 
 **What this costs.** Failure modes 3 (irrelevant methodological discussion) and 5 (misleading causal interpretation) are under-measured in a first release scored this way. They are central to the brief's motivation, and the evidence suggests interpretation is the layer most open to manipulation: in one 2026 study, a confirmatory prompt moved Claude Code's support verdicts from 10% to 90% while its estimates barely changed (R4, summary) [S]. The experimental track and the V3 agreement study should therefore start in parallel, not later. A middle path is to include **structured claim-classification tasks** with consensus keys in the first release as a separately reported score. This trade-off is logged as Open question O-003 for the research lead.
 
-**Scoring** (VVP §8): a binary reward per execution or correction task, conjunctive across checks and hidden variants; detection as in VVP §7; at least five trials per evaluated configuration; per task type, a mean with a bootstrap 95% confidence interval, never pooled; repair and preservation reported separately; the clean-control share fixed per release and undisclosed; models that touched construction marked *calibration-exposed*.
+**Scoring** follows VVP §8: binary, conjunctive rewards for execution and correction tasks; at least five trials per evaluated configuration; per task type, a mean with a bootstrap 95% confidence interval, never pooled; repair and preservation reported separately; the clean-control share fixed per release and undisclosed; *calibration-exposed* models marked.
 
 ## 7. The "what makes a top-journal paper" objective (brief §3.4)
 
@@ -218,7 +218,7 @@ Journal placement is not a ground-truth label (X-001). Instead, the interview el
 | Published coefficients memorized or retrievable | No internet; perturbed or fully synthetic data; re-execution of agent code on answer-changing hidden variants with unseen bases (rubric LK-2; VVP §5.1) |
 | Paper or package recognized from the agent tier | A restructured presentation shared by each variant and its clean twin (Stage 4); recognition probe (LK-4); unpublished or post-cutoff packages for the held-out split (Stage 0) |
 | Flawed code compared against the public source package | Restructured or ported presented code; no internet; naturalness review (LK-3) |
-| Hidden-tier material reaching model providers (VVP §10) | Every session, trial, or LLM call that sees hidden-tier material runs under commercial no-training terms (zero data retention where available); consumer accounts, even after a training opt-out, handle only agent-tier or public material. This covers interview sessions: Option A meets the rule by construction; Option B needs commercial-terms access, project-provided (if O-018 permits) or institutional ([Option B](../architecture/option-b-local-skill.md) §10.2). Terms go in `consent.contributor_account_terms`; exposures in the exposure log (LK-5) |
+| Hidden-tier material reaching model providers (VVP §10) | Every session, trial, or LLM call that sees hidden-tier material, interviews included, runs under commercial no-training terms (zero data retention where available); consumer accounts, even after an opt-out, handle only agent-tier or public material. Option A meets this by construction; Option B needs project-provided (if O-018 permits) or institutional commercial access ([Option B](../architecture/option-b-local-skill.md) §10.2). Terms are recorded in `consent.contributor_account_terms`, exposures in the log (LK-5) |
 | Held-out split worn down or leaked | Run only by the project, vetted evaluators, or locally hosted open-weight models; exposures logged (LK-5) and tasks refreshed after a set number of external evaluations; split by paper (all tasks and twins from one paper together); catalogue without identifiers of papers with held-out tasks (§7); disclosure embargo in contributor agreements |
 | Task materials entering training data after release | Canary string; held-out split (O-001); periodic refresh |
 | Hidden material in agent-facing text | Physical tier separation; automated leakage scan (LK-1) |
@@ -240,9 +240,6 @@ These are untested proposals. The pilot's methodology arm takes every candidate 
 
 ## 10. Changes
 
-**v0.2.0** (independent reviews, 2026-11-05):
-- Staffing table with blinding states and hours; shepherd hours include dropped candidates.
-- Stage 0 data routes, re-execution budget, and held-out preference; Stage 1 estimand separation and clean-room check; Stage 3 classification moved after L7, P-1FACT only a prediction; Stage 4 shared restructured presentation; Stage 5 blind solves, benchmark-wide contract, and repair and preservation scoring.
-- Gate lines copy the rubric's map; five layers, per-output tiers; failure mode 2 narrowed; scoring and exposure rules; the pilot's methodology arm.
+**v0.2.0** (independent reviews, 2026-11-05): staffing table with blinding and hours, dropped candidates counted; data routes, re-execution budget, and held-out preference (Stage 0); estimand separation and clean-room check (Stage 1); status classification after L7 and P-1FACT as a prediction (Stage 3); shared restructured presentation (Stage 4); blind solves, benchmark-wide contract, and repair and preservation scoring (Stage 5); gate lines from the rubric; five layers and per-output tiers; failure mode 2 narrowed; scoring, exposure rules, and the pilot's methodology arm.
 
 **v0.1.0** (2026-11-05): first version.
