@@ -2,7 +2,7 @@
 
 An expert-driven benchmark for evaluating whether AI agents can perform rigorous economics research — empirical implementation, causal identification, econometric reasoning, and scientific judgment — built from the experience of economists who publish in leading journals.
 
-> **Project status (2026-11-05): design phase.** Phases 1–4 of the [plan](docs/requirements/2026-11-05-research-lead-brief.md#12-proposed-development-process) are in progress. **No contribution architecture has been selected** and nothing has been implemented. All recommendations are *Proposed* until the research lead approves them in the [decision log](docs/decisions/decision-log.md).
+> **Project status (2026-11-05): design phase, decision package ready for review.** Phases 1–4 of the [plan](docs/requirements/2026-11-05-research-lead-brief.md#12-proposed-development-process) have produced complete drafts of Deliverables 1–8, revised after four independent reviews (econometrics, benchmark methodology, and one advocate for each architecture). **No contribution architecture has been selected** and nothing has been implemented. All recommendations are *Proposed* until the research lead approves them in the [decision log](docs/decisions/decision-log.md).
 
 ## The idea in one paragraph
 
@@ -12,7 +12,7 @@ From a published paper, an economist helps build a validated **correct** replica
 
 | If you want… | Read |
 |---|---|
-| The decision we need to make, in a few pages | [Architecture decision brief](docs/architecture/architecture-decision-brief.md) (Deliverable 7) |
+| The decision we need to make, in a few pages | [Architecture decision brief](docs/architecture/architecture-decision-brief.md) (Deliverable 7); a designed rendering is in [`reports/`](reports/README.md) |
 | Answers to the five assessment questions | [Initial assessment](docs/assessment/initial-assessment.md) |
 | What has been decided, proposed, left open, and rejected | [Decision log](docs/decisions/decision-log.md) |
 | The original requirements | [Research lead's brief](docs/requirements/2026-11-05-research-lead-brief.md) |
@@ -51,7 +51,7 @@ implementations/
   hosted-platform/      Option A (not started; pending decision)
   claude-code-skill/    Option B (not started; pending decision)
 pilot/              pilot materials (placeholder)
-tests/              automated tests (currently: schema tests)
+tests/              automated tests: schema tests, Markdown link check, report version check
 reports/            generated, collaborator-facing renderings
 contributor-docs/   English and Chinese contributor guides (placeholder)
 CLAUDE.md           project memory and working conventions
@@ -63,13 +63,21 @@ CLAUDE.md           project memory and working conventions
 - **Evidence labels:** **[P-full]** primary source read in full · **[P-page]** primary abstract, landing page, or official documentation · **[S]** secondary · **[U]** unverified.
 - **Architecture neutrality:** Options A and B are developed to the same depth on the same assumptions.
 
-## Running the tests
+## Running the checks
 
 ```bash
 python3 tests/schema/test_schema.py
 ```
 
-Requires Python 3.10+, `jsonschema` 4.18 or later, and `PyYAML`.
+```bash
+python3 tests/docs/check_links.py
+```
+
+```bash
+python3 tests/docs/check_report_version.py
+```
+
+The schema tests require Python 3.10+, `jsonschema` 4.18 or later, and `PyYAML`; the document checks use the standard library only.
 
 ## Licence
 

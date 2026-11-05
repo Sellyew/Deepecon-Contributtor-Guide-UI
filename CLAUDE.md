@@ -8,7 +8,7 @@ An expert-driven benchmark that tests whether AI agents can do rigorous economic
 
 - **Canonical requirements:** [`docs/requirements/2026-11-05-research-lead-brief.md`](docs/requirements/2026-11-05-research-lead-brief.md) — verbatim; never edit it.
 - **Decision status:** [`docs/decisions/decision-log.md`](docs/decisions/decision-log.md) — Decided / Proposed / Open / Rejected.
-- **Current phase (2026-11-05):** Phases 1–4 (discovery, shared methodology, parallel architecture design, decision package). **No implementation yet. No architecture selected.**
+- **Current phase (2026-11-05):** Phases 1–4 (discovery, shared methodology, parallel architecture design, decision package) drafted and revised after four independent reviews; awaiting the research lead's review. **No implementation yet. No architecture selected.**
 
 ## Roles and collaboration principles
 
@@ -44,6 +44,11 @@ An expert-driven benchmark that tests whether AI agents can do rigorous economic
 | `docs/decisions/` | Decision log and ADRs |
 | `protocol/`, `validation/`, `implementations/`, `pilot/`, `tests/`, `contributor-docs/` | Placeholders until Phase 5 |
 | `reports/` | Generated, collaborator-facing renderings |
+
+## Checks before committing
+
+- `python3 tests/schema/test_schema.py` (schema and example), `python3 tests/docs/check_links.py` (relative links and heading anchors in all Markdown), `python3 tests/docs/check_report_version.py` (the HTML rendering in `reports/` matches the Markdown brief's version).
+- When a document's numbers change (engineering weeks, hours, costs), update the [cost model](docs/architecture/cost-and-effort-model.md) and its scripts first, then the brief, the assessment, the decision log, and the HTML rendering.
 
 ## Before researching anything again
 
