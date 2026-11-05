@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** v0.1.0 (2026-11-05). A search-based review, not a systematic survey. |
+| **Status** | **Proposed** v0.2.0 (2026-11-05). A search-based review, not a systematic survey. v0.2.0 corrects the novelty statement (§6), the account of effect injection (§7.2), and the validation agenda (§9) after independent reviews; see §11. |
 | **Purpose** | Establish what existing benchmarks measure, how they collect expert contributions, and how they construct and verify tasks; state precisely what DeepEcon's correct-versus-flawed approach adds and what it does not; identify what still needs methodological validation. |
 | **Evidence** | Reading notes on [*Good Benchmarks*](reading-notes/good-benchmarks-bercovich-2026.md) and [`interview-me`](reading-notes/interview-me-skill.md); evidence notes [R1–R9](evidence/). Labels: **[P-full]** primary, full text · **[P-page]** primary abstract, landing page, or documentation · **[S]** secondary · **[U]** unverified. |
 
@@ -103,7 +103,7 @@ A compact skill that turns a fuzzy idea into a research specification. It uses s
 
 **What this means for DeepEcon.**
 - Method choice, design specification, and estimate recovery on real economics papers are already covered, most rigorously by CausalVerify, together with CauSciBench and CausalReasoningBenchmark.
-- No benchmark found grades **inference choices** (clustering level, few-cluster corrections, inference under staggered timing) inside real economics packages as executable outcomes.
+- No benchmark found grades **inference choices** (clustering level, few-cluster corrections, inference under staggered timing) inside real economics replication packages as executable outcomes. The nearest precedents work elsewhere: CausalVerify grades standard-error ratios on synthetic twins, and a Terminal-Bench-Science causal-inference task verifies a code repair on seeded hidden instances ([R1](evidence/R1-terminal-bench-science.md) §8.2) [P-full].
 - No benchmark found uses **expert-designed flawed versions of real replication packages**, either as verifier negative controls or as executable detection and correction tasks.
 - CausalVerify's post-hoc scorer revisions are a direct warning for DeepEcon's verifier protocol: freeze verifiers before evaluation.
 
@@ -130,11 +130,11 @@ A compact skill that turns a fuzzy idea into a research specification. It uses s
 - **AI agents vary less than humans.** In one 2026 study, human estimates were 2–27 times more dispersed than repeated Claude Code runs on the same tasks [S]. Calibrating acceptance regions on agent runs alone would therefore reject legitimate human alternatives.
 
 **Consequences, adopted in the [verifier protocol](../methodology/verifier-validation-protocol.md) §4:**
-- fix the estimand and the decisions that matter before grading numbers;
-- use a hidden decision space (reference / accepted / unjustifiable / contested);
-- grade against declared choices with a conditional reference;
-- use tolerances only for numerical noise, calibrated with experts;
-- freeze verifiers before evaluation.
+- separate the estimand, the identifying assumptions, and the estimator, and fix the estimand before grading numbers;
+- use a hidden decision space (reference / accepted / unjustifiable / contested), with constraints between options;
+- allow declarations only for non-crux conventions from a benchmark-wide vocabulary, and grade crux decisions through outcomes on separating hidden variants;
+- separate numerical noise, conventions, and substantive alternatives, and borrow no default tolerance band from another benchmark;
+- calibrate with blind expert solves, and freeze verifiers before evaluation.
 
 Several figures here are [S] or [U] and must be checked against the original papers before appearing in a public document.
 
@@ -154,18 +154,22 @@ Several figures here are [S] or [U] and must be checked against the original pap
 
 1. **Verifier false negatives are common.** CORE-Bench's automatic grader rejected correct alternative techniques, and ScienceAgentBench released a "verified" split to reduce false negatives ([R4](evidence/R4-replication-benchmarks.md)) [S/P-page]. → DeepEcon calibrates acceptance regions on validated alternatives and widens them as agents reveal legitimate approaches.
 2. **LLM judges are widespread and under-validated for economics.** PaperBench reports a judge evaluation (F1 0.83) [S]; most benchmarks do not. → LLM judges only in the unscored track, with measured agreement.
-3. **Contamination is measurable.** Non-anonymized materials can lead to perfect scores [S]. → Offline environments, perturbed data, re-execution on hidden data, a private held-out set.
+3. **Contamination is measurable.** Non-anonymized materials can lead to perfect scores [S]. Perturbed data defeat memorized numbers but not memory of the paper or its package. → Offline environments; a recognition probe; restructured presentations shared by flawed variants and clean twins; answer-changing hidden variants built on data the agent never sees; a private held-out split handled under exposure rules.
 4. **Interpretation is manipulable.** A confirmatory prompt moved an agent's support verdicts from 10% to 90% with unchanged estimates [S]. → Neutral agent-facing instructions; claim-level grading.
 5. **Statistical verification is mature in TBS.** Hidden simulated instances, metamorphic interventions, and witness implementations are established practice ([R1](evidence/R1-terminal-bench-science.md) §8) [P-full].
 
 ## 6. What DeepEcon adds — and what it does not
 
-**The addition** (each element has precedents in isolation; the combination appears new for empirical economics as of 2026-11-05):
+**The addition.** As far as targeted searches found (2026-11-05; several sources [S]), no benchmark builds tasks from published empirical-economics replication packages paired with expert-designed flawed variants, each with a realism warrant and an independent classification as established or conditional, and verifies them by re-running agents' code on hidden variants of the paper's own pipeline. The elements have precedents:
+- repair tasks verified on hidden instances (Terminal-Bench-Science `highdim-mediation-debiasing`) [P-full];
+- injected-error detection (Terminal-Bench-Science `ehr-error-detection`) [P-full];
+- repair rounds and standard-error-ratio grading on synthetic twins (CausalVerify) [P-page];
+- layer-separated scoring (CausalVerify, CausalReasoningBenchmark) [P-page/S];
+- author-defined ground truth (PaperBench, ReplicationBench) [P-page/S].
 
-1. **Executable correct packages paired with expert-designed flawed packages** from published empirical economics papers.
-2. Each flaw is a **realistic, scientifically consequential mistake** — in identification, inference, sample construction, treatment timing, or variable definition — with a documented consequence, a realism warrant, and evidence that it is wrong rather than a valid alternative.
-3. The flaws become **outcome-verified tasks** (error correction, research execution where the flaw is the crux, structured detection with clean controls), graded so that computational, statistical, identification, and interpretation validity are kept apart.
-4. The knowledge comes from **original authors or expert replicators through a structured AI-guided interview** with statement-level provenance.
+The first release would score computational and statistical validity only; identification and interpretation would stay in an experimental, unscored track. The distinctive element is therefore **where the negative controls come from**: realistic, consequential mistakes designed by experts in the paper's own pipeline.
+
+**How the knowledge is collected** is part of the method, not a claimed contribution: original authors or expert replicators are interviewed through a structured AI-guided protocol with statement-level provenance, whose validity is itself still to be established (§9, item 7).
 
 **What it does not add** (overlaps to acknowledge in any public description):
 - re-running packages when code and data are supplied (CORE-Bench, REPRO-Bench, SocSci-Repro-Bench, I4R);
@@ -226,7 +230,7 @@ For contested questions, structured expert-judgment methods use several independ
 
 **Two contributions from R6 to our protocol.**
 1. **"Same number, wrong procedure" is six different problems.** The types are semantic, data, observation, tolerance, power, and identification equivalence, and each has a different remedy.
-2. **Additive effect injection is an exact, noise-free check.** Add a known effect to treated outcomes in the real data, and every estimator that is linear in Y must move by the estimand's weighting of that effect. R6 also showed that the draft protocol's clustering relation was wrong as written. Both are incorporated in [verifier protocol](../methodology/verifier-validation-protocol.md) v0.2.0.
+2. **Additive effect injection is an exact, noise-free check, but of one thing only.** For a pipeline that is linear in the outcome on the estimand's scale, adding a known effect to treated outcomes moves the estimate by exactly the estimator's weighting of that effect over treated cells. An independent econometric review showed that this tests nothing about how the counterfactual is built: two clearly wrong estimators (a treated-minus-untreated mean and a treated-only before/after comparison) moved by exactly the target. Counterfactual-side invariances (adding anything in the span of the required fixed effects or controls; adding confounding orthogonal to the instruments) complement it, and answer-changing variants must be built on data the agent never sees, or a program can pass by arithmetic. R6 also showed that the draft protocol's clustering relation was wrong as written. All of this is incorporated in [verifier protocol](../methodology/verifier-validation-protocol.md) v0.3.0 (§5).
 
 ## 8. Economics-specific grounding ([R8](evidence/R8-replication-standards-and-econometric-pitfalls.md))
 
@@ -248,21 +252,24 @@ For contested questions, structured expert-judgment methods use several independ
 - AEA's Stata Docker images require a licence mounted at run time [P-page], and results can vary with the Stata version and processor count [P-full].
 - The median package is 40.4 MB; about 20% exceed 2 GB [P-full].
 
-**Pitfall catalogue.** R8 catalogues 21 consequential pitfalls, each with its consequence and a computational signature where one exists. Fourteen have an established core plus a computational signature; three are contested (Kelly's spatial-noise critique, how widespread Young's findings are, and weak-IV thresholds); about half change only standard errors. This catalogue seeds the **vetted pitfall taxonomy** the interview protocol requires (§7, §14). Every entry still needs sign-off by a named econometrician, and 13 of the 35 references remain [U] in bibliographic detail.
+**Pitfall catalogue.** R8 catalogues 21 consequential pitfalls, each with its consequence and a computational signature where one exists. Fourteen have an established core plus a computational signature; three are contested (Kelly's spatial-noise critique, how widespread Young's findings are, and weak-IV thresholds); about half change only standard errors. This catalogue seeds the **vetted pitfall taxonomy** the interview protocol requires (§7, §14). An independent econometric review corrected several statuses (see R8's corrections section): the regression-discontinuity entry is split into two established errors (global high-order polynomials; conventional confidence intervals at the MSE-optimal bandwidth) and a decision-space node (bandwidth choice); clustering by a discrete running variable is added as an established error; shift-share exposure-robust inference and multiple-testing corrections are conditional; robust standard errors in randomized trials are contested or conditional. Every entry still needs sign-off by a named econometrician, and 13 of the 35 references remain [U] in bibliographic detail.
 
 **Established versus contested.** Documented errors such as Reinhart–Rogoff and Donohue–Levitt (Foote & Goetz 2008) differ in kind from contested methodological disputes, such as the Acemoglu–Johnson–Robinson and Albouy debate or the re-analyses of Miguel & Kremer. This is the distinction the protocol's independent status classification is designed to preserve (R8 §4).
 
 ## 9. What requires further methodological validation
 
 1. **Yield:** consequential, realistic, discriminating failure modes per paper and per interview hour.
-2. **Discriminability on real data:** how often flagship flawed variants are equivalent mutants on the evaluation data; how often semi-synthetic variants are needed.
-3. **Semi-synthetic realism:** whether generated data preserve the mistake's consequence without encoding the contributor's assumptions (*Good Benchmarks* §7).
-4. **Re-execution practicality:** whether agents' code runs reliably under a minimal contract without measuring format compliance.
-5. **Clean controls:** whether audit-and-correct tasks with clean controls separate judgment from over-correction.
-6. **Expert agreement:** whether economists agree enough to key identification and interpretation items (V3).
-7. **Interview validity:** whether the AI-guided interview elicits contributor-originated content rather than AI-planted content (LLM-origin share, recall of a sealed key).
-8. **Effort:** shepherd hours per admitted task, by stage.
-9. **"One-sentence-fact" tasks:** whether they measure capability or recall (O-004).
+2. **Discriminability on real data:** how often flagship flawed variants are data-equivalent on the evaluation data, and how many answer-changing hidden instances, on data the agent never sees, each task needs.
+3. **Synthetic-data realism:** whether fully synthetic data for restricted sources preserve the mistake's consequence without encoding the contributor's assumptions (*Good Benchmarks* §7), given that they lose real-data quirks such as duplicates and miscoded treatment.
+4. **Re-execution practicality:** whether agents' code runs reliably under a benchmark-wide output contract without measuring format compliance.
+5. **Clean controls:** whether correction and detection tasks with clean controls separate judgment from over-correction, with repair and preservation scored separately.
+6. **Expert agreement:** whether economists agree enough to key identification and interpretation items (V3), and whether two blind outside economists agree on a task's acceptance criteria.
+7. **Interview validity:** whether the AI-guided interview elicits contributor-originated content rather than AI-planted content (LLM-originated share, recall of a sealed key on pre-exposure items, false endorsement of known-valid controls).
+8. **Effort and cost:** shepherd-team hours per stage for admitted and dropped candidates; outside-economist hours; validation trials per task.
+9. **"One-sentence-fact" tasks:** whether they measure capability or recall (O-004), measured with the hint ladder and knowledge probe.
+10. **Recognition:** whether restructured presentations and ports stop evaluated models from recognizing canonical papers and repairing flaws from memory.
+
+The pilot's methodology arm takes surviving candidates through the full validation ladder to test items 1–6, 8, and 10 ([pilot plan](../pilot/pilot-evaluation-plan.md)).
 
 ## 10. Sources
 
@@ -270,3 +277,7 @@ Full source lists, with URLs, access dates, and evidence labels, are in each evi
 - Bercovich, I. (2026). *Good Benchmarks*. arXiv:2607.12217v1 [P-full].
 - Terminal-Bench-Science repository, commit `9276073` (2026-11-04) [P-full].
 - `pedrohcgs/claude-code-my-workflow`, `interview-me` skill, commit `7586127` (2026-11-04) [P-full].
+
+## 11. Changes
+
+**v0.2.0** (independent reviews, 2026-11-05): novelty statement narrowed and precedents added (§6), with the interview moved into the method description; effect injection restated with its limits and complements (§7.2); acceptance-region lessons updated (§3.4); contamination lesson extended to memory of methods (§5); pitfall-status corrections noted (§8); validation agenda extended (§9).
