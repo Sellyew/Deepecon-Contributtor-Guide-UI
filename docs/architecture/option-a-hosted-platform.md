@@ -18,7 +18,7 @@ The decisive design question is **who runs code**. A hosted interview does **not
 - **Staff execution.** Shepherds run reference and variants on project machines during task construction. These are machines the project licenses for Stata where it holds suitable licences.
 - **A2 — hosted R/Python sandbox.** For public, redistributable data only.
 
-**Proposed MVP:** A1 together with staff execution. Add A2 if the pilot shows that hand-offs stall operationalization (pilot PQ4).
+**Proposed MVP:** A1 together with staff execution. Add A2 if the pilot shows that hand-offs stall operationalization (pilot §7, rule 3, which can also point to staff execution or to Option B).
 
 | Property | Option A |
 |---|---|

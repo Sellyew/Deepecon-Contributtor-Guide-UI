@@ -269,7 +269,7 @@ For contested questions, structured expert-judgment methods use several independ
 9. **"One-sentence-fact" tasks:** whether they measure capability or recall (O-004), measured with the hint ladder and knowledge probe.
 10. **Recognition:** whether restructured presentations and ports stop evaluated models from recognizing canonical papers and repairing flaws from memory.
 
-The pilot's methodology arm takes surviving candidates through the full validation ladder to test items 1–6, 8, and 10 ([pilot plan](../pilot/pilot-evaluation-plan.md)).
+The pilot's methodology arm takes surviving candidates (or a random sample of at least six, stratified by arm) through validation rungs L0–L12 to test items 1–6, 8, and 10 ([pilot plan](../pilot/pilot-evaluation-plan.md)).
 
 ## 10. Sources
 
