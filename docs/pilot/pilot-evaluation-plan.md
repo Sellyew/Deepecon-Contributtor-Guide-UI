@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | **Proposed** v0.2.0 (2026-11-05). Not yet reviewed by the research lead. Execution belongs to Phases 5–6, after the architecture review. v0.2.0 integrates four independent reviews (§12). |
 | **Purpose** | Replace theoretical argument with evidence: run the *same scientific content* through both contribution workflows, compare what contributors experience and produce, and test the construction method end to end. |
-| **Requirement** | Brief, Deliverable 8 (D-016): one published paper; one validated correct implementation; at least one plausible, consequential error; an expert-guided interview; an erroneous implementation and its results; a proposed task; an initial verifier; a standardized package. |
+| **Requirement** | Research lead's brief, Deliverable 8 (D-016): one published paper; one validated correct implementation; at least one plausible, consequential error; an expert-guided interview; an erroneous implementation and its results; a proposed task; an initial verifier; a standardized package. |
 | **Builds on** | [Interview protocol](../interview/expert-interview-protocol.md) · [verifier validation protocol](../methodology/verifier-validation-protocol.md) (VVP) v0.3.0 · [rubric](../methodology/task-quality-rubric.md) · [Option A](../architecture/option-a-hosted-platform.md) · [Option B](../architecture/option-b-local-skill.md) · [cost model](../architecture/cost-and-effort-model.md) |
 
 ---
@@ -13,7 +13,7 @@
 
 | ID | Question | Why it matters for the decision |
 |---|---|---|
-| PQ1 | Can economists of differing technical fluency start and complete a contribution in each workflow, and where do they get stuck? | Accessibility (brief §7) |
+| PQ1 | Can economists of differing technical fluency start and complete a contribution in each workflow, and where do they get stuck? | Accessibility (research lead's brief §7) |
 | PQ2 | Do the workflows differ in the **quality** of what is produced, judged by reviewers blind to the arm? | Scientific quality — the central criterion |
 | PQ3 | Do they differ in **intellectual ownership**: does the dossier reflect the contributor's reasoning rather than the model's suggestions? | Human authority (D-008); *Good Benchmarks* §9 |
 | PQ4 | Does in-session execution (B; A2 if tested) change how often failure modes become **operationalized, validated** flawed variants, compared with hand-offs (A1 run kits; research-assistant mode)? | The real value of local execution |
@@ -42,7 +42,7 @@ Both slices share the architecture-independent core (protocol assets, schema, va
 
 ### 3.1 Keeping the arms comparable
 
-- **Model access.** Flawed variants and error labels arise in sessions, so all sessions use commercial no-training terms (VVP §10): the project's API account in A; in B, project-provided commercial access (pending O-018) or an institutional commercial account, never a consumer plan, even with the training opt-out. If O-018 is unresolved, B participants need institutional accounts.
+- **Model access.** Flawed variants and error labels arise in sessions, so all sessions use commercial no-training terms (VVP §10): the project's API account in A; in B, project-provided commercial access (pending O-018) or an institutional commercial account, never a consumer plan, even with the training opt-out. In B, project-provided API keys serve terminal users; the desktop app, rule 1's designed onboarding, requires a Pro, Max, Ultra, Team, or Enterprise subscription sign-in, and Console (API) accounts are documented only for the terminal client ([R2](../research/evidence/R2-claude-code-platform.md) §6.1 [P-page]; whether the app accepts API keys is [U]). B participants who use the desktop app therefore need Team or Enterprise seats, project-provided (also subject to O-018) or institutional. Team Standard seats cost $25 per seat per month ($20 billed annually) and are named, not meant for rotation ([R3](../research/evidence/R3-access-pricing-policy-portability.md) [P-full/P-page]): roughly $25–50 per desktop participant for one to two seat-months [U], instead of about $17 of API usage per contribution, plus seat management. If O-018 is unresolved, B participants need institutional accounts.
 - **B-arm environment audit** (at setup and in each package, via Option B's package doctor): client and plugin versions, access route, model-deviation flags, and any user-level `CLAUDE.md`, skills, plugins, MCP servers or output styles (names and hashes, not contents). Provided access standardizes data terms, not the whole interviewer configuration (Option B §5.3). The audit shows how much real-world variation the B sessions carried, which identical access would otherwise hide (tie-break, §7).
 - **A design baseline.** A thin slice faces a finished commercial client; the component library and dry run give A a usable baseline, but usability (M8) and drop-off (M2) differences may still reflect product maturity and carry that caveat.
 - **Fallbacks.** Both arms keep their staff fallback and research-assistant mode; staff-completed contributions are reported by route, with shepherd hours (M9).
@@ -69,23 +69,23 @@ Both slices share the architecture-independent core (protocol assets, schema, va
 
 **Suggestion experiment (O-017).** The units are critical decisions pre-registered for each target analysis from the design map; unlisted decisions get no suggestions. Assignment is balanced: each participant has the gated suggestion phase (protocol §7) on for half the listed decisions, and each decision has it on for half the participants per arm, target analysis and period. All free-recall locks of a contribution (S2 decisions, S3 failure modes) precede any suggestion (protocol §6–§7), so no suggestion can prime recall on another decision. The outcome is endorsed items with a complete evidence bundle that arm-blind reviewers rate valid (rule 7).
 
-**Methodology arm (PQ8).** Every candidate that reaches a run flawed variant with a material consequence under RV-2 (or, if capacity is short, a random sample of at least six, stratified by arm) goes through L0–L12 (VVP §3), staffed as the ladder requires (VVP §12). Its blind SP-1 economists, who must not have seen the hidden tier, cannot be participants or arm-blind reviewers. SP-3 is assessed here, through the hint ladder (L10). Each rung records hours by role, outcome (pass, pass after repair, fail, dropped) and reason. Shepherds know the arm, so results are reported by arm but stay out of the decision rules.
+**Methodology arm (PQ8).** Every candidate whose flawed variant has been run and shows a material consequence under RV-2 (or, if capacity is short, a random sample of at least six, stratified by arm) goes through the validation ladder up to independent review (rungs L0–L12, VVP §3), staffed as the ladder requires (VVP §12). Its blind SP-1 economists, who must not have seen the hidden tier, cannot be participants or arm-blind reviewers. SP-3 is assessed here, through the hint ladder (L10). Each rung records hours by role, outcome (pass, pass after repair, fail, dropped) and reason. Shepherds know the arm, so results are reported by arm but stay out of the decision rules.
 
 **Order of activities.**
 
 1. **Preparation:** dry runs with simulated contributors on both slices (protocol §15), recording the cost of one suite pass; the A-slice usability dry run; a cognitive-interview pretest of the probes (three to five economists per language); registration of the decision list, suggestion assignment, sealed keys and §7 thresholds.
-2. **Setup test** on participants' own machines, both arms in counterbalanced order, with the designed onboarding available (one onboarding session, or the participant's research assistant); help requests are logged, unaided completion recorded separately, and the environment audit taken. *B setup* is complete when the workspace opens with the plugin loaded and the skill starts in the participant's language (whether the reference implementation then runs through the run wrappers is recorded); the *A1 run-kit test*, when a sample run kit for the reference implementation has run and its outputs are uploaded.
+2. **Setup test** on participants' own machines, both arms in counterbalanced order, with the designed onboarding available (one onboarding session, or the participant's research assistant); help requests are logged, unaided completion recorded separately, and the environment audit taken. *B setup* is complete when the workspace opens with the plugin loaded and the skill starts in the participant's language; the *B run test*, when the reference implementation has run through the run wrappers (the model's in-session help allowed); the *A1 run-kit test*, when a sample run kit for the reference implementation has run and its outputs are uploaded.
 3. **Sessions**, recorded with consent; **asynchronous completion**, each hand-off timed from the variant's approval; a 20-minute **debrief**, including preferences.
-4. **Arm-blind review** of normalized packages (one rendering; client, platform and path identifiers sealed). Two independent economists and a benchmark reviewer rate (i) each endorsed item's validity, blind to arm, suggestion condition and provenance; (ii) each candidate on RV-1 to RV-4, GT-2 (preliminary) and GT-3 (the other candidate-stage gates, LK-5 and PR-1, are automated); (iii) each package on an anchored 1–7 scale (e.g., 1 no usable candidate, 4 usable after substantial revision, 7 ready for task construction). They also guess each package's arm. SP-3 needs agent trials, so it is not rated blind.
+4. **Arm-blind review** of normalized packages (one rendering; client, platform and path identifiers sealed). Two independent economists and a benchmark reviewer rate (i) each endorsed item's validity, blind to arm, suggestion condition and provenance; (ii) each candidate on the candidate-stage gates RV-1 to RV-3 and, as preliminary ratings of later criteria, on RV-4, GT-2 and GT-3 (the remaining candidate-stage gates, LK-5 and PR-1, are checked from the exposure log and the provenance and influence records, not rated blind); (iii) each package on an anchored 1–7 scale (e.g., 1 no usable candidate, 4 usable after substantial revision, 7 ready for task construction). They also guess each package's arm. SP-3 needs agent trials, so it is not rated blind.
 5. **Methodology arm**, as above.
 
 ## 5. Measures
 
 | ID | Measure | Instrument or source | PQ |
 |---|---|---|---|
-| M1 | Completion and time for B setup and the A1 run-kit test, with and without designed onboarding; help requests; access route; environment audit | Setup test; logs | PQ1 |
+| M1 | Completion and time for B setup, the B run test, and the A1 run-kit test, with and without designed onboarding; help requests; access route; environment audit | Setup test; logs | PQ1 |
 | M2 | Time to first substantive question; active time; sessions per contribution; drop-off stage | Session metrics (both slices) | PQ1 |
-| M3 | Yield: failure modes endorsed with a complete evidence bundle; operationalized; validated (run, re-run by the project, material under RV-2); route; time from approval to a run variant | Packages; logs; shepherd records | PQ2, PQ4 |
+| M3 | Yield: failure modes endorsed with a complete evidence bundle; operationalized; validated (run, re-run by the project, material under RV-2); route; time from approval until a variant has been run | Packages; logs; shepherd records | PQ2, PQ4 |
 | M4 | Recall of the sealed key on **pre-exposure items only**, separately for textbook and paper-specific items; novel items rated valid | Key comparison; arm-blind review | PQ2, PQ7 |
 | M5 | Share of candidates passing all candidate-stage gates; RV-1 to RV-4, GT-2, GT-3; 1–7 rating; inter-rater agreement; arm guesses | Arm-blind review | PQ2 |
 | M6 | **Measured AI influence:** LLM-originated, post-exposure and LLM-influenced shares of endorsed items; false endorsement of known-valid controls; weak endorsements; the suggestion-experiment outcome | Recall lists; exposure flags; suggestion ledger; double coding; arm-blind review | PQ3, PQ7 |
@@ -110,9 +110,9 @@ Each rule applies identically to both arms. The research lead sets the final val
 
 | # | If the pilot shows… | Proposed threshold | …it favours |
 |---|---|---|---|
-| 1 | B setup fails | Fewer than 3 of 4 non-fluent participants complete B setup within 60 minutes using the designed onboarding (desktop app plus one onboarding session, or their research assistant); unaided completion reported separately | A, or a B variant without the economist's own installation (Option B §3.2; untested here) |
+| 1 | B setup or the B run test fails | Fewer than 3 of 4 non-fluent participants complete B setup, and then the B run test, each within 60 minutes using the designed onboarding (desktop app, with a Team or Enterprise seat as in §3.1, plus one onboarding session; or their research assistant); unaided completion reported separately | A, or a B variant without the economist's own installation (Option B §3.2; untested here) |
 | 2 | A1 run kits fail | Fewer than 3 of 4 non-fluent A1 contributors, or their research assistants, can run a run kit within 60 minutes with the same designed onboarding; unaided completion reported separately | B, A2, or staff execution |
-| 3 | Operationalization stalls | In either arm, fewer than half of the contributions with an approved variant, or of the research-assistant-mode contributions, reach a run flawed variant within one week of approval | The other arm, or the stalling arm's remedy (A: A2 or staff execution; B: Remote Control, SSH or B-staff). If both stall, neither; staff execution becomes the default |
+| 3 | Operationalization stalls | In either arm, fewer than half of the contributions with an approved variant, or of the research-assistant-mode contributions, have a flawed variant run within one week of approval | The other arm, or the stalling arm's remedy (A: A2 or staff execution; B: Remote Control, SSH or B-staff). If both stall, neither; staff execution becomes the default |
 | 4 | Yield differs | Validated, operationalized variants per contribution differ by one or more on average (all routes counted; route reported) | The higher arm |
 | 5 | Quality differs | The share of candidates passing all candidate-stage gates (rubric Stages 2–4) differs by at least 25 percentage points, or paired differences favour one arm, by at least the minimal important difference, in at least 75% of pairs (first-period participants matched on fluency stratum and target analysis) | The better arm; otherwise quality counts as similar (tie-break) |
 | 6 | AI influence is high in one arm | Pooled over the arm's participants: LLM-influenced share (validated coding) above 50% of endorsed items, or adjudicated false endorsement of more than 25% of known-valid controls | Revising that arm's interaction design before scaling, whichever is chosen (also PR-1's provisional thresholds) |
@@ -139,25 +139,25 @@ Each rule applies identically to both arms. The research lead sets the final val
 | Stevenson & Wolfers (2006, *QJE*) | Staggered DiD (Goodman-Bacon 2021's illustration [U]); `divorce` in the CRAN package `bacondecomp` (MIT) [P-page] | No codebook; data provenance and licence [U]. State-specific trends are a contested threat in this literature (Wolfers 2006 [U]), not a binary key |
 | Ludwig & Miller (2007, *QJE*) | Sharp RD (Head Start); `headstart.csv`, with a pre-period placebo outcome; no licence file [P-page] | Noisy outcome; a manipulation test means little for a 1960 poverty rate |
 | Meyersson (2014, *Econometrica*) | Sharp RD; `polecon`; no licence file [P-page] | The main teaching example of a widely used RD primer |
-| Autor, Dorn & Hanson (2013, *AER*) | Shift-share; copies in ShiftShareSE, Goldsmith-Pinkham–Sorkin–Swift and Borusyak–Hull–Jaravel [P-page] | Licensing of derived data; Stata-version sensitivity; three independent reference implementations (an advantage) |
+| Autor, Dorn & Hanson (2013, *AER*) | Shift-share; copies in ShiftShareSE, Goldsmith-Pinkham–Sorkin–Swift and Borusyak–Hull–Jaravel [P-page] | Licensing of derived data; Stata-version sensitivity; three third-party implementations, useful for differential testing; whether any qualifies as GT-1's clean-room check (same target analysis, written without reading ADH's code) is [U] |
 
 **Pitfall statuses by archetype** (R8 numbering, as corrected by the econometric review); for each, verify package availability, licence and two target analyses:
 - *Staggered DiD:* estimator choice under staggered adoption (conditional on effect heterogeneity, shown by diagnostics on the graded data); treatment timing; clustering.
 - *Sharp RD:* established are a global high-order polynomial (P10a), conventional confidence intervals at the MSE-optimal bandwidth (P10b), and clustering by a discrete running variable (P22; Kolesár & Rothe 2018 [U]). Bandwidth choice (P10c) is a decision-space node, not a failure mode, and manipulation testing has no computational consequence. No exact relation tests them (VVP §5.5); they need conditional references and validation-time coverage simulations.
-- *Shift-share:* exposure-robust standard errors (P12) are conditional on shock-based identification (P13), which must be shown to hold.
+- *Shift-share:* conventional standard errors (P12) are an error only under shock-based identification (P13). That assumption cannot be shown to hold from data: the instruction must state it, and shock-level balance tests and the effective number of shocks are recorded as supporting diagnostics.
 
 ## 9. Ethics and data handling
 
 - The study is likely **human-subjects research** under many institutions' rules, even if exempt: obtain ethics review or a documented exemption before recruiting (O-013; [R9](../research/evidence/R9-hosted-stack-and-compliance.md) summarizes guidance). Consent covers recording, transcript retention, session metrics, the environment audit, data flows to the model provider, and withdrawal.
 - The pilot paper's data must be public; no restricted or confidential microdata are used.
-- Hidden-tier material follows VVP §10, with every exposure logged (rubric LK-5). After submission, B participants purge local hidden-tier copies and transcripts (Option B §5.2); A deletes uploads under its retention policy.
+- Hidden-tier material follows VVP §10, with every exposure logged (rubric LK-5). After submission, B participants and their research assistants purge local hidden-tier copies (including imported hand-off bundles) and transcripts (Option B §5.2), and A1 participants and their research assistants delete run kits and their outputs; A deletes uploads under its retention policy.
 - Honorarium and/or contributor credit: an Open question (O-005).
 
 ## 10. Timeline (indicative [U], after Phase 5 authorization)
 
 | When | Activity |
 |---|---|
-| Build | Shared core (pilot subset) and both slices; calendar time depends on staffing. In parallel: paper selection, clean-room reference implementations, sealed keys, ethics review, model access (O-018), recruitment |
+| Build | Shared core (pilot subset) and both slices; calendar time depends on staffing. In parallel: paper selection, clean-room reference implementations, sealed keys, ethics review, model access (O-018; Team seats for B-arm desktop users), recruitment |
 | Weeks 1–2 after the build | Preparation (§4, step 1); fixes |
 | Weeks 3–8 | Setup tests, sessions, asynchronous completion, debriefs |
 | Weeks 9–11 | Arm-blind review |
@@ -178,5 +178,6 @@ Each rule applies identically to both arms. The research lead sets the final val
 - Balanced suggestion experiment; blind ratings, coding and adjudication; normalized packages; SP-3 out of blind review.
 - Commercial terms, staff fallbacks and observation in both arms; B environment audit; A design baseline.
 - Methodology arm through L0–L12 (PQ8); paper-specific key items; PQ7 on a less canonical paper; corrected RD and shift-share statuses; sessions within the cap; O-019.
+- Cross-document consistency pass (2026-11-05): Team or Enterprise seats for B-arm desktop users and API keys for terminal users, with the seat cost (§3.1, rule 1, §10); a B run test matching the A1 run-kit test (§4, M1, rule 1); candidate-stage gates as in the rubric's stage map (§4); the shift-share condition stated as an untestable identifying assumption (§8); the ADH implementations not assumed to meet GT-1 (§8); local hidden-tier copies deleted in both arms (§9); clearer methodology-arm and rule 3 wording; the research lead's brief named explicitly.
 
 **v0.1.0** (2026-11-05): first draft.

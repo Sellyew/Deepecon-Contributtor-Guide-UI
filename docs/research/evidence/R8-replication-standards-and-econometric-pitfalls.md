@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Topic | (a) Replication-package standards and data licensing in economics: the Data and Code Availability Standard (DCAS), journal policies and archives, data-editor checks, reported reproducibility, restricted data, package size, software, Stata containers and licensing, redistributability of common datasets, default licences. (b) A catalogue of consequential econometric pitfalls: the mistake, its consequence, a computational detection idea, and its status, with a citation check for every reference. (c) Documented real errors and well-known contested cases. (d) Candidate papers for the three pilot archetypes in the [pilot plan](../../pilot/pilot-evaluation-plan.md) §8. |
-| Date | 2026-11-05. All sources accessed 2026-11-05. Corrections added 2026-11-05: see [Corrections](#corrections-2026-11-05-independent-econometric-review). |
+| Date | 2026-11-05. All sources accessed 2026-11-05. Corrections added 2026-11-05: see [Corrections](#corrections-2026-11-05-independent-econometric-review) and [further corrections](#corrections-2026-11-05-cross-document-consistency-review). |
 | Author | research agent |
 | Scope | Top-5 journals (AER, Econometrica, JPE, QJE, REStud) and the field journals that appear in the same standards documents. Pitfalls: the 35 references named in the assignment, plus eight additions verified at [P-page] or [S]. Pilot: four Top-5 candidates and one field-journal alternate. Institute for Replication (I4R) material already in [R4](R4-replication-benchmarks.md) §2.4 is cross-referenced, not repeated. |
 | Evidence labels | **[P-full]** primary source, full text read (a whole policy page, blog post, standard, data file or report section). **[P-page]** primary source read in part: landing page, abstract, README, repository file, or an author's own software documentation. **[S]** secondary: search-engine summary, third-party documentation or bibliography, aggregator. **[U]** unverified: my domain knowledge, or a claim I could not check here. Text marked *(assessment)* is my analysis, not a sourced fact. |
@@ -61,6 +61,14 @@
 ### Grading of inference-only pitfalls (§3.1 P6; §3.3)
 
 The detection ideas for P6 ("it should be about 5%") and in §3.3 ("size simulations … with the rejection rate as the score") would grade an agent by the size of its test. That is infeasible: detecting a size of 10% against 5% takes about 150 re-runs of the agent's pipeline, and 7% against 5% about 820 ([verifier protocol](../../methodology/verifier-validation-protocol.md) §4 item 7). A 5% key would also fail correct conventional inference with few treated clusters (Conley & Taber 2011; MacKinnon & Webb 2018 [U]). Inference is therefore graded deterministically, against the conditional reference for the declared variance estimator; size and coverage simulations are used only to validate verifiers (rungs L4 and L7).
+
+## Corrections (2026-11-05, cross-document consistency review)
+
+*Added on 2026-11-05 after a cross-document consistency review. As with the corrections above, the rest of this note is kept unchanged as its dated record; where it conflicts with this section, this section supersedes it.*
+
+- **Share of inference-only entries (§3.3; §6 item 8).** "About half" should read "about a third": 7 of the 21 entries (P6, P7, P8, P12, P14, P15, P20) change mainly inference, and only P6, P7, P12 and P14 change standard errors alone (§3.1, *Changes* column; P8 also moves the point estimate, and P15 and P20 also affect interpretation). After the status corrections above, P10b and P22 also change inference only.
+- **Restricted data (§6 item 3).** Implication 3 is superseded by decision-log P-027 and the [verifier protocol](../../methodology/verifier-validation-protocol.md) §6: semi-synthetic data on real covariates inherit the original licence and serve only redistributable data; for restricted sources the route is fully synthetic data, with disclosure review and the provider's permission where required.
+- **ADH implementations and GT-1 (§5, D4 pros; §6 item 12).** The three public ADH implementations (`ShiftShareSE`, GPSS, BHJ) support differential testing. They were written by methods authors to reproduce their own papers' analyses, so whether any meets GT-1's clean-room standard (a re-implementation of the same target analysis by someone who has not read the original code; P-028, Proposed) is [U]. The same applies to the `rdpackages` scripts for the RD candidates.
 
 ---
 
@@ -392,7 +400,7 @@ How to read the catalogue:
 
 ### 3.3 Patterns for detection *(assessment)*
 
-- **About half the catalogue changes only inference** (P6, P7, P8, P12, P14, P15, P20). A verifier that compares point estimates alone will pass these flawed variants as if they were "equivalent mutants". The output contract must include SEs or CIs and must name the inference method. Hidden-variant tests should include **size simulations**: placebo treatments or placebo shocks, with the rejection rate as the score. *(Corrected 2026-11-05: size simulations validate verifiers but do not grade agents; see [Corrections](#corrections-2026-11-05-independent-econometric-review).)*
+- **About half the catalogue changes only inference** (P6, P7, P8, P12, P14, P15, P20). A verifier that compares point estimates alone will pass these flawed variants as if they were "equivalent mutants". The output contract must include SEs or CIs and must name the inference method. Hidden-variant tests should include **size simulations**: placebo treatments or placebo shocks, with the rejection rate as the score. *(Corrected 2026-11-05: size simulations validate verifiers but do not grade agents; see [Corrections](#corrections-2026-11-05-independent-econometric-review). "About half" should read "about a third"; see [further corrections](#corrections-2026-11-05-cross-document-consistency-review).)*
 - **Metamorphic relations available from the sources:**
   - effective-F invariance (P8);
   - unit-rescaling sensitivity of log-like ATEs (P16);
@@ -442,7 +450,7 @@ Archetype labels follow pilot plan §8. "Public copy" means data redistributed b
 | Software | R (`bacondecomp`); a Stata version exists [U] | R, Stata and Python scripts [P-page] | R, Stata and Python scripts [P-page] | R (`ShiftShareSE`); Stata and R (GPSS, BHJ) [P-page] |
 | Size | `divorce.rda` 692 KB, compressed [P-page] | CSV 511 KB; dta 377 KB [P-page] | CSV 311 KB; dta 273 KB [P-page] | `ADH.rda` 1.2 MB; GPSS ADH inputs about 10 MB; BHJ `ADH.zip` 11.5 MB [P-page] |
 | Possible two target analyses *(assessment)* | Two outcomes from the 147-variable file, once a codebook exists [U] | Main mortality effect, plus the pre-period placebo or the race-specific outcome | Female outcome `Y`, plus the male outcome `hischshr1520m` (my reading of the name [U]) | Manufacturing versus non-manufacturing employment-share change |
-| Pros *(assessment)* | Top-5; tiny; the archetypal staggered DiD for P1–P4, P6 and P7; the decomposition gives checkable intermediate outputs | Top-5; tiny; classic sharp RD for P10 and P11; CTV (2017) re-examined inference approaches on these data, giving an independent reference [S] | Top-5; tiny; close-election RD with covariates and density testing (P10, P11); reference code in three languages | Top-5; the canonical application of all three shift-share papers, so **three independent reference implementations** exist for the GT-1 independent check; established pitfalls P12 and P13 |
+| Pros *(assessment)* | Top-5; tiny; the archetypal staggered DiD for P1–P4, P6 and P7; the decomposition gives checkable intermediate outputs | Top-5; tiny; classic sharp RD for P10 and P11; CTV (2017) re-examined inference approaches on these data, giving an independent reference [S] | Top-5; tiny; close-election RD with covariates and density testing (P10, P11); reference code in three languages | Top-5; the canonical application of all three shift-share papers, so **three independent reference implementations** exist for the GT-1 independent check *(GT-1 status [U]; see [further corrections](#corrections-2026-11-05-cross-document-consistency-review))*; established pitfalls P12 and P13 |
 | Cons *(assessment)* | Undocumented variables; licence and provenance unknown; original package not located; extremely familiar in DiD teaching | Rare-event mortality outcomes make estimates noisy, which may blur the consequences of flaws; licence unstated; well-known teaching example; a manipulation test means little for a 1960 poverty rate | The main teaching example of a widely used RD primer, so contamination is very high; licence unstated; only a subset of the paper's variables | Very famous; Stata version sensitivity noted by BHJ [P-page]; ambiguous licensing of derived data; exposure-robust SEs need share matrices, which makes the environment more complex |
 
 - **Field-journal alternate (not Top-5).** Cheng & Hoekstra (2013, JHR), castle-doctrine laws: `castle` in `bacondecomp`, 520 observations × 159 variables, 81 KB [P-page]. It is also used in the package vignette [P-page].
@@ -461,7 +469,7 @@ Archetype labels follow pilot plan §8. "Public copy" means data redistributed b
    - JPE requires non-proprietary copies of data files, which eases R and Python environments under decision P-016.
    - Their READMEs follow a template.
    - Be cautious with QJE until its policy is verified.
-3. **Plan for semi-synthetic data as the main route, not the exception.**
+3. **Plan for semi-synthetic data as the main route, not the exception.** *(Superseded 2026-11-05 for restricted data; see [further corrections](#corrections-2026-11-05-cross-document-consistency-review).)*
    - About 72% of AEA intake "cases" involve some restriction, and about 20% are "very difficult".
    - REStud and JPE packages with **simulated data plus simulated output** are useful precedents and raw material. They are designed to exercise the code path, not to reproduce the paper, so DeepEcon still needs its own design-preserving semi-synthetic variants.
 4. **Size screen.** The median package (about 40 MB) is unproblematic, but about 1 in 5 exceeds about 2 GB. Target analyses should run on bounded analysis datasets. Protocol Stage 0's "under about 1 hour" compute screen needs a matching storage screen.
@@ -481,14 +489,14 @@ Archetype labels follow pilot plan §8. "Public copy" means data redistributed b
    - I4R finds coding errors in about a quarter of the studies it reproduced.
    - The GT-1 independent check of the reference implementation therefore stays necessary.
    - I4R's error types (duplicates, incomplete DiD interactions, miscoded treatment) are ready-made, realistic flaw templates that satisfy Safeguard G.
-8. **Output contracts must include inference.** About half the catalogued pitfalls change only SEs, so tasks that score only coefficients cannot detect them. Hidden-variant tests should include placebo-based size checks.
+8. **Output contracts must include inference.** About half the catalogued pitfalls change only SEs, so tasks that score only coefficients cannot detect them. Hidden-variant tests should include placebo-based size checks. *(Corrected 2026-11-05: about a third; see [further corrections](#corrections-2026-11-05-cross-document-consistency-review).)*
 9. **Use the statuses in §3.1 for admission.** *(Statuses corrected 2026-11-05; see [Corrections](#corrections-2026-11-05-independent-econometric-review).)*
    - `established` pitfalls with computational signatures (P1–P4, P6–P8, P10–P12, P16, P17, P19, P21) suit V1 and V2 scoring.
    - `conditional` items need the conditions shown in the task data.
    - `contested` items (P8 thresholds, P14's literature-wide claims, P20 Kelly, AJR–Albouy, the worm wars) belong on the experimental track (X-003).
 10. **Citation hygiene is itself a task for the pipeline.** Here, 13 of the 35 named references could not be verified at all, and 4 more only as working papers, because Crossref and publisher hosts were blocked. The Stage 3 citation-verification step needs network access to Crossref or publisher sites, or a pre-built verified bibliography.
 11. **Contamination.** All four pilot candidates are canonical *teaching* datasets with public method implementations. That suits a pilot that compares workflows (pilot plan §8, criterion 5) but not admitted tasks, which would need perturbed or semi-synthetic variants.
-12. **ADH as a cross-validation testbed.** Three independent public implementations (`ShiftShareSE`, GPSS, BHJ) let an "independent reference implementation" check (GT-1) run almost free on the shift-share archetype. The same holds, to a lesser degree, for the RD candidates (R, Stata and Python scripts by the `rdpackages` team).
+12. **ADH as a cross-validation testbed.** Three independent public implementations (`ShiftShareSE`, GPSS, BHJ) let an "independent reference implementation" check (GT-1) run almost free on the shift-share archetype. The same holds, to a lesser degree, for the RD candidates (R, Stata and Python scripts by the `rdpackages` team). *(Corrected 2026-11-05: whether these meet GT-1 is [U]; see [further corrections](#corrections-2026-11-05-cross-document-consistency-review).)*
 
 ---
 

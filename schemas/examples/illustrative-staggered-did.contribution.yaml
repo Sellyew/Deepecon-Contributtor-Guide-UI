@@ -202,7 +202,7 @@ failure_modes:
       warrant_types: [contributor_research_experience, methodological_literature]
       observed_in_practice: own_project
     validity_layer: statistical
-    # Static TWFE here is also an estimand–estimator mismatch (verifier protocol §9).
+    # Interpretation is secondary: the static TWFE coefficient is read as the stated weighted ATT (verifier protocol §9).
     secondary_validity_layers: [interpretation]
     status: conditional
     status_claimed_by_contributor: conditional

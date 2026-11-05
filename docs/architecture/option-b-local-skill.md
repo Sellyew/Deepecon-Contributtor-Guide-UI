@@ -31,7 +31,7 @@ Everything happens on the contributor's computer: the interview, code inspection
 |---|---|---|---|
 | 1 | Discover | Project page (English / 中文): motivation, what a contribution involves, credit policy | 5–10 min |
 | 2 | Check requirements | Commercial-terms access (project-provided or institutional, §10.2); a supported location (§10.3); operating system; Stata, R, or Python as the paper needs. Python for the helper only where no helper binary exists for the platform | 5 min |
-| 3 | Install Claude Code | **Terminal:** macOS 13+, Windows 10 1809+ (native or WSL), Ubuntu, Debian, Alpine. **No terminal:** the desktop app's Code tab runs the same engine and installs plugins from its interface [P-page]. The desktop app is the no-terminal path *for the conversation*; the workspace and its setup script are still required | 10–30 min; the main barrier for non-technical users |
+| 3 | Install Claude Code | **Terminal:** macOS 13+, Windows 10 1809+ (native or WSL), Ubuntu, Debian, Alpine. **No terminal:** the desktop app's Code tab runs the same engine and installs plugins from its interface [P-page]. It needs a subscription sign-in (API keys are documented only for the terminal client), so under the exposure rule a Team or Enterprise seat (§3.2, §10.2). The desktop app is the no-terminal path *for the conversation*; the workspace and its setup script are still required | 10–30 min; the main barrier for non-technical users |
 | 4–5 | Get the workspace | **Default, typing-free:** download the project's **workspace**, place the replication package in `original/`, open the folder in Claude Code or the desktop app, and accept the trust dialog. The workspace's settings declare the project marketplace and enable the plugin (`extraKnownMarketplaces`, `enabledPlugins`, applied after trust), or embed the skill directly; it also carries the policy that plugins cannot ship (§6.1) [P-full/P-page, R2 §2.1, §8.7]. **Alternative:** `/plugin marketplace add <owner>/<repo>`, then `/plugin install deepecon-contributor@<marketplace-name>`; the marketplace name is declared in its `marketplace.json`, not the GitHub owner. Since v2.1.292 there is also a one-step form, `claude plugin install … --marketplace <owner>/<repo>`. Adding a third-party marketplace through the desktop app's own interface is not documented [U]. Restricted data stay **outside** the workspace (§6.3). | 5–15 min |
 | 6 | Start | Run the skill, e.g. `/deepecon-contributor:contribute` | — |
 | 7 | Choose language | English or Simplified Chinese, stored for resumption | 1 min |
@@ -79,7 +79,7 @@ flowchart LR
 | Surface | Suitability | Evidence |
 |---|---|---|
 | Claude Code in a terminal | Full capability. OS-level sandboxing for shell commands is available on macOS, Linux, and WSL2, but **not native Windows**. | [P-page] |
-| Desktop app, Code tab | **The no-terminal path for the conversation.** Same engine; installs plugins from its interface (not in WSL or cloud sessions); needs a paid plan. The workspace, its setup script, and the paper's software are still required. | [P-page] |
+| Desktop app, Code tab | **The no-terminal path for the conversation.** Same engine; installs plugins from its interface (not in WSL or cloud sessions). It requires a Pro, Max, Ultra, Team, or Enterprise subscription sign-in, and Console (API) accounts are documented only for the terminal client [P-page, R2 §6.1]; whether it accepts API keys is [U]. Under the exposure rule (§10.2) it therefore needs a Team or Enterprise seat, project-provided (subject to O-018) or institutional; project-provided API keys serve terminal users. The workspace, its setup script, and the paper's software are still required. | [P-page] |
 | Claude Cowork | **Not suitable as the main surface.** It loads plugin skills, agents, and hooks, but runs code on Anthropic's servers (Pro/Max/Ultra) or in a cloud/local VM (Team/Enterprise). It cannot use a contributor's local Stata installation or licence. | [P-page/P-full] |
 | **B-web: Claude Code on the web** (cloud sessions) | A browser-only variant, the counterpart of Option A's hosted sandbox. A cloud session loads the repository's `.claude/settings.json` hooks and permission rules and its `.claude/skills/` (not marketplace plugins). Python is preinstalled; R comes through a setup script. Available on Pro, Max, Ultra, Team, and qualifying Enterprise seats, so under the exposure rule (§10.2) it needs a Team or Enterprise seat. **Limits:** only public-data R or Python packages; the materials must sit in a private GitHub repository; code runs in an Anthropic virtual machine; Stata is unavailable. | [P-page, R2 §8.4] |
 | **Remote Control; desktop sessions over SSH** | The economist converses from the browser, mobile, or desktop app while execution and files stay on another machine: a local machine (Remote Control) or a research assistant's or department's machine that has Stata (desktop SSH sessions, where plugins install in local and SSH sessions). Remote Control needs a Pro, Max, Ultra, Team, or Enterprise sign-in and is **not available with API keys**, so under the exposure rule it needs a Team or Enterprise seat; while connected, its transcript is also stored on Anthropic's servers. | [P-page, R2 §8.2, §8.6] |
@@ -91,7 +91,7 @@ flowchart LR
 | Function | How Option B provides it | Runs where | Who pays |
 |---|---|---|---|
 | F1 Onboarding and consent | Bilingual project page + skill's S0 | Static site + local | Project (static hosting) |
-| F2 Identity | Contributor's name and e-mail in the package; verified at the upload endpoint | Local + upload endpoint | Project |
+| F2 Identity | Contributor's name and e-mail in the package; verified at the upload endpoint; location attestation when project-provided access is issued and at the endpoint (§10.3) | Local + upload endpoint | Project |
 | F3 Materials ingestion | The model reads local files directly | Local | — |
 | F4 Interview engine | Skill + stage cards + subagents + model | Local client, remote model | Project or institution (commercial access, §10.2) |
 | F5 State and provenance store | `.deepecon/` files written through a schema-validating helper | Local | — |
@@ -224,7 +224,8 @@ The package ZIP goes through a private upload link (the default) or a private Gi
 |---|---|---|---|
 | Prompts, the content of files the model reads, command outputs | Yes, on every request | Anthropic | The account's terms (§10.2) |
 | Files the model never reads | No | — | — |
-| Drafts and abandoned contributions | No | — | — |
+| Drafts and abandoned contributions | No, except hand-off bundles (next row) | — | — |
+| Hand-off bundle (research-assistant mode): session state, hand-off specification, `work/` repository | Yes, encrypted, before submission | The RA, through the project's upload endpoint or an institutional drive | Exposure log; encryption; deletion after import |
 | Final package (code, dossier, consented transcript, hidden-tier material in `internal/` and `hidden/`) | Yes, at submission | Project, in the same internal review store as Option A | Project privacy notice; licence records |
 | Hidden-tier copies after submission (`work/`, `.deepecon/`, local transcripts) | No, but they **persist on the contributor's machine** | — | Purge step after export; the contributor agreement asks for deletion after acceptance |
 | Client telemetry | Optional | Anthropic | Can be disabled [P-page] |
@@ -237,10 +238,12 @@ The package ZIP goes through a private upload link (the default) or a private Gi
 | Commercial (Team, Enterprise, API) | Anthropic "may not train" on customer content | 30 days in the Claude Code documentation; "not retained by default" in the API documentation (the two disagree); zero data retention for qualified organizations through sales | [P-page/P-full] |
 
 **The exposure rule.** The [verifier protocol](../methodology/verifier-validation-protocol.md) §10 (Proposed) requires that any session that sees hidden-tier material runs under commercial no-training terms; consumer accounts, even after an opt-out, may handle only agent-tier or public material. Failure modes, flawed variants, and answer keys are created **inside** the interview from stage S2 onwards. **Option B therefore needs commercial-terms access for full contributions**, provided:
-- by the project, through a Console workspace with API keys, if Anthropic confirms that external contributors count as the customer's "authorized users" (O-018); or
-- by the contributor's institution, for example a university agreement governing Claude for Education [P-page, R3 §6.2].
+- by the project, if Anthropic confirms that external contributors count as the customer's "authorized users" (O-018): API keys from a Console workspace for terminal users, and Team or Enterprise seats for desktop-app users; or
+- by the contributor's institution, for example a university agreement governing Claude for Education [P-page, R3 §6.2] (whether Education plans include Claude Code is [U], R3).
 
 If neither is available, the research lead must choose between relaxing the rule (accepting a contamination risk for the private split) and not using Option B as designed. The feedback path is closed in any case: the workspace sets `DISABLE_FEEDBACK_COMMAND=1`, and feedback is uploaded only on an explicit action [P-page, R2 §9.2]. The account type is recorded in `consent.contributor_account_terms`.
+
+**Desktop users need seats, not keys.** The desktop app requires a Pro, Max, Ultra, Team, or Enterprise subscription sign-in, and Console (API) accounts are documented only for the terminal client [P-page, R2 §6.1]; whether the desktop app accepts API keys is [U]. Under the exposure rule, desktop users therefore need Team or Enterprise seats, project-provided (subject to O-018) or institutional; project-provided API keys serve terminal users. Team Standard seats cost $25 per seat per month, $20 billed annually, and are named, not meant for rotation [P-full/P-page, R3]. The cost effect is in §12.
 
 ### 10.3 Regional availability
 
@@ -263,7 +266,7 @@ Under Option B, contributors located in those regions therefore cannot use Claud
 
 | Cost | Who pays | Order of magnitude |
 |---|---|---|
-| Model access, project-provided | Project | ≈ $17 per contribution at API list prices (central estimate), through a Console "Claude Code workspace" with per-user monthly spend limits [P-page]. With API keys, Claude Code's prompt cache lasts 5 minutes unless the workspace sets `promptCacheTtl: "1h"`; the $17 figure assumes the one-hour cache (cost model A7) [P-page, R2 §11]. Anthropic's Claude Code terms permit customers to provision API keys "for use by the customer's own authorized users"; whether external contributors count as authorized users is the open question (O-018). Team seats are named and not meant for rotation. |
+| Model access, project-provided | Project | ≈ $17 per contribution at API list prices (central estimate), through a Console "Claude Code workspace" with per-user monthly spend limits [P-page]; this serves terminal users. With API keys, Claude Code's prompt cache lasts 5 minutes unless the workspace sets `promptCacheTtl: "1h"`; the $17 figure assumes the one-hour cache (cost model A7) [P-page, R2 §11]. Anthropic's Claude Code terms permit customers to provision API keys "for use by the customer's own authorized users"; whether external contributors count as authorized users is the open question (O-018). Desktop-app users need Team or Enterprise seats instead (§10.2): at Team Standard's $25 per seat per month ($20 billed annually) [P-full/P-page, R3], roughly $25–50 per desktop contributor for one to two seat-months [U], instead of about $17 of API usage, plus seat management. Team seats are named and not meant for rotation. |
 | …or institutional | Contributor's institution | Existing commercial agreements (e.g., Claude for Education); no project cost |
 | Consumer plans | Contributor | Pro $20 a month ($17 annually); Max $100; Ultra $200 [P-full]. Admissible only for agent-tier or public material under the exposure rule (§10.2). Reimbursing one month of Pro for 200 contributors would cost $4,000, against ≈ $3,400 of API inference |
 | Workspace, plugin, helper, and endpoint development | Project | §13 |
@@ -271,7 +274,7 @@ Under Option B, contributors located in those regions therefore cannot use Claud
 | Operations | Project | 0.1–0.2 FTE (§14) |
 | Evaluation inference | Project | A simulated-contributor regression suite per certified client version on the stable channel (cost model §4) |
 | Support | Project | Higher than Option A per contributor (environment diversity): ≈ 1 h against 0.75 h [U] |
-| Shepherding and review | Project | Likely the largest cost. Contributors (or RAs) pre-do part of the operationalization by submitting variants they have already run, as under Option A's A1. Measured in the pilot (M9) |
+| Shepherding and review | Project | Likely the largest cost. Contributors (or RAs) pre-do part of the operationalization by submitting variants they have already run, as under Option A's A1. B-staff adds ≈ 4 h (2–6 h) per contribution routed to it [U], as staff execution does under Option A. Measured in the pilot (M9) |
 
 ## 13. MVP build plan
 
@@ -286,7 +289,7 @@ Under Option B, contributors located in those regions therefore cannot use Claud
 | Run wrappers and environment capture for Stata, R, Python | 1–2 |
 | Per-platform helper binaries (Python optional) | 0.5–1 |
 | Status line and locally rendered dossier page | 0.5–1 |
-| Upload endpoint with package validation and identity check ([submission](submission-mechanisms.md) §3.3) | 1–2 |
+| Upload endpoint with package validation, identity check, and location attestation ([submission](submission-mechanisms.md) §3.3) | 1–2 |
 | Bilingual project page | 0.25–0.5 |
 | Privacy notice for the endpoint and package store | 0.25–0.5 |
 | Installation and contributor guides (EN/ZH); desktop-app walkthrough | 1–2 |
@@ -322,17 +325,20 @@ The risk registers of both options use one inclusion rule: every risk rated Medi
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
 | Non-technical economists do not complete setup | Medium–High [U: pilot] | High | Desktop app; typing-free workspace; research-assistant mode; onboarding sessions; hosted onboarding (hybrid H1) |
-| Engineering takes longer than planned | Medium | Medium | Narrow MVP; early tests of the client features the design relies on (workspace-scoped `agent`, auto-update from workspace settings, subagent input restriction) |
+| Engineering takes longer than planned | Medium–High: the design relies on untested client features, on a client that ships several releases a week | Medium | Narrow MVP; early tests of the client features the design relies on (workspace-scoped `agent`, auto-update from workspace settings, subagent input restriction) |
 | Terms do not allow project-provided access for external contributors (O-018) | Low–Medium (a definitional question about "authorized users") | High: B then depends on institutional accounts or on relaxing the exposure rule | Ask Anthropic; institutional commercial accounts |
+| Project account suspended or capped (project-provided keys or seats) | Low–Medium | High: interviews on project-provided access stop | Location attestation when keys or seats are issued and at the endpoint; per-user spend limits; Scale tier before recruitment waves; separate evaluation workspace; institutional accounts as a second route |
 | Research-assistant hand-offs stall operationalization | Medium [U: pilot] | Medium–High | Remote Control or SSH variants; reminders; B-staff |
 | Long interview degraded by context compaction | Medium | Medium | Core rules first in `SKILL.md`; state re-injection hook; `.deepecon/` as the record of truth |
 | Interviewer configuration drifts (client version, user-level configuration) | Medium | Medium–High | Pinned and recorded model; doctor records configuration; pre-flight warnings; per-model evaluations |
 | Taxonomy and controls readable in the plugin weaken the influence measures | Medium | Medium | Serve suggestion sets and controls from a project endpoint; report the limit |
 | Hidden-tier copies persist on contributors' machines | Medium | Medium–High | Purge step after export; deletion after acceptance in the agreement; encrypted hand-off bundles |
-| Hidden material enters training through consumer accounts | Low if the exposure rule is enforced; Plausible otherwise | High (contamination) | Commercial-terms access required (§10.2); the account type is recorded and checked at intake |
+| Breach of the upload endpoint or submitted packages | Low–Medium | High | Encryption, minimal retention, access control, security review |
+| Hidden material enters training through consumer accounts | Low if the exposure rule is enforced; Medium–High otherwise | High (contamination) | Commercial-terms access required (§10.2); the account type is recorded and checked at intake |
 | Restricted data read by a subprocess despite deny rules | Low–Medium | High | Keep restricted data out of the workspace; never request it |
 | Originals modified on native Windows (no OS sandbox) | Low | High | Checksum integrity check blocks export |
 | Plugin breaks after a client update | Medium | Medium | Stable channel; pre-flight check; regression suite per certified release |
+| Maintenance burden persists after the grant period | Medium | Medium | Certify less often; minimum client version; sunset plan |
 | Contributors in mainland China, Hong Kong, or Macau cannot use Claude Code | Certain under the current policy for those located there | High for that group | Legal review; portable skill in another tool, with validation caveats (O-007) |
 | Support load exceeds capacity | Medium | Medium | Office hours; FAQ; a narrow supported-environment matrix |
 
@@ -350,7 +356,7 @@ The risk registers of both options use one inclusion rule: every risk rated Medi
 
 ## 18. Open questions specific to Option B
 
-1. May the project provide Console workspace keys to external contributors as its "authorized users" (O-018)? Which contributors have institutional commercial access (O-006)?
+1. May the project provide Console workspace keys (terminal users) or Team or Enterprise seats (desktop-app users) to external contributors as its "authorized users" (O-018)? Which contributors have institutional commercial access (O-006)?
 2. What is the supported environment matrix for the first release (operating systems, Stata versions, surfaces)?
 3. Does a plugin `agent` setting enabled only in the workspace replace Claude Code's system prompt as documented, and how does it interact with a user's own `agent` and `/model`?
 4. Should the suggestion sets and controls be served from a project endpoint (§5.1)?
@@ -366,6 +372,7 @@ The risk registers of both options use one inclusion rule: every risk rated Medi
 - Research-assistant mode: the economist still installs; hand-off bundle route; possibly days of waiting.
 - Build plan completed (upload endpoint, project page, privacy notice, subagents, binaries, status line): ≈ 11.5–20.5 engineer-weeks; shepherd console in the shared core.
 - Maintenance 0.1–0.2 FTE, with evaluation inference per certified stable release; pre-interview setup time (31–66 minutes).
+- Cross-document consistency pass (2026-11-05): desktop-app users need Team or Enterprise seats under the exposure rule (§2.1, §3.2, §10.2, §12, §18); hand-off bundles added to the data flows; B-staff shepherd hours costed; location attestation at the endpoint; three risks added (project account suspension, endpoint breach, post-grant maintenance); engineering overrun rated Medium–High with its basis; the consumer-account risk rated on the shared scale.
 
 **v0.2.1 (fairness review for Option B).**
 - The workspace becomes the default, typing-free delivery: it registers or embeds the plugin.

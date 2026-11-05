@@ -140,7 +140,7 @@ The interviewer updates the dossier only through schema-validated tool calls (`u
 - **One pinned model** (e.g., Claude Opus 5.5 at a fixed effort level) and one protocol version per release. Every contributor gets the same interviewer: same system prompt, tools, model, and effort level. This makes contributions comparable and protocol evaluations meaningful.
 - **Prompt caching** for the stable prefix. A one-hour cache lifetime suits human response gaps; writes cost 2× base input, and reads cost 0.05× on Opus 5.5.
 - **Budgets:** per-session token and dollar caps, with graceful checkpointing.
-- **Account tier.** API usage tiers carry monthly spend caps: $500 at Start, $1,000 at Build, $200,000 at Scale [P-page, R9]. Thirty contributions in one month at the central estimate already cost about $511, and 50 at the high estimate about $2,310 ([cost model](cost-and-effort-model.md)). The caps are **ample only at the Build tier or above**, and the account should move to the Scale tier before recruitment waves. Evaluation trials run in a separate workspace, with spend alerts on both.
+- **Account tier.** API usage tiers carry monthly spend caps: $500 at Start, $1,000 at Build, $200,000 at Scale [P-page, R9]. Thirty contributions in one month cost about $390 at the A1 central estimate ($511 with A2), and 50 at the high estimate about $1,770 ($2,310 with A2) ([cost model](cost-and-effort-model.md)). The caps are **ample only at the Build tier or above**, and the account should move to the Scale tier before recruitment waves. Evaluation trials run in a separate workspace, with spend alerts on both.
 - **Refusal handling:** server-side fallback configuration, per the provider's guidance. A flagged turn may then be answered by a fallback model unless refusals are left to stand; the same applies to Option B. The safety classifiers "most often flag cybersecurity and biology content", which is rare in economics [P-page: Claude Code model-configuration documentation, read 2026-11-05].
 
 ### 5.3 State, provenance, and resumption
@@ -166,6 +166,8 @@ A full Chinese webfont (Noto Sans SC) is 17.8 MB [P-page], so the platform uses 
 ### 6.1 Ingestion and protection of originals
 
 The application never modifies an original. Objects are **versioned**, checksums are kept in the database, and variants are stored as patches against the originals. Originals are deleted on withdrawal or on an erasure request, with an audit entry. Write-once bucket locks are not used, because they would conflict with contributors' right to withdraw (D-008) and with GDPR erasure ([R9](../research/evidence/R9-hosted-stack-and-compliance.md) §5).
+
+On the contributor's or RA's machine, a run kit copies the original package into a separate working directory, applies the patch only there, and verifies a checksum manifest of the original before uploading outputs; a mismatch blocks the upload.
 
 ### 6.2 Execution routes
 
@@ -211,6 +213,7 @@ In-app submission writes the package directly into the internal review store; no
 | Paper, code, declarations, interview text, drafts | Yes, from the first upload (variant (a) defers code until submission) | Project servers (EU hosting proposed) **and the project's processors**: hosting, database, object storage, LLM tracing, error tracking (§3.2) | Project privacy notice, processor agreements, and retention policy |
 | Content needed for each turn | Yes | Anthropic, under the project's commercial account | Anthropic "may not train models on Customer Content". A data processing addendum with EU standard contractual clauses (plus UK and Swiss addenda) is part of the terms. API data at rest is stored in the US; inference is global by default, or US-only at 1.1× price [P-page, R3/R9]. Default retention is stated inconsistently: 30 days in the Claude Code documentation versus "not retained by default" (except certain models) in the API documentation, unresolved [P-page, R3 §6.2]. Zero data retention is available on the API to qualified organizations through sales; it is not available on consumer plans [P-page, R3 §6.2] |
 | Data (A1, staff) | No | — | — |
+| Run kits (A1): flawed-variant patches and run scripts, and the outputs they produce | Arrive from the project on the contributor's or RA's machine, where copies persist; only outputs are uploaded | — | Each download recorded in the exposure log, as for Option B's hand-off bundles; deletion after upload and after acceptance under the contributor agreement |
 | Data (A2), public only | Yes | Project sandbox | Project terms |
 
 **Exposure rule.** The [verifier protocol](../methodology/verifier-validation-protocol.md) §10 requires that any session that sees hidden-tier material (flawed variants, answer keys) runs under commercial no-training terms. Option A meets this by construction.
@@ -218,6 +221,7 @@ In-app submission writes the package directly into the internal review store; no
 ### 10.2 Obligations that come with custody
 
 - **Unpublished code, drafts, and transcripts.** The project holds them from the first session, including contributions that are later abandoned. This requires security controls, minimal retention, processor agreements, and deletion on withdrawal. Under Option B the project receives the same code, dossier, and consented transcript at submission; the difference is custody of drafts and abandoned contributions.
+- **Run-kit copies (A1).** Run kits carry hidden-tier material (flawed-variant patches) to contributors' and RAs' machines, where copies persist with their outputs. Each download is recorded in the exposure log; the kit asks for deletion after upload, and the contributor agreement asks for deletion after acceptance, as for Option B's local copies (Option B §10.1).
 - **EU contributors (GDPR).** Personal data goes to the US under the standard contractual clauses; variant (b) could keep model traffic in the EU [U].
 - **Contributors in mainland China (PIPL).** China's Personal Information Protection Law (Articles 3(2), 39, and 53) would apply. The 2024 exemption for transfers involving fewer than 100,000 people still leaves consent duties [S, unofficial copies]. Hosting inside mainland China would require an ICP filing [S].
 
@@ -255,7 +259,7 @@ A human interviewer using the same protocol is a third route. None of these has 
 | Support | Project | ≈ 0.75 h per contributor (0.25–1.5) [U]: the web platform plus run-kit questions on contributors' and RAs' machines; ≈ 150 h at 200 contributions, against Option B's ≈ 200 h |
 | Evaluation inference | Project | A simulated-contributor regression suite per protocol or model change ([cost model](cost-and-effort-model.md) §4) |
 | Contributor-side | Contributor | Time only (A1: their own compute and Stata licence) |
-| Shepherding and review | Project | Likely the largest cost. Under staff execution, shepherds also perform the S5 operationalization (≈ 4 h, 2–6 h, per contribution [U]); under A1, as under Option B, contributors pre-do part of it. Measured in the pilot (M9) |
+| Shepherding and review | Project | Likely the largest cost. Under staff execution, shepherds also perform the S5 operationalization (≈ 4 h, 2–6 h, per contribution routed to it [U]; the same holds for Option B's B-staff); under A1, as under Option B's local route, contributors pre-do part of it. Measured in the pilot (M9) |
 
 ## 13. MVP build plan
 
@@ -266,7 +270,7 @@ A human interviewer using the same protocol is a third route. None of these has 
 | Uploads, ingestion workers (PDF text, code index), materials viewer | 1.5–2.5 |
 | Interview orchestrator: tools, recall locks, exposure tracking, separate suggestion and checker calls, streaming, caching, budgets | 3–4.5 |
 | Dossier panel, provenance and exposure badges, review and diff screens | 1.5–2.5 |
-| Run-kit generator and output intake (A1) | 1–1.5 |
+| Run-kit generator (copy-then-patch, checksum check of the original) and output intake (A1) | 1–1.5 |
 | Run-kit cross-platform test matrix (macOS / Windows / Linux × Stata / R / Python) and guides (EN/ZH) | 1–2 |
 | Security hardening, privacy notice and processor agreements, deployment, monitoring | 1.5–3 |
 | **Option A-specific total (A1 plus staff execution)** | **≈ 12–19.5**, plus the shared core |
@@ -298,13 +302,17 @@ The risk registers of both options use one inclusion rule: every risk rated Medi
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Engineering takes longer than planned | Medium–High | Medium | Narrow MVP (A1 + staff execution); proven components; reuse ideas, not code, from open interview platforms (non-commercial licences: CC BY-NC 4.0, PolyForm Noncommercial; Wuttke et al.'s is CC0 [P-page]) |
+| Engineering takes longer than planned | Medium–High: more components to build | Medium | Narrow MVP (A1 + staff execution); proven components; reuse ideas, not code, from open interview platforms (non-commercial licences: CC BY-NC 4.0, PolyForm Noncommercial; Wuttke et al.'s is CC0 [P-page]) |
 | Breach of unpublished code, drafts, or transcripts (held from upload) | Low–Medium | High | Encryption, minimal retention, processor agreements, access control, security review; no data upload in A1; variant (a) |
+| Restricted data uploaded despite the declaration (e.g., inside the code archive) | Low–Medium | High | Data-type rejection; declaration; scan on upload; deletion and incident procedure |
 | Project API account suspended or capped | Low–Medium | High: all interviews stop | Location attestation and country checks; monitoring; a separate evaluation workspace; Scale tier before recruitment waves; spend alerts |
 | A1 hand-offs stall operationalization | Medium [U: pilot] | Medium–High | Staff execution; RA mode; reminders; A2 for public-data papers |
+| Hidden-tier run kits and outputs persist on contributors' or RAs' machines | Medium | Medium–High | Deletion step after upload; deletion after acceptance in the agreement; exposure log |
+| A run kit modifies the contributor's local original | Low | High | Copy-then-patch run kits; checksum check before upload |
 | Contributors in mainland China, Hong Kong, or Macau cannot be served with Claude | Certain under the current policy for those located there | High for that group | Legal review; second-provider route with validation caveats (O-007) |
 | Agent SDK variant (H2) conflicts with end-user payment terms | Medium–High | Medium | Prefer the Messages API path; ask Anthropic (O-018) |
 | Operating burden persists after the grant period | Medium | Medium | Small stack; managed services; a sunset plan |
+| Support load exceeds capacity (run-kit questions on varied machines) | Medium | Medium | Run-kit test matrix and guides; office hours; FAQ |
 | Interview less evidence-anchored than with local code access | Medium | Medium | Code index and viewer; staff execution; A2; RA mode |
 
 ## 17. The brief's stated advantages and disadvantages, assessed
@@ -335,6 +343,7 @@ The risk registers of both options use one inclusion rule: every risk rated Medi
 - Run-kit cross-platform test matrix and guides costed; shepherd console moved to the shared core; A2 split into managed and self-built.
 - A1's Stata use and environment diversity stated; research-on-the-interview advantage and provider replaceability credited; unequal China fallbacks stated.
 - Inference without in-session agentic work (≈ $13); pre-interview setup time (15–35 minutes); one risk-inclusion rule for both options.
+- Cross-document consistency pass (2026-11-05): A1 run kits recorded as hidden-tier copies on contributors' and RAs' machines (data flows, custody, risks) and specified as copy-then-patch with a checksum check of the original; four risks added (run-kit copies, local originals, support load, restricted data in uploads); engineering overrun's basis stated; spend-cap examples at the A1 rate; B-staff noted beside staff execution.
 
 **v0.2.0:**
 - Reference stack and verified cost anchors from R9.

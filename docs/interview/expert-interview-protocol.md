@@ -150,7 +150,7 @@ Stages are **adaptive, not linear**: the policy in §6 can return to an earlier 
 
 1. **Pre-registered prediction** (P-PRED), timestamped before any flawed code runs. Coarse categories, including a change in the standard error or confidence interval alone, and optionally three quantiles. Predictions are information, never a score of the expert.
 2. **Mechanism laddering** (P-WHY) until the mechanism is stated in terms of an estimand, an assumption, a measurement property, or an inference property.
-3. **Validity layer, classified by the contributor first** from a neutral list: implementation fidelity (computational correctness), measurement validity, statistical validity, identification validity, interpretation validity. The contributor names one primary layer and any secondary layers; static TWFE under staggered adoption, for example, is both a statistical and an estimand–estimator problem ([verifier protocol](../methodology/verifier-validation-protocol.md) §9). The interviewer then notes any disagreement, with reasons.
+3. **Validity layer, classified by the contributor first** from a neutral list: implementation fidelity (computational correctness), measurement validity, statistical validity, identification validity, interpretation validity. The contributor names one primary layer and any secondary layers; static TWFE under staggered adoption, for example, is primarily a statistical problem (the estimator does not target the stated estimand), with interpretation as a possible secondary layer ([verifier protocol](../methodology/verifier-validation-protocol.md) §9). The interviewer then notes any disagreement, with reasons.
 4. **Status as a claim** (P-STAT, P-REF): the contributor's view (established, conditional, or contested), with references. This is **recorded, not settled**: status is decided by independent classification (§13).
 5. **Similar-but-valid approaches** (P-VALID) and the **one-sentence-fact probe** (P-1FACT).
 6. **Evidence bundle as the exit condition.** For each failure mode:
@@ -214,30 +214,30 @@ The open AI-interview platforms forbid suggesting answers altogether, "not even 
 
 Probe identifiers are language-independent; phrasings are localized assets ([bilingual design](../architecture/bilingual-design.md)). On first use in Chinese, technical terms keep the English term in parentheses. **All phrasings must be pretested with cognitive interviews** (three to five economists per language) before the pilot (Willis 2005 [S]).
 
-**The Chinese phrasings are unreviewed drafts.** Bilingual economists have not yet reviewed them, nor the seed glossary terms they use (bilingual design, appendix). This includes the P-PRED option on the standard error or confidence interval added in v0.2.1 (标准误 and 置信区间 as in the glossary; 估计值 as in the existing probes).
+**The Chinese phrasings are unreviewed drafts.** Bilingual economists have not yet reviewed them, nor the seed glossary terms they use (bilingual design, appendix). This includes the P-PRED option on the standard error or confidence interval added in v0.2.1 (标准误 and 置信区间 as in the glossary; 估计值 as in the existing probes), and the phrasings revised in the cross-document consistency pass (2026-11-05) to follow the glossary.
 
 | ID | Purpose | English | 简体中文 |
 |---|---|---|---|
-| P-RQ | Own summary | In your own words, what is the main question, and what variation identifies the effect? | 请用您自己的话概括：这篇论文回答的核心问题是什么？识别效应依赖的是哪一种变异？ |
-| P-RECALL | Free-recall lock | Before I show you anything from the code: which decisions in getting this result right required real judgment? Please list them in your own words. | 在我展示任何代码内容之前：要得到这个结果，哪些决策需要真正的判断？请用您自己的话列出来。 |
-| P-TIMELINE | Contributor's timeline | Walk me from the raw data to the estimate in three to six steps, and mark where judgment was needed. | 请用三到六个步骤，带我从原始数据走到最终估计值，并标出哪些环节需要判断。 |
-| P-HARD | Incident | Which part of getting this result right took the most judgment? Was there a moment when the results changed with a choice? | 要得到这个结果，哪个环节最需要判断？是否有某个时刻，结果随着某个选择而改变？ |
+| P-RQ | Own summary | In your own words, what is the main question, and what variation identifies the effect? | 请用您自己的话概括：这篇论文回答的核心问题是什么？这一效应是依靠哪种变异（variation）来识别的？ |
+| P-RECALL | Free-recall lock | Before I show you anything from the code: which decisions in getting this result right required real judgment? Please list them in your own words. | 在我展示任何代码内容之前：要正确得出这一结果，哪些决策需要真正的判断？请用您自己的话列出来。 |
+| P-TIMELINE | Contributor's timeline | Walk me from the raw data to the estimate in three to six steps, and mark where judgment was needed. | 请用三到六个步骤，说明从原始数据到最终估计值的过程，并标出哪些环节需要判断。 |
+| P-HARD | Incident | Which part of getting this result right took the most judgment? Was there a moment when the results changed with a choice? | 要正确得出这一结果，哪个环节最需要判断？是否出现过结果因某个选择而改变的情况？ |
 | P-CUE | Cues | What told you the obvious approach was wrong? What did you see in the data or the output? | 是什么让您意识到显而易见的做法是错的？您在数据或输出中看到了什么？ |
 | P-OPTIONS | Options and basis | Which alternatives did you consider, and on what basis did you reject them? | 您考虑过哪些替代做法？依据什么排除了它们？ |
 | P-SELFMON | Self-monitoring | How did you check that the code implements what the paper says? | 您是如何核实代码确实实现了论文所述内容的？ |
 | P-LOCATE | Ask before pointing | As you remember it, where in the code is this decision implemented? | 据您回忆，这个决策在代码中的哪个位置实现？ |
-| P-RA | Novice hypothetical, with permission | If there is no realistic way to get this wrong, that is a complete and useful answer. Otherwise: suppose a capable research assistant overlooked this issue. What apparently reasonable approach might they take instead? | 如果这里不存在现实的出错方式，这本身就是完整且有用的回答。否则：假设一位能干的研究助理忽略了这个问题，他们可能会采用哪种看似合理的做法？ |
+| P-RA | Novice hypothetical, with permission | If there is no realistic way to get this wrong, that is a complete and useful answer. Otherwise: suppose a capable research assistant overlooked this issue. What apparently reasonable approach might they take instead? | 如果这里实际上不太可能出错，这本身就是一个完整且有用的回答。否则，请设想一位能干的研究助理忽略了这个问题：这位助理可能会改用哪种看似合理的做法？ |
 | P-SEEN | Realism warrant (required) | Where have you seen this mistake: in your own project, while refereeing (please describe the pattern only, never a manuscript under review), when supervising research assistants, in the published literature — or is it hypothetical? | 您在哪里见过这种错误：自己的项目中、审稿时（请只描述模式，切勿涉及审稿中的具体稿件）、指导研究助理时、已发表文献中——还是仅为假设？ |
-| P-NOTICE | Anomalies | What pattern in the sample size, standard errors, signs, or event-time coefficients would make you suspect this mistake? | 样本量、标准误、符号或事件时间系数出现什么样的模式，会让您怀疑存在这个错误？ |
+| P-NOTICE | Anomalies | What pattern in the sample size, standard errors, signs, or event-time coefficients would make you suspect this mistake? | 样本量、标准误、系数符号或事件研究各期系数（event-time coefficients）出现什么样的模式，会让您怀疑存在这个错误？ |
 | P-DEFAULT | Software behaviour | Which software default or package behaviour could produce this silently? | 哪些软件默认设置或程序包行为可能在不知不觉中导致这个问题？ |
-| P-PRED | Pre-registered consequence | If we ran that version, which is closest: immaterial; changes significance; changes the sign; changes the magnitude materially without changing the sign; changes the standard error or confidence interval without moving the estimate; something else? If you like, also give a low, middle, and high guess for the estimate. | 如果按那种做法运行，哪种情况最接近：影响不大；改变显著性；改变符号；幅度显著变化但符号不变；改变标准误或置信区间但估计值不变；其他？如愿意，也可给出估计值的低、中、高三个猜测。 |
+| P-PRED | Pre-registered consequence | If we ran that version, which is closest: immaterial; changes significance; changes the sign; changes the magnitude materially without changing the sign; changes the standard error or confidence interval without moving the estimate; something else? If you like, also give a low, middle, and high guess for the estimate. | 如果运行采用那种做法的版本，以下哪种情况最接近：无实质影响；改变统计显著性；改变估计值的符号；符号不变，但幅度发生实质性变化；改变标准误或置信区间，但估计值不变；其他情况？如您愿意，也可以给出估计值的低、中、高三个猜测值。 |
 | P-WHY | Mechanism laddering | Why would it move in that direction rather than the other? | 为什么会朝这个方向变化，而不是相反方向？ |
-| P-STAT | Status (recorded as a claim) | Would a well-informed econometrician defend that alternative here? Under which assumptions? | 一位了解前沿的计量经济学家会在这里为那种做法辩护吗？需要满足哪些假设？ |
+| P-STAT | Status (recorded as a claim) | Would a well-informed econometrician defend that alternative here? Under which assumptions? | 一位熟悉相关文献的计量经济学家，会在本文的情境下为那种做法辩护吗？需要满足哪些假设？ |
 | P-REF | Standard of evidence | Which reference would you point a skeptical referee to? | 如果审稿人表示怀疑，您会请他参考哪篇文献？ |
 | P-VALID | Similar but valid | Which nearby choices would be perfectly fine here? | 哪些看起来相近的做法在这里其实完全可以接受？ |
 | P-CODE | Operationalization | Which part of the code would need to change to reproduce this mistake? | 要复现这个错误，需要修改代码的哪一部分？ |
-| P-DETECT | Distinguishing test | How could an independent verifier tell the correct implementation from this mistake? | 独立的验证者如何区分正确的实现与这个错误？ |
-| P-1FACT | One-sentence-fact risk | If a task instruction told the agent this fact, would the problem become easy? | 如果任务说明直接告诉智能体这一点，问题会不会变得很容易？ |
+| P-DETECT | Distinguishing test | How could an independent verifier tell the correct implementation from this mistake? | 一个独立的验证程序（verifier）要如何区分正确的实现与含有这一错误的实现？ |
+| P-1FACT | One-sentence-fact risk | If a task instruction told the agent this fact, would the problem become easy? | 如果任务说明直接把这一点告诉智能体（AI agent），这项任务会不会因此变得很容易？ |
 | P-SUGG | Balanced suggestion | Some implementations of this design make a different choice: [X]. The case that it would be a mistake here: [A]. The case that it would be acceptable here: [B]. Which is closer to right for this paper — or is it not relevant? Please explain in your own terms. *(Order of A and B rotated.)* | 在类似研究设计中，有些实现采用了不同的选择：[X]。认为这在本文中是错误的理由：[A]。认为这在本文中可以接受的理由：[B]。哪一种更符合本文的情况——还是两者都不相关？请用您自己的话说明。*（A、B 顺序轮换。）* |
 | P-SUM | Summary with accuracy rating | Here is my summary, using your own words where I could: … How accurate is it, from 1 (misleading) to 4 (accurate)? What should change? | 以下是我的总结，尽量使用了您的原话：…… 准确度如何？请从 1（有误导）到 4（准确）打分。需要修改哪些地方？ |
 | P-DISAGREE | Evidence-based disagreement (only about statements already made) | My reading of the code differs: at [file:line] it appears that … Could you check? | 我对代码的理解有所不同：在[文件:行号]处似乎是……能否请您核对一下？ |
@@ -303,7 +303,7 @@ The conversational interviewer is **not** the judge of validity, the recorder, o
 |---|---|---|
 | Contributor | Confirms each stage summary with an accuracy rating; signs off; may edit, reject, or withdraw anything | During and at the end |
 | Shepherd | Reviews the dossier, influence metrics, and flags; may schedule a follow-up | Within an agreed number of days |
-| **Independent status classification** | Economists not involved in the contribution classify each failure mode (established / conditional / contested) **independently and blind** to one another, with reasons: one classifier for an item that matches a vetted-taxonomy entry with a canonical citation, two for a novel item. Each condition is verified by a recorded diagnostic on the evaluation data and on every hidden-variant family used for grading. A second round only with stated reasons; the default is "needs review" | After the materiality check and the first verifier rungs (rubric RV-2; verifier protocol L4, L7); feeds rubric GT-2 |
+| **Independent status classification** | Economists not involved in the contribution classify each failure mode (established / conditional / contested) **independently and blind** to one another, with reasons: one classifier for an item that matches a vetted-taxonomy entry with a canonical citation, two for a novel item. Each condition that is a property of the data is verified by a recorded diagnostic on the evaluation data and on every hidden-variant family used for grading; a condition that is a design statement rather than a property of the data (e.g., shock-based identification for shift-share inference, R8 P12; how the family of tests is defined, R8 P15) is fixed in the task instruction, with any supporting diagnostics recorded. A second round only with stated reasons; the default is "needs review" | After the materiality check and the first verifier rungs (rubric RV-2; verifier protocol L4, L7); feeds rubric GT-2 |
 | Independent reviewers | Assess resulting tasks against the rubric | Construction Stage 7 |
 
 The interviewer never marks content as validated. The contributor's status judgment is a claim; status comes from independent classification. This follows structured expert-judgment practice for contested questions: Cooke's classical model, SHELF, and Delphi [S]; see D-013.
@@ -328,12 +328,12 @@ Host-independent assets, kept in [`protocol/`](../../protocol/) in Phase 5:
 6. output templates;
 7. the [schema](../../schemas/deepecon-contribution.schema.json).
 
-| Concern | Option B — Claude Code skill | Option A — hosted orchestrator |
+| Concern | Option B — local Claude Code skill | Option A — hosted orchestrator |
 |---|---|---|
 | Interviewer | `SKILL.md` plus stage cards loaded on demand | Server-side system prompt assembled from the same assets |
 | Recorder and state | Local dossier files written through a schema-validating helper that timestamps and tags exposure | Database records written through tool calls with the same validation |
 | Suggestion generator and checkers | Separate subagents with restricted inputs | Separate model calls with restricted inputs |
-| Execution (S5) | Local Stata, R, or Python with originals protected | Run kits (A1), staff execution, or hosted R/Python sandbox (A2) |
+| Execution (S5) | Local Stata, R, or Python with originals protected, or staff execution (B-staff) | Run kits (A1), staff execution, or hosted R/Python sandbox (A2) |
 | Model access terms (S0) | Commercial no-training terms, with zero data retention where available, because sessions create hidden-tier material: project-provided access if O-018 permits, or the contributor's institutional commercial account; a consumer plan is not enough, even with the training opt-out | The project's commercial account, server-side, under the same terms |
 | Packaging and validation | Shared validator and packager library | Same library, server-side |
 
@@ -376,6 +376,7 @@ Simulations test mechanics only; they are not evidence about real experts. The [
 - **Validity layers** (S4): one primary layer plus any secondary layers.
 - **Terminology and gates aligned with the verifier protocol:** "data-equivalence" (verifier protocol §2, type 2) replaces "equivalent mutant" in S5 and §10; the P-1FACT answer is a prediction tested later by the hint ladder, not an in-interview SP-3 assessment (S6, §10).
 - **Session length:** sessions are capped at 45–60 minutes; longer work, such as a pilot arm, spans several sessions (§5).
+- Cross-document consistency pass (2026-11-05): Chinese phrasings of ten probes revised to follow the glossary, with English glosses for easily misread terms, still unreviewed (§8); the TWFE layer example uses the five layers (S4); design-statement conditions fixed in the task instruction (§13); Option B named as in D-005, and staff execution listed under both options (§14).
 
 **v0.2.0** (from v0.1.0), driven by the evidence and critique in [R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md) §6 (risk and improvement IDs refer to that note):
 

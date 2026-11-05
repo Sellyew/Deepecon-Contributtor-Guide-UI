@@ -132,7 +132,7 @@ A compact skill that turns a fuzzy idea into a research specification. It uses s
 **Consequences, adopted in the [verifier protocol](../methodology/verifier-validation-protocol.md) §4:**
 - separate the estimand, the identifying assumptions, and the estimator, and fix the estimand before grading numbers;
 - use a hidden decision space (reference / accepted / unjustifiable / contested), with constraints between options;
-- allow declarations only for non-crux conventions from a benchmark-wide vocabulary, and grade crux decisions through outcomes on separating hidden variants;
+- grade the decision each task is built to test (its "crux", in *Good Benchmarks*' term) only through outcomes on hidden data variants on which correct and flawed procedures give different answers, and let agents declare their choice only for other conventions (such as small-sample corrections), drawn from a vocabulary fixed benchmark-wide for each design family;
 - separate numerical noise, conventions, and substantive alternatives, and borrow no default tolerance band from another benchmark;
 - calibrate with blind expert solves, and freeze verifiers before evaluation.
 
@@ -160,14 +160,14 @@ Several figures here are [S] or [U] and must be checked against the original pap
 
 ## 6. What DeepEcon adds — and what it does not
 
-**The addition.** As far as targeted searches found (2026-11-05; several sources [S]), no benchmark builds tasks from published empirical-economics replication packages paired with expert-designed flawed variants, each with a realism warrant and an independent classification as established or conditional, and verifies them by re-running agents' code on hidden variants of the paper's own pipeline. The elements have precedents:
+**The addition.** As far as targeted searches found (2026-11-05; several sources [S]), no benchmark builds tasks from published empirical-economics replication packages paired with expert-designed flawed variants, each with a realism warrant and an independent classification as established or conditional, and verifies them by re-running agents' code on hidden variants of the paper's data. The elements have precedents:
 - repair tasks verified on hidden instances (Terminal-Bench-Science `highdim-mediation-debiasing`) [P-full];
 - injected-error detection (Terminal-Bench-Science `ehr-error-detection`) [P-full];
 - repair rounds and standard-error-ratio grading on synthetic twins (CausalVerify) [P-page];
 - layer-separated scoring (CausalVerify, CausalReasoningBenchmark) [P-page/S];
 - author-defined ground truth (PaperBench, ReplicationBench) [P-page/S].
 
-The first release would score computational and statistical validity only; identification and interpretation would stay in an experimental, unscored track. The distinctive element is therefore **where the negative controls come from**: realistic, consequential mistakes designed by experts in the paper's own pipeline.
+The first release would score error-correction and research-execution tasks at tiers V1, V2a, and V2b, and structured error detection only alongside clean controls. These cover mainly computational, measurement, and statistical failure modes, and identification threats only where the instruction states the design and the repair is unique and design-implied; other identification items and interpretation would stay in an experimental, unscored track ([construction protocol](../methodology/benchmark-construction-protocol.md) §6). The distinctive element is therefore **where the negative controls come from**: realistic, consequential mistakes designed by experts in the paper's own pipeline.
 
 **How the knowledge is collected** is part of the method, not a claimed contribution: original authors or expert replicators are interviewed through a structured AI-guided protocol with statement-level provenance, whose validity is itself still to be established (§9, item 7).
 
@@ -252,7 +252,7 @@ For contested questions, structured expert-judgment methods use several independ
 - AEA's Stata Docker images require a licence mounted at run time [P-page], and results can vary with the Stata version and processor count [P-full].
 - The median package is 40.4 MB; about 20% exceed 2 GB [P-full].
 
-**Pitfall catalogue.** R8 catalogues 21 consequential pitfalls, each with its consequence and a computational signature where one exists. Fourteen have an established core plus a computational signature; three are contested (Kelly's spatial-noise critique, how widespread Young's findings are, and weak-IV thresholds); about half change only standard errors. This catalogue seeds the **vetted pitfall taxonomy** the interview protocol requires (§7, §14). An independent econometric review corrected several statuses (see R8's corrections section): the regression-discontinuity entry is split into two established errors (global high-order polynomials; conventional confidence intervals at the MSE-optimal bandwidth) and a decision-space node (bandwidth choice); clustering by a discrete running variable is added as an established error; shift-share exposure-robust inference and multiple-testing corrections are conditional; robust standard errors in randomized trials are contested or conditional. Every entry still needs sign-off by a named econometrician, and 13 of the 35 references remain [U] in bibliographic detail.
+**Pitfall catalogue.** R8 catalogues 21 consequential pitfalls, each with its consequence and a computational signature where one exists. Before the corrections below, R8 counted fourteen entries with an established core plus a computational signature and three contested ones (Kelly's spatial-noise critique, how widespread Young's findings are, and weak-IV thresholds); about a third (P6, P7, P8, P12, P14, P15, P20) mainly change inference, and four of these (P6, P7, P12, P14) change standard errors alone. This catalogue seeds the **vetted pitfall taxonomy** the interview protocol requires (§7, §14). An independent econometric review corrected several statuses (see R8's corrections section): the regression-discontinuity entry is split into two established errors (global high-order polynomials; conventional confidence intervals at the MSE-optimal bandwidth) and a decision-space node (bandwidth choice); clustering by a discrete running variable is added as an established error; the shift-share entry (conventional standard errors instead of exposure-robust inference) becomes conditional on shock-based identification; the multiple-testing entry becomes conditional on how the family of tests is defined; and the entry on relying only on robust or clustered standard errors in randomized experiments becomes contested or conditional. Every entry still needs sign-off by a named econometrician, and 13 of the 35 references remain [U] in bibliographic detail.
 
 **Established versus contested.** Documented errors such as Reinhart–Rogoff and Donohue–Levitt (Foote & Goetz 2008) differ in kind from contested methodological disputes, such as the Acemoglu–Johnson–Robinson and Albouy debate or the re-analyses of Miguel & Kremer. This is the distinction the protocol's independent status classification is designed to preserve (R8 §4).
 
@@ -269,7 +269,7 @@ For contested questions, structured expert-judgment methods use several independ
 9. **"One-sentence-fact" tasks:** whether they measure capability or recall (O-004), measured with the hint ladder and knowledge probe.
 10. **Recognition:** whether restructured presentations and ports stop evaluated models from recognizing canonical papers and repairing flaws from memory.
 
-The pilot's methodology arm takes surviving candidates (or a random sample of at least six, stratified by arm) through validation rungs L0–L12 to test items 1–6, 8, and 10 ([pilot plan](../pilot/pilot-evaluation-plan.md)).
+The pilot's methodology arm takes surviving candidates (or a random sample of at least six, stratified by arm) through validation rungs L0–L12 to test items 1, 2, 4, 5, and 8–10 and the blind-agreement part of item 6; item 3 and V3 agreement wait for Phase 6, since the pilot builds no fully synthetic data and runs no V3 agreement study ([pilot plan](../pilot/pilot-evaluation-plan.md)).
 
 ## 10. Sources
 
@@ -281,3 +281,4 @@ Full source lists, with URLs, access dates, and evidence labels, are in each evi
 ## 11. Changes
 
 **v0.2.0** (independent reviews, 2026-11-05): novelty statement narrowed and precedents added (§6), with the interview moved into the method description; effect injection restated with its limits and complements (§7.2); acceptance-region lessons updated (§3.4); contamination lesson extended to memory of methods (§5); pitfall-status corrections noted (§8); validation agenda extended (§9).
+- Cross-document consistency pass (2026-11-05): "crux" and declared conventions explained (§3.4); hidden variants described as variants of the data, and the first-release scope stated by task type and tier rather than validity layer (§6); the pitfall-catalogue counts dated and corrected (about a third, not half, mainly change inference) and the status corrections phrased as pitfalls (§8); the pilot's coverage of the validation agenda corrected (§9).

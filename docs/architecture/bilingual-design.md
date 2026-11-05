@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** v0.1.1 (2026-11-05). Not yet reviewed by the research lead. The glossary in the appendix has **not** been reviewed by bilingual economists. v0.1.1 adds the glossary entry for "estimate", which the interview probes use. |
+| **Status** | **Proposed** v0.1.1 (2026-11-05). Not yet reviewed by the research lead. The glossary in the appendix has **not** been reviewed by bilingual economists. v0.1.1 adds the glossary entry for "estimate", which the interview probes use. The cross-document consistency pass (2026-11-05) adds further unreviewed entries that the Chinese probes and the Chinese executive summary use (e.g., shepherd, AI agent, material / immaterial, exposure log, engineer-week) and replaces the alternative 错误类型, which collided with "failure-mode category". |
 | **Requirement** | Brief §9 (D-007): both architectures support English and Simplified Chinese from the beginning; language-independent schema; contributors' original statements preserved; machine translations labelled; extensible to more languages. |
 | **Evidence labels** | Framework and product facts verified in evidence notes [R2](../research/evidence/R2-claude-code-platform.md) and [R9](../research/evidence/R9-hosted-stack-and-compliance.md); remaining [U] items are marked. |
 
@@ -68,6 +68,7 @@ Preferred Chinese terms follow common usage in Chinese economics journals and te
 |---|---|---|
 | identification strategy | 识别策略 | |
 | identifying assumption | 识别假设 | |
+| identifying variation | 识别所依赖的变异 | 变动 |
 | estimand | 目标参数 | 估计目标; keep "estimand" in parentheses on first use |
 | estimator | 估计量 | 估计方法 (when referring to the procedure) |
 | average treatment effect (ATE) | 平均处理效应 | |
@@ -78,6 +79,7 @@ Preferred Chinese terms follow common usage in Chinese economics journals and te
 | staggered adoption | 交错实施 | 多时点处理; "staggered DiD": 交错双重差分 / 多时点双重差分 |
 | two-way fixed effects (TWFE) | 双向固定效应 | |
 | event study | 事件研究 | 事件研究法 |
+| event-time coefficients | 事件研究各期系数 | 动态效应系数 |
 | parallel trends assumption | 平行趋势假设 | |
 | pre-trends | 事前趋势 | |
 | treatment effect heterogeneity | 处理效应异质性 | |
@@ -115,16 +117,29 @@ Preferred Chinese terms follow common usage in Chinese economics journals and te
 | standard error | 标准误 | |
 | confidence interval | 置信区间 | |
 | statistical significance | 统计显著性 | |
+| material / immaterial (consequence) | 实质性影响 / 无实质影响 | 实质性 as a modifier (e.g., 发生实质性变化); never 显著, which is reserved for statistical significance |
 | causal interpretation | 因果解释 | |
 | internal / external validity | 内部有效性 / 外部有效性 | |
 | replication package | 复现包 | 复制材料; 复现材料包 |
 | research assistant | 研究助理 | |
 | referee | 审稿人 | |
 | benchmark (AI evaluation) | 评测基准 | 基准测试 |
+| AI agent (evaluated system) | 智能体 | AI 智能体; not 代理人 (economic agent) |
 | verifier | 验证程序 | 评测程序 |
+| answer key | 标准答案 | 评分答案 |
+| hidden material (hidden tier) | 隐藏材料 | 不向被测智能体公开的材料 |
 | reference implementation | 参考实现 | 正确实现 |
 | deliberately flawed implementation | 刻意植入错误的实现 | 错误版本 |
 | critical research decision | 关键研究决策 | |
-| failure mode (plausible mistake) | 潜在失误 | 错误类型 |
+| failure mode (plausible mistake) | 潜在失误 | 常见失误 |
+| failure-mode category | 失误类别 | |
 | established / conditional / contested | 公认 / 有条件成立 / 有争议 | |
 | restricted-access data | 受限数据 | 保密数据 (confidential) |
+| shepherd (benchmark-team role) | 任务引导人 | keep "shepherd" in parentheses on first use |
+| contamination (benchmark) | 数据污染 | 训练数据污染 |
+| exposure (to hidden material) / exposure log | 接触 / 接触记录 | 暴露 / 暴露记录 |
+| pre-registered (prediction) | 预先登记 | 预注册 (common; reviewers to confirm the preferred form) |
+| run kit (Option A) | 运行包 | |
+| schema (contribution data schema) | 数据模式 | keep "schema" in parentheses |
+| thin slice (pilot prototype) | 精简原型 | 端到端最小原型 |
+| engineer-week | 人周 | 工程师周 |

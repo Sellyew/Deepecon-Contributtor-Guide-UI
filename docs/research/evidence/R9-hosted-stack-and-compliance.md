@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Topic | Technology choices, verified cost anchors, and compliance constraints for **Option A** (hosted bilingual contributor platform with an LLM interviewer on the project's Claude API account). Includes a fact-check of the `[U]` claims in the Option A, cost, bilingual, submission and pilot drafts. **Neither architecture is selected;** this note informs both the Option A design and the A-versus-B comparison. |
-| Date | 2026-11-05. All URLs accessed 2026-11-05. |
+| Date | 2026-11-05. All URLs accessed 2026-11-05. Corrections added 2026-11-05: see [Corrections](#corrections-2026-11-05). |
 | Author | research agent |
 | Scope | (1) open-source AI-interview platforms and chat frameworks; (2) internationalization and CJK typography; (3) authentication; (4) secure storage; (5) sandboxed execution, R/Python, Stata; (6) cost anchors and a small-deployment estimate; (7) compliance and ethics (Anthropic terms, GDPR, PIPL, reachability, ICP, IRB); (8) submission-related vendor facts; (9) fact-check table; a proposed reference stack with two alternatives. |
 | Evidence labels | **[P-full]** primary source read in full. **[P-page]** primary landing page, official doc page, pricing page, README, licence or repository file read by me. **[S]** secondary (WebSearch summaries of pages I did not open; unofficial copies of legal texts). **[U]** unverified, including my own background knowledge. |
@@ -45,6 +45,12 @@
    - **ICP filing:** a non-commercial site offered in mainland China needs an ICP filing; Cloudflare says this includes delivery through a CDN [P-page].
    - **Unverified [U]:** StataCorp's server and container licensing terms, and US Common Rule / IRB guidance.
 10. **Fact-check results and proposed stack.** I made 28 in-scope checks: 24 `[U]`-marked claims plus 4 related unmarked claims (Managed Agents availability, A2 sandbox cost, the submission note on docs.github.com, and the pilot's ethics statement). Of these, **14 are confirmed, 4 corrected, 2 partly confirmed and 8 still unverifiable**. One further discrepancy sits outside the `[U]` set: the Sonnet 5.5 cache-read price is **$0.10/MTok**, not $0.20. The **proposed reference stack** is Next.js + next-intl + Better Auth + Neon Postgres + Cloudflare R2 + the Anthropic SDK + Langfuse (EU region) + Sentry, on Fly.io in the EU. A2 adds Managed Agents or E2B. The alternatives are (1) Supabase-integrated and (2) Managed-Agents-centric.
+
+## Corrections (2026-11-05)
+
+*Added on 2026-11-05 after a cross-document consistency review. The findings in the rest of this note are kept unchanged as its dated record; where they conflict with this section, this section supersedes them.*
+
+- **Shepherding hours (§7.2, "Reading").** The figure of about 4,000 shepherd hours came from [cost model](../../architecture/cost-and-effort-model.md) v0.2.0 (20 hours per admitted task). Cost model v0.3.0 estimates about 8,000 shepherd-team hours at 200 contributions (central; range 1,600–22,000): about 10 hours per contribution for screening and early stages, dropped candidates included, plus about 30 per admitted task. The comparison's direction is unchanged: hosting and interview inference are both far smaller than shepherding.
 
 ---
 
@@ -284,7 +290,7 @@ These are my arithmetic on the anchors above, excluding inference (already in th
 | **A2 increment** (hosted sandbox) | e.g., 200 contributions × 2 running sandbox-hours = 400 h: Managed Agents runtime 400 × $0.08 = **$32 in total** (tokens counted in the inference model); Fly performance-1x ≈ $18 in total | small, one-off per contribution |
 | **Option B comparator** (static page + upload endpoint) | Fly 256 MB ($2.19) or Cloud Run free tier + R2 free tier | **≈ $0–$5** |
 
-**Reading.** Hosting runs at **≈ $13–$210 per month**, or ≈ $160–$2,500 per year. That is the same order as, or below, the cost model's central inference estimate for 200 contributions ($3,404). Both are dwarfed by shepherding (≈ 4,000 h). The drafts' "tens to low hundreds of dollars per month" is consistent with these anchors.
+**Reading.** Hosting runs at **≈ $13–$210 per month**, or ≈ $160–$2,500 per year. That is the same order as, or below, the cost model's central inference estimate for 200 contributions ($3,404). Both are dwarfed by shepherding (≈ 4,000 h). *(Superseded 2026-11-05: ≈ 8,000 shepherd-team hours in cost model v0.3.0; see [Corrections](#corrections-2026-11-05).)* The drafts' "tens to low hundreds of dollars per month" is consistent with these anchors.
 
 ---
 

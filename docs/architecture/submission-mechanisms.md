@@ -14,9 +14,9 @@ Discussions of "submission" usually mix three different things. Separating them 
 
 | Layer | Question it answers | Recommendation in brief |
 |---|---|---|
-| **L0 — Package** | *What* is handed over? | One standardized, schema-valid package (manifest, tier directories, checksums), identical whatever the channel ([schema](../../schemas/README.md)) |
-| **L1 — Transport** | *How* does it reach us? | Simple, private, browser-based upload as the default; Git for technical contributors who want it |
-| **L2 — Internal review store** | *Where* does it live while shepherds and reviewers work on it? | A private Git repository with automated checks, plus object storage for large files |
+| **Package** | *What* is handed over? | One standardized, schema-valid package (manifest, tier directories, checksums), identical whatever the channel ([schema](../../schemas/README.md)) |
+| **Transport** | *How* does it reach us? | Simple, private, browser-based upload as the default; Git for technical contributors who want it |
+| **Internal review store** | *Where* does it live while shepherds and reviewers work on it? | A private Git repository with automated checks, plus object storage for large files |
 
 Neither architecture implies a transport. Option B can produce a ZIP that goes through an upload link; Option A can push straight into the internal store without keeping a submission database of its own.
 
@@ -42,7 +42,7 @@ From the brief: contributor convenience; access and permission management; confi
 
 - **Public repository:** excellent automation (continuous-integration checks on every pull request), review tooling, version history, and audit — this is how Terminal-Bench-Science works. But a public repository exposes hidden material to the world and to training-data crawlers. It is compatible with DeepEcon only if the benchmark itself is fully public and canary-marked (O-001).
 - **Private repository:** keeps the automation and history, but every contributor needs a GitHub account, an invitation, and working knowledge of Git. That is a barrier for many senior economists. GitHub blocks files above 100 MiB; Git LFS allows 2, 4, or 5 GB per file depending on the plan [P-page, R9].
-- **Assessment:** ideal as the **internal review store** (L2), operated by staff. Optional transport for technically fluent contributors.
+- **Assessment:** ideal as the **internal review store**, operated by staff. Optional transport for technically fluent contributors.
 
 ### 3.3 Hosted upload
 
@@ -82,7 +82,7 @@ Ratings are qualitative judgments for DeepEcon's situation, not measurements.
 
 ## 5. Recommendation (proposed)
 
-1. **Standardize the package first** (L0). Every channel carries the same schema-valid package; the channel is recorded in `submission.channel`.
+1. **Standardize the package first**. Every channel carries the same schema-valid package; the channel is recorded in `submission.channel`.
 2. **Pilot:** an institutionally approved file-request service or a minimal hosted upload link, followed by staff intake into the internal store.
 3. **MVP and beyond:** a hosted upload with validation on arrival — embedded in the platform under Option A, standalone under Option B — plus an optional private-Git path for technical contributors.
 4. **Internal review store:** a private Git repository per release, with continuous-integration checks (schema validation, leakage scan, validation-ladder runs) and object storage for large files referenced by checksum. Reviewers work in pull requests opened by staff, so contributors never need GitHub.

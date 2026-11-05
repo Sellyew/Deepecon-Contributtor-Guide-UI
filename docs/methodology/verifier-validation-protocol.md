@@ -46,10 +46,10 @@ Run the rungs in order. A failure sends the task back to the shepherd. Every run
 | L4 | **Negative controls (expert flawed variants)** | Every validated flawed variant is rejected, with separation margins recorded. | Run: yes. Design: human |
 | L5 | **Mutation analysis (artificial mutants)** | Generated mutants (drop a fixed effect, change the cluster variable, shift timing by one period, alter a sample filter, flip a sign) are run. **Pass:** every surviving non-equivalent mutant has been triaged, and no survivor reveals a verifier gap. Survivor counts are reported by operator class. No confidence interval is reported, because designer-chosen mutants are not a random sample. | Yes, with human triage |
 | L6 | **Metamorphic relations** | The relations in §5 hold for the reference and all alternatives, and are violated by the flawed variants they target. Relations are necessary conditions, not sufficient ones. | Yes |
-| L7 | **Hidden-variant separation** | Answer-changing variants are built on bases the agent never sees (§5.1). **Deterministic families:** every correct solution matches its conditional reference on the same input. **Stochastic families:** simulation shows that the probability of rejecting a correct solution is below 10⁻³. **Flawed variants:** each is rejected on the variants that satisfy its stated conditions, with a one-sided 95% lower bound of at least 0.90 (for example, 194 of 200 gives 0.942 by Clopper–Pearson). The kill matrix records flawed variants × checks, with margins. | Yes |
+| L7 | **Hidden-variant separation** | Answer-changing variants are built on bases the agent never sees (§5.1). **Deterministic families:** every correct solution matches its conditional reference on the same input. **Stochastic families:** simulation shows, with a one-sided 95% upper bound, that the probability of rejecting a correct solution is below 10⁻³ (with no rejections, about 3,000 draws). **Flawed variants:** each is rejected on the variants that satisfy its stated conditions, with a one-sided 95% lower bound of at least 0.90 (for example, 194 of 200 gives 0.942 by Clopper–Pearson). The kill matrix records flawed variants × checks, with margins. | Yes |
 | L8 | **Shortcut and adversarial attacks** | Each of these attacks must fail:<br>(a) hard-coded published coefficients;<br>(b) trivial nulls (L2);<br>(c) copying from any file in the environment;<br>(d) "flag everything" in detection tasks;<br>(e) recall of the original package or paper (rubric LK-4);<br>(f) cheat trials by an agent briefed to get the reward without doing the work, run offline (the official configuration) and once online to measure what the offline rule protects;<br>(g) the **differential attack**: return the main-data or published answer plus the estimand-weighted difference between hidden and visible outcomes;<br>(h) constant outputs on invariance instances;<br>(i) "change nothing" and "always switch to the newest estimator" policies in correction tasks;<br>(j) agent code trying to write the reward or read hidden data (EN-4).<br>"No hack found" is evidence, not proof ([R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) §2.3). | Mostly yes |
 | L9 | **Full-harness replay** | At least 300 replays of the oracle and of every accepted alternative, through the agent sandbox plus verifier, varying unfixed seeds, thread counts, and at least two hardware platforms. **Pass:** zero spurious failures, reported with the one-sided 95% upper bound (about 1% at 0 of 300). Re-running a deterministic verifier with fixed seeds on stored outputs cannot fail and does not count. | Yes |
-| L10 | **Hint ladder and knowledge probe** | Pre-declared hints are given to agents in separate trials: H1 a design fact the instruction should carry; H2 names the pitfall; H3 names the method. A knowledge probe asks the key fact directly, outside the task. Results feed rubric SP-3 and SO-3. | Yes, with human reading |
+| L10 | **Hint ladder and knowledge probe** | Pre-declared hints are given to agents in separate trials: H1 a design fact the instruction should carry; H2 names the pitfall; H3 names the method. A knowledge probe asks the key fact directly, outside the task. H2 and H3 trials, the knowledge probe, and the recognition probe (L8 e) disclose the crux, so they are hidden-tier exposures under §10: they run under commercial no-training terms or on a locally hosted open-weight model, and are logged (rubric LK-5). Results feed rubric SP-3 and SO-3. | Yes, with human reading |
 | L11 | **Agent trials and crux alignment** | At least 5 trials for each of at least 3 configurations from at least 2 model families, on the frozen task version, with model IDs and dates. At least 4 of 5 failing trials fail at the stated crux. Calibration models are listed in the release, and their scores are reported as *calibration-exposed*. | Runs: yes. Analysis: human |
 | L12 | **Independent review** | The blind expert solves and acceptance criteria from Stage 5 are re-checked against the L11 outputs. The domain reviewer and the benchmark reviewer sign off. | No |
 | L13 | **Post-admission monitoring** | Issue reports and task repairs. Status classifications are revisited at each release against new methodological literature. | Partly |
@@ -58,9 +58,9 @@ Run the rungs in order. A failure sends the task back to the shepherd. Every run
 
 | Change | Re-run |
 |---|---|
-| Instruction | L1–L12 |
+| Instruction | L0–L12 |
 | Verifier | L1–L9, and re-score all stored trials |
-| Environment | L0–L9 |
+| Environment | L0–L12 (the environment counts as instruction, rubric SP-3) |
 
 Hardening edits are logged together with the trial that prompted them. No edit may be justified **only** by an agent's success (§4 item 9), because filtering tasks against the evaluated models biases their scores (R1 §4; *Good Benchmarks* §3, §9).
 
@@ -183,13 +183,13 @@ These tasks measure prompted error-finding. They do not measure whether an agent
 - **Execution and correction tasks:** binary reward per task, conjunctive across checks and hidden variants.
 - **Detection tasks:** scored as in §7.
 - **Trials:** at least five per evaluated configuration.
-- **Reporting:** for each task type, the mean with a bootstrap 95% confidence interval. Types are never pooled, and repair and preservation scores are reported separately.
+- **Reporting:** for each task type, the mean with a 95% confidence interval from a bootstrap that resamples tasks, keeping each task's trials together. Types are never pooled, and repair and preservation scores are reported separately.
 - **Exposure labels:** models that touched construction (interviewer, generator, checkers, calibration agents) are listed, and their scores are marked *calibration-exposed*.
 - **Release stability:** each release's contents are frozen; a withdrawal retires a task only at the next version.
 
 ## 9. Verification by validity layer, and tiers per graded output
 
-Each failure mode has a **primary** validity layer (of five) plus optional secondary layers. TWFE under staggered adoption, for instance, is both a statistical and an estimand–estimator issue. Agreement on the layer is reported.
+Each failure mode has a **primary** validity layer (of five) plus optional secondary layers. TWFE under staggered adoption, for instance, is primarily statistical (the estimator does not target the stated weighted ATT), with interpretation as a secondary layer when its coefficient is read as that ATT. Agreement on the layer is reported.
 
 **Tiers are assigned per graded output, not per layer:**
 - **V1:** deterministic comparison.
@@ -289,6 +289,7 @@ Primary: Bercovich (2026), *Good Benchmarks* [P-full].
 - Repair versus preservation scoring; equivalent-location keys; sidedness of bounds.
 - Licensing of derived data; fully synthetic data for restricted sources.
 - Exposure rules for hidden material; scoring and reporting section; tiers per graded output (V1, V2a, V2b, V3, V4) with V3 admission rules.
+- Cross-document consistency pass (2026-11-05): one-sided 95% bound for stochastic families (L7); crux-disclosing hint and probe trials are hidden-tier exposures (L10); instruction changes re-run from L0 and environment changes through L12 (§3.1); the bootstrap resamples tasks (§8); the TWFE example uses the five layers (§9).
 
 **v0.2.0:**
 - Clustering relation corrected.

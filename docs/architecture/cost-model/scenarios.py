@@ -15,7 +15,7 @@ SHEPHERD_H_PER_ADMITTED_TASK = (30, 15, 60)     # Stages 5-8 incl. clean-room wi
 REVIEWER_H_PER_TASK = (8, 4, 12)                # domain reviewer + benchmark reviewer
 ECONOMIST_H_PER_TASK = (15, 5, 35)              # outside economists: blind SP-1 solves, GT-2 classification, V3 raters, calibration
 TRIAL_COMPUTE_USD_PER_TASK = (500, 250, 750)    # validation trials (L8, L10, L11): ~50-150 trials at ~$5 each (methodology review)
-STAFF_S5_H_PER_CONTRIBUTION = (4, 2, 6)         # extra shepherd hours when staff run operationalization (Option A staff route)
+STAFF_S5_H_PER_CONTRIBUTION = (4, 2, 6)         # extra shepherd hours per contribution routed to staff execution (A's staff route or B-staff)
 SUPPORT_H_A = (0.75, 0.25, 1.5)                 # per contributor: web platform plus run-kit questions
 SUPPORT_H_B = (1.0, 0.5, 2.0)                   # per contributor: local installation and environments
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     print(f"  with in-session agentic work (B, A2): ${b[0]:.2f} [${b[1]:.2f}-${b[2]:.2f}]")
     print(f"  without (A1, staff execution):        ${a[0]:.2f} [${a[1]:.2f}-${a[2]:.2f}]")
     print()
-    cols = ["N", "tasks", "inference $", "shepherd h", "reviewer h", "economist h", "trial compute $", "staff-S5 h (A)", "support h A", "support h B"]
+    cols = ["N", "tasks", "inference $", "shepherd h", "reviewer h", "economist h", "trial compute $", "staff-S5 h (if all; A staff or B-staff)", "support h A", "support h B"]
     print(" | ".join(cols))
     for n in (10, 50, 200):
         inf = tuple(cost("opus-5.5", SCENARIOS[k])[0] * n for k in ("central", "low", "high"))

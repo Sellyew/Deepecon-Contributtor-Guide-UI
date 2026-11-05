@@ -68,7 +68,7 @@ Interview inference is shown at the $17 route; under A1 or staff execution it is
 
 **Route- and option-specific hours** (central [bounds]):
 
-| Contributions | Extra shepherd hours, A staff execution (S5 on project machines) | Support hours, A | Support hours, B |
+| Contributions | Extra shepherd hours if every contribution uses staff execution (A's staff route or B-staff; S5 on project machines) | Support hours, A | Support hours, B |
 |---|---|---|---|
 | 10 | 40 [20–60] | 8 [2–15] | 10 [5–20] |
 | 50 | 200 [100–300] | 38 [12–75] | 50 [25–100] |
@@ -78,7 +78,7 @@ Interview inference is shown at the $17 route; under A1 or staff execution it is
 
 **The decision-relevant result.** At 200 contributions, the central estimate is about **8,000 shepherd-team hours** (roughly four to five full-time-equivalent years), **1,600 reviewer hours**, **3,000 outside-economist hours**, and **$100,000 of validation-trial compute**, against about **$3,400 of interview inference**. Human effort and validation compute dominate under either architecture, and neither depends much on the architecture. What the architecture does move:
 - **Engineering effort** is now comparable (§4).
-- **Shepherd hours by execution route** are untested and could outweigh every other difference: staff execution moves operationalization onto shepherds (≈ 800 extra hours at 200 contributions), while under A1 and Option B contributors submit variants they have already run. A 10% difference in shepherd-team hours (≈ 800 hours) exceeds the central engineering difference between the options. The pilot measures it (M9).
+- **Shepherd hours by execution route** are untested and could outweigh every other difference: staff execution, available under either option (A's staff route or B-staff), moves operationalization onto shepherds (≈ 4 h per contribution routed to it; ≈ 800 extra hours if all 200 are), while under A1 and B's local route contributors submit variants they have already run. A 10% difference in shepherd-team hours (≈ 800 hours) exceeds the central engineering difference between the options. The pilot measures it (M9).
 - **Who pays for model access** (§5) and **operations** (§4).
 
 ## 4. Costs that differ between the options
@@ -87,12 +87,12 @@ Interview inference is shown at the $17 route; under A1 or staff execution it is
 |---|---|---|
 | **Initial development** (engineer-weeks, beyond a shared core of 10–17.5 that now includes the shepherd console) | ≈ 12–19.5 (A1 + staff execution); hosted sandbox (A2): managed integration +1.5–3, self-built +3–6 | ≈ 11.5–20.5, including the upload endpoint, project page, privacy notice, subagents, helper binaries, and status line; optional controls endpoint +0.25–0.5 |
 | **Fixed operating** | Hosting ≈ **$13–210 a month** from pilot to 200 contributors, excluding inference, e-mail, and paid error tracking. Estimated from verified anchors: Fly.io from $2.19/month ($33 for a 2 GB machine); Neon $0.106 per compute-unit hour plus $0.35/GB-month; Supabase Pro $25/month; Cloudflare R2 $0.015/GB-month; Langfuse Core $29/month [P-page, R9] | Static page plus upload endpoint: ≈ $0–5 a month [R9 estimate] |
-| **Variable per contribution (project)** | Inference ≈ $13 (A1, staff) or ≈ $17 (A2). A2 sandbox ≈ $32 in total for 200 contributions at Managed Agents' $0.08 per session-hour [R9] | ≈ $17 with project-provided API access; $0 where institutions provide commercial access. Consumer plans are admissible only for agent-tier or public material under the exposure rule (§5) |
+| **Variable per contribution (project)** | Inference ≈ $13 (A1, staff) or ≈ $17 (A2). A2 sandbox ≈ $32 in total for 200 contributions at Managed Agents' $0.08 per session-hour [R9] | ≈ $17 with project-provided API access (terminal users; desktop-app users need Team or Enterprise seats, §5); $0 where institutions provide commercial access. Consumer plans are admissible only for agent-tier or public material under the exposure rule (§5) |
 | **Contributor-side** | Time; for A1, their own compute and Stata licence | Time; their own compute and licences; installation |
 | **Ongoing maintenance** | ≈ 0.1–0.25 FTE: deployments, security updates, monitoring, backups, processor agreements [U] | ≈ 0.1–0.2 FTE: plugin and workspace compatibility with the client's stable channel, the upload endpoint, cross-platform regression runs [U] |
 | **Evaluation inference** (simulated-contributor regression suite: 15 simulated contributions per pass ≈ $255, range $92–693) | Per protocol or pinned-model change, ≈ 4–8 passes a year: ≈ **$1,500 a year** ($370–5,500) [U] | Per certified stable client release; certifying monthly ≈ **$3,100 a year** ($1,100–8,300); certifying every weekly stable release at the high per-pass cost would reach ≈ $36,000 [U] |
 | **Support load** | ≈ 0.75 h per contributor: the web platform plus run-kit questions on heterogeneous machines | ≈ 1 h per contributor: installation and environment diversity |
-| **Shepherd hours by route** | Staff execution adds ≈ 4 h (2–6 h) per contribution for S5 [U]; A1 as Option B | Contributors or RAs pre-do part of S5 [U] |
+| **Shepherd hours by route** | Staff execution adds ≈ 4 h (2–6 h) per contribution routed to it, for S5 [U]; A1 as B's local route | Contributors or RAs pre-do part of S5 [U]; B-staff adds ≈ 4 h (2–6 h) per contribution routed to it [U] |
 | **Security and compliance** | Custody of uploads, drafts, abandoned contributions, and consented transcripts from the first session, with processors (hosting, database, storage, tracing, error tracking): security review, privacy notice, processor agreements, GDPR standard contractual clauses | Lighter during drafting; the **same duties for submitted packages**; hidden-tier copies persist on contributors' machines (purge step, agreement) |
 
 **Pilot slices.** Building thin slices of both options for the pilot costs roughly **8–14 engineer-weeks for whichever slice is built second** [U], on top of the shared core and the first slice. A cheaper variant (one slice plus setup and hand-off probes of the other) is an open question (O-019).
@@ -104,15 +104,15 @@ The [verifier protocol](../methodology/verifier-validation-protocol.md) §10 (Pr
 | Mechanism | Works with | Cost to project | Model consistency | Data-use terms | Admissible for hidden-tier work? | Caveat |
 |---|---|---|---|---|---|---|
 | Project API account behind the platform | A | ≈ $13–17 per contribution | Enforced | Commercial: Anthropic "may not train" | Yes | Regional policy applies to end users |
-| Project-issued access through a Console "Claude Code workspace" with per-user monthly spend limits [P-page] | B | ≈ $17 per contribution | Pinned and recorded; enforceable only with organization-managed settings | Commercial | Yes | Permitted for "the customer's own authorized users"; whether external contributors count needs confirmation (O-018) |
+| Project-issued access through a Console "Claude Code workspace" with per-user monthly spend limits [P-page] | B | ≈ $17 per contribution | Pinned and recorded; enforceable only with organization-managed settings | Commercial | Yes | Permitted for "the customer's own authorized users"; whether external contributors count needs confirmation (O-018). Regional policy applies to end users. Documented for the terminal client only: the desktop app requires a subscription sign-in [P-page, R2 §6.1], and whether it accepts API keys is [U], so desktop users need Team or Enterprise seats (Team-seats row) or their institution's seats |
 | Institutional commercial access (e.g., a university agreement) | B | $0 | Pinned and recorded; enforced only if the institution manages settings | Commercial | Yes | Depends on each contributor's institution |
-| Team seats for contributors | B | Team Standard $25/month per seat ($20 annually); seats are named and not for rotation [P-full/P-page] | Organization-managed | Commercial | Yes | Seat management across 200 short-lived contributors; also enables Remote Control and web sessions |
+| Team seats for contributors | B | Team Standard $25/month per seat ($20 annually); seats are named and not for rotation [P-full/P-page]. ≈ $25–50 per desktop contributor for one to two seat-months [U] | Organization-managed | Commercial | Yes | Needed by desktop-app users under the exposure rule; seat management across 200 short-lived contributors; also enables Remote Control and web sessions; regional policy applies to end users |
 | Project gateway | B | ≈ $17 plus a small service | Enforceable at the gateway | Commercial | Yes | Anthropic's gateway feature accepts only private-network addresses; a public gateway would be the project's own [P-page] |
 | Contributor's own consumer plan | B | $0 | Pinned and recorded | Consumer plans train unless the user opts out (5-year retention if on), with a safety-flag exception [P-page/P-full] | **No** (agent-tier or public material only) | Pro or higher required |
 | Project reimburses consumer plans | B | One month of Pro × 200 contributors = **$4,000**, more than ≈ $3,400 of direct API inference | As above | As above | **No** | Admin overhead |
 | Sponsor or programme credits | A or B | Reduced | Depends | Depends | Depends | AI for Science: up to $50k in credits per project, "any researcher is eligible to apply" [P-full]; the Sloan Foundation distributes Claude credits [P-page]; a Team plan offer for scientists ($0 Standard seats for 12 months; economics not named; lab members only) [P-full] |
 
-**Note.** With project-provided commercial-terms access, Option B's inference cost to the project equals Option A's A2 route and is about $4 per contribution above A1 and staff execution. Engineering is comparable. The remaining differences are operations, evaluation inference, support, custody, and shepherd hours by route.
+**Note.** With project-provided commercial-terms access, Option B's inference cost to the project equals Option A's A2 route and is about $4 per contribution above A1 and staff execution. That holds for terminal users on API keys. Desktop-app users need Team or Enterprise seats instead, because the desktop app requires a subscription sign-in and Console (API) accounts are documented only for the terminal client [P-page, R2 §6.1]; whether it accepts API keys is [U]. At Team Standard's $25 per seat per month ($20 billed annually) that is roughly $25–50 per desktop contributor for one to two seat-months [U], instead of about $17 of API usage, plus seat management, so B's cost to the project rises with the share of contributors who use the desktop app. Engineering is comparable. The remaining differences are operations, evaluation inference, support, custody, and shepherd hours by route.
 
 ## 6. Sensitivities: what would change these conclusions
 
@@ -120,7 +120,7 @@ The [verifier protocol](../methodology/verifier-validation-protocol.md) §10 (Pr
 - **Admission rate (A9).** At 0.2 admitted tasks per contribution, five contributions are needed per task and screening effort per admitted task rises fivefold, so recruitment and screening, rather than construction, become the binding constraints.
 - **Validation-trial compute** is architecture-independent but about 15–45 times interview inference per task. Sponsor credits matter more here than for the interview.
 - **Heavy hosted execution (A2) with large data.** Most target analyses should run in minutes (a selection criterion), but heavy-tailed package sizes (5% of AEA packages exceed 20 GB) would raise sandbox and storage costs for those papers.
-- **A more expensive model.** Claude Fable 5.1 ($10 / $50 per million tokens) raises inference about 2.5×. That is still small next to human effort.
+- **A more expensive model.** Claude Fable 5.1 ($10 / $50 per million tokens; Claude API reference cached 2026-10-06 [P-page], not re-checked on 2026-11-05) raises inference about 2.5×. That is still small next to human effort.
 - **Contributor counts in the thousands.** Inference would reach tens of thousands of dollars, but shepherding would bind long before.
 - **Contributor honoraria** (O-005) could exceed every other per-contribution cost. They do not depend on the architecture.
 
@@ -142,5 +142,6 @@ The [verifier protocol](../methodology/verifier-validation-protocol.md) §10 (Pr
 - New lines: outside-economist hours, validation-trial compute, evaluation inference, staff-execution hours, route-specific inference ($13 without in-session agentic work).
 - Engineering restated as comparable (A ≈ 12–19.5, B ≈ 11.5–20.5 beyond a shared core of 10–17.5 with the shepherd console); maintenance A 0.1–0.25 FTE, B 0.1–0.2 FTE; support A 0.75 h.
 - Access mechanisms assessed against the exposure rule; custody stated symmetrically.
+- Cross-document consistency pass (2026-11-05): staff execution costed as a route under either option (A's staff route or B-staff; label also in `scenarios.py`, numbers unchanged); desktop-app users of Option B need Team or Enterprise seats rather than API keys, with the cost effect stated (§4, §5); regional-policy caveat on project-provided keys and seats; Fable price sourced and dated.
 
 **v0.2.0:** verified prices and hosting anchors (R3, R9); Sonnet cache-read price corrected.
