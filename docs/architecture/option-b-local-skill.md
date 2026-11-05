@@ -324,7 +324,7 @@ The risk registers of both options use one inclusion rule: every risk rated Medi
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Non-technical economists do not complete setup | Medium–High [U: pilot] | High | Desktop app; typing-free workspace; research-assistant mode; onboarding sessions; hosted onboarding (hybrid H1) |
+| Non-technical economists do not complete setup | Medium–High [U: pilot] | High | Desktop app (with a Team or Enterprise seat under the exposure rule, §10.2); typing-free workspace; research-assistant mode; onboarding sessions; hosted onboarding (hybrid H1) |
 | Engineering takes longer than planned | Medium–High: the design relies on untested client features, on a client that ships several releases a week | Medium | Narrow MVP; early tests of the client features the design relies on (workspace-scoped `agent`, auto-update from workspace settings, subagent input restriction) |
 | Terms do not allow project-provided access for external contributors (O-018) | Low–Medium (a definitional question about "authorized users") | High: B then depends on institutional accounts or on relaxing the exposure rule | Ask Anthropic; institutional commercial accounts |
 | Project account suspended or capped (project-provided keys or seats) | Low–Medium | High: interviews on project-provided access stop | Location attestation when keys or seats are issued and at the endpoint; per-user spend limits; Scale tier before recruitment waves; separate evaluation workspace; institutional accounts as a second route |
@@ -350,7 +350,7 @@ The risk registers of both options use one inclusion rule: every risk rated Medi
 | "Direct access to the contributor's local research environment." | **True and important.** Stata appears in 71.6% of economics replication packages [S]; local execution with in-session iteration is B's clearest advantage, especially for operationalizing errors. |
 | "Focus development effort on interview, specification, and validation quality." | **Partly true.** There is no web application to build, but an upload endpoint, project page, subagents, binaries, and cross-platform support are still needed. Engineering effort is comparable to Option A's (≈ 11.5–20.5 against ≈ 12–19.5 engineer-weeks). |
 | "Contributors need access to Claude Code, suitable models, and research software." | **True, and stricter than it sounds.** It requires commercial-terms access for full contributions and a supported region. |
-| "Some senior economists may not want to install or operate such tools." | **Plausible; must be measured** (pilot PQ1). The typing-free workspace, the desktop app, and research-assistant mode reduce the burden, but the economist still installs Claude Code. |
+| "Some senior economists may not want to install or operate such tools." | **Plausible; must be measured** (pilot PQ1). The typing-free workspace, the desktop app (with a Team or Enterprise seat under the exposure rule), and research-assistant mode reduce the burden, but the economist still installs Claude Code. |
 | "Model behaviour may differ across versions, settings, and model access." | **True, but narrower than it sounds.** The model is pinned, switch-blocked, and recorded; enforcement needs managed settings or a gateway; the client version and user-level configuration still vary and are recorded. |
 | "Local execution does not guarantee offline inference." | **True.** Every request sends prompts, file contents, and command outputs to Anthropic. The same holds for what the model reads under Option A. |
 
