@@ -45,10 +45,16 @@ An expert-driven benchmark that tests whether AI agents can do rigorous economic
 | `protocol/`, `validation/`, `implementations/`, `pilot/`, `tests/`, `contributor-docs/` | Placeholders until Phase 5 |
 | `reports/` | Generated, collaborator-facing renderings |
 
+## Before researching anything again
+
+Read the dated evidence notes in [`docs/research/evidence/`](docs/research/evidence/) (R1–R9, 2026-11-05) first; they record what was verified, at which evidence level, and what could not be accessed. Re-verify only what is stale or marked [S]/[U]. Prices, plan terms, and policies change: re-check them before any public use.
+
 ## Environment notes (cloud sessions)
 
-- `arxiv.org` is not reachable from the cloud environment's network policy; ask the research lead for PDFs, or have the environment's allowed domains updated. Do not route around blocked hosts with proxy or mirror services.
-- `github.com` web pages and `api.github.com` are blocked, but `git clone` and `raw.githubusercontent.com` work. Clone references read-only into the scratchpad; never execute their scripts.
+- Blocked by the environment's network policy (as of 2026-11-05): `arxiv.org`, `github.com` web pages and `api.github.com`, `docs.github.com`, `aclanthology.org`, `agentskills.io`, `api.crossref.org`, `www.aeaweb.org`, and several vendor and university sites. Ask the research lead for PDFs or to allow hosts in the environment's network settings. Never route around blocked hosts with proxy or mirror services.
+- Reachable: `code.claude.com`, `platform.claude.com`, `www.anthropic.com`, `claude.com` pricing pages, `raw.githubusercontent.com`, and `git clone` of public repositories. Clone references read-only into the scratchpad; never execute their scripts.
+- **WebSearch has a per-turn budget shared by all subagents (about 200 searches).** Parallel research agents exhausted it on 2026-11-05; plan searches accordingly, and prefer primary sources reachable by fetch or clone.
+- The machine has 4 CPUs, so the Workflow tool runs about two agents at a time; independent background agents can run more in parallel.
 
 ## Corrections and standing preferences from the research lead
 
