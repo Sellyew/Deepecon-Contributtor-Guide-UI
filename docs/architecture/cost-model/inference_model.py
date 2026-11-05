@@ -34,7 +34,17 @@ def cost(model, s, caching=True):
     parts = dict(interview_in=interview_in, restarts=restarts, agentic_in=agentic_in, pre_in=pre_in, ver_in=ver_in, output=out_cost)
     return total_in + out_cost, parts
 
+def cost_without_agentic(model, s):
+    """Option A with run kits or staff execution: no in-session agentic execution loops (fairness review, A-advocate #6)."""
+    s2 = dict(s, ag_in=0, ag_out=0)
+    return cost(model, s2)
+
+
 if __name__ == "__main__":
+    for name, s in SCENARIOS.items():
+        c, _ = cost_without_agentic("opus-5.5", s)
+        print(f"opus-5.5    {name:8s} without in-session agentic work (A1/staff): ${c:6.2f}")
+    print()
     for model in PRICES:
         for name, s in SCENARIOS.items():
             c, parts = cost(model, s)

@@ -9,7 +9,9 @@ from inference_model import SCENARIOS, cost
 TASKS_PER_CONTRIBUTION = (1.0, 0.5, 1.5)      # admitted tasks per contribution (many candidates fail)
 SHEPHERD_HOURS_PER_TASK = (20, 10, 40)        # Good Benchmarks §10 reports >40 h for hard tasks
 REVIEWER_HOURS_PER_TASK = (8, 4, 12)          # two independent reviewers x 2-6 h
-SUPPORT_HOURS_A = (0.5, 0.25, 1.0)            # per contributor, hosted platform
+ECONOMIST_HOURS_PER_TASK = (15, 5, 35)        # blind status classification, dual-verifier test, calibration (methodology review #13) [U]
+STAFF_S5_HOURS_PER_CONTRIBUTION = (4, 2, 6)   # extra shepherd hours when staff execute operationalization (A staff route) [U]
+SUPPORT_HOURS_A = (0.75, 0.25, 1.5)           # per contributor, hosted platform incl. run-kit support (fairness review)
 SUPPORT_HOURS_B = (1.0, 0.5, 2.0)             # per contributor, local plugin (environment heterogeneity)
 
 def triple(n, per):
@@ -17,13 +19,15 @@ def triple(n, per):
     return n * c, n * lo, n * hi
 
 if __name__ == "__main__":
-    print(f"{'N':>4} | {'inference $ (central [low-high])':>34} | {'shepherd h':>22} | {'reviewer h':>20} | {'support h A':>17} | {'support h B':>17}")
+    print(f"{'N':>4} | {'inference $ (central [low-high])':>34} | {'shepherd h':>22} | {'reviewer h':>20} | {'economist h':>20} | {'support h A':>17} | {'support h B':>17} | {'staff-S5 h (A)':>18}")
     for n in (10, 50, 200):
         inf = [cost('opus-5.5', SCENARIOS[k])[0] * n for k in ('central', 'low', 'high')]
         tasks = triple(n, TASKS_PER_CONTRIBUTION)
         sh = (tasks[0] * SHEPHERD_HOURS_PER_TASK[0], tasks[1] * SHEPHERD_HOURS_PER_TASK[1], tasks[2] * SHEPHERD_HOURS_PER_TASK[2])
         rv = (tasks[0] * REVIEWER_HOURS_PER_TASK[0], tasks[1] * REVIEWER_HOURS_PER_TASK[1], tasks[2] * REVIEWER_HOURS_PER_TASK[2])
+        ec = (tasks[0] * ECONOMIST_HOURS_PER_TASK[0], tasks[1] * ECONOMIST_HOURS_PER_TASK[1], tasks[2] * ECONOMIST_HOURS_PER_TASK[2])
+        s5 = triple(n, STAFF_S5_HOURS_PER_CONTRIBUTION)
         sa = triple(n, SUPPORT_HOURS_A)
         sb = triple(n, SUPPORT_HOURS_B)
         f = lambda t: f"{t[0]:,.0f} [{t[1]:,.0f}-{t[2]:,.0f}]"
-        print(f"{n:>4} | ${inf[0]:>9,.0f} [${inf[1]:,.0f}-${inf[2]:,.0f}]{'':>9} | {f(sh):>22} | {f(rv):>20} | {f(sa):>17} | {f(sb):>17}")
+        print(f"{n:>4} | ${inf[0]:>9,.0f} [${inf[1]:,.0f}-${inf[2]:,.0f}]{'':>9} | {f(sh):>22} | {f(rv):>20} | {f(ec):>20} | {f(sa):>17} | {f(sb):>17} | {f(s5):>18}")

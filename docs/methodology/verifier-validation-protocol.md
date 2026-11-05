@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** v0.2.0 (2026-11-05). Part of Deliverable 2. Not yet reviewed by the research lead. Changes from v0.1.0 are listed in §13. |
+| **Status** | **Proposed** v0.3.0 (2026-11-05). Part of Deliverable 2. Not yet reviewed by the research lead. v0.3.0 integrates an independent econometric review and a benchmark-methodology review (§16). |
 | **Purpose** | Establish, with recorded evidence, that a task's verifier accepts correct work and rejects scientifically consequential mistakes, so that the benchmark score means what it claims. |
 | **Inputs** | A task candidate with a reference implementation, at least one validated flawed variant, and a draft verifier (see the [construction protocol](benchmark-construction-protocol.md)). |
-| **Outputs** | `validationRun` records (see the [schema](../../schemas/README.md)), a **kill matrix**, and a pass/fail decision on rubric criteria VE-1 to VE-5, SO-1 to SO-3, DF-1, EN-2, EN-4, LK-1, and LK-2 ([rubric](task-quality-rubric.md)). |
-| **Evidence** | [R1](../research/evidence/R1-terminal-bench-science.md) (Terminal-Bench-Science practice), [R5](../research/evidence/R5-analysis-causal-econ-benchmarks.md) (analytic dispersion, causal benchmarks), [R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) (testing techniques, error detection, numerical checks) |
+| **Outputs** | `validationRun` records (see the [schema](../../schemas/README.md)), a **kill matrix**, an exposure log, and a pass/fail decision on the verification and leakage criteria of the [rubric](task-quality-rubric.md). |
+| **Evidence** | [R1](../research/evidence/R1-terminal-bench-science.md) (Terminal-Bench-Science practice), [R5](../research/evidence/R5-analysis-causal-econ-benchmarks.md) (analytic dispersion, causal benchmarks), [R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) (testing techniques, numerical checks); independent reviews of 2026-11-05 (§16) |
 
 ---
 
@@ -14,11 +14,11 @@
 
 The research lead's brief (§4) states the core difficulty: "A deliberately flawed implementation is not sufficient by itself to establish that a task is good." Three distinct failures can hide behind a verifier that "rejects the flawed version":
 
-1. **Over-fitting to one wrong answer.** The verifier rejects the specific flawed output but accepts other wrong answers. This is the negative-side version of the verifier "co-designed with the author's own solution" (*Good Benchmarks* §7).
-2. **Rejecting valid alternatives.** The verifier rejects a different estimator that identifies the same estimand. Legitimate dispersion among competent analysts is large ([R5](../research/evidence/R5-analysis-causal-econ-benchmarks.md) §6).
-3. **Coincidence.** On the evaluation data, the flawed procedure gives the same answer as the correct one, so no outcome check on that data can separate them. This is really six different problems with six different remedies (§2).
+1. **Over-fitting to one wrong answer.** The verifier rejects the specific flawed output but accepts other wrong answers. This is the mirror image of the verifier "co-designed with the author's own solution" (*Good Benchmarks* §7).
+2. **Rejecting valid alternatives.** Legitimate dispersion among competent analysts is large ([R5](../research/evidence/R5-analysis-causal-econ-benchmarks.md) §6).
+3. **Coincidence.** The flawed procedure gives the same answer as the correct one on the evaluation data. This is really six different problems with six different remedies (§2).
 
-**What DeepEcon adds to established practice.** Seeding faults to test the tests is classic mutation testing (DeMillo, Lipton & Sayward 1978). Terminal-Bench-Science already uses named negative controls and independent "witness" implementations [P-full]. DeepEcon's contribution is **where the mutants come from**: experts design them as realistic research mistakes, each with a realism warrant. The technique itself is not new and should be cited as such.
+**What DeepEcon adds to established practice.** Seeding faults to test the tests is classic mutation testing (DeMillo, Lipton & Sayward 1978). Terminal-Bench-Science already verifies repair tasks on seeded hidden instances with named negative controls and independent "witness" implementations [P-full]. DeepEcon's contribution is **where the mutants come from**: realistic research mistakes designed by experts and documented with realism warrants. The machinery is borrowed and should be cited as such.
 
 ## 2. "Same number, wrong procedure": six kinds of equivalence
 
@@ -26,169 +26,270 @@ Adapted from [R6](../research/evidence/R6-error-detection-and-verifier-methodolo
 
 | Type | Definition | Economics example | Can an outcome check catch it? | Remedy |
 |---|---|---|---|---|
-| **1. Semantic equivalence** | F(d) = P(d) for every admissible input | Clustering on `state_id` versus `state_name` when they map one-to-one | No, and it need not | Not a flaw. Reclassify as a valid alternative or discard; exclude from mutation scores. Only this type is an "equivalent mutant" proper. |
-| **2. Data-equivalence** | F ≈ P on the evaluation data, but not on other admissible inputs | TWFE ≈ heterogeneity-robust DiD when effects are nearly homogeneous; OLS ≈ 2SLS when endogeneity is weak in the sample | **Yes, with new inputs** | Hidden variants that exercise the separating feature, e.g. effect injection (§5). Record the separation margin. |
-| **3. Observation-equivalence** | F differs only in outputs the verifier does not observe | Wrong clustering level: same coefficient, different SE | Yes, if the verifier observes more | Require SE, confidence interval, N, number of clusters, and first-stage statistics as outputs, stated in the instruction. Use inference relations (§5). |
-| **4. Tolerance-equivalence** | F falls inside an acceptance region widened for valid alternatives | A flawed estimate within the dispersion of valid estimators | Partly | Declared-choice grading with conditional references (§4); hidden variants where F leaves the region; tighten the estimand. |
-| **5. Power-equivalence** | F and P differ in sampling properties too subtly for the verifier's simulation budget | A test with size 7% instead of 5%; mild under-coverage | Only with large Monte Carlo budgets | Do not key tasks on small distortions. Report the verifier's own power. |
-| **6. Identification-equivalence** | Both compute valid statistics; the flaw lies in an untestable assumption | A comparison group whose trends diverge only after treatment; a violated exclusion restriction | **No**, not from observational data. Semi-synthetic data can catch it only by encoding the assumption in the generator (*Good Benchmarks* §7). | Structured expert judgment (tier V3); require sensitivity analysis as an output; never force a binary key (brief §4). |
+| **1. Semantic equivalence** | F(d) = P(d) for every admissible input | Clustering on `state_id` versus `state_name` when they map one-to-one | No, and it need not | Not a flaw: reclassify as a valid alternative or discard; exclude from mutation counts. Only this type is an "equivalent mutant" proper. |
+| **2. Data-equivalence** | F ≈ P on the evaluation data, but not on other admissible inputs | TWFE ≈ heterogeneity-robust DiD when effects are nearly homogeneous; OLS ≈ 2SLS when endogeneity is weak in the sample | **Yes, with new inputs** | Hidden variants that exercise the separating feature (§5); record the separation margin |
+| **3. Observation-equivalence** | F differs only in outputs the verifier does not observe | Wrong clustering level: same coefficient, different SE | Yes, if the verifier observes more | A benchmark-wide output schema that always includes SE, confidence interval, N, number of clusters, and the cluster variable (rubric SP-4); inference relations (§5) |
+| **4. Tolerance-equivalence** | F falls inside an acceptance region widened for valid alternatives | A flawed estimate within the dispersion of valid estimators | Partly | Separate the three sources of variation (§4.6); tighten the estimand; separating hidden variants |
+| **5. Power-equivalence** | F and P differ in sampling properties too subtly for the verifier's simulation budget | A test with size 7% instead of 5% | Only with large Monte Carlo budgets | Grade inference deterministically against conditional references (§4.7); never key tasks on small distortions |
+| **6. Identification-equivalence** | Both compute valid statistics; the flaw lies in an untestable assumption | A comparison group whose trends diverge only after treatment; a violated exclusion restriction | **No**, not from observational data | Structured expert judgment (tier V3); sensitivity analysis as a required output; never a binary key (brief §4) |
 
 ## 3. The validation ladder
 
-Run the rungs in order; a failure sends the task back to the shepherd. Each run is stored as a `validationRun`.
+Run the rungs in order. A failure sends the task back to the shepherd. Every run is stored as a `validationRun`, and §3.1 says which rungs to re-run after a change.
 
-| Rung | Run kind | What it establishes | Pass condition | Automatable? |
-|---|---|---|---|---|
-| L0 | Static checks | Package integrity | Schema valid; tiers correct; leakage scan clean (LK-1); environment pinned and offline (EN-1); verifier isolation (EN-4). | Yes |
-| L1 | **Oracle** | Solvability from agent-facing materials (SO-1); the verifier accepts correct work | The reference solution, run in the task environment with no privileged files, is accepted. Oracles can themselves be wrong (the test-oracle problem; Barr et al. 2015); hence L3 and the independent check in construction Stage 1. | Yes |
-| L2 | **No-op and trivial nulls** | The verifier is not trivially satisfied | Empty, default, constant, mean, zero-effect, and identity outputs are rejected on every hidden instance. | Yes |
-| L3 | **Alternative valid implementations** | Other correct paths get credit (GT-4, VE-1) | Every accepted option in the decision space is accepted on the main data and on all hidden variants. **Several LLM-written implementations are not independent evidence:** independently written versions tend to fail together (Knight & Leveson 1986; reported again for coding agents in 2026 [S]). At least one structurally independent witness is required: a different author, software, or method. | Run: yes. Choosing alternatives: human |
-| L4 | **Negative controls (expert flawed variants)** | Consequential mistakes are rejected (VE-2) | Every validated flawed variant is rejected, with separation margins recorded. The flagship variant is rejected on the main data or killed by a stated hidden variant. | Run: yes. Design: human |
-| L5 | **Mutation analysis (artificial mutants)** | Verifier sensitivity beyond the expert variants | Report a mutation score **with a confidence interval** over generated mutants: drop a fixed effect, change the cluster variable, shift timing by one period, alter a sample filter, flip a sign. Classify each survivor (§2): semantically equivalent → exclude; data-equivalent → add a separating hidden variant, or document as undetectable on this design; verifier gap → fix; valid alternative → add to L3. | Yes, with human triage |
-| L6 | **Metamorphic relations** | Procedure-level correctness without exact keys (VE-3) | The relations in §5 hold for the reference and all alternatives, and the relevant relations are violated by the flawed variants they target. Relations are necessary conditions, not sufficient ones. | Yes |
-| L7 | **Hidden-variant separation** | No flaw survives as data-equivalent (type 2) | Each flawed variant is rejected on at least 95% of hidden variants; each correct solution is accepted on 100%. The **kill matrix** (flawed variants × checks, with margins) is recorded. | Yes |
-| L8 | **Shortcut and adversarial attacks** | The score cannot be obtained without the capability (VE-4, EN-2) | All of these fail: hard-coded published coefficients; memorized values; copying from any file in the environment; "flag everything" answers in detection tasks; diffing against the public source package; an adversarial agent instructed to obtain the reward without doing the work. "No hack found" is evidence, not proof: hardening loops reduce but do not eliminate exploits ([R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) §2.3). | Mostly yes |
-| L9 | **Repeat stability** | No flakiness (VE-5) | Hundreds of repeated verifier runs (*Good Benchmarks* §1) with zero spurious failures. | Yes |
-| L10 | **Guided-agent fairness** | The verifier is fair conditional on the method (SO-3) | With the method named in a temporary instruction, strong agents pass. Terminal-Bench-Science reads graded hints this way: a pass with a hint the instruction could carry means the task is underspecified; a fail without hints but a pass with them means it is genuinely hard; a fail with every hint means it is broken. | Yes, with human reading of failures |
-| L11 | **Agent trials and crux alignment** | Difficulty is intrinsic and located where claimed (DF-1, DF-3) | Batches of five trials per configuration across several models. The shepherd reads the failures, which must occur at the stated crux. | Runs: yes. Analysis: human |
-| L12 | **Independent review** | Domain correctness and benchmark correctness (PR-2, SP-1) | Domain reviewer and benchmark reviewer sign off; the dual-verifier specification test passes. | No |
-| L13 | **Post-admission monitoring** | Validity over time | Issue reports and task repairs; L1–L9 are re-run when the environment changes. | Partly |
+| Rung | Run kind | Pass condition | Automatable? |
+|---|---|---|---|
+| L0 | **Static checks** | Schema valid; tiers correct; leakage scan clean (LK-1); environment pinned, offline, and identical for every task of a type (EN-1); output schema benchmark-wide (SP-4). | Yes |
+| L1 | **Oracle** | The reference solution, run in the task environment with no privileged files, is accepted. Oracles can themselves be wrong (Barr et al. 2015), hence L3. | Yes |
+| L2 | **No-op and trivial nulls** | Empty, default, constant, mean, zero-effect, and identity outputs are rejected on every **answer-changing** hidden instance. Invariance instances are exempt and listed; every task has a stated minimum number of answer-changing instances. | Yes |
+| L3 | **Alternatives and independent witnesses** | Every accepted option in the decision space is accepted on the main data and on all hidden variants. At least one **structurally independent** witness is required. Qualifying witnesses: a clean-room re-implementation written from the paper, estimand, and codebook without reading the original code; or a blind expert solve (rubric SP-1). Several LLM-written implementations are **not** independent evidence; independently written versions tend to fail together (Knight & Leveson 1986; reported again for coding agents in 2026 [S]). | Run: yes. Choice of alternatives: human |
+| L4 | **Negative controls (expert flawed variants)** | Every validated flawed variant is rejected, with separation margins recorded. | Run: yes. Design: human |
+| L5 | **Mutation analysis (artificial mutants)** | Generated mutants (drop a fixed effect, change the cluster variable, shift timing by one period, alter a sample filter, flip a sign) are run. **Pass:** every surviving non-equivalent mutant has been triaged, and no survivor reveals a verifier gap. Survivor counts are reported by operator class. No confidence interval is reported, because designer-chosen mutants are not a random sample. | Yes, with human triage |
+| L6 | **Metamorphic relations** | The relations in §5 hold for the reference and all alternatives, and are violated by the flawed variants they target. Relations are necessary conditions, not sufficient ones. | Yes |
+| L7 | **Hidden-variant separation** | Answer-changing variants are built on bases the agent never sees (§5.1). **Deterministic families:** every correct solution matches its conditional reference on the same input. **Stochastic families:** simulation shows that the probability of rejecting a correct solution is below 10⁻³. **Flawed variants:** each is rejected on the variants that satisfy its stated conditions, with a one-sided 95% lower bound of at least 0.90 (for example, 194 of 200 gives 0.936). The kill matrix records flawed variants × checks, with margins. | Yes |
+| L8 | **Shortcut and adversarial attacks** | Each of these attacks must fail:<br>(a) hard-coded published coefficients;<br>(b) trivial nulls (L2);<br>(c) copying from any file in the environment;<br>(d) "flag everything" in detection tasks;<br>(e) recall of the original package or paper (rubric LK-4);<br>(f) cheat trials by an agent briefed to get the reward without doing the work, run offline (the official configuration) and once online to measure what the offline rule protects;<br>(g) the **differential attack**: return the main-data or published answer plus the estimand-weighted difference between hidden and visible outcomes;<br>(h) constant outputs on invariance instances;<br>(i) "change nothing" and "always switch to the newest estimator" policies in correction tasks;<br>(j) agent code trying to write the reward or read hidden data (EN-4).<br>"No hack found" is evidence, not proof ([R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) §2.3). | Mostly yes |
+| L9 | **Full-harness replay** | At least 300 replays of the oracle and of every accepted alternative, through the agent sandbox plus verifier, varying unfixed seeds, thread counts, and at least two hardware platforms. **Pass:** zero spurious failures, reported with the one-sided 95% upper bound (about 1% at 0 of 300). Re-running a deterministic verifier with fixed seeds on stored outputs cannot fail and does not count. | Yes |
+| L10 | **Hint ladder and knowledge probe** | Pre-declared hints are given to agents in separate trials: H1 a design fact the instruction should carry; H2 names the pitfall; H3 names the method. A knowledge probe asks the key fact directly, outside the task. Results feed rubric SP-3 and SO-3. | Yes, with human reading |
+| L11 | **Agent trials and crux alignment** | At least 5 trials for each of at least 3 configurations from at least 2 model families, on the frozen task version, with model IDs and dates. At least 4 of 5 failing trials fail at the stated crux. Calibration models are listed in the release, and their scores are reported as *calibration-exposed*. | Runs: yes. Analysis: human |
+| L12 | **Independent review** | The blind expert solves and acceptance criteria from Stage 5 are re-checked against the L11 outputs. The domain reviewer and the benchmark reviewer sign off. | No |
+| L13 | **Post-admission monitoring** | Issue reports and task repairs. Status classifications are revisited at each release against new methodological literature. | Partly |
+
+### 3.1 Re-run matrix
+
+| Change | Re-run |
+|---|---|
+| Instruction | L1–L12 |
+| Verifier | L1–L9, and re-score all stored trials |
+| Environment | L0–L9 |
+
+Hardening edits are logged together with the trial that prompted them. No edit may be justified **only** by an agent's success (§4.9), because filtering tasks against the evaluated models biases their scores (R1 §4; *Good Benchmarks* §3, §9).
 
 ## 4. Designing the acceptance region
 
-Two pieces of evidence shape this section ([R5](../research/evidence/R5-analysis-causal-econ-benchmarks.md)).
+**Evidence.** Competent analysts disagree, even on sign and significance, when given only a question and data: in Breznau et al.'s released data, 64.4% of 1,252 models were not significant, 19.5% significantly negative, and 16.1% significantly positive [P-page]. Repeated AI-agent runs vary far less than human analysts (2–27 times less in one 2026 study) [S]. Calibrating on agent runs alone would therefore reject legitimate alternatives ([R5](../research/evidence/R5-analysis-causal-econ-benchmarks.md)).
 
-**Competent analysts disagree, even on sign and significance, when given only a question and data.** In Breznau et al.'s released data, 64.4% of 1,252 models were not significant, 19.5% significantly negative, and 16.1% significantly positive [P-page]. Further specification narrows the dispersion but does not remove it: with shared cleaned data, the Many Economists study still found an interquartile range of 2.4 percentage points [S].
+1. **Separate estimand, assumptions, and estimator** (Lundberg, Johnson & Stewart 2021 [U]):
+   - **(a) Estimand.** State it in potential-outcome terms, with explicit weights over the treated (cohort, period) cells, the event window, and the population.
+   - **(b) Identifying assumptions.** Comparison group, base period, and anticipation are stated in the instruction or chosen from a benchmark-wide convention vocabulary (item 4).
+   - **(c) Estimator.** It is never part of the estimand.
 
-**Repeated AI-agent runs vary far less than human analysts** (2–27 times less in one 2026 study [S]). Tolerances calibrated only on agent runs would therefore reject legitimate alternatives.
+   In staggered DiD, writing out the aggregation weights can effectively name the estimator. Rubric SP-3 records which phrases disclose the method.
+2. **Tighten first.** Tighten the instruction until the remaining variation is small (*Good Benchmarks* §4).
+3. **Hidden decision space.** For each consequential decision, list the options and mark each as reference, accepted, unjustifiable, or contested, with provenance and citations. Options carry `requires` and `excludes` constraints. For example: not-yet-treated controls *require* a no-anticipation window; imputation *requires* parallel trends in all pre-periods; never-treated controls are infeasible when every unit is eventually treated; a wild bootstrap must match the clustering level.
+4. **Declarations only for non-crux conventions.** The agent may declare conventions from a vocabulary that is **benchmark-wide for the design family**, and so reveals nothing task-specific. Examples: small-sample factor, degrees-of-freedom rule, handling of singletons, counting of nested fixed effects.
+   - **Crux decisions are graded only through outcomes on separating hidden variants.** Naming them in the output contract would disclose the crux and turn the task into multiple choice.
+   - Each task has at most two multi-option decisions.
+   - Every selectable combination's conditional reference is checked against a second implementation (GT-1).
+   - A declaration–implementation consistency check runs on variants where the declared options separate.
+   - Self-reported values are never graded alone (rubric VE-3).
+5. **Intermediate outputs are outcomes.** Estimation-sample identifiers (or their hash), cohort sizes, and the number of clusters are produced by **re-executing the agent's code** in the verifier sandbox, not taken from its report.
+6. **Three sources of variation, three mechanisms.**
+   - **(i) Numerical noise:** a band from cross-software re-runs of the same declared estimator and convention. For deterministic estimators it is tiny.
+   - **(ii) Conventions:** fixed in the instruction or declared from the vocabulary, each with its own conditional reference. Conventions can be as large as flaws: in R6's design, two defensible CR1 conventions differ by a factor of about 1.10.
+   - **(iii) Substantive alternatives:** the decision space.
 
-1. **Fix the estimand and the decisions that matter first.** Tighten the instruction until the remaining variation is small (*Good Benchmarks* §4). With open specifications, no single tolerance band separates errors from valid alternatives.
-2. **Build a hidden decision space.** For each consequential decision, list the options and mark each as reference, accepted, unjustifiable, or contested, with provenance and citations. BLADE uses expert-annotated decision spaces this way, but grades decisions rather than estimates [P-page].
-3. **Grade against declared choices** when more than one option is accepted. The agent declares its choices. The verifier checks them against the decision space and recomputes the reference for that exact combination (a *conditional reference*). This separates three cases: a valid choice correctly implemented, a valid choice wrongly implemented, and an unjustifiable choice.
-4. **Treat compact intermediate outputs as outcomes.** Estimation-sample identifiers (or their hash), cohort sizes, and the number of clusters catch errors that barely move the headline number.
-5. **Use a tolerance only for numerical noise.** Express it in reference standard-error units, with a separate band on the ratio of standard errors (CausalVerify uses 0.5 SE and 0.8–1.25 [P-page]). Calibrate it from reference re-runs and cross-software implementations. Admit it only if it accepts every validated correct implementation and rejects every validated flawed variant.
-6. **Freeze the verifier before evaluation.** CausalVerify revised its scorer three times after outputs existed, and its headline failure rate moved from 56.1% to 33.1% to 15.5% [P-page].
-   - *Development:* agent trials may reveal legitimate alternatives; *Good Benchmarks* §7 calls this "a discovery process". Any widening needs an expert's written justification and a re-run of all controls.
-   - *Evaluation:* the verifier version is frozen. Later changes create a new task version.
-7. **Calibrate with experts, not agent runs.** Where residual dispersion matters, a small staged calibration study with economists measures it directly.
-8. **Check discrimination.** If the region contains a flawed variant's output, take one of four routes: tighten the estimand, choose another target analysis, add separating hidden variants (L7), or demote the task to tier V3.
-9. **Avoid knife-edge decisions.** Never key a task on a significance decision when the reference p-value is near the threshold.
-10. **Contested decisions get no binary grade** (D-013, X-003). Exclude them, or grade recognition and abstention in the experimental track.
+   **No default band is borrowed from another benchmark.** For example, an SE-ratio band of 0.8–1.25 would accept a wrong clustering level in R6's design, where unit-clustered over state-clustered SE is 1.195 and heteroskedasticity-only over state-clustered is 1.065.
 
-## 5. Metamorphic relations and hidden-variant families for econometrics
+   For stochastic outputs (bootstrap, randomization inference), the output contract fixes a minimum number of draws B, and the band adds k × the simulation SE at the declared B. Near p = 0.05, the simulation error of a p-value is about 0.007 at B = 999 and 0.015 at B = 199.
+7. **Inference is graded deterministically.** The agent's SE, confidence interval, and p-value are compared with the conditional reference for the declared variance estimator, on the main data and on hidden variants. Size and coverage simulations are used only during validation (L4, L7). Grading size by re-running an agent's pipeline is infeasible: about 150 runs would be needed to detect a 10% size against 5%, and about 820 to detect 7% against 5%.
+8. **Familywise control.** All of a task's thresholds are set jointly, before any agent output is seen. The familywise false-rejection probability for an implementation drawn from the accepted decision space must be at most 1%, estimated by simulation, as in Terminal-Bench-Science's `small-area-equivalence` task (R1 §8.3). Coverage gates report their binomial noise.
+9. **Freeze before evaluation.** CausalVerify revised its scorer three times after outputs existed, moving its headline failure rate from 56.1% to 33.1% to 15.5% [P-page].
+   - **Development.** Widening for a legitimately valid approach needs an expert's written justification and a re-run of all controls.
+   - **Evaluation.** The verifier version is frozen; any change creates a new task version.
+10. **Calibrate with experts.** Blind expert solves (rubric SP-1) supply human dispersion; agent runs alone understate it.
+11. **Check discrimination.** If the region contains a flawed variant's output, tighten the estimand, choose another target analysis, add separating variants, or demote the task to tier V3.
+12. **No knife-edge keys.** Never key a task on a significance change unless both p-values lie outside [0.02, 0.10].
+13. **Contested decisions get no binary grade** (D-013, X-003).
 
-A metamorphic relation states how the output must change when the input is transformed. It checks a procedure without an exact answer key. Every relation is first verified on the reference and on all alternatives. **Some relations are model-specific:** scaling or shifting the outcome behaves differently for log outcomes, PPML, and ratio estimands, without any error in the code.
+## 5. Hidden variants and metamorphic relations
 
-| Transformation of the input | Required behaviour of a correct procedure | Typical flaw it exposes |
+### 5.1 Answer-changing variants must use bases the agent never sees
+
+If an answer-changing variant is built on the data the agent holds, a program can pass by arithmetic rather than estimation (the differential attack, L8g). Answer-changing hidden variants are therefore built on:
+- held-out units, cohorts, or periods;
+- bootstrap-resampled panels;
+- outcome-perturbed copies.
+
+Effect injection is then layered on top. References are computed on each variant by the reference and accepted implementations. Invariance checks may use the visible data.
+
+### 5.2 Treated-cell weighting checks: effect injection
+
+**What it tests.** Replace Y with Y + τ·D on the variant base, where D is the treatment as the instruction defines it and τ is an effect pattern within the class the instruction admits. For a pipeline that is linear in the outcome *on the estimand's scale*, with weights that do not depend on Y, the estimate shifts by **exactly the estimator's weighting of τ over treated cells**.
+
+**Limits.**
+- The shift equals the *estimand's* weighting only for estimators that are unbiased for the stated weighted ATT under arbitrary heterogeneity (imputation; Callaway–Sant'Anna with the matching aggregation).
+- For 2SLS and other regression-defined estimands, it is a differential check against the conditional reference for the declared specification. With heterogeneous τ, the 2SLS shift is the estimator's own weighting (0.809 versus a complier mean of 0.975 in the review's check), and it changes with valid covariates (Blandhol et al. 2022 [U]).
+- **It tests nothing about how the counterfactual Y(0) is built.** In the review's check, a naive treated-minus-untreated mean and a treated-only before/after comparison both moved by exactly the target. Hence §5.3.
+- Exactness breaks for winsorizing or trimming on Y, standardized indices, data-driven bandwidths, LASSO-selected controls, and log, inverse-hyperbolic-sine, or PPML outcomes. Inject on the estimand's scale (multiplicatively for log estimands). For binary or bounded outcomes, injection can leave the outcome's support.
+
+**What it catches.** Static TWFE under staggered adoption with heterogeneous effects: in R6's design, with a target ATT of 2.062, the imputation estimator moved by 2.062 and TWFE by 1.421. It also catches mistimed treatment: with τ = 1, a one-period-late coding moved by 0.686.
+
+### 5.3 Counterfactual-side invariances (exact)
+
+| Transformation | Correct procedure | Flaw exposed |
 |---|---|---|
-| **Additive effect injection.** Replace Y with Y + τ·D on the real data, where D is the treatment as the instruction defines it and τ is an effect pattern within the class the instruction admits. | For estimators linear in Y, the estimate moves by **exactly** the estimand's weighting of τ, because the real untreated outcomes cancel in the difference. In R6's numerical check (Appendix A), the target ATT was 2.062: the imputation estimator moved by 2.062 and TWFE by 1.421. With a constant τ = 1, TWFE estimated with treatment coded one period late moved by 0.686. | Static TWFE under staggered adoption with heterogeneous effects; mistimed treatment. The check is exact and noise-free. It encodes only the estimand's definition, which sidesteps most of *Good Benchmarks*' synthetic-data warning. |
-| IV variant: inject τᵢXᵢ. | Just-identified 2SLS moves by Cov(Z, τX)/Cov(Z, X); OLS moves by Cov(X, τX)/Var(X). | Using OLS where 2SLS is required, even where the two coincide on the base data. |
-| RD variant: inject τ·1[X ≥ c]. | A local-linear estimate at a fixed bandwidth moves by exactly τ. Data-driven bandwidth selectors must be checked empirically. | Wrong side of the cutoff; wrong running variable. |
-| Add rows that the stated sample definition excludes. | All outputs unchanged. | A missing sample filter. |
-| **Duplicate every unit with a new unit ID but its original cluster ID.** | A correctly cluster-robust SE at the assignment level is unchanged (ratio ≈ 1; 0.9956 with CR1 small-sample factors in R6's design, so allow about 1–2% tolerance). Unit-clustered and heteroskedasticity-only SEs shrink by about 1/√2. | Clustering finer than the assignment level, or no clustering. It does **not** expose clustering coarser than necessary, which is often a contested choice (V3). |
-| Rescale the instruments, or apply any nonsingular linear transformation to them. | 2SLS estimates unchanged. | Ad hoc instrument handling. |
-| Shift the RD running variable and the cutoff together. | Estimate unchanged. | Hard-coded cutoff. |
-| Permute the row order; relabel identifiers consistently. | All outputs unchanged. | Order-dependent data manipulation; identifier-dependent merges. |
-| Shift every calendar date by a constant. | Event-time effects unchanged. | Timing tied to calendar values instead of adoption dates. |
-| Multiply the outcome by c; add a constant to the outcome (linear models in levels only). | Coefficients and SEs scale by c, with t unchanged; slopes unchanged when there is an intercept or fixed effects. | Hard-coded values; ad hoc transformations. |
-| Randomly reassign treatment (placebo). | Estimates centred on zero across draws. | Mechanical correlation introduced by the procedure. |
+| **Control-span invariance:** add any vector in the span of the required fixed effects or controls (e.g., arbitrary αᵢ + λₜ) | Estimate unchanged | Missing fixed effects or controls. Naive comparisons changed by 6.93 and 7.95 in the review's check, while TWFE and imputation changed by 0.000 |
+| **Instrument-orthogonal confounding:** add a component orthogonal in-sample to [1, Z, W] but correlated with X | 2SLS unchanged | Using OLS where 2SLS is required: OLS changed by 0.713 in the review's check |
 
-**Hidden-variant families.**
-- Resamples (bootstrap, subsamples) test stability.
-- Effect injection gives exact checks of how the point estimate weights the data.
-- Full simulations with known truth are kept for **inference** checks (coverage, size), with large enough Monte Carlo budgets.
+### 5.4 Inference relations
 
-## 6. Semi-synthetic data: uses and dangers
+| Transformation | Correct procedure | Flaw exposed |
+|---|---|---|
+| **Duplicate every unit with a new unit ID but its original cluster ID** | A correctly cluster-robust SE at the assignment level is unchanged (ratio 1.0000 with CR0 and CR2, 0.9956 with CR1, so allow about 1–2%); unit-clustered and heteroskedasticity-only SEs shrink by about 1/√2 | Clustering finer than the assignment level, or none. It does **not** expose clustering coarser than necessary, which is often a contested choice (V3) |
 
-Semi-synthetic datasets keep the real design (covariates, treatment timing, cluster structure) and simulate outcomes with known effects. The 2016 ACIC data-analysis challenge used this approach to compare causal-inference methods (Dorie et al. 2019) [S]. It supplies ground truth for statistical-validity tasks and defeats memorized published results.
+### 5.5 Other invariances
 
-*Good Benchmarks* §7 names the danger: "When you generate the data from a hypothesis, the verifier can quietly encode an assumption only you hold." Safeguards:
+| Transformation | Correct procedure | Flaw exposed |
+|---|---|---|
+| Add rows that the stated sample definition excludes | Unchanged | A missing sample filter |
+| Rescale the instruments, or apply any nonsingular linear transformation to them | 2SLS unchanged | Ad hoc instrument handling |
+| Shift the RD running variable and the cutoff together | Unchanged | Hard-coded cutoff |
+| Permute rows; relabel identifiers consistently | Unchanged | Order-dependent manipulation; identifier-dependent merges |
+| Shift calendar dates by a constant | Event-time effects unchanged | Calendar-tied timing. **Use only when the instruction's parameters are derived from the data and transformed consistently**; otherwise it grades an unstated requirement |
+| Multiply or shift the outcome (linear models in levels only) | Coefficients and SEs scale; slopes are unchanged with an intercept or fixed effects | Hard-coded values |
 
-- **Prefer effect injection** (§5) where it suffices. It keeps the real untreated outcomes and encodes only the estimand's definition.
-- **Document the data-generating process** in the hidden tier, and have an independent economist review it.
-- **Every validated alternative estimator must recover the truth.** If only the contributor's estimator does, the generator encodes that estimator's assumptions.
-- **Calibrate realism.** Noise and heterogeneity magnitudes should be plausible for the setting, not tuned to maximize the gap between the correct and flawed procedures.
-- **Pair coverage checks with interval-width or contraction checks.** A procedure that ignores the data can pass a calibration check while being useless [P-full, R6 §3.9].
+**Regression discontinuity.** A constant injection moves a local-linear estimate at any bandwidth, and a global quartic, by exactly τ. RD's main pitfalls (bandwidth, polynomial order, inference) therefore have no exact relation. They are verified through conditional references for declared conventions, and through coverage simulations during validation.
 
-## 7. Error-detection tasks: clean twins, decoys, and matchers
+## 6. Synthetic and derived data: licensing and realism
 
-Most error-detection benchmarks do not measure false alarms on clean material. Where matched clean twins were used, models that looked identical on recall differed by 79 points in false-alarm rate [S] ([R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) §1.4). Rules:
+- **Derived works inherit the original licence.** Effect-injected, perturbed, and semi-synthetic data built on real covariates are derived from the original files. They are hidden-variant techniques for **redistributable** data, not substitutes for restricted data.
+- **For restricted data, the only route is fully synthetic data.** Every variable is synthesized, with disclosure review and the data provider's permission where required. The reference check (GT-1) and the materiality check (RV-2) are re-run, and the failure mode's consequence is re-demonstrated, on the synthetic data.
+- **Fully synthetic data lose real-data quirks:** duplicates, miscoded treatment, unbalanced panels. Those quirks drive the brief's failure mode #6. Task counts are therefore reported by failure-mode category × data route, so that bias toward estimator-choice flaws is visible.
+- **Generator safeguards** (*Good Benchmarks* §7: "the verifier can quietly encode an assumption only you hold"):
+  - document the data-generating process in the hidden tier;
+  - have an independent economist review it;
+  - every validated alternative must recover the truth;
+  - calibrate realism, rather than maximizing the gap between correct and flawed results;
+  - pair coverage checks with interval-width or contraction checks (R6 §3.9).
 
-1. **Matched clean twins.** Each flawed package has a twin with no known consequential error, presented under the same instruction.
-2. **Decoys.** Valid alternatives that look like mistakes (drawn from the decision space) must not be flagged.
-3. **Separate scores.** Report recall, false-alarm rate, and localization separately. Never combine them into one number that hides the false-alarm rate.
-4. **Enough controls to bound false alarms.** With 0 false alarms in 30 clean controls, the 95% upper bound on the true false-alarm rate is still about 9.5%. Report bounds, not just point estimates.
-5. **Test the matcher.** The rule-based or LLM procedure that matches an agent's report to the planted error is itself validated on planted match and non-match fixtures. SPOT uses an LLM similarity step for this [P-page].
-6. **Adjudicate natural errors.** An agent may find a real, unplanted error in a "clean" package; published packages contain real errors ([R4](../research/evidence/R4-replication-benchmarks.md)). Such reports go to a human adjudication route, which may lead to task repair. By default they do not count as false alarms.
+## 7. Correction and detection tasks: twins, decoys, and matchers
 
-## 8. Verification by validity layer
+1. **Matched clean twins.** Each flawed package has a twin with no known consequential error, under the same instruction and the same restructured presentation (rubric LK-3).
+2. **Scoring correction tasks.**
+   - Flawed instances are scored on **repair**: the output matches the reference or a conditional reference.
+   - Clean instances are scored on **preservation**. Each outcome is classified as *unchanged*; *changed to another accepted option* (neutral, reported as a valid but unnecessary change); or *changed to an unjustifiable option* (a false alarm).
+   - The instruction states whether valid but different choices count as unnecessary changes.
+   - Repair and preservation are reported separately, never pooled.
+3. **Clean-control share.** The share is fixed per release, not disclosed to agents, and reported with every score.
+4. **Detection tasks.** Recall, false-alarm rate, and localization are reported separately. Decoys (valid alternatives from the decision space) must not be flagged. The key lists **groups of equivalent locations and categories**, because a planted error can legitimately be located at several sites.
+5. **Bounds.** With 0 false alarms in 30 clean controls, the 95% upper bound on the true rate is about 9.5% one-sided (11.6% two-sided). Report bounds with their sidedness.
+6. **Matcher validation.** The rule-based or LLM matcher is validated on planted match and non-match fixtures (SPOT uses an LLM similarity step [P-page]).
+7. **Natural errors.** An agent may find a real, unplanted error in a "clean" package. Such reports go to human adjudication and may lead to task repair; they are not false alarms by default.
 
-| Validity layer | What can be verified objectively | Recommended tier and methods | What cannot be verified objectively |
+These tasks measure prompted error-finding. They do not measure whether an agent avoids errors in its own work; that is the job of research-execution tasks.
+
+## 8. Scoring and reporting
+
+- **Execution and correction tasks:** binary reward per task, conjunctive across checks and hidden variants.
+- **Detection tasks:** scored as in §7.
+- **Trials:** at least five per evaluated configuration.
+- **Reporting:** for each task type, the mean with a bootstrap 95% confidence interval. Types are never pooled, and repair and preservation scores are reported separately.
+- **Exposure labels:** models that touched construction (interviewer, generator, checkers, calibration agents) are listed, and their scores are marked *calibration-exposed*.
+- **Release stability:** each release's contents are frozen; a withdrawal retires a task only at the next version.
+
+## 9. Verification by validity layer, and tiers per graded output
+
+Each failure mode has a **primary** validity layer (of five) plus optional secondary layers. TWFE under staggered adoption, for instance, is both a statistical and an estimand–estimator issue. Agreement on the layer is reported.
+
+**Tiers are assigned per graded output, not per layer:**
+- **V1:** deterministic comparison.
+- **V2a:** exact relation (injection, invariances).
+- **V2b:** stochastic check with stated error rates.
+- **V3:** structured judgment with an expert-consensus key.
+- **V4:** open-ended judgment.
+
+| Validity layer | Objectively verifiable | Typical tiers | Not objectively verifiable |
 |---|---|---|---|
-| Computational correctness (implementation fidelity) | Whether the code implements the stated design | V1: numeric tolerance; intermediate outputs; hidden-variant re-execution; effect injection | — |
-| Measurement validity | Whether variables are constructed as defined, and whether definitions match the construct | V1 for construction against the definition; V3 for whether the definition fits the construct | Whether a proxy captures the construct, where experts disagree |
-| Statistical validity | Whether the procedure is appropriate for the estimand and design | V2: effect injection, metamorphic relations, simulations with known truth, established statistical results | Choices among valid procedures with different finite-sample trade-offs |
-| Identification validity | Whether stated falsification tests were run correctly, and what they show | V2 for the computational part; V3 for recognizing threats; sensitivity analysis (e.g., bounds under limited violations of parallel trends) as a required output | Whether untestable assumptions hold (identification-equivalence, §2 type 6) |
-| Interpretation validity | Whether specific claims follow from given results | V3: claim classification with an expert-consensus key; contested claims excluded or keyed as acceptable sets | Nuanced judgments where credible experts disagree |
+| Computational (implementation fidelity) | The code implements the stated design | V1, V2a | — |
+| Measurement | Variables are constructed as defined | V1; V3 for whether a definition fits the construct | Contested proxies |
+| Statistical | The procedure is appropriate for the estimand and design | V2a, V2b, V1 against conditional references | Trade-offs among valid procedures |
+| Identification | Falsification computations and sensitivity outputs | V1/V2 for the computations; V3 for recognizing threats | Whether untestable assumptions hold |
+| Interpretation | Whether claims follow from given results | V3 | Contested nuances |
 
-**Agreement standard for V3 keys (proposed).** At least three independent economists label each item without seeing each other's labels. An item enters the scored set only if all agree, or if a pre-registered agreement statistic clears a pre-registered threshold. Each item carries written rationales and citations.
+**V3 admission.** Each item type is first qualified by a pre-registered, set-level agreement study (Krippendorff's α or Gwet's AC1 of at least 0.8). Individual items are then admitted when at least 4 of 5 raters agree, or when a latent-class posterior is at least 0.95.
 
-**LLM-as-judge (V4).** Useful for triage and review assistance, but never the sole grader of a scored task. *Good Benchmarks* §7 notes that an LLM judge "will find some issues, but not everything." Any LLM-judged track reports its agreement with human graders.
+**LLM-as-judge (V4)** is used only in the unscored track, and reports its agreement with human graders.
 
-## 9. Validating the validators
+## 10. Exposure of hidden material
 
-Every automated or LLM-based reviewer, judge, or matcher used in the pipeline is itself tested. Terminal-Bench-Science keeps a set of intentionally broken tasks and requires its LLM rubric reviewer to catch 100% of the planted defects whenever the rubric changes ([R1](../research/evidence/R1-terminal-bench-science.md) §4) [P-full].
+1. **Any session, trial, or LLM call that sees hidden-tier material** runs under commercial no-training terms, with zero data retention where available. Consumer accounts, even after an opt-out, may handle only agent-tier or public material.
+2. **Held-out split.** It is run only by the project, by vetted evaluators, or on locally hosted open-weight models. Every exposure is logged (rubric LK-5), and tasks are refreshed after a set number of external evaluations.
+3. **Split granularity.** All tasks and twins from one paper go in the same split.
+4. **Credibility-criteria catalogue.** While a paper has held-out tasks, the catalogue is published without that paper's identifiers.
+5. **Contributor agreements** include a disclosure embargo.
 
-DeepEcon already has natural fixtures for this: its expert-designed flawed packages are planted-defect fixtures, and its clean twins are non-defect fixtures. A reviewer model, matcher, or automated check that fails on them is not fit for gating.
+## 11. Validating the validators
 
-## 10. Division of labour
+Every automated or LLM-based reviewer, judge, or matcher is itself tested. Terminal-Bench-Science requires its LLM rubric reviewer to catch 100% of planted defects whenever the rubric changes ([R1](../research/evidence/R1-terminal-bench-science.md) §4) [P-full]. DeepEcon's flawed packages and clean twins are natural planted-defect and non-defect fixtures.
 
-| Activity | Automated | Shepherd | Contributor | Independent reviewers |
-|---|---|---|---|---|
-| Static checks, leakage scan | ✔ | Reviews hits | — | — |
-| Oracle, null, repeat-stability, metamorphic, and effect-injection runs | ✔ | Interprets | — | — |
-| Designing flawed variants | — | Assists | ✔ (scientific content) | Domain reviewers classify status |
-| Decision space and alternative implementations | — | ✔ | ✔ | Domain reviewer checks |
-| Mutation analysis and survivor triage | Generates and runs | ✔ (classifies by §2) | — | — |
-| Hidden variants and semi-synthetic data | Runs | ✔ | Consulted | Domain reviewer checks |
-| Shortcut and cheat trials | ✔ | Designs attacks | — | Benchmark reviewer checks |
-| Agent trials and crux alignment | Runs | ✔ (reads trajectories) | Consulted on surprises | — |
-| Dual-verifier specification test | — | Organizes | — | ✔ |
-| Admission decision | — | Recommends | — | ✔ (release editor decides) |
+Benchmark reviewers qualify in two ways: by shepherding one task through L12, and by passing a planted-defect calibration set.
 
-## 11. Precedents
+## 12. Division of labour
 
-Terminal-Bench-Science already uses most of these elements in its statistics tasks ([R1](../research/evidence/R1-terminal-bench-science.md) §8) [P-full]:
-- many hidden simulated instances generated from fixed seeds;
-- conjunctive gates on bias, RMSE, and coverage;
-- metamorphic interventions;
-- byte-identical reruns;
-- named negative controls;
-- a structurally independent "witness" implementation.
+| Activity | Automated | Shepherd | Contributor | Outside economists (blind, then unblinded) | Benchmark reviewer |
+|---|---|---|---|---|---|
+| Static checks, leakage and exposure logs | ✔ | Reviews hits | — | — | Audits |
+| Oracle, nulls, replay, relations, injection | ✔ | Interprets | — | — | — |
+| Flawed variants | — | Assists | ✔ | Classify status (after RV-2/L4/L7) | — |
+| Decision space, conventions, alternatives | — | ✔ | ✔ | Check | — |
+| Blind acceptance criteria and blind solves (SP-1) | — | Organizes | — | ✔ (before seeing the hidden tier) | — |
+| Mutation triage, hidden variants | Runs | ✔ | — | Check data-generating processes | — |
+| Attacks and cheat trials | ✔ | Designs | — | — | Checks |
+| Agent trials, hint ladder, crux alignment | Runs | ✔ | Consulted | — | — |
+| Admission | — | Recommends | — | Domain reviewer | ✔ (with release editor) |
 
-It also runs adversarial cheat trials and a hacker–fixer hardening loop. CausalVerify commits each agent's design before the data are revealed, and uses an "oracle arm" that substitutes the reference design ([R5](../research/evidence/R5-analysis-causal-econ-benchmarks.md) §4.1) [P-page].
+## 13. Precedents
 
-DeepEcon adds no new testing machinery. What it adds is **realistic, expert-designed negative controls**, used systematically across detection, correction, and execution tasks.
+**Terminal-Bench-Science** ([R1](../research/evidence/R1-terminal-bench-science.md) §8) [P-full]:
+- a repair task (`highdim-mediation-debiasing`) verified on seeded hidden instances;
+- injected-error detection (`ehr-error-detection`);
+- conjunctive statistical gates and metamorphic interventions;
+- witness implementations;
+- cheat trials and hardening loops.
 
-## 12. References
+**CausalVerify** ([R5](../research/evidence/R5-analysis-causal-econ-benchmarks.md) §4.1) [P-page]:
+- design commitment before the data are revealed;
+- an oracle arm;
+- repair rounds;
+- SE-ratio grading on synthetic twins.
 
-Verified at secondary-source level in [R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) §9 [S]; the full texts were not accessible from this environment.
+**DeepEcon's distinctive contribution** is realistic, expert-designed negative controls drawn from published papers' own pipelines, used systematically across correction, detection, and execution tasks.
 
-- DeMillo, R. A., Lipton, R. J., & Sayward, F. G. (1978). Hints on test data selection: Help for the practicing programmer. *Computer*, 11(4), 34–41.
-- Chen, T. Y., Cheung, S. C., & Yiu, S. M. (1998). *Metamorphic testing: A new approach for generating next test cases.* Technical Report HKUST-CS98-01, Hong Kong University of Science and Technology. Reposted as arXiv:2002.12543.
-- Barr, E. T., Harman, M., McMinn, P., Shahbaz, M., & Yoo, S. (2015). The oracle problem in software testing: A survey. *IEEE Transactions on Software Engineering*, 41(5), 507–525.
-- Knight, J. C., & Leveson, N. G. (1986). An experimental evaluation of the assumption of independence in multiversion programming. *IEEE Transactions on Software Engineering*, SE-12(1), 96–109.
-- Dorie, V., Hill, J., Shalit, U., Scott, M., & Cervone, D. (2019). Automated versus do-it-yourself methods for causal inference: Lessons learned from a data analysis competition. *Statistical Science*, 34, 43–68.
+## 14. References
 
-Primary source: Bercovich (2026), *Good Benchmarks* [P-full].
+Verified at secondary-source level in [R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) §9 [S]:
+- DeMillo, Lipton & Sayward (1978), *Computer* 11(4), 34–41.
+- Chen, Cheung & Yiu (1998), Technical Report HKUST-CS98-01 (arXiv:2002.12543).
+- Barr et al. (2015), *IEEE TSE* 41(5), 507–525.
+- Knight & Leveson (1986), *IEEE TSE* SE-12(1), 96–109.
+- Dorie et al. (2019), *Statistical Science* 34, 43–68.
 
-## 13. Changes from v0.1.0
+Cited by the independent reviewers, not yet verified [U]:
+- Lundberg, Johnson & Stewart (2021), *American Sociological Review*, on separating estimands from estimators.
+- Blandhol, Bonney, Mogstad & Torgovitsky (2022), NBER WP 29709, on 2SLS with covariates.
+- Kolesár & Rothe (2018), *AER*, on clustering by a discrete running variable.
+- Conley & Taber (2011); MacKinnon & Webb (2018), on inference with few treated clusters.
 
-- **Corrected the clustering relation.** Duplicating the panel with fresh cluster IDs shrinks every SE type by 1/√2, so it discriminates nothing. Duplicating units within their original clusters does discriminate (R6 §8, verified numerically).
-- **Added exact and invariance relations:** additive effect injection (exact for estimators linear in Y), IV and RD injection variants, and sample-filter, instrument-rescaling, and RD-shift invariances. Relations are now marked as model-specific where they are.
-- **Added mutation-testing machinery:** the six-type equivalence taxonomy (§2), the kill matrix, mutation scores with confidence intervals, and four-way survivor triage.
-- **Added rules for error-detection tasks (§7):** clean twins, decoys, separate detection scores, false-alarm bounds, matcher validation, and adjudication of natural errors.
-- **Added** that several LLM-written implementations do not count as independent evidence (L3).
-- **Added acceptance-region rules from R5 (§4):** decision spaces, declared-choice grading, intermediate outputs, SE-unit tolerances, freezing, and expert calibration.
-- **Added** measurement validity to the validity-layer table.
-- **Replaced** the unverified [U] references with verified ones.
+Primary: Bercovich (2026), *Good Benchmarks* [P-full].
+
+## 15. Open methodological questions raised by v0.3.0
+
+- How many answer-changing hidden instances are needed per task, and how they are generated without disclosing the crux.
+- Whether a benchmark-wide convention vocabulary per design family is achievable without leaking crux decisions.
+- The cost of blind expert solves and full-harness replays at scale (see the [cost model](../architecture/cost-and-effort-model.md)).
+
+## 16. Changes
+
+**v0.3.0** (independent reviews, 2026-11-05):
+- Effect injection restated precisely: it is an estimator-weighting check, blind to the counterfactual Y(0). Counterfactual-side invariances added (control-span, instrument-orthogonal confounding).
+- Answer-changing variants on unseen bases; differential and policy attacks added.
+- Estimand, assumptions, and estimator separated. Declarations limited to non-crux conventions from a benchmark-wide vocabulary.
+- Three-way split of variation, with no borrowed default band. Deterministic inference grading. Familywise control. Full-harness replay.
+- Pass rules with confidence bounds; L5 triage rule; re-run matrix; hint ladder; agent-trial anchors; calibration-exposed labels.
+- Repair versus preservation scoring; equivalent-location keys; sidedness of bounds.
+- Licensing of derived data; fully synthetic data for restricted sources.
+- Exposure rules for hidden material; scoring and reporting section; tiers per graded output (V1, V2a, V2b, V3, V4) with V3 admission rules.
+
+**v0.2.0:**
+- Clustering relation corrected.
+- Equivalence taxonomy, kill matrix, clean twins, decision spaces, and freezing added.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed design** v0.2.0 (2026-11-05). One of two candidate architectures; **not selected**. Comparable in depth and assumptions to [Option A](option-a-hosted-platform.md). v0.2.0 replaces v0.1.0's unverified platform claims with verified facts (§19). |
+| **Status** | **Proposed design** v0.2.1 (2026-11-05). One of two candidate architectures; **not selected**. Comparable in depth and assumptions to [Option A](option-a-hosted-platform.md). v0.2.0 replaced unverified platform claims with verified facts; v0.2.1 adds documented template controls and variants raised in the fairness review (§19). |
 | **Shared foundations** | [Construction protocol](../methodology/benchmark-construction-protocol.md) · [Interview protocol](../interview/expert-interview-protocol.md) · [Schema](../../schemas/README.md) · [Submission](submission-mechanisms.md) · [Bilingual design](bilingual-design.md) · [Cost and effort model](cost-and-effort-model.md) |
 | **Evidence** | Claude Code facts: [R2](../research/evidence/R2-claude-code-platform.md) (official documentation for Claude Code v2.1.318, read 2026-11-05). Access, prices, terms: [R3](../research/evidence/R3-access-pricing-policy-portability.md). Labels: [P-full], [P-page], [S], [U]. |
 
@@ -31,8 +31,7 @@ Everything happens on the contributor's computer: the interview, code inspection
 | 1 | Discover | Project page (English / 中文): motivation, what a contribution involves, credit policy | 5–10 min |
 | 2 | Check requirements | A paid Claude plan (Pro is $20 a month, or $17 a month billed annually) or project-provided access; a supported location (§10.3); operating system; Python for helper scripts; Stata, R, or Python as the paper needs | 5 min |
 | 3 | Install Claude Code | **Terminal:** macOS 13+, Windows 10 1809+ (native or WSL), Ubuntu, Debian, Alpine. **No terminal:** the desktop app's Code tab runs the same engine and installs plugins from its interface [P-page] | 10–30 min; the main barrier for non-technical users |
-| 4 | Install the plugin | `/plugin marketplace add <owner>/<repo>`, then `/plugin install deepecon-contributor@<marketplace-name>`. The marketplace name is declared in its `marketplace.json` and is not the GitHub owner. A one-step form exists from v2.1.292: `claude plugin install deepecon-contributor --marketplace <owner>/<repo>`. The desktop app offers the same through its interface [P-full/P-page] | 2–5 min |
-| 5 | Create the workspace | Copy the project's **workspace template** next to the replication package. The template carries the policy that plugins cannot ship (§6.1). The original package goes into `original/`; restricted data stay **outside** the workspace (§6.3) | 5–10 min |
+| 4–5 | Get the workspace | **Default, typing-free:** download the project's **workspace** (template), place the replication package in `original/`, open the folder in Claude Code or the desktop app, and accept the trust dialog. The workspace's settings declare the project marketplace and enable the plugin (`extraKnownMarketplaces`, `enabledPlugins`, applied after trust), or embed the skill directly; it also carries the policy that plugins cannot ship (§6.1) [P-full/P-page, R2 §2.1, §8.7]. **Alternative:** `/plugin marketplace add <owner>/<repo>`, then `/plugin install deepecon-contributor@<marketplace-name>`; the marketplace name is declared in its `marketplace.json`, not the GitHub owner. Since v2.1.292 there is also a one-step form, `claude plugin install … --marketplace <owner>/<repo>`. Adding a third-party marketplace through the desktop app's own interface is not documented [U]. Restricted data stay **outside** the workspace (§6.3). | 5–15 min |
 | 6 | Start | Run the skill, e.g. `/deepecon-contributor:contribute` | — |
 | 7 | Choose language | English or Simplified Chinese, stored for resumption | 1 min |
 | 8 | Consent | Data-flow disclosure for the account in use (consumer or commercial terms, §10); confidentiality instruction | 5 min |
@@ -77,7 +76,10 @@ flowchart LR
 | Claude Code in a terminal | Full capability. OS-level sandboxing for shell commands is available on macOS, Linux, and WSL2, but **not native Windows**. | [P-page] |
 | Desktop app, Code tab | **The no-terminal path.** Same engine; installs plugins from its interface (not in WSL or cloud sessions); needs a paid plan. | [P-page] |
 | Claude Cowork | **Not suitable as the main surface.** It loads plugin skills, agents, and hooks, but runs code on Anthropic's servers (Pro/Max/Ultra) or in a cloud/local VM (Team/Enterprise). It cannot use a contributor's local Stata installation or licence. | [P-page/P-full] |
-| Other agent tools reading the Agent Skills format | A portable subset of the skill could run in 46 listed tools, including Codex, Gemini CLI, GitHub Copilot/VS Code, Cursor, Kimi Code CLI, and Qwen Code. Only the six specification frontmatter fields are portable, and other models' interview quality is unvalidated (§5.3). | [P-full spec; P-page] |
+| **B-web: Claude Code on the web** (cloud sessions) | A browser-only variant, the counterpart of Option A's hosted sandbox. A cloud session loads the repository's `.claude/settings.json` hooks and permission rules and its `.claude/skills/` (not marketplace plugins). Python is preinstalled; R comes through a setup script. Available on Pro, Max, Ultra, Team, and qualifying Enterprise seats. **Limits:** only public-data R or Python packages; the materials must sit in a private GitHub repository; code runs in an Anthropic virtual machine; Stata is unavailable. | [P-page, R2 §8.4] |
+| **Remote Control; desktop sessions over SSH** | The economist converses from the browser, mobile, or desktop app while execution and files stay on another machine: a local machine (Remote Control) or a research assistant's or department's machine that has Stata (desktop SSH sessions, where plugins install in local and SSH sessions). | [P-page, R2 §8.2, §8.6] |
+| **B-staff** | As in Option A, operationalization (S5) can be deferred to shepherds instead of being run locally. | Design choice |
+| Other agent tools reading the Agent Skills format | The six-field skill is portable to tools in the agentskills.io client list, such as Codex, Gemini CLI, GitHub Copilot/VS Code, and Cursor. Kimi Code CLI and Qwen Code read `SKILL.md` according to their own documentation, not that list. Other models' interview quality is unvalidated (§5.3). | [P-full spec; P-page, R3 §4.3] |
 
 ## 4. Functional decomposition (identical to Option A's table)
 
@@ -111,13 +113,16 @@ deepecon-contributor/                 # PLUGIN (distributed through a marketplac
 │   │                                 # core rules within the first ~5,000 tokens
 │   ├── stages/  probes/  pitfalls/  templates/
 ├── hooks/                            # PreToolUse protection of original/; state re-injection after compaction
-├── scripts/                          # helper CLI: state, provenance, exposure, ledger, run wrappers, doctor, packager
+├── scripts/ and bin/                 # helper CLI: state, provenance, exposure, ledger, run wrappers, doctor, packager;
+│                                     # shipped as per-platform binaries in bin/ so Python is optional [R2 §14.11]
 ├── locales/{en,zh-Hans}/
 └── schemas/
 
-deepecon-workspace-template/          # WORKSPACE TEMPLATE (copied next to the replication package)
-├── .claude/settings.json             # deny rules (Edit/Write under original/), sandbox, model and effort,
-│                                     # language, permission mode, auto memory off, plugin enablement
+deepecon-workspace-template/          # WORKSPACE (downloaded; the replication package goes in original/)
+├── .claude/settings.json             # Edit(/original/**) deny rule; sandbox; model, effortLevel, availableModels,
+│                                     # switchModelsOnFlag:false; disableAutoMode:"disable"; language; autoMemory off;
+│                                     # extraKnownMarketplaces + enabledPlugins (autoUpdate); autoUpdatesChannel:"stable";
+│                                     # minimumVersion; promptCacheTtl:"1h"; statusLine; env DISABLE_FEEDBACK_COMMAND=1
 ├── original/      work/      .deepecon/
 └── README.md / README.zh-Hans.md
 ```
@@ -129,19 +134,27 @@ deepecon-workspace-template/          # WORKSPACE TEMPLATE (copied next to the r
 
 - The model never writes the dossier free-hand. It calls the helper, which validates against the schema, timestamps entries, and records provenance and exposure. Records without provenance are refused.
 - Free-recall lists, the suggestion ledger, and the influence metrics (protocol v0.2.0 §4) are maintained by the helper, not by the model's memory.
-- Claude Code keeps transcripts locally in plaintext for 30 days [P-page]. With consent, the exporter includes a cleaned transcript in the package. Auto memory is turned off in the template, so that memories from other projects cannot bleed into the interview.
+- **Transcripts.** The terminal client keeps transcripts locally in plaintext for 30 days [P-page]. Desktop-app transcripts are exempt from that limit by default, and their cleanup setting can be changed only in user or managed settings, not by the template [P-page, R2 §5.1]. The exporter therefore offers a purge step after export, and the disclosure says so. With consent, it includes a cleaned transcript in the package.
+- **Auto memory** is turned off in the template, so that memories from other projects cannot bleed into the interview.
+- **Progress display.** A status line (configurable in the template) shows the current stage and the dossier's state; a locally rendered dossier page shows provenance and exposure badges. Both are to be tested in the desktop app during the pilot.
 
 ### 5.3 Model selection and consistency
 
 - **Defaults.** On paid plans, Claude Code defaults to Claude Opus 5.5 at effort `medium` [P-page]. The template can set a higher effort.
-- **No plugin or skill can require a model.** A skill's `model` field lasts for one turn; a plugin's default agent can only steer. Enforcement needs organization-managed settings or a gateway [P-page]. A safety-related fallback can also switch the model mid-session [P-page].
+- **Pin, block, record.** No plugin or skill can *force* a model against a deliberate user choice; that needs organization-managed settings or a gateway [P-page]. But the workspace template can do three things [P-page, R2 §6.2–6.3]:
+  - **pin** the session: `model`, `effortLevel`, and `availableModels: ["claude-opus-5-5"]`;
+  - **block** silent changes: with `switchModelsOnFlag: false`, a safety-flag event pauses and asks instead of switching, and a fallback model outside `availableModels` is not used. A plugin `PreModelSwitch` hook asks for confirmation before any switch;
+  - **record** every change: `SessionStart` and `PostModelSwitch` hooks log the model actually used, and the package carries a deviation flag.
+- **Same caveat for Option A.** On the API, a classifier refusal is handled by retrying with another model; the same safety classifiers apply in both options, and they mostly flag cybersecurity and biology content, which economics interviews rarely touch [P-page].
 - **Recording.** The helper records the model reported for the session where available [partly confirmed, R2]. Packages state the client version and plugin version.
 - **Mitigations:** (a) project-provided access under an organization the project controls, which also standardizes data-use terms (subject to O-018); (b) a pre-flight check that warns about untested models or an outdated plugin; (c) per-model protocol evaluations (interview protocol §15).
 - **Non-Claude models.** Anthropic "doesn't support routing Claude Code to non-Claude models" [P-page]. Contributors without Claude access could run the six-field skill in another tool that reads the Agent Skills format (e.g., Kimi Code CLI, Qwen Code [P-page]). That interviewer would be unvalidated until it passes the protocol evaluations, and the regional and terms questions in §10.3 still apply.
 
 ### 5.4 Interaction with "auto mode"
 
-Since v2.1.283, auto mode is the default permission mode in the terminal and VS Code. It "nudges Claude to keep working without stopping for clarifying questions" unless a skill relies on asking [P-page]. An interview *is* asking. The skill therefore states explicitly that it must wait for the contributor's answer at every turn. The template sets a permission mode in which code execution prompts the contributor. The interview must be tested under the default mode before release.
+Since v2.1.283, auto mode is the default permission mode in the terminal and VS Code. It "nudges Claude to keep working without stopping for clarifying questions", but "Claude still asks when your prompt or a skill explicitly relies on it" [P-page].
+
+**The template removes the issue:** `disableAutoMode: "disable"` in any settings file makes sessions start in Manual mode and makes auto mode unavailable [P-page, R2 §13.2]. Setting `defaultMode` alone is weaker: VS Code ignores a project's `defaultMode`, and the desktop app's remembered per-folder mode outranks it. The skill also states that asking questions is the task. A test under each surface's defaults remains part of release checks.
 
 ### 5.5 Bilingual behaviour
 
@@ -156,8 +169,8 @@ Defence in depth. The strength varies by operating system.
 | Layer | Mechanism | Strength |
 |---|---|---|
 | 1 Layout | Original package in `original/`, made read-only by the setup script; all work on copies in `work/` | Basic |
-| 2 Deny rules | Template `.claude/settings.json` denies Edit and Write under `original/` | Robust for file-editing tools |
-| 3 Hook | Plugin `PreToolUse` hook blocks any tool call targeting `original/` (exit code 2 or a deny decision blocks even in bypass mode) | Robust for Edit/Write; **best-effort for shell commands** [P-page] |
+| 2 Deny rules | Template `.claude/settings.json` with `Edit(/original/**)`. `Write(path)` rules "never match", so the rule must use `Edit` [P-page, R2 §4.1] | Robust for file-editing tools |
+| 3 Hook | Plugin `PreToolUse` hook blocks any tool call targeting `original/`; exit code 2 or a deny decision blocks even in bypass mode. The hook declares `"onFailure": "block"`, because a failing hook otherwise lets the action through [P-page, R2 §3.1] | Robust for Edit/Write; **best-effort for shell commands** [P-page] |
 | 4 Sandbox | OS-level filesystem sandbox for shell commands | macOS, Linux, WSL2 only; **not native Windows** [P-page] |
 | 5 Integrity check | Checksum manifest of `original/` taken at setup and verified before export; any change blocks packaging | The backstop on every platform |
 | 6 Audit trail | `work/` is a local Git repository; each variant is a commit or branch with a patch | Reviewability |
@@ -207,7 +220,9 @@ The package ZIP goes through a private upload link (the default) or a private Gi
 | Consumer (Free, Pro, Max, Ultra) | **Yes, unless the user opts out.** Feedback and safety-flagged content may be used even after opting out | 5 years if training is on; 30 days if off | [P-page/P-full] |
 | Commercial (Team, Enterprise, API) | Anthropic "may not train" on customer content | 30 days in the Claude Code documentation; "not retained by default" in the API documentation (the two disagree); zero data retention for qualified organizations through sales | [P-page/P-full] |
 
-**Implication.** On consumer accounts with training enabled, hidden-tier material can enter training data: flawed variants, answer keys, error labels. That is a benchmark-contamination risk. Even after an opt-out, the feedback and safety-flag exceptions leave a residual risk. Project-provided commercial access closes most of this gap; the terms questions are in O-018. The account type is recorded in `consent.contributor_account_terms`.
+**Implication.** On consumer accounts with training enabled, hidden-tier material can enter training data: flawed variants, answer keys, error labels. That is a benchmark-contamination risk.
+
+The feedback path can be closed: the template sets `DISABLE_FEEDBACK_COMMAND=1` in its `env`, and feedback is uploaded only on an explicit action anyway [P-page, R2 §9.2]. Only the safety-flag exception remains after an opt-out. Commercial access closes the gap entirely; it can be provided by the project (O-018) or by the contributor's institution, for example a university agreement governing Claude for Education. The account type is recorded in `consent.contributor_account_terms`.
 
 ### 10.3 Regional availability
 
@@ -230,7 +245,7 @@ Under Option B, contributors located in those regions therefore cannot use Claud
 | Cost | Who pays | Order of magnitude |
 |---|---|---|
 | Model access | Contributor by default | A paid plan: Pro $20 a month ($17 annually); Max $100; Ultra $200; Team Standard $25 a month per seat [P-full]. The plan determines the usage limits. Free cannot run Claude Code. |
-| …or project-provided | Project | ≈ $17 per contribution at API list prices (central estimate) via a Console "Claude Code workspace" with per-user monthly spend limits [P-page]; Team seats are named and not meant for rotation. Terms for external contributors: O-018. |
+| …or project-provided | Project | ≈ $17 per contribution at API list prices (central estimate), through a Console "Claude Code workspace" with per-user monthly spend limits [P-page]. With API keys, Claude Code's prompt cache lasts 5 minutes unless the template sets `promptCacheTtl: "1h"`; the $17 figure assumes the one-hour cache (cost model A7) [P-page, R2 §11]. Anthropic's Claude Code terms permit customers to provision API keys "for use by the customer's own authorized users"; whether external contributors count as authorized users is the open question (O-018). Team seats are named and not meant for rotation. |
 | Reimbursing plans instead | Project | One month of Pro for 200 contributors = $4,000, against ≈ $3,400 of API inference in the central estimate |
 | Plugin, template, and helper development | Project | §13 |
 | Hosting | Project | Static project page plus upload endpoint: small |
@@ -261,7 +276,8 @@ Under Option B, contributors located in those regions therefore cannot use Claud
 ## 14. Operations and maintenance
 
 - **Versioning.** Plugin and protocol follow semantic versioning, and packages record both. Sessions finish on the version they started with.
-- **Updates.** Third-party marketplaces do not auto-update by default, and Claude Code ships several releases a week. A **pre-flight version check** is therefore mandatory, and each client release needs a regression run of the simulated-contributor suite.
+- **Updates.** Third-party marketplaces do not auto-update by default. The workspace can enable auto-update (`"autoUpdate": true` on its `extraKnownMarketplaces` entry; to be tested from a repository settings file), and each contribution's protocol version stays pinned by the workspace snapshot [P-full, R2 §2.1–2.2].
+- **Client channel.** The template sets `autoUpdatesChannel: "stable"` ("typically about one week old, skipping releases with major regressions") and a `minimumVersion` [P-page]. Regression runs of the simulated-contributor suite then follow stable releases, not every release. A pre-flight version check remains as a backstop.
 - **Support.** Documentation, office hours, and an issue form. Installation problems vary by operating system and software setup.
 
 ## 15. Scalability
@@ -273,7 +289,7 @@ Compute and inference scale with contributors' own resources. Project effort sca
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
 | Non-technical economists do not complete setup | Medium–High [U: pilot] | High | Desktop app; research-assistant mode; onboarding sessions; hosted onboarding (hybrid H1) |
-| Interview degraded by auto mode or by context compaction | Medium | Medium–High | Explicit wait-for-answer rules; template permission mode; core rules first; state re-injection; tests under defaults |
+| Long interview degraded by context compaction | Medium | Medium | Core rules first in `SKILL.md`; state re-injection hook; `.deepecon/` as the record of truth (auto mode is disabled by the template) |
 | Inconsistent model or client versions | Medium | Medium–High | Project-provided access; pre-flight checks; per-model evaluations |
 | Hidden material enters training through consumer accounts | Plausible (opt-out is the default regime) | High (contamination) | Project-provided commercial access, or verified opt-out plus residual-risk disclosure |
 | Restricted data read by a subprocess despite deny rules | Low–Medium | High | Keep restricted data out of the workspace; never request it |
@@ -301,7 +317,18 @@ Compute and inference scale with contributors' own resources. Project effort sca
 3. What is the supported environment matrix for the first release (operating systems, Stata versions)?
 4. How are contributors without Claude access served (O-007)?
 
-## 19. Changes from v0.1.0
+## 19. Changes
+
+**v0.2.1 (fairness review).**
+- The workspace becomes the default, typing-free delivery: it registers or embeds the plugin.
+- Template controls added: pin, block, and record the model; disable auto mode; stable update channel and auto-update; feedback command off; one-hour prompt cache with API keys; status line.
+- Corrected deny-rule syntax (`Edit(...)`) and hook `onFailure: block`.
+- Desktop transcripts are exempt from the 30-day limit, so a purge step was added.
+- Variants added: B-web (Claude Code on the web), Remote Control and desktop SSH sessions, and B-staff.
+- Helper shipped as binaries, so Python is optional.
+- Agent Skills tool list corrected.
+
+**v0.2.0 (from v0.1.0).**
 
 Verified or corrected against the official documentation and policies (R2, R3):
 - Install syntax corrected; one-step install form added.
