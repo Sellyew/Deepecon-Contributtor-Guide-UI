@@ -1,0 +1,226 @@
+# ILLUSTRATIVE EXAMPLE ONLY — fictional paper, fictional people, fictional numbers.
+# Purpose: show how the schema records provenance, bilingual text, a failure mode, a flawed
+# variant, consequence evidence, and a task candidate. Nothing here describes a real study.
+x-illustrative: true
+schema_version: 0.1.0
+protocol_version: 0.1.0
+rubric_version: 0.1.0
+contribution_id: ex-2026-0001
+created_at: "2026-11-05T09:00:00Z"
+updated_at: "2026-11-05T12:30:00Z"
+status: draft
+pathway: B_own_paper
+languages:
+  interview: zh-Hans
+  ui: zh-Hans
+  working_translation: en
+contributors:
+  - person_id: econ-001
+    display_name: "Example Economist"
+    role: contributing_economist
+    relationship_to_paper: original_author
+    affiliation: "Example University"
+  - person_id: ra-001
+    role: research_assistant
+    relationship_to_paper: none
+consent:
+  disclosure_version: 0.1.0
+  accepted_at: "2026-11-05T09:01:00Z"
+  model_providers_disclosed: [anthropic]
+  contributor_account_terms: project_commercial_account
+  allow_transcript_retention: true
+  allow_research_use_of_transcript: true
+  credit_preference: named
+  attribution_name: "Example Economist"
+paper:
+  paper_id: ex-paper-01
+  title: "Illustrative example: staggered policy adoption and county employment"
+  authors: ["Example Economist", "Second Example"]
+  journal: "Illustrative Journal of Examples"
+  year: 2024
+  pdf_included: false
+source_package:
+  repository: private
+  data_availability: all_public_redistributable
+  included_in_contribution: true
+  license: CC-BY-4.0
+target_analyses:
+  - target_id: t-main-att
+    paper_location: "Table 2, column 1"
+    description:
+      - lang: zh-Hans
+        text: "政策对县级就业的平均处理效应（交错实施）。"
+        is_original: true
+      - lang: en
+        text: "Average effect of the policy on county employment (staggered adoption)."
+        is_original: false
+        machine_translated: true
+        translation_of: zh-Hans
+        translator: "interviewer model (see interview record)"
+    estimand:
+      description:
+        - lang: en
+          text: "Average treatment effect on the treated, aggregated across adoption cohorts with cohort-size weights, using not-yet-treated counties as controls."
+          is_original: true
+      parameter: ATT
+      design: did_staggered
+    outputs:
+      - output_id: att-overall
+        label: "Overall ATT (log employment)"
+        value: 0.031
+        std_error: 0.009
+        n_obs: 24000
+        n_clusters: 48
+        tolerance: { kind: in_reference_se_units, value: 0.25, justification: "Valid heterogeneity-robust estimators agree within 0.2 SE on this design (alternative implementation impl-alt-01)." }
+reference_implementations:
+  - impl_id: impl-ref-01
+    target_ids: [t-main-att]
+    kind: cleaned_original
+    entrypoint: "internal/reference/run.R"
+    environment:
+      languages: [{ name: r, version: "4.4.1" }]
+      packages: [{ ecosystem: cran, name: did, version: "2.1.2" }]
+      network_required: false
+    files:
+      - { path: "internal/reference/run.R", visibility: internal, role: code }
+    expected_outputs:
+      - { output_id: att-overall, label: "Overall ATT", value: 0.031, std_error: 0.009 }
+    validation:
+      reproduces_published: within_tolerance
+      independent_check:
+        performed: true
+        method: cross_language_reimplementation
+        performed_by: shepherd-01
+        agrees: true
+    visibility: internal
+critical_decisions:
+  - decision_id: cd-estimator
+    target_ids: [t-main-att]
+    category: estimator_choice
+    validity_layer: statistical
+    importance: critical
+    description:
+      statement_id: s-001
+      text:
+        - lang: zh-Hans
+          text: "处理时间交错且效应随时间增长，因此不能用双向固定效应回归。"
+          is_original: true
+        - lang: en
+          text: "Treatment timing is staggered and effects grow over time, so a two-way fixed effects regression cannot be used."
+          is_original: false
+          machine_translated: true
+          translation_of: zh-Hans
+          translator: "interviewer model"
+      provenance:
+        origin: contributor
+        actor_id: econ-001
+        created_at: "2026-11-05T09:40:00Z"
+        endorsement: endorsed
+        validation: unvalidated
+        evidence_refs:
+          - { kind: code_location, file: "internal/reference/run.R", line_start: 40, line_end: 52 }
+    chosen_option:
+      statement_id: s-002
+      text:
+        - { lang: en, text: "Group-time ATTs with not-yet-treated controls, aggregated by cohort size.", is_original: true }
+      provenance: { origin: contributor, actor_id: econ-001, created_at: "2026-11-05T09:41:00Z", endorsement: endorsed, validation: unvalidated }
+failure_modes:
+  - failure_mode_id: fm-twfe
+    decision_id: cd-estimator
+    description:
+      statement_id: s-010
+      text:
+        - lang: en
+          text: "Estimate the effect with a static two-way fixed effects regression of log employment on a post-treatment indicator."
+          is_original: true
+      provenance:
+        origin: llm_suggested
+        model: { provider: anthropic, model_id: claude-opus-5-5, client: "illustrative" }
+        created_at: "2026-11-05T10:05:00Z"
+        endorsement: edited_then_endorsed
+        endorsed_by: econ-001
+        endorsed_at: "2026-11-05T10:07:00Z"
+        validation: unvalidated
+    why_incorrect:
+      statement:
+        statement_id: s-011
+        text:
+          - { lang: en, text: "With staggered timing and dynamic effects, TWFE uses already-treated units as controls and can assign negative weights, biasing the estimate toward zero here.", is_original: true }
+        provenance: { origin: contributor, actor_id: econ-001, created_at: "2026-11-05T10:09:00Z", endorsement: endorsed, validation: unvalidated }
+      citations:
+        - { title: "Difference-in-differences with variation in treatment timing", authors: ["Goodman-Bacon, A."], year: 2021, venue: "Journal of Econometrics", evidence_level: U }
+    realism_warrant:
+      statement:
+        statement_id: s-012
+        text:
+          - { lang: en, text: "Standard practice before 2020 and still common in RA code; the contributor's own first draft used it.", is_original: true }
+        provenance: { origin: contributor, actor_id: econ-001, created_at: "2026-11-05T10:10:00Z", endorsement: endorsed, validation: unvalidated }
+      warrant_types: [contributor_research_experience, methodological_literature]
+    validity_layer: statistical
+    status: conditional
+    conditions:
+      - statement_id: s-013
+        text:
+          - { lang: en, text: "Wrong when effects are heterogeneous across cohorts or time; the event-study evidence in the paper shows growing effects.", is_original: true }
+        provenance: { origin: contributor, actor_id: econ-001, created_at: "2026-11-05T10:11:00Z", endorsement: endorsed, validation: unvalidated }
+    predicted_consequence:
+      direction: [point_estimate_down]
+      magnitude_note: "Roughly halves the estimate."
+      predicted_at: "2026-11-05T10:12:00Z"
+      predicted_by: econ-001
+    one_sentence_fact_risk: { level: medium, note: "Naming the estimator would make the task easy; the instruction must not name it." }
+    lifecycle: validated
+    visibility: hidden
+flawed_variants:
+  - variant_id: v-twfe
+    failure_mode_id: fm-twfe
+    base_impl_id: impl-ref-01
+    patch: { path: "hidden/variants/v-twfe.patch", visibility: hidden, role: patch }
+    authored_by: [research_assistant]
+    naturalness_review: { tells_removed: true, reviewed_by: shepherd-01 }
+    observed_outputs:
+      - { output_id: att-overall, label: "Overall effect (TWFE)", value: 0.014, std_error: 0.008 }
+    consequence:
+      comparisons:
+        - output_id: att-overall
+          reference_value: 0.031
+          flawed_value: 0.014
+          difference: -0.017
+          difference_in_reference_se: -1.89
+          materiality_rule: "|diff| > 1 reference SE or significance change at 5%"
+          material: true
+      prediction_matched: matched
+      robustness: { method: semi_synthetic, n_variants: 200, share_separated: 0.97, separation_margin: 5.6 }
+    visibility: hidden
+task_candidates:
+  - task_id: task-ec-01
+    task_type: error_correction
+    verifiability_tier: V2
+    target_capability:
+      statement_id: s-020
+      text:
+        - { lang: en, text: "Recognize that the implemented estimator is invalid under staggered adoption with dynamic effects, and repair it while preserving the estimand.", is_original: true }
+      provenance: { origin: shepherd, actor_id: shepherd-01, created_at: "2026-11-05T12:00:00Z", endorsement: endorsed, endorsed_by: econ-001, validation: unvalidated }
+    source_refs: { target_ids: [t-main-att], failure_mode_ids: [fm-twfe], variant_ids: [v-twfe] }
+    agent_facing:
+      visibility: agent
+      instruction:
+        - { lang: en, text: "(Instruction text written by the shepherd and contributor; omitted in this illustration.)", is_original: true }
+      instruction_authorship: human_written
+      output_contract:
+        description: "Write results.json with the overall ATT and its standard error; provide run.R that reproduces it from the data path given as its first argument."
+        results_path: "/workspace/results.json"
+        code_entrypoint_required: true
+      environment:
+        languages: [{ name: r, version: "4.4.1" }]
+        network_required: false
+      internet_access: false
+      time_limit_minutes: 120
+    hidden:
+      visibility: hidden
+      verifier:
+        methods: [acceptance_region, hidden_variant_reexecution, metamorphic_relations]
+      alternative_solution_impl_ids: [impl-alt-01]
+      negative_controls:
+        - { variant_id: v-twfe, expected_verdict: reject }
+    review_status: draft
