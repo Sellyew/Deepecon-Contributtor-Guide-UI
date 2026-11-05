@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** v0.1.0 (2026-11-05). Not yet reviewed by the research lead. The glossary in the appendix has **not** been reviewed by bilingual economists. |
+| **Status** | **Proposed** v0.1.1 (2026-11-05). Not yet reviewed by the research lead. The glossary in the appendix has **not** been reviewed by bilingual economists. v0.1.1 adds the glossary entry for "estimate", which the interview probes use. |
 | **Requirement** | Brief §9 (D-007): both architectures support English and Simplified Chinese from the beginning; language-independent schema; contributors' original statements preserved; machine translations labelled; extensible to more languages. |
 | **Evidence labels** | Framework and product facts verified in evidence notes [R2](../research/evidence/R2-claude-code-platform.md) and [R9](../research/evidence/R9-hosted-stack-and-compliance.md); remaining [U] items are marked. |
 
@@ -111,6 +111,7 @@ Preferred Chinese terms follow common usage in Chinese economics journals and te
 | selection on observables | 基于可观测变量的选择 | |
 | propensity score | 倾向得分 | |
 | statistical inference | 统计推断 | |
+| estimate (point estimate) | 估计值 | 点估计; distinguish from 估计量 (estimator) |
 | standard error | 标准误 | |
 | confidence interval | 置信区间 | |
 | statistical significance | 统计显著性 | |
