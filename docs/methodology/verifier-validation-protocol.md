@@ -43,7 +43,7 @@ Run the rungs in order; a failure sends the task back to the shepherd. Each run 
 | L7 | **Hidden-variant separation** | The flaw is not an equivalent mutant for the evaluation (DP-05) | Each flawed variant rejected on ≥ 95% of hidden variants; each correct solution accepted on 100%. | Yes |
 | L8 | **Shortcut and adversarial attacks** | Score cannot be obtained without the capability (VE-4, EN-2) | All fail: hard-coded published coefficients; memorized values; null outputs; copying any file in the environment; "flag everything" answers for detection tasks; diffing against the public source package; an adversarial agent instructed to obtain the reward without doing the work (cheat trial). | Mostly yes |
 | L9 | **Repeat stability** | No flakiness (VE-5) | Hundreds of repeated verifier runs (*Good Benchmarks* §1) with zero spurious failures. | Yes |
-| L10 | **Guided-agent fairness** | Verifier is fair conditional on the method (SO-3; *Good Benchmarks* §7) | With the method named in a temporary instruction, strong agents pass. | Yes, with human reading of failures |
+| L10 | **Guided-agent fairness** | Verifier is fair conditional on the method (SO-3; *Good Benchmarks* §7) | With the method named in a temporary instruction, strong agents pass. TBS implements this as graded hints (`/run hints`): passing with a hint the instruction could carry means underspecified; failing without hints but passing with them means genuinely hard; failing with all hints means broken. | Yes, with human reading of failures |
 | L11 | **Agent trials and crux alignment** | Difficulty is intrinsic and located where claimed (DF-1, DF-3) | Batches of five trials per configuration across several models; failures read by the shepherd; failures occur at the stated crux. | Runs: yes; analysis: human |
 | L12 | **Independent review** | Domain correctness and benchmark correctness (PR-2, SP-1) | Domain reviewer and benchmark reviewer sign off; dual-verifier specification test passes. | No |
 | L13 | **Post-admission monitoring** | Validity over time | Issue reports and task repairs (as in Terminal-Bench-Science); re-run L1–L9 when the environment changes. | Partly |
@@ -112,6 +112,14 @@ Semi-synthetic datasets keep the real design (covariates, treatment timing, clus
 | Dual-verifier specification test | — | organizes | — | ✔ |
 | Admission decision | — | recommends | — | ✔ (release editor decides) |
 
-## 9. References (to be verified)
+## 9. Validating the validators
+
+Any automated or LLM-based reviewer used in the pipeline is itself tested. Terminal-Bench-Science keeps a set of intentionally broken tasks and requires its LLM rubric reviewer to catch 100% of planted defects whenever the rubric changes ([evidence note R1](../research/evidence/R1-terminal-bench-science.md), §4) [P-full]. DeepEcon can do the same at lower cost, because its expert-designed flawed packages are natural planted-defect fixtures: a reviewer model or automated check that fails to flag a validated flawed variant is not fit for gating.
+
+## 10. Precedents
+
+Terminal-Bench-Science already uses most of these elements for its statistics tasks: many hidden simulated instances generated from fixed seeds; conjunctive gates (bias, RMSE, coverage); metamorphic interventions; byte-identical reruns; named negative controls; and a structurally independent "witness" implementation ([R1](../research/evidence/R1-terminal-bench-science.md), §8) [P-full]. It also uses adversarial cheat trials and a hacker–fixer hardening loop. What DeepEcon adds is not the testing machinery but **where the negative controls come from**: expert-elicited, paper-specific design errors with realism warrants, instead of author-invented comparators.
+
+## 11. References (to be verified)
 
 Pending verification in evidence note R6 ([U] until then): DeMillo, Lipton & Sayward (1978) on mutation testing; Chen, Cheung & Yiu (1998) on metamorphic testing; Barr et al. (2015) on the test-oracle problem; Knight & Leveson (1986) on correlated failures in independently developed program versions (relevant to independent reference implementations); Dorie et al. (2019) on the ACIC causal-inference data challenge. Primary: Bercovich (2026), *Good Benchmarks* [P-full].

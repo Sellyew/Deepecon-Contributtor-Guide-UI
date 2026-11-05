@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | **Proposed** v0.1.0 (2026-11-05). Part of Deliverable 2. Not yet reviewed by the research lead. |
 | **Primary basis** | Bercovich (2026), *Good Benchmarks* — [reading notes](../research/reading-notes/good-benchmarks-bercovich-2026.md) (§ numbers below refer to the paper) |
-| **Also informed by** | Terminal-Bench-Science proposal and implementation rubrics ([evidence note R1](../research/evidence/R1-terminal-bench-science.md)); the research lead's brief §4 and §10 |
+| **Also informed by** | Terminal-Bench-Science (TBS) proposal, implementation (39 criteria), trial-analysis, and cheat-analysis rubrics, Apache-2.0 ([evidence note R1](../research/evidence/R1-terminal-bench-science.md)); the research lead's brief §4 and §10. Criteria adapted from TBS name their TBS counterpart in brackets. |
 | **Used by** | Contributors (self-assessment), shepherds, independent reviewers, automated checks; recorded as `rubricAssessment` in the [schema](../../schemas/README.md) |
 
 ## How to use this rubric
@@ -47,7 +47,7 @@
 
 | ID | Criterion | Evidence | Pass | Concern | Fail | Who / when |
 |---|---|---|---|---|---|---|
-| **SP-1** [G] | The instruction states the **required outcome** precisely enough that meeting it implies passing the verifier. | **Dual-verifier test** (§1): two economists independently write acceptance criteria from the agent-facing instruction alone; their criteria agree on every reference, alternative, and flawed output. | Both accept the same answers. | Agreement only after a clarification that is then written into the instruction. | Disagreement on what counts as correct. | Shepherd + one independent economist · T |
+| **SP-1** [G] | The instruction states the **required outcome** precisely enough that meeting it implies passing the verifier. [TBS `well_specified`, `test_instruction_alignment`] | **Dual-verifier test** (§1): two economists independently write acceptance criteria from the agent-facing instruction alone; their criteria agree on every reference, alternative, and flawed output. Every verifier assertion maps to a stated requirement, and vice versa. Where conventions legitimately differ (small-sample corrections, singleton handling, degrees of freedom), the instruction states the convention or the verifier accepts every defensible one. | Both accept the same answers. | Agreement only after a clarification that is then written into the instruction. | Disagreement on what counts as correct. | Shepherd + one independent economist · T |
 | **SP-2** | The instruction is **short, in practitioner language, and human-written or substantially human-edited.** | Authorship record; instruction length; reviewer reading. | Two paragraphs a referee would write; goal stated first. | Longer than necessary; some LLM-style scaffolding. | LLM-drafted and unedited; enumerates steps instead of the goal (§4, §9). | Shepherd · T; benchmark reviewer · A |
 | **SP-3** [G] | Difficulty does **not** come from a hidden fact, an unstated convention, or ambiguity. | **One-sentence-fact probe** (§9): state the disputed or key fact in a temporary instruction; record how difficulty changes. Disclosure of *the design's structure* (data, timing, assignment level) must already be in the instruction. | Disclosing the method makes the task easy, but recognizing the method from the disclosed design *is* the capability under test (record why). | Collapse to trivial on disclosure and no argument that recognition is the capability. | The task is hard only because the data's structure or the estimand is not described. | Shepherd · T |
 | **SP-4** | The **output contract** is minimal and self-checkable. | Results-file schema provided in the agent environment; format validator available to the agent. | One small JSON file plus a code entry point; the agent can validate its format. | A complex structure without a validator. | Failures dominated by formatting (§3: "measuring format compliance"). | Shepherd · T |
@@ -69,10 +69,10 @@
 | ID | Criterion | Evidence | Pass | Concern | Fail | Who / when |
 |---|---|---|---|---|---|---|
 | **VE-1** [G] | The verifier **accepts every correct solution**: the reference and all validated alternatives, on the main data and all hidden variants. | Validation runs of kind `oracle`, `alternative_solution`, `hidden_variant`. | 100% acceptance. | Rare rejections explained by numerical tolerance, with tolerance widened. | Any validated correct solution is rejected. | Automated + shepherd · T |
-| **VE-2** [G] | The verifier **rejects every validated flawed variant**, with margin, robustly. | Negative-control runs; separation margin; share of hidden variants on which the flawed output is rejected. The flagship flawed variant must not be an "equivalent mutant" (numerically indistinguishable on the evaluation data). | All flawed variants rejected on ≥ 95% of hidden variants; margin several tolerance widths. | Rejected on the main data only. | Some validated flawed variant passes. | Automated + shepherd · T |
+| **VE-2** [G] | The verifier **rejects every validated flawed variant**, with margin, robustly. [TBS `verification_explanation_quality`] | Negative-control runs; separation margin; share of hidden variants on which the flawed output is rejected. The flagship flawed variant must not be an "equivalent mutant" (numerically indistinguishable on the evaluation data). Separation is measured against a structurally independent correct implementation (a "witness"), and any comparator that "failed to fail" is reported, not hidden. | All flawed variants rejected on ≥ 95% of hidden variants; margin several tolerance widths. | Rejected on the main data only. | Some validated flawed variant passes. | Automated + shepherd · T |
 | **VE-3** | The verifier grades **outcomes**, and tests **procedure** through outcomes. | Verifier design: re-execution of the agent's code on hidden variants and metamorphic relations, rather than inspection of code or libraries (§7: "tests should verify outcomes, not implementations"). | Agent's code re-run on hidden semi-synthetic variants; outputs compared to the reference on the same inputs. | Single-dataset numeric check only (vulnerable to memorization). | Verifier checks which package or function was used. | Shepherd · T |
-| **VE-4** [G] | **Shortcut resistance.** | Attack runs: (a) published coefficients hard-coded; (b) no-op or empty output; (c) answer copied from any file in the environment; (d) generic "flag everything" answer for detection tasks; (e) diff against the public source package where applicable. | All attacks fail. | An attack fails only because of an incidental detail. | Any attack passes. | Automated + benchmark reviewer · T, A |
-| **VE-5** | **Verifier stability.** | Repeat runs (target: hundreds, §1) with fixed seeds; tolerance justified by the dispersion of valid solutions. | Zero spurious failures. | Rare flakes, root cause known and fixed. | Flaky outcomes. | Automated · T |
+| **VE-4** [G] | **Shortcut resistance.** | Attack runs: (a) published coefficients hard-coded; (b) no-op or empty output, and trivial nulls (constant, mean, zero effect, identity) on every hidden instance [TBS `graded_instances_discriminate`]; (c) answer copied from any file in the environment; (d) generic "flag everything" answer for detection tasks; (e) diff against the public source package where applicable; (f) an adversarial agent briefed to obtain the reward without doing the work, including by locating the original package online [TBS cheat trials]. | All attacks fail. | An attack fails only because of an incidental detail. | Any attack passes. | Automated + benchmark reviewer · T, A |
+| **VE-5** | **Verifier stability and boundary fairness.** [TBS `deterministic_reproducible`, trial-analysis `boundary_fairness`] | Repeat runs (target: hundreds, §1; TBS asks for 100+ for stochastic tasks) with fixed seeds; tolerance justified by the dispersion of valid solutions; outcomes near the acceptance boundary reflect real quality differences, not seeds or conventions. | Zero spurious failures; no knife-edge decisions. | Rare flakes, root cause known and fixed. | Flaky outcomes, or pass/fail decided by noise near a threshold. | Automated · T |
 
 ## 6. Difficulty
 
@@ -90,9 +90,10 @@
 
 | ID | Criterion | Evidence | Pass | Concern | Fail | Who / when |
 |---|---|---|---|---|---|---|
-| **EN-1** [G] | **Pinned, offline, reproducible** environment. | Pinned container image and package versions; no internet; no live data downloads; open-source software, or explicitly marked licensed track. | R or Python with pinned packages, data baked in. | Requires Stata (licensed track only). | Downloads data at run time; unpinned packages. | Automated · T |
+| **EN-1** [G] | **Pinned, offline, reproducible** environment. | Pinned container image and package versions (lockfiles for R and Python); no internet in the agent phase (a deliberate departure from TBS, whose agents have open internet, because DeepEcon's source packages are public); no live data downloads; open-source software, or explicitly marked licensed track. The set of pre-installed econometrics packages is documented, because it can change difficulty (*Good Benchmarks* §8 red flag). | R or Python with pinned packages, data baked in. | Requires Stata (licensed track only). | Downloads data at run time; unpinned packages. | Automated · T |
 | **EN-2** | **Hackability reviewed** (§6). | Adversarial "cheat" trials; root-cause explanation for any hack; oracle re-run after fixes. | No hack found. | Hack found and fixed at its root. | Known hack unfixed. | Benchmark reviewer · A |
 | **EN-3** [G] | **Licensing** permits distributing the data and code for evaluation. | Licence records per asset. | Redistributable (perhaps evaluation-only). | Permission pending. | Not redistributable and no substitute (synthetic or semi-synthetic) data. | Shepherd · T |
+| **EN-4** [G] | **Verifier isolation and task security.** Agent code that the verifier re-executes runs unprivileged, in a separate container, without network access, and cannot write the reward. Every "do not modify" in the instruction is enforced. [TBS `verifier_execution_isolation`, `task_security`, `do_not_modify_enforced`] | Verifier configuration review; an attack run in which agent code tries to write the reward file or read hidden data. | Isolated and enforced. | — | Agent code can influence its own grade. | Benchmark reviewer · T, A |
 
 ## 8. Leakage and contamination
 
@@ -113,6 +114,15 @@
 | **PR-1** [G] | **Complete provenance.** Every scientific assertion records its origin and the contributor's disposition; LLM-originated items were endorsed with the contributor's own reasoning. | Provenance fields; interview record; share of LLM-originated items. | Contributor-originated core, LLM suggestions explicitly endorsed or rejected. | Majority of items LLM-originated (triggers deeper review, §9 "hill climbing toward a task that is too artificial"). | Unendorsed LLM content presented as the contributor's. | Automated + shepherd · C, T |
 | **PR-2** [G] | **Independent review.** At least one domain economist not involved in the contribution, who could solve the task, and one benchmark reviewer who has built tasks before (§9). | Review records with conflict-of-interest statements. | Both reviews complete; concerns resolved. | Reviews converge only after more than three rounds (§8 red flag). | No independent review. | Release editor · A |
 
+## 10. Documentation
+
+*TBS README and metadata criteria [`difficulty_explanation_quality`, `solution_explanation_quality`, `verification_explanation_quality`, `expert_time_estimate`].*
+
+| ID | Criterion | Evidence | Pass | Concern | Fail | Who / when |
+|---|---|---|---|---|---|---|
+| **DC-1** | The task README explains, for reviewers: why the task is hard for humans and agents, and who does this work in practice (without citing pass rates); the reference solution's strategy and key insight; what the verifier checks, why that suffices, and how each tolerance was calibrated. | README review. | Complete and consistent with the code. | Gaps. | Missing or inconsistent with the code. | Shepherd · T; benchmark reviewer · A |
+| **DC-2** | Metadata: design type, validity layer, verifiability tier, JEL codes, a plausible expert time estimate, data licences. | Schema validation; reviewer check. | Complete. | Partial. | Missing. | Automated + shepherd · T |
+
 ---
 
 ## Red flags (from §8, adapted to economics)
@@ -120,7 +130,7 @@
 None is disqualifying alone; each is a reason to look closer.
 
 - The pass rate swings with a tiny change — a package version (e.g., an estimator library update), a pre-installed package, or a small hint.
-- Several agents converge on the **same wrong answer**. In economics, first check whether that answer is a valid alternative the verifier wrongly rejects.
+- Several agents converge on the **same wrong answer**. In economics, first check whether that answer is a valid alternative the verifier wrongly rejects. (TBS: "Recurring 'misunderstandings' by independent agents are evidence of ambiguity.")
 - Review keeps returning critical concerns after two or three rounds.
 - The instruction has a large surface (many files to read, many deliverables).
 - The reference solution states the answer instead of deriving it, or uses information the agent does not have.
