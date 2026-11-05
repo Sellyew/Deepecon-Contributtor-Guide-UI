@@ -46,7 +46,7 @@ The decisive design question is **who runs code**. A hosted interview does **not
 | 9 | Review | Dossier review screen in the contributor's language; edit, reject, or withdraw anything | 15–30 min |
 | 10 | Submit | One button; confirmation e-mail; shepherd feedback later in the platform | 1 min |
 
-**Before the interview starts** (steps 2 and 4–6): about **15–35 minutes**, with nothing to install [U: from this table; to be measured]. Option B's corresponding steps take about 31–66 minutes, plus a plan purchase unless the project provides access (Option B §2.1). Run kits (step 8) still need a working Stata, R or Python installation on someone's machine.
+**Before the interview starts** (steps 2 and 4–6): about **15–35 minutes**, with nothing to install [U: from this table; to be measured]. Option B's corresponding steps take about 31–66 minutes, plus obtaining commercial-terms access from the project (if O-018 permits) or the contributor's institution (Option B §2.1, §10.2). Run kits (step 8) still need a working Stata, R or Python installation on someone's machine.
 
 ### 2.2 Research-assistant mode
 
@@ -74,7 +74,7 @@ flowchart LR
 
 ### 3.2 Reference stack (proposed) and alternatives
 
-Based on [R9](../research/evidence/R9-hosted-stack-and-compliance.md) §9. A custom application fits the staged, stateful interview better than generic chat frameworks:
+Based on [R9](../research/evidence/R9-hosted-stack-and-compliance.md) §2.2 and §11. A custom application fits the staged, stateful interview better than generic chat frameworks:
 - Chainlit has been community-maintained since 2025-05;
 - Open WebUI's licence restricts removing its branding above 50 users;
 - the Vercel AI SDK routes through Vercel's gateway by default unless the Anthropic provider package is used directly [P-page].
@@ -183,7 +183,7 @@ Variant (c) in §3.3 would add in-browser execution for public-data R/Python pac
 
 ### 6.3 Restricted data
 
-About 72% of AEA intake cases involve some access restriction [P-full, R8]. The S0 disclosure forbids uploading restricted or confidential microdata (DP-28). Upload screens require a data-availability declaration and reject data-file types unless the data are declared public. With A1 and staff execution, no data upload is needed at all. Agent-facing material from restricted sources can only be fully synthetic ([verifier protocol](../methodology/verifier-validation-protocol.md) §6).
+About 72% of AEA intake cases involve some access restriction [P-full, R8]. The S0 disclosure forbids uploading restricted or confidential microdata (P-015). Upload screens require a data-availability declaration and reject data-file types unless the data are declared public. With A1 and staff execution, no data upload is needed at all. Agent-facing material from restricted sources can only be fully synthetic ([verifier protocol](../methodology/verifier-validation-protocol.md) §6).
 
 ## 7. How correct and flawed packages are produced
 
@@ -252,9 +252,10 @@ A human interviewer using the same protocol is a third route. None of these has 
 | Sandbox (A2) | Project | ≈ $32 in total for 200 contributions at Managed Agents' session-hour rate [R9 estimate] |
 | Development | Project | §13 |
 | Operations and security | Project | 0.1–0.25 FTE; periodic security review |
+| Support | Project | ≈ 0.75 h per contributor (0.25–1.5) [U]: the web platform plus run-kit questions on contributors' and RAs' machines; ≈ 150 h at 200 contributions, against Option B's ≈ 200 h |
 | Evaluation inference | Project | A simulated-contributor regression suite per protocol or model change ([cost model](cost-and-effort-model.md) §4) |
 | Contributor-side | Contributor | Time only (A1: their own compute and Stata licence) |
-| Shepherding and review | Project | Likely the largest cost. Under staff execution, shepherds also perform the S5 operationalization (≈ 4 h, 2–6 h, per task [U]); under A1, as under Option B, contributors pre-do part of it. Measured in the pilot (M9) |
+| Shepherding and review | Project | Likely the largest cost. Under staff execution, shepherds also perform the S5 operationalization (≈ 4 h, 2–6 h, per contribution [U]); under A1, as under Option B, contributors pre-do part of it. Measured in the pilot (M9) |
 
 ## 13. MVP build plan
 

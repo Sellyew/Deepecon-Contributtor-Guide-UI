@@ -52,7 +52,7 @@ Cache writes cost 1.25× base input with the 5-minute cache and 2× with the 1-h
 | Opus 5.5, without it (A1 run kits; staff execution) | $5 | $13 | $35 | — |
 | Sonnet 5.5, with in-session agentic work | $3 | $9 | $23 | $80 |
 
-In the central Opus case, output (≈ $7.80) and interview input (≈ $4.40) dominate; session restarts that rewrite the cache add ≈ $2.40, and agentic work ≈ $4. Caching discipline cuts costs about threefold, but model and architecture choices move inference spending only by tens of dollars per contribution.
+In the central Opus case, output (≈ $7.80, of which ≈ $3 is agentic) and interview input (≈ $4.40) dominate; session restarts that rewrite the cache add ≈ $2.40; agentic work costs ≈ $4 in all (its output included above). Caching discipline cuts costs about threefold, but model and architecture choices move inference spending only by tens of dollars per contribution.
 
 ## 3. Scenario analysis (10 / 50 / 200 contributions)
 
@@ -112,7 +112,7 @@ The [verifier protocol](../methodology/verifier-validation-protocol.md) §10 (Pr
 | Project reimburses consumer plans | B | One month of Pro × 200 contributors = **$4,000**, more than ≈ $3,400 of direct API inference | As above | As above | **No** | Admin overhead |
 | Sponsor or programme credits | A or B | Reduced | Depends | Depends | Depends | AI for Science: up to $50k in credits per project, "any researcher is eligible to apply" [P-full]; the Sloan Foundation distributes Claude credits [P-page]; a Team plan offer for scientists ($0 Standard seats for 12 months; economics not named; lab members only) [P-full] |
 
-**Note.** With commercial-terms access, Option B's inference cost to the project equals Option A's A2 route and is about $4 per contribution above A1 and staff execution. Engineering is comparable. The remaining differences are operations, evaluation inference, support, custody, and shepherd hours by route.
+**Note.** With project-provided commercial-terms access, Option B's inference cost to the project equals Option A's A2 route and is about $4 per contribution above A1 and staff execution. Engineering is comparable. The remaining differences are operations, evaluation inference, support, custody, and shepherd hours by route.
 
 ## 6. Sensitivities: what would change these conclusions
 

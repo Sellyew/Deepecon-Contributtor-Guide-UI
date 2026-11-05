@@ -85,7 +85,7 @@ A compact skill that turns a fuzzy idea into a research specification. It uses s
 | ReplicatorBench (KDD 2026) | Replication with new data, from the SCORE project; includes economics | LLM judge on design and interpretation stages | Replication, not error judgment [P-page] |
 | PaperBench (2025) | Replicating ML papers from scratch | Author-co-developed rubrics, LLM judge | Precedent for using original authors to define ground truth [P-page/S] |
 | ReplicationBench (2025) | Replicating astrophysics papers | Tasks co-developed with original authors; author-set tolerances | Same precedent [S] |
-| I4R "AI games" (Brodeur et al., PNAS 2026) | Human-only versus AI-assisted versus AI-led teams reproducing economics papers | Reproduction rates (recomputed in R4: 31/33, 32/35, 13/35); detection of **naturally occurring** coding errors against a catalogue of 122 errors in 12 papers | Closest human-plus-AI precedent in economics [P-page] |
+| I4R "AI games" (Brodeur et al., PNAS 2026) | Human-only versus AI-assisted versus AI-led teams reproducing economics papers | Reproduction rates (recomputed in R4: 31/33, 32/35, 13/35); detection of **naturally occurring** coding errors against a catalogue of 122 entries in 12 papers (11 coded "not an error") | Closest human-plus-AI precedent in economics [P-page] |
 
 **Pattern.** Reproduction with supplied code and data is near saturation. Economics benchmarks use naturally occurring errors, not designed ones, and none grades methodological judgment as an executable outcome.
 
@@ -114,7 +114,7 @@ A compact skill that turns a fuzzy idea into a research specification. It uses s
 | Natural errors in papers | SPOT: 83 papers, 91 author-confirmed errors; no model exceeds 21.1% recall or 6.1% precision [P-page] | Detection is hard; precision is very low |
 | Errors injected into paper text | FLAWS (GPT-5 finds 39.1% at k = 10) [S]; PaperAudit-Bench (8 error categories) [P-page]; LimitGen (11 perturbation types) [P-page]; Liu & Shah 2023 (GPT-4 found 7 of 13 planted errors) [S] | Injection into *text*, not runnable code |
 | Errors injected into data | Terminal-Bench-Science `ehr-error-detection` (69 injected error clusters; recall 1.0 and precision ≥ 0.1 required) [P-full, R1] | Injected-error detection exists as a task format |
-| Natural errors in economics packages | I4R AI games: a catalogue of 122 natural errors in 12 papers [P-page] | Real consequential errors exist in Top-5 packages |
+| Natural errors in economics packages | I4R AI games: a catalogue of 122 entries in 12 papers, 111 of them natural errors [P-page] | Real consequential errors exist in Top-5 packages |
 | Economics-specific evidence | No model found known errors in four economic-theory papers without heavy human help (Toda 2026) [S]; remaining agent errors in econometric code are increasingly silent [S] | Thin but suggestive |
 
 **Clean controls are rarely used, and they matter.** SPOT counts every unmatched flag as a false positive but has no clean twins [P-page]. A 2026 benchmark with matched clean twins found that models with identical recall differed by 79 points in false-alarm rate [S].
@@ -142,7 +142,7 @@ Several figures here are [S] or [U] and must be checked against the original pap
 
 | Project | Who contributes | How | What is collected |
 |---|---|---|---|
-| Terminal-Bench-Science | Domain researchers (mostly PhD students, postdocs, engineers) | Web proposal form → GitHub pull request; reviewers act as shepherds (DRIs) | Complete tasks built by contributors themselves [P-full] |
+| Terminal-Bench-Science | Domain researchers (mostly PhD students, postdocs, engineers) | Web proposal form → GitHub pull request; reviewers act as shepherds (directly responsible individuals, DRIs) | Complete tasks built by contributors themselves [P-full] |
 | PaperBench | Original paper authors | Co-developed rubrics; author addenda for the agent and the judge | Ground-truth rubrics [P-page/S] |
 | ReplicationBench | Original authors | Co-developed tasks; author-set tolerances | Task definitions and tolerances [S] |
 | BLADE | Expert analysts | Annotation of analysis decisions as justifiable or not | Decision labels [S] |
@@ -181,7 +181,7 @@ The first release would score computational and statistical validity only; ident
 - many-analysts dispersion and interpretation vulnerability (the many-analysts studies, BLADE);
 - natural errors with human adjudication (I4R, REPRO-Bench, SPOT).
 
-**The window may be short.** FLAWS reportedly plans an economics extension; I4R's Replication Engine includes an error-finding agent; COS is building a robustness module ([R4](evidence/R4-replication-benchmarks.md) §5) [S].
+**The window may be short.** FLAWS reportedly plans an economics extension; I4R's Replication Engine includes an error-finding agent; the Center for Open Science (COS) is building a robustness module ([R4](evidence/R4-replication-benchmarks.md) §5) [S].
 
 ## 7. Methodological foundations borrowed from other fields
 

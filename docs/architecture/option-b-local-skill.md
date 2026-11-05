@@ -21,7 +21,7 @@ Everything happens on the contributor's computer: the interview, code inspection
 | Model access | **Commercial-terms access is required for full contributions** under the proposed exposure rule (§10.2): provided by the project (subject to O-018) or by the contributor's institution. Every paid consumer plan includes Claude Code (Free does not) [P-full], but consumer terms are not sufficient for hidden-tier work. |
 | Who holds materials during drafting | The contributor. The project receives the code, dossier, and consented transcript at submission; hidden-tier copies remain on the contributor's machine unless purged (§10.1) |
 | What the project operates | Workspace and plugin distribution, a bilingual project page, an upload endpoint with validation and identity check, the internal review pipeline, and support |
-| Model consistency | **Pinned, switch-blocked, and recorded** by the template; **enforceable** only with organization-managed settings or a gateway. Client version and contributors' user-level configuration vary and are recorded (§5.3) |
+| Model consistency | **Pinned, switch-blocked, and recorded** by the workspace; **enforceable** only with organization-managed settings or a gateway. Client version and contributors' user-level configuration vary and are recorded (§5.3) |
 
 ## 2. Contributor experience
 
@@ -42,11 +42,11 @@ Everything happens on the contributor's computer: the interview, code inspection
 | 12 | Review and approve | Dossier summary with provenance and exposure badges, in the contributor's language | 15–30 min |
 | 13 | Export and submit | A ZIP package through a private upload link (default) or a private Git repository (optional); optional purge of local hidden-tier copies | 5 min |
 
-**Before the interview starts** (steps 1–5, 7, and 8): about **31–66 minutes** [U: from this table; to be measured], plus a plan purchase if access is not provided. Option A's corresponding steps take about 15–35 minutes with nothing to install (Option A §2.1).
+**Before the interview starts** (steps 1–5, 7, and 8): about **31–66 minutes** [U: from this table; to be measured], plus obtaining commercial-terms access from the project (if O-018 permits) or the contributor's institution (§10.2). Option A's corresponding steps take about 15–35 minutes with nothing to install (Option A §2.1).
 
 ### 2.2 Research-assistant mode
 
-A senior economist can do steps 6–9 and 12 in conversation, in the desktop app if preferred. **This does not remove the economist's own installation (steps 1–8).** A research assistant performs steps 10–11 on their own machine with the same plugin, working from the hand-off specification. Speakers and actions are attributed in the provenance record.
+A senior economist can do steps 6–9 and 12 in conversation, in the desktop app if preferred. **This does not remove the economist's own installation (steps 1–5).** A research assistant performs steps 10–11 on their own machine with the same plugin, working from the hand-off specification. Speakers and actions are attributed in the provenance record.
 
 **Hand-off route.** The helper exports a hand-off bundle (session state, hand-off specification, and the `work/` repository; never data). The bundle contains hidden-tier material, so it is encrypted, transferred through the project's upload endpoint or an institutional drive, logged in the exposure log, and imported by the RA's helper. The hand-off can wait days on the RA's schedule, as in Option A's run kits. The Remote Control and SSH variants in §3.2 avoid the transfer: the economist converses while execution stays on the RA's or department's machine.
 
@@ -168,7 +168,7 @@ deepecon-workspace/                   # WORKSPACE (downloaded; the replication p
 
 Since v2.1.283, auto mode is the default permission mode in the terminal and VS Code. It "nudges Claude to keep working without stopping for clarifying questions", but "Claude still asks when your prompt or a skill explicitly relies on it" [P-page].
 
-**The workspace removes the issue:** `disableAutoMode: "disable"` in any settings file makes sessions start in Manual mode and makes auto mode unavailable [P-page, R2 §13.2]. Setting `defaultMode` alone is weaker: VS Code ignores a project's `defaultMode`, and the desktop app's remembered per-folder mode outranks it. The skill also states that asking questions is the task. A test under each surface's defaults remains part of release checks.
+**The workspace removes the issue:** `disableAutoMode: "disable"` in any settings file removes auto mode [P-page, R2 §4.1]; that sessions then start in Manual mode is to be tested [U]. Setting `defaultMode` alone is weaker: the VS Code extension does not read a project's settings for its starting permission mode [P-page, R2 §8.3], and the desktop app's remembered per-folder mode outranks a project's `defaultMode` [P-page, R2 §4.1]. The skill also states that asking questions is the task. A test under each surface's defaults remains part of release checks.
 
 ### 5.5 Bilingual behaviour
 
@@ -197,7 +197,7 @@ With auto mode disabled, the permission mode and an allowlist limited to the run
 
 ### 6.3 Restricted data
 
-**Keep restricted data out of the workspace.** Read-deny rules reduce exposure but do not guarantee confidentiality: the documentation states that they "don't apply to … arbitrary subprocesses … like a Python or Node script" [P-page]. Rules shipped by a plugin are not honoured at all. The protocol therefore never asks for restricted microdata (DP-28), and the S0 disclosure explains that anything the model reads is sent to Anthropic. Agent-facing material from restricted sources can only be fully synthetic ([verifier protocol](../methodology/verifier-validation-protocol.md) §6).
+**Keep restricted data out of the workspace.** Read-deny rules reduce exposure but do not guarantee confidentiality: the documentation states that they "don't apply to … arbitrary subprocesses … like a Python or Node script" [P-page]. Rules shipped by a plugin are not honoured at all. The protocol therefore never asks for restricted microdata (P-015), and the S0 disclosure explains that anything the model reads is sent to Anthropic. Agent-facing material from restricted sources can only be fully synthetic ([verifier protocol](../methodology/verifier-validation-protocol.md) §6).
 
 ## 7. How correct and flawed packages are produced
 
@@ -305,7 +305,7 @@ v0.2.1 counted ≈ 8–14 engineer-weeks; v0.2.2 adds the items B needs that wer
 
 ## 14. Operations and maintenance
 
-- **Versioning.** Plugin and protocol follow semantic versioning, and packages record both. Sessions finish on the version they started with: each contribution's protocol version stays pinned by the workspace snapshot [P-full, R2 §2.2].
+- **Versioning.** Plugin and protocol follow semantic versioning, and packages record both. Sessions finish on the version they started with: each contribution's protocol version stays pinned by the workspace snapshot [U: design inference, R2 §2.2].
 - **Updates.** The workspace enables auto-update for the project marketplace (`"autoUpdate": true` on its `extraKnownMarketplaces` entry; to be tested from a repository settings file) [P-full, R2 §2.1].
 - **Client channel.** The workspace sets `autoUpdatesChannel: "stable"` ("typically about one week old, skipping releases with major regressions") and a `minimumVersion` [P-page]. The simulated-contributor regression suite is run per **certified** stable release; certifying less often than every stable release, and recording the client version per package, reduces the cost (cost model §4). A pre-flight version check remains as a backstop.
 - **Effort.** About 0.1–0.2 FTE: plugin and workspace compatibility with the stable channel, the upload endpoint, and more varied support.

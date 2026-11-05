@@ -119,7 +119,7 @@ Contribution (manifest)
 - **Patch** (0.1.x): clarifications and new optional fields. Old packages remain valid.
 - **Minor** (0.x.0): new optional entities or enumerations. Old packages remain valid; tools must ignore unknown `x-` fields.
 - **Major** (x.0.0): breaking change, accompanied by a migration script and a note in the decision log.
-- **Before 1.0.0**, while the schema is a draft, a minor version may also make breaking changes; each is listed with a migration note. 0.3.0 is the first such version (§8). No contribution packages existed when it was drafted.
+- **Before 1.0.0**, while the schema is a draft, a minor version may also make breaking changes; each is listed with a migration note. 0.3.0 is the first version to list its breaking changes with migration notes (§8); 0.2.0 had already made `realism_warrant.observed_in_practice` required, without a migration note. No contribution packages existed when either was drafted.
 - Packages are never rewritten in place by a schema upgrade; a migration produces a new package version with provenance.
 
 ## 7. Measuring AI influence
@@ -180,4 +180,4 @@ Recall of a known-issues key is computed on pre-exposure items only. The similar
 - Whether contributor identity fields (e-mail, ORCID) should live outside the package in a separate registry (data minimization).
 - Whether `numericResult` needs vector/matrix outputs (event-study coefficient paths), or a file reference suffices.
 - Where the exposure log should live: in each contribution package, or in a benchmark-wide registry, since external evaluations happen long after submission.
-- A `split` field (public or held-out) once O-001 is decided; all tasks and twins from one contribution would share it (VVP §10 item 3).
+- A `split` field (public or held-out) once O-001 is decided; all tasks and twins from one paper, across contributions, would share it (VVP §10 item 3).

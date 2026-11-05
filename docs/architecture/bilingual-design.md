@@ -50,7 +50,7 @@
 
 - **Model-facing instructions stay in English, in one place.** `SKILL.md` and the stage cards are not duplicated per language; they instruct the model to converse in the selected language and to follow the glossary.
 - **User-facing assets are per language:** `locales/en/` and `locales/zh-Hans/` hold templates (summaries, consent text, export instructions) and probe phrasings.
-- **Language selection:** asked at the start of the skill, stored in the local session state, and reused on resume. Claude Code has a documented `language` setting, but a plugin cannot set it. The workspace template sets it, and the skill also states the language explicitly [P-page, R2].
+- **Language selection:** asked at the start of the skill, stored in the local session state, and reused on resume. Claude Code has a documented `language` setting, but a plugin cannot set it. The workspace sets it, and the skill also states the language explicitly [P-page, R2].
 - **Helper scripts** (state, validation, packaging) print messages from small message catalogs.
 - **Documentation:** `README.md` and `README.zh-Hans.md`; installation guides in both languages.
 

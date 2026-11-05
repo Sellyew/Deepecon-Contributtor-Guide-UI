@@ -108,7 +108,7 @@ Stages are **adaptive, not linear**: the policy in §6 can return to an earlier 
 ### S0 — Setup and consent
 
 - Language (English or Simplified Chinese); role; relationship to the paper; pathway; materials; time budget.
-- **Data-flow disclosure:** which model provider receives which content, under which account terms. Raw restricted or confidential microdata must not be shared (DP-28).
+- **Data-flow disclosure:** which model provider receives which content, under which account terms. Raw restricted or confidential microdata must not be shared (P-015).
 - **Account terms for hidden material.** The interview itself creates hidden-tier material (failure modes, flawed variants, answer keys), so a session runs only under commercial terms that exclude training, with zero data retention where available. A consumer account is not sufficient, even with the training opt-out ([verifier protocol](../methodology/verifier-validation-protocol.md) §10). Each session is entered in the exposure log (rubric LK-5).
 - **Disclosure embargo:** the contributor agreement embargoes disclosure of the hidden material (verifier protocol §10).
 - **Confidentiality:** describe patterns, never identifiable manuscripts under review; transcripts are treated as sensitive and potentially re-identifying.
@@ -164,7 +164,7 @@ Stages are **adaptive, not linear**: the policy in §6 can return to an earlier 
 ### S5 — Operationalization (may be asynchronous with a research assistant)
 
 - Locate the change; draft the minimal diff **in a separate location** (originals are never modified, D-011). The contributor approves that the diff represents their failure mode.
-- Run reference and variant where execution is available. Compare observed with predicted consequences. Discuss mismatches openly: misunderstanding, data-equivalence (the flawed procedure gives nearly the same number on these data; [verifier protocol](../methodology/verifier-validation-protocol.md) §2, type 2; DP-05), or a new insight. Preview robustness where feasible.
+- Run reference and variant where execution is available. Compare observed with predicted consequences. Discuss mismatches openly: misunderstanding, data-equivalence (the flawed procedure gives nearly the same number on these data; [verifier protocol](../methodology/verifier-validation-protocol.md) §2, type 2), or a new insight. Preview robustness where feasible.
 - Without in-session execution: an approved hand-off specification for the research assistant or shepherd.
 
 ### S6 — Task design and quality
@@ -268,9 +268,9 @@ The conversational interviewer is **not** the judge of validity, the recorder, o
 |---|---|---|
 | Vagueness | No estimand, assumption, measurement, or inference property in the mechanism | Ladder (P-WHY) |
 | Triviality (checker) | Candidate looks like a coding slip without methodological content | Flag for the contributor and shepherd (X-002); never decided by the interviewer |
-| Data-equivalence risk | Predicted or observed consequence small or data-dependent | Flag for discriminability work: hidden variants that separate the procedures (verifier protocol §2, type 2; DP-05) |
+| Data-equivalence risk | Predicted or observed consequence small or data-dependent | Flag for discriminability work: hidden variants that separate the procedures (verifier protocol §2, type 2) |
 | One-sentence-fact risk | P-1FACT answer is "yes" | Record as a prediction, to be tested by the hint ladder and the knowledge probe (verifier protocol L10; rubric SP-3); O-004 stays open |
-| Inference-only consequence | P-PRED answer is a change in the standard error or confidence interval alone | Record. Materiality is judged by the SE-ratio criterion of rubric RV-2, and the task's standard error and confidence interval are graded deterministically against conditional references (verifier protocol §4 item 7) |
+| Inference-only consequence | P-PRED answer is a change in the standard error or confidence interval alone | Record. Materiality is judged by rubric RV-2 (criterion 2, the SE ratio or coverage; criterion 4 if significance changes), and the task's standard error and confidence interval are graded deterministically against conditional references (verifier protocol §4 item 7) |
 | Leakage (checker) | Agent-facing draft reveals the error, method, or answer | Block and explain |
 | Contradiction with artifacts | A statement conflicts with paper or code | P-DISAGREE |
 | Influence | High LLM-influenced share or false-endorsement rate | Flag for shepherd review (PR-1) |

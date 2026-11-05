@@ -29,8 +29,8 @@ Adapted from [R6](../research/evidence/R6-error-detection-and-verifier-methodolo
 | **1. Semantic equivalence** | F(d) = P(d) for every admissible input | Clustering on `state_id` versus `state_name` when they map one-to-one | No, and it need not | Not a flaw: reclassify as a valid alternative or discard; exclude from mutation counts. Only this type is an "equivalent mutant" proper. |
 | **2. Data-equivalence** | F ≈ P on the evaluation data, but not on other admissible inputs | TWFE ≈ heterogeneity-robust DiD when effects are nearly homogeneous; OLS ≈ 2SLS when endogeneity is weak in the sample | **Yes, with new inputs** | Hidden variants that exercise the separating feature (§5); record the separation margin |
 | **3. Observation-equivalence** | F differs only in outputs the verifier does not observe | Wrong clustering level: same coefficient, different SE | Yes, if the verifier observes more | A benchmark-wide output schema that always includes SE, confidence interval, N, number of clusters, and the cluster variable (rubric SP-4); inference relations (§5) |
-| **4. Tolerance-equivalence** | F falls inside an acceptance region widened for valid alternatives | A flawed estimate within the dispersion of valid estimators | Partly | Separate the three sources of variation (§4.6); tighten the estimand; separating hidden variants |
-| **5. Power-equivalence** | F and P differ in sampling properties too subtly for the verifier's simulation budget | A test with size 7% instead of 5% | Only with large Monte Carlo budgets | Grade inference deterministically against conditional references (§4.7); never key tasks on small distortions |
+| **4. Tolerance-equivalence** | F falls inside an acceptance region widened for valid alternatives | A flawed estimate within the dispersion of valid estimators | Partly | Separate the three sources of variation (§4 item 6); tighten the estimand; separating hidden variants |
+| **5. Power-equivalence** | F and P differ in sampling properties too subtly for the verifier's simulation budget | A test with size 7% instead of 5% | Only with large Monte Carlo budgets | Grade inference deterministically against conditional references (§4 item 7); never key tasks on small distortions |
 | **6. Identification-equivalence** | Both compute valid statistics; the flaw lies in an untestable assumption | A comparison group whose trends diverge only after treatment; a violated exclusion restriction | **No**, not from observational data | Structured expert judgment (tier V3); sensitivity analysis as a required output; never a binary key (brief §4) |
 
 ## 3. The validation ladder
@@ -46,7 +46,7 @@ Run the rungs in order. A failure sends the task back to the shepherd. Every run
 | L4 | **Negative controls (expert flawed variants)** | Every validated flawed variant is rejected, with separation margins recorded. | Run: yes. Design: human |
 | L5 | **Mutation analysis (artificial mutants)** | Generated mutants (drop a fixed effect, change the cluster variable, shift timing by one period, alter a sample filter, flip a sign) are run. **Pass:** every surviving non-equivalent mutant has been triaged, and no survivor reveals a verifier gap. Survivor counts are reported by operator class. No confidence interval is reported, because designer-chosen mutants are not a random sample. | Yes, with human triage |
 | L6 | **Metamorphic relations** | The relations in §5 hold for the reference and all alternatives, and are violated by the flawed variants they target. Relations are necessary conditions, not sufficient ones. | Yes |
-| L7 | **Hidden-variant separation** | Answer-changing variants are built on bases the agent never sees (§5.1). **Deterministic families:** every correct solution matches its conditional reference on the same input. **Stochastic families:** simulation shows that the probability of rejecting a correct solution is below 10⁻³. **Flawed variants:** each is rejected on the variants that satisfy its stated conditions, with a one-sided 95% lower bound of at least 0.90 (for example, 194 of 200 gives 0.936). The kill matrix records flawed variants × checks, with margins. | Yes |
+| L7 | **Hidden-variant separation** | Answer-changing variants are built on bases the agent never sees (§5.1). **Deterministic families:** every correct solution matches its conditional reference on the same input. **Stochastic families:** simulation shows that the probability of rejecting a correct solution is below 10⁻³. **Flawed variants:** each is rejected on the variants that satisfy its stated conditions, with a one-sided 95% lower bound of at least 0.90 (for example, 194 of 200 gives 0.942 by Clopper–Pearson). The kill matrix records flawed variants × checks, with margins. | Yes |
 | L8 | **Shortcut and adversarial attacks** | Each of these attacks must fail:<br>(a) hard-coded published coefficients;<br>(b) trivial nulls (L2);<br>(c) copying from any file in the environment;<br>(d) "flag everything" in detection tasks;<br>(e) recall of the original package or paper (rubric LK-4);<br>(f) cheat trials by an agent briefed to get the reward without doing the work, run offline (the official configuration) and once online to measure what the offline rule protects;<br>(g) the **differential attack**: return the main-data or published answer plus the estimand-weighted difference between hidden and visible outcomes;<br>(h) constant outputs on invariance instances;<br>(i) "change nothing" and "always switch to the newest estimator" policies in correction tasks;<br>(j) agent code trying to write the reward or read hidden data (EN-4).<br>"No hack found" is evidence, not proof ([R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) §2.3). | Mostly yes |
 | L9 | **Full-harness replay** | At least 300 replays of the oracle and of every accepted alternative, through the agent sandbox plus verifier, varying unfixed seeds, thread counts, and at least two hardware platforms. **Pass:** zero spurious failures, reported with the one-sided 95% upper bound (about 1% at 0 of 300). Re-running a deterministic verifier with fixed seeds on stored outputs cannot fail and does not count. | Yes |
 | L10 | **Hint ladder and knowledge probe** | Pre-declared hints are given to agents in separate trials: H1 a design fact the instruction should carry; H2 names the pitfall; H3 names the method. A knowledge probe asks the key fact directly, outside the task. Results feed rubric SP-3 and SO-3. | Yes, with human reading |
@@ -62,7 +62,7 @@ Run the rungs in order. A failure sends the task back to the shepherd. Every run
 | Verifier | L1–L9, and re-score all stored trials |
 | Environment | L0–L9 |
 
-Hardening edits are logged together with the trial that prompted them. No edit may be justified **only** by an agent's success (§4.9), because filtering tasks against the evaluated models biases their scores (R1 §4; *Good Benchmarks* §3, §9).
+Hardening edits are logged together with the trial that prompted them. No edit may be justified **only** by an agent's success (§4 item 9), because filtering tasks against the evaluated models biases their scores (R1 §4; *Good Benchmarks* §3, §9).
 
 ## 4. Designing the acceptance region
 
@@ -129,7 +129,7 @@ Effect injection is then layered on top. References are computed on each variant
 | Transformation | Correct procedure | Flaw exposed |
 |---|---|---|
 | **Control-span invariance:** add any vector in the span of the required fixed effects or controls (e.g., arbitrary αᵢ + λₜ) | Estimate unchanged | Missing fixed effects or controls. Naive comparisons changed by 6.93 and 7.95 in the review's check, while TWFE and imputation changed by 0.000 |
-| **Instrument-orthogonal confounding:** add a component orthogonal in-sample to [1, Z, W] but correlated with X | 2SLS unchanged | Using OLS where 2SLS is required: OLS changed by 0.713 in the review's check |
+| **Instrument-orthogonal confounding:** add to the outcome a component orthogonal in-sample to [1, Z, W] but correlated with X | 2SLS unchanged | Using OLS where 2SLS is required: OLS changed by 0.713 in the review's check |
 
 ### 5.4 Inference relations
 
@@ -203,7 +203,7 @@ Each failure mode has a **primary** validity layer (of five) plus optional secon
 | Computational (implementation fidelity) | The code implements the stated design | V1, V2a | — |
 | Measurement | Variables are constructed as defined | V1; V3 for whether a definition fits the construct | Contested proxies |
 | Statistical | The procedure is appropriate for the estimand and design | V2a, V2b, V1 against conditional references | Trade-offs among valid procedures |
-| Identification | Falsification computations and sensitivity outputs | V1/V2 for the computations; V3 for recognizing threats | Whether untestable assumptions hold |
+| Identification | Falsification computations and sensitivity outputs | V1 or V2a for the computations; V3 for recognizing threats | Whether untestable assumptions hold |
 | Interpretation | Whether claims follow from given results | V3 | Contested nuances |
 
 **V3 admission.** Each item type is first qualified by a pre-registered, set-level agreement study (Krippendorff's α or Gwet's AC1 of at least 0.8). Individual items are then admitted when at least 4 of 5 raters agree, or when a latent-class posterior is at least 0.95.

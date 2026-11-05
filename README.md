@@ -6,7 +6,7 @@ An expert-driven benchmark for evaluating whether AI agents can perform rigorous
 
 ## The idea in one paragraph
 
-From a published paper, an economist helps build a validated **correct** replication of a specific result and one or more **deliberately flawed** versions, each encoding a plausible, scientifically consequential mistake: the wrong estimator, inference procedure, sample, or treatment timing, or an unsupported interpretation. An AI-guided interview helps the economist make that tacit knowledge explicit. A benchmark team then turns these source materials into short, verifiable tasks whose hidden verifiers accept correct work and reject the expert-identified mistakes. Contributions reach the project through one of two candidate architectures under comparison: a **hosted bilingual web platform** (Option A) or a **Claude Code skill run locally** (Option B).
+From a published paper, an economist helps build a validated **correct** replication of a specific result and one or more **deliberately flawed** versions, each encoding a plausible, scientifically consequential mistake: the wrong estimator, inference procedure, sample, or treatment timing, or an unsupported interpretation. An AI-guided interview helps the economist make that tacit knowledge explicit. A benchmark team then turns these source materials into short, verifiable tasks whose hidden verifiers accept correct work and reject the expert-identified mistakes. Contributions reach the project through one of two candidate architectures under comparison: a **hosted web platform** (Option A) or a **Claude Code skill run locally** (Option B), both in English and Simplified Chinese.
 
 ## Start here
 
