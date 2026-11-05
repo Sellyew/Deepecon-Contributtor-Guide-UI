@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://deepecon.example/schemas/deepecon-contribution/0.2.0",
+  "$id": "https://deepecon.example/schemas/deepecon-contribution/0.3.0",
   "title": "DeepEcon contribution package (manifest and records)",
-  "description": "Language-independent, architecture-independent record of one expert contribution: paper, reference and flawed implementations, interview-derived knowledge with provenance, candidate tasks, validation evidence, reviews, and submission metadata. Status: PROPOSED draft 0.2.0 (2026-11-05); not yet approved by the research lead. Every entity carries a visibility tier: contributor | internal | agent | hidden. Only 'agent'-tier material may ever be placed in an evaluated agent's environment.",
+  "description": "Language-independent, architecture-independent record of one expert contribution: paper, reference and flawed implementations, interview-derived knowledge with provenance, candidate tasks, validation evidence, an exposure log of hidden material, reviews, and submission metadata. Status: PROPOSED draft 0.3.0 (2026-11-05); not yet approved by the research lead. Every entity carries a visibility tier: contributor | internal | agent | hidden. Only 'agent'-tier material may ever be placed in an evaluated agent's environment.",
   "type": "object",
   "required": [
     "schema_version",
@@ -147,6 +147,13 @@
         "$ref": "#/$defs/validationRun"
       }
     },
+    "exposure_log": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/exposureLogEntry"
+      },
+      "description": "Every exposure of hidden-tier material to a model or service (verifier protocol §10; rubric LK-5). Unrelated to provenance.exposure, which records a contributor's exposure to AI suggestions."
+    },
     "reviews": {
       "type": "array",
       "items": {
@@ -213,6 +220,26 @@
         "U"
       ],
       "description": "P-full primary source read in full; P-page primary abstract/landing page/official doc; S secondary; U unverified."
+    },
+    "validityLayer": {
+      "enum": [
+        "computational",
+        "measurement",
+        "statistical",
+        "identification",
+        "interpretation"
+      ],
+      "description": "computational (implementation fidelity), measurement, statistical, identification, interpretation (P-003; verifier protocol §9)."
+    },
+    "verifiabilityTier": {
+      "enum": [
+        "V1",
+        "V2a",
+        "V2b",
+        "V3",
+        "V4"
+      ],
+      "description": "Assigned per graded output (verifier protocol §9): V1 deterministic comparison; V2a exact relation (effect injection, invariances); V2b stochastic check with stated error rates; V3 structured judgment with an expert-consensus key, admitted only after the agreement study of §9; V4 open-ended judgment (unscored track). The tier does not follow from the validity layer."
     },
     "textVersion": {
       "type": "object",
@@ -548,6 +575,24 @@
       "type": "string",
       "pattern": "^[a-f0-9]{64}$"
     },
+    "sourceAccess": {
+      "enum": [
+        "public_redistributable",
+        "public_not_redistributable",
+        "restricted_access",
+        "confidential",
+        "unknown"
+      ],
+      "description": "Redistribution status of the source data a file contains or was derived from (for a fully synthetic file: of the data it imitates). Outputs that the provider or a disclosure review has released for publication take the status of that release."
+    },
+    "dataRoute": {
+      "enum": [
+        "redistributable_original",
+        "derived_from_redistributable",
+        "fully_synthetic"
+      ],
+      "description": "redistributable_original: the original data, or a cleaned subset, whose terms permit redistribution for evaluation. derived_from_redistributable: effect-injected, perturbed, resampled, or semi-synthetic data built on such originals; they inherit the original licence. fully_synthetic: every variable synthesized, with disclosure review and the provider's permission where required; the only route for non-redistributable sources (verifier protocol §6; P-027)."
+    },
     "fileRef": {
       "type": "object",
       "required": [
@@ -578,9 +623,64 @@
         },
         "license_ref": {
           "type": "string"
+        },
+        "source_access": {
+          "$ref": "#/$defs/sourceAccess",
+          "description": "Required for data files (role: data)."
+        },
+        "data_route": {
+          "$ref": "#/$defs/dataRoute",
+          "description": "Required for data files (role: data)."
         }
       },
-      "additionalProperties": false
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "data"
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "required": [
+              "source_access",
+              "data_route"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "source_access": {
+                "enum": [
+                  "public_not_redistributable",
+                  "restricted_access",
+                  "confidential"
+                ]
+              }
+            },
+            "required": [
+              "source_access"
+            ]
+          },
+          "then": {
+            "properties": {
+              "data_route": {
+                "const": "fully_synthetic"
+              }
+            },
+            "required": [
+              "data_route"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false,
+      "description": "A file in the package. Data derived from a non-redistributable source appear in any tier only as fully synthetic data, which covers agent-facing material and hidden variants alike (verifier protocol §6; P-015, P-027)."
     },
     "softwareEnv": {
       "type": "object",
@@ -742,7 +842,8 @@
           "description": "Value printed in the paper, if any."
         },
         "tolerance": {
-          "$ref": "#/$defs/tolerance"
+          "$ref": "#/$defs/tolerance",
+          "description": "Acceptance band for value, from numerical noise only (verifier protocol §4 item 6). Conventions and substantive alternatives get their own conditional references, never a wider band."
         }
       },
       "additionalProperties": false
@@ -767,10 +868,22 @@
           "minimum": 0
         },
         "justification": {
-          "type": "string"
+          "type": "string",
+          "description": "Evidence for the band: differences between cross-software re-runs of the same declared estimator and conventions, or, for stochastic outputs, k times the simulation SE at the declared number of draws. No default band is borrowed from another benchmark."
         }
       },
       "additionalProperties": false
+    },
+    "outputQuantity": {
+      "enum": [
+        "value",
+        "std_error",
+        "confidence_interval",
+        "p_value",
+        "n_obs",
+        "n_clusters"
+      ],
+      "description": "Which quantity of a numeric output is meant (the fields of numericResult)."
     },
     "contributorRole": {
       "type": "object",
@@ -855,7 +968,11 @@
             "other_provider",
             "unknown"
           ],
-          "description": "Terms under which the interview model was accessed; consumer accounts with training enabled create a leakage risk for hidden materials."
+          "description": "Terms under which the interview model was accessed. Interview sessions create hidden-tier material (failure modes, flawed variants), so they require commercial no-training terms (verifier protocol §10); a consumer account does not qualify, even with the training opt-out."
+        },
+        "disclosure_embargo_accepted": {
+          "type": "boolean",
+          "description": "The contributor accepted the disclosure embargo on hidden material in the contributor agreement (verifier protocol §10 item 5)."
         },
         "allow_transcript_retention": {
           "type": "boolean"
@@ -1024,7 +1141,8 @@
           ],
           "properties": {
             "description": {
-              "$ref": "#/$defs/localizedText"
+              "$ref": "#/$defs/localizedText",
+              "description": "The estimand in potential-outcome terms, with explicit weights over (cohort, period) cells or units, the window, and the population. It never names the estimator or the comparison group."
             },
             "parameter": {
               "type": "string",
@@ -1038,6 +1156,14 @@
             },
             "outcome": {
               "type": "string"
+            },
+            "weights": {
+              "type": "string",
+              "description": "Explicit weights, e.g. over treated (cohort, period) cells."
+            },
+            "window": {
+              "type": "string",
+              "description": "Event-time or calendar window over which the estimand averages, where applicable."
             },
             "design": {
               "enum": [
@@ -1061,10 +1187,12 @@
               "type": "array",
               "items": {
                 "$ref": "#/$defs/statement"
-              }
+              },
+              "description": "Comparison group, base period, anticipation, and other identifying assumptions, stated in the instruction or declared from the benchmark-wide convention vocabulary (verifier protocol §4 item 1)."
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "(a) The estimand, in potential-outcome terms; (b) the identifying assumptions; (c) the estimator is never part of it (verifier protocol §4 item 1)."
         },
         "outputs": {
           "type": "array",
@@ -1201,8 +1329,11 @@
                     "cross_language_reimplementation",
                     "line_by_line_code_review",
                     "simulation_check",
+                    "clean_room_reimplementation",
+                    "blind_expert_solve",
                     "other"
-                  ]
+                  ],
+                  "description": "Only clean_room_reimplementation (written from the paper, the estimand statement, and the codebook by someone who has not read the original code) and a correct blind_expert_solve qualify as the independent check (rubric GT-1; verifier protocol L3). A port (cross_language_reimplementation) or a line_by_line_code_review inherits the original's logic and does not qualify. independent_reimplementation is the 0.2.0 value, kept for old records."
                 },
                 "performed_by": {
                   "type": "string"
@@ -1268,14 +1399,8 @@
           ]
         },
         "validity_layer": {
-          "enum": [
-            "computational",
-            "measurement",
-            "statistical",
-            "identification",
-            "interpretation"
-          ],
-          "description": "Which kind of validity the decision protects: computational (implementation fidelity), measurement, statistical, identification, interpretation (DP-01; protocol v0.2.0 S4)."
+          "$ref": "#/$defs/validityLayer",
+          "description": "Which kind of validity the decision protects: computational (implementation fidelity), measurement, statistical, identification, interpretation (DP-01; P-003; protocol S4)."
         },
         "description": {
           "$ref": "#/$defs/statement"
@@ -1402,13 +1527,16 @@
           "description": "Brief §3.3 item 3: why the mistake is realistic and easy to overlook (DP-10)."
         },
         "validity_layer": {
-          "enum": [
-            "computational",
-            "measurement",
-            "statistical",
-            "identification",
-            "interpretation"
-          ]
+          "$ref": "#/$defs/validityLayer",
+          "description": "Primary validity layer (verifier protocol §9)."
+        },
+        "secondary_validity_layers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/validityLayer"
+          },
+          "description": "Further layers the failure mode also touches, e.g. statistical plus interpretation for static TWFE under staggered adoption. Must not repeat the primary layer (validator rule). Agreement on layers is reported (verifier protocol §9)."
         },
         "status": {
           "enum": [
@@ -1418,7 +1546,7 @@
             "contested"
           ],
           "default": "needs_review",
-          "description": "Determined by independent classification (protocol §13), not by the interview. Contested items never receive binary answer keys (D-013)."
+          "description": "Determined by independent classification (protocol §13; rubric GT-2), not by the interview. Contested items never receive binary answer keys (D-013)."
         },
         "status_justification": {
           "$ref": "#/$defs/statement"
@@ -1428,7 +1556,7 @@
           "items": {
             "$ref": "#/$defs/statement"
           },
-          "description": "For 'conditional': the assumptions under which the alternative is wrong, and why they hold here."
+          "description": "For 'conditional': the assumptions under which the alternative is wrong, and why they hold here, verified by recorded diagnostics on the evaluation data and on every hidden-variant family used for grading (rubric GT-2)."
         },
         "predicted_consequence": {
           "type": "object",
@@ -1471,9 +1599,10 @@
                 "changes_significance",
                 "changes_sign",
                 "changes_magnitude_material",
+                "changes_inference_only",
                 "other"
               ],
-              "description": "Coarse pre-registered prediction (probe P-PRED)."
+              "description": "Coarse pre-registered prediction (probe P-PRED). changes_inference_only: the standard error or confidence interval changes without the estimate moving."
             },
             "quantiles": {
               "type": "object",
@@ -1596,7 +1725,7 @@
             },
             "additionalProperties": false
           },
-          "description": "Independent classifications by at least two economists not involved in the contribution."
+          "description": "Independent, blind classifications by economists outside the contribution, made after the materiality check and verifier rungs L4 and L7: one classifier for an item that matches a vetted-taxonomy entry with a canonical citation, two for a novel item (rubric GT-2; P-020)."
         }
       },
       "additionalProperties": false
@@ -1702,6 +1831,10 @@
               "output_id": {
                 "type": "string"
               },
+              "quantity": {
+                "$ref": "#/$defs/outputQuantity",
+                "description": "Quantity compared; value when omitted. Use std_error for flaws that change only inference (the SE-ratio criterion of rubric RV-2)."
+              },
               "reference_value": {
                 "type": "number"
               },
@@ -1712,11 +1845,12 @@
                 "type": "number"
               },
               "difference_in_reference_se": {
-                "type": "number"
+                "type": "number",
+                "description": "For value comparisons: the difference divided by the reference SE."
               },
               "materiality_rule": {
                 "type": "string",
-                "description": "Pre-registered rule, e.g., '|diff| > 1 reference SE or significance change at 5%' (DP-04)."
+                "description": "The rule applied, fixed before the variant is run: the benchmark-wide default of rubric RV-2, unless the release editor approved a task-specific deviation in advance."
               },
               "material": {
                 "type": "boolean"
@@ -1755,7 +1889,7 @@
               "type": "number",
               "minimum": 0,
               "maximum": 1,
-              "description": "Share of hidden variants on which reference and flawed outputs are separated by the verifier (DP-04, DP-05)."
+              "description": "Share of hidden variants satisfying the failure mode's stated conditions on which the verifier rejects the flawed output; verifier protocol L7 requires a one-sided 95% lower bound of at least 0.90."
             },
             "separation_margin": {
               "type": "number",
@@ -1772,7 +1906,6 @@
       "required": [
         "task_id",
         "task_type",
-        "verifiability_tier",
         "target_capability",
         "source_refs",
         "agent_facing",
@@ -1792,14 +1925,15 @@
             "research_interpretation"
           ]
         },
-        "verifiability_tier": {
-          "enum": [
-            "V1",
-            "V2",
-            "V3",
-            "V4"
-          ],
-          "description": "V1 deterministic computational; V2 statistical with known truth; V3 structured judgment with expert-consensus key; V4 open-ended judgment (DP-02)."
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "recognition_task"
+            ]
+          },
+          "description": "recognition_task: the failure disappears once the pitfall is named (hint H2); such tasks are reported separately while O-004 is open (rubric SP-3; verifier protocol L10)."
         },
         "target_capability": {
           "$ref": "#/$defs/statement"
@@ -1872,7 +2006,7 @@
                 },
                 "results_schema": {
                   "type": "string",
-                  "description": "Path (agent tier) to a JSON Schema the agent can use to self-check its output format."
+                  "description": "Path (agent tier) to the results JSON Schema, which is benchmark-wide and identical for all tasks of a type (rubric SP-4); the agent can use it to self-check its output."
                 },
                 "code_entrypoint_required": {
                   "type": "boolean",
@@ -1880,14 +2014,18 @@
                 },
                 "declared_choices_required": {
                   "type": "boolean",
-                  "description": "The agent must declare its choices for decisions with more than one accepted option; the verifier grades against a conditional reference (verifier protocol §4)."
+                  "description": "The agent declares non-crux conventions (e.g., small-sample factor, degrees-of-freedom rule, singletons, counting of nested fixed effects) from the convention vocabulary; each has its own conditional reference. Crux decisions are never declared: they are graded only through outcomes on separating hidden variants (verifier protocol §4 item 4)."
+                },
+                "convention_vocabulary": {
+                  "type": "string",
+                  "description": "Identifier and version of the convention vocabulary for the design family. It is benchmark-wide, so it reveals nothing task-specific (verifier protocol §4 item 4)."
                 },
                 "intermediate_outputs_required": {
                   "type": "array",
                   "items": {
                     "type": "string"
                   },
-                  "description": "Compact intermediate outputs the agent must report, e.g. estimation-sample identifiers or their hash, cohort sizes, number of clusters."
+                  "description": "Intermediate outputs the results must include, e.g. the estimation-sample hash, cohort sizes, number of clusters. Graded values come from re-executing the agent's code; self-reported values are never graded alone (verifier protocol §4 item 5; rubric VE-3)."
                 }
               },
               "additionalProperties": false
@@ -1919,23 +2057,25 @@
             "verifier": {
               "type": "object",
               "required": [
-                "methods"
+                "methods",
+                "graded_outputs"
               ],
               "properties": {
                 "methods": {
                   "type": "array",
                   "minItems": 1,
                   "items": {
-                    "enum": [
-                      "numeric_tolerance",
-                      "acceptance_region",
-                      "hidden_variant_reexecution",
-                      "metamorphic_relations",
-                      "structured_answer_key",
-                      "rubric_llm_judge_with_human_audit",
-                      "human_expert_grading"
-                    ]
-                  }
+                    "$ref": "#/$defs/verifierMethod"
+                  },
+                  "description": "All methods the verifier uses; graded_outputs say which method grades which quantity."
+                },
+                "graded_outputs": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "#/$defs/gradedOutput"
+                  },
+                  "description": "Every graded quantity with its verifiability tier (verifier protocol §9). Where a task needs a single tier, it is that of its least verifiable graded output."
                 },
                 "files": {
                   "type": "array",
@@ -1990,49 +2130,9 @@
             "decision_space": {
               "type": "array",
               "items": {
-                "type": "object",
-                "required": [
-                  "decision_id",
-                  "option",
-                  "status",
-                  "source"
-                ],
-                "properties": {
-                  "decision_id": {
-                    "type": "string"
-                  },
-                  "option": {
-                    "type": "string"
-                  },
-                  "status": {
-                    "enum": [
-                      "reference",
-                      "accepted",
-                      "unjustifiable",
-                      "contested"
-                    ]
-                  },
-                  "source": {
-                    "enum": [
-                      "contributor",
-                      "reviewer",
-                      "llm",
-                      "literature"
-                    ]
-                  },
-                  "citations": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/$defs/citation"
-                    }
-                  },
-                  "note": {
-                    "type": "string"
-                  }
-                },
-                "additionalProperties": false
+                "$ref": "#/$defs/decisionSpaceOption"
               },
-              "description": "Hidden, expert-validated decision space for alternative valid implementations (verifier protocol §4)."
+              "description": "Hidden decision space for substantive alternatives (verifier protocol §4 items 3–4): options with status, provenance, and requires/excludes constraints. At most two decisions per task have more than one reference or accepted option, and every selectable combination has a conditional reference checked against a second implementation (rubric GT-1)."
             },
             "verifier_version": {
               "$ref": "#/$defs/semver"
@@ -2070,6 +2170,131 @@
         }
       },
       "additionalProperties": false
+    },
+    "verifierMethod": {
+      "enum": [
+        "numeric_tolerance",
+        "acceptance_region",
+        "hidden_variant_reexecution",
+        "metamorphic_relations",
+        "structured_answer_key",
+        "rubric_llm_judge_with_human_audit",
+        "human_expert_grading"
+      ],
+      "description": "Verification methods (verifier protocol §4–§7). metamorphic_relations covers effect injection, invariances, and inference relations (§5)."
+    },
+    "optionRef": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{1,79}/[a-z0-9][a-z0-9._-]{1,79}$",
+      "description": "An option of the same task's decision space, written <decision_id>/<option_id>."
+    },
+    "decisionSpaceOption": {
+      "type": "object",
+      "required": [
+        "decision_id",
+        "option_id",
+        "option",
+        "status",
+        "source"
+      ],
+      "properties": {
+        "decision_id": {
+          "$ref": "#/$defs/id",
+          "description": "A critical decision, or an identifying assumption that the instruction fixes, recorded as a decision with a single reference option so that other options can require or exclude it."
+        },
+        "option_id": {
+          "$ref": "#/$defs/id",
+          "description": "Unique within its decision."
+        },
+        "option": {
+          "type": "string",
+          "description": "The option in plain language."
+        },
+        "status": {
+          "enum": [
+            "reference",
+            "accepted",
+            "unjustifiable",
+            "contested"
+          ],
+          "description": "reference: the reference implementation's choice; accepted: a valid alternative, graded against its own conditional reference; unjustifiable: an error; contested: never receives a binary grade (D-013, X-003)."
+        },
+        "source": {
+          "enum": [
+            "contributor",
+            "reviewer",
+            "llm",
+            "literature"
+          ]
+        },
+        "requires": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/optionRef"
+          },
+          "description": "For each decision named here, a valid combination selects one of the listed options of that decision (e.g., not-yet-treated controls require a no-anticipation assumption; verifier protocol §4 item 3)."
+        },
+        "excludes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/optionRef"
+          },
+          "description": "Options that a valid combination containing this option must not select."
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/citation"
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "description": "One option of one decision in the hidden decision space."
+    },
+    "gradedOutput": {
+      "type": "object",
+      "required": [
+        "output_id",
+        "verifiability_tier",
+        "methods"
+      ],
+      "properties": {
+        "output_id": {
+          "type": "string",
+          "description": "An output named in the output contract or the benchmark-wide results schema."
+        },
+        "quantity": {
+          "$ref": "#/$defs/outputQuantity",
+          "description": "For numeric outputs, the quantity graded; omitted for non-numeric outputs (reports, detection lists, judgments)."
+        },
+        "verifiability_tier": {
+          "$ref": "#/$defs/verifiabilityTier",
+          "description": "When several checks grade the same quantity, the least verifiable of them, in the order V1, V2a, V2b, V3, V4."
+        },
+        "methods": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/verifierMethod"
+          }
+        },
+        "tolerance": {
+          "$ref": "#/$defs/tolerance",
+          "description": "Band for this quantity, from numerical noise only (verifier protocol §4 item 6). For an output's value, the output's own tolerance applies when this is omitted."
+        },
+        "note": {
+          "type": "string",
+          "description": "How the check works, e.g. which relation or hidden-variant family it uses."
+        }
+      },
+      "additionalProperties": false,
+      "description": "One graded quantity and its tier (verifier protocol §9)."
     },
     "rubricAssessment": {
       "type": "object",
@@ -2291,13 +2516,13 @@
               "type": "number",
               "minimum": 0,
               "maximum": 1,
-              "description": "Post-exposure items whose wording is close to a logged suggestion or interviewer statement."
+              "description": "Post-exposure items whose wording is close to a logged suggestion or interviewer statement. The similarity threshold is validated, in each interview language, against blinded double human coding, with suggestion-off decisions as the baseline (protocol §4)."
             },
             "false_endorsement_rate": {
               "type": "number",
               "minimum": 0,
               "maximum": 1,
-              "description": "Share of known-valid controls endorsed as mistakes."
+              "description": "Share of known-valid controls endorsed as mistakes, counting only endorsements that an independent economist adjudicated as false (suggestion_ledger[].adjudication; protocol §4)."
             },
             "summary_accuracy_ratings": {
               "type": "array",
@@ -2348,7 +2573,7 @@
             },
             "additionalProperties": false
           },
-          "description": "Unaided lists recorded before any suggestion or code pointer (protocol §4)."
+          "description": "Unaided lists recorded before any suggestion or code pointer; every lock precedes the contribution's first suggestion (protocol §4, §7)."
         },
         "suggestion_ledger": {
           "type": "array",
@@ -2394,10 +2619,61 @@
               },
               "contributor_reasoning": {
                 "type": "string"
+              },
+              "adjudication": {
+                "type": "object",
+                "required": [
+                  "adjudicator_id",
+                  "verdict",
+                  "adjudicated_at"
+                ],
+                "properties": {
+                  "adjudicator_id": {
+                    "type": "string",
+                    "description": "An economist independent of the contribution."
+                  },
+                  "verdict": {
+                    "enum": [
+                      "false_endorsement",
+                      "valid_objection",
+                      "inconclusive"
+                    ],
+                    "description": "valid_objection: in this context the control is in fact a mistake, so the endorsement is not false."
+                  },
+                  "adjudicated_at": {
+                    "$ref": "#/$defs/dateTime"
+                  },
+                  "rationale": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "description": "For an endorsed known-valid control: independent adjudication, required before the endorsement counts as false (protocol §4, §7)."
               }
             },
             "additionalProperties": false
           }
+        },
+        "suggestion_assignments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "decision_id",
+              "suggestions_on"
+            ],
+            "properties": {
+              "decision_id": {
+                "type": "string",
+                "description": "A decision pre-registered from the design map before the first session."
+              },
+              "suggestions_on": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Pre-registered, balanced randomization of the suggestion phase over design-map decisions (protocol §7); suggestion-off decisions are the baseline for validating the LLM-influenced share (protocol §4)."
         }
       },
       "additionalProperties": false
@@ -2410,8 +2686,7 @@
         "kind",
         "subject",
         "executed_at",
-        "expected_verdict",
-        "observed"
+        "expected_verdict"
       ],
       "properties": {
         "run_id": {
@@ -2433,12 +2708,19 @@
             "agent_trial",
             "repeat_stability",
             "tolerance_calibration",
-            "expert_calibration"
-          ]
+            "expert_calibration",
+            "mutation_analysis",
+            "full_harness_replay",
+            "hint_ladder",
+            "knowledge_probe",
+            "recognition_probe",
+            "expert_solve"
+          ],
+          "description": "Rungs of the validation ladder (verifier protocol §3): oracle L1; no_op L2; alternative_solution L3; negative_control L4; mutation_analysis L5; metamorphic L6; hidden_variant L7; shortcut_attack L8; full_harness_replay L9; hint_ladder and knowledge_probe L10; agent_trial L11. recognition_probe: rubric LK-4 (attack L8 e). expert_solve: rubric SP-1, and an L3 witness when blind and correct. tolerance_calibration and expert_calibration: §4. repeat_stability (fixed-seed re-runs) does not satisfy L9, and guided_agent_fairness is superseded by hint_ladder; both are kept for 0.2.0 records."
         },
         "subject": {
           "type": "string",
-          "description": "impl_id, variant_id, agent/model identifier, or attack name."
+          "description": "impl_id, variant_id, mutant ID, agent/model identifier, attack name, or the solver's ID (expert_solve)."
         },
         "environment": {
           "$ref": "#/$defs/softwareEnv"
@@ -2478,7 +2760,30 @@
               "minimum": 0
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "Verifier verdicts. Required for every kind except the two probes."
+        },
+        "blind": {
+          "type": "boolean",
+          "description": "expert_solve: the solver had seen only the agent tier (rubric SP-1, PR-2)."
+        },
+        "duration_minutes": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Working time, e.g. of a blind solve (rubric DC-2)."
+        },
+        "hint_level": {
+          "enum": [
+            "H1",
+            "H2",
+            "H3"
+          ],
+          "description": "hint_ladder: H1 gives a design fact the instruction should carry; H2 names the pitfall; H3 names the method (verifier protocol L10)."
+        },
+        "n_correct_answers": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "recognition_probe: runs in which the model named the paper or the original choice at the crux (rubric LK-4). knowledge_probe: runs in which it stated the key fact correctly (rubric SP-3)."
         },
         "log": {
           "$ref": "#/$defs/fileRef"
@@ -2490,7 +2795,159 @@
           "const": "hidden"
         }
       },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "recognition_probe",
+                  "knowledge_probe"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "n_correct_answers"
+            ]
+          },
+          "else": {
+            "required": [
+              "observed"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "hint_ladder"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "hint_level"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "expert_solve"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "blind"
+            ]
+          }
+        }
+      ],
       "additionalProperties": false
+    },
+    "exposureLogEntry": {
+      "type": "object",
+      "required": [
+        "entry_id",
+        "exposed_at",
+        "material_description",
+        "terms",
+        "visibility"
+      ],
+      "properties": {
+        "entry_id": {
+          "$ref": "#/$defs/id"
+        },
+        "exposed_at": {
+          "$ref": "#/$defs/dateTime",
+          "description": "When the material was sent, or the session or trial started."
+        },
+        "material_description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What hidden-tier material was exposed, described without reproducing it."
+        },
+        "material_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "IDs (task, failure mode, variant, run) or package-relative paths of the exposed material."
+        },
+        "model": {
+          "$ref": "#/$defs/modelInfo",
+          "description": "The model that received the material, if any."
+        },
+        "service": {
+          "type": "string",
+          "description": "The service, account, or party that received it, e.g. an API account, an evaluation partner, a local deployment."
+        },
+        "terms": {
+          "enum": [
+            "commercial_no_training_zdr",
+            "commercial_no_training",
+            "consumer_training_opt_out",
+            "consumer_training_opt_in",
+            "local_open_weight",
+            "vetted_evaluator_agreement",
+            "other",
+            "unknown"
+          ],
+          "description": "Terms under which the recipient received the material. Hidden-tier material is permitted only under commercial no-training terms (zero data retention where available), on locally hosted open-weight models, or with vetted evaluators under the project's agreement (verifier protocol §10). Other values record a breach of rubric LK-5; they are accepted so that breaches are logged, not hidden."
+        },
+        "purpose": {
+          "enum": [
+            "interview_session",
+            "construction_assistance",
+            "validation_trial",
+            "checker_or_matcher",
+            "evaluation_run",
+            "external_evaluation",
+            "other"
+          ],
+          "description": "external_evaluation entries count toward the refresh threshold (verifier protocol §10 item 2)."
+        },
+        "context_ref": {
+          "type": "string",
+          "description": "session_id or run_id of the exposure, where one exists."
+        },
+        "logged_by": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "visibility": {
+          "const": "internal"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "model"
+          ]
+        },
+        {
+          "required": [
+            "service"
+          ]
+        }
+      ],
+      "additionalProperties": false,
+      "description": "One exposure of hidden-tier material to a model or service: what, to whom, under which terms, and when (verifier protocol §10; rubric LK-5)."
     },
     "reviewDecision": {
       "type": "object",

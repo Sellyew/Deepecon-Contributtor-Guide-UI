@@ -1,13 +1,15 @@
 # ILLUSTRATIVE EXAMPLE ONLY — fictional paper, fictional people, fictional numbers.
-# Purpose: show how the schema records provenance, bilingual text, a failure mode, a flawed
-# variant, consequence evidence, and a task candidate. Nothing here describes a real study.
+# Purpose: show how the schema records provenance, bilingual text, an estimand kept apart from its
+# identifying assumptions and from the estimator, a failure mode, a flawed variant, consequence evidence,
+# and a task candidate with a decision space, per-output tiers, data routes, validation runs, and an
+# exposure log. Nothing here describes a real study, and no number here is an empirical result.
 x-illustrative: true
-schema_version: 0.2.0
-protocol_version: 0.2.0
-rubric_version: 0.1.0
+schema_version: 0.3.0
+protocol_version: 0.2.1
+rubric_version: 0.2.0
 contribution_id: ex-2026-0001
 created_at: "2026-11-05T09:00:00Z"
-updated_at: "2026-11-05T12:30:00Z"
+updated_at: "2026-11-05T16:30:00Z"
 status: draft
 pathway: B_own_paper
 languages:
@@ -28,6 +30,7 @@ consent:
   accepted_at: "2026-11-05T09:01:00Z"
   model_providers_disclosed: [anthropic]
   contributor_account_terms: project_commercial_account
+  disclosure_embargo_accepted: true
   allow_transcript_retention: true
   allow_research_use_of_transcript: true
   credit_preference: named
@@ -58,12 +61,32 @@ target_analyses:
         translation_of: zh-Hans
         translator: "interviewer model (see interview record)"
     estimand:
+      # (a) The estimand only: no comparison group and no estimator (verifier protocol §4 item 1).
       description:
         - lang: en
-          text: "Average treatment effect on the treated, aggregated across adoption cohorts with cohort-size weights, using not-yet-treated counties as controls."
+          text: "θ = Σ_{(g,t)∈C} N_g · ATT(g,t) / Σ_{(g,t)∈C} N_g, where ATT(g,t) = E[Y_it(g) − Y_it(∞) | G_i = g]. Y_it(g) is the log employment of county i in year t if its state first applies the policy in year g, and Y_it(∞) if the state never applies it; G_i is the county's adoption year; N_g is the number of counties in cohort g; C is the set of treated (cohort, year) cells with 0 ≤ t − g ≤ 4 and t ≤ 2019, for cohorts g = 2013, …, 2017. Equivalently: the average effect over all treated county-years in event years 0 to 4."
           is_original: true
       parameter: ATT
+      population: "Counties in the 36 states that adopt the policy in 2013–2017; county panel 2010–2019"
+      treatment: "The county's state applies the policy (absorbing); the adoption year g is the first year in which it applies"
+      outcome: "Log of annual county employment"
+      weights: "Each treated (cohort, year) cell in C weighted by its number of counties N_g, i.e. equal weight for every treated county-year"
+      window: "Event years 0 to 4 after adoption, truncated at 2019"
       design: did_staggered
+      # (b) Identifying assumptions, stated in the agent-facing instruction.
+      identifying_assumptions:
+        - statement_id: s-003
+          text:
+            - { lang: en, text: "A1 (comparison group): counties not yet treated in a given year, including the counties of the 12 states that never adopt the policy.", is_original: true }
+          provenance: { origin: contributor, actor_id: econ-001, created_at: "2026-11-05T09:20:00Z", endorsement: endorsed, validation: unvalidated }
+        - statement_id: s-004
+          text:
+            - { lang: en, text: "A2 (parallel trends): absent the policy, expected log employment would have changed in parallel in every adoption cohort and in the comparison counties, in every year from 2010 to 2019, and hence from any base period, including g − 1.", is_original: true }
+          provenance: { origin: contributor, actor_id: econ-001, created_at: "2026-11-05T09:21:00Z", endorsement: endorsed, validation: unvalidated }
+        - statement_id: s-005
+          text:
+            - { lang: en, text: "A3 (no anticipation): the policy has no effect on employment before its adoption year.", is_original: true }
+          provenance: { origin: contributor, actor_id: econ-001, created_at: "2026-11-05T09:22:00Z", endorsement: endorsed, validation: unvalidated }
     outputs:
       - output_id: att-overall
         label: "Overall ATT (log employment)"
@@ -71,7 +94,7 @@ target_analyses:
         std_error: 0.009
         n_obs: 24000
         n_clusters: 48
-        tolerance: { kind: in_reference_se_units, value: 0.25, justification: "Valid heterogeneity-robust estimators agree within 0.2 SE on this design (alternative implementation impl-alt-01)." }
+        tolerance: { kind: absolute, value: 0.000001, justification: "Numerical noise only: cross-software re-runs of the same estimator and conventions differed by less than 10⁻⁷ on the main data and on every hidden variant. Valid alternative estimators are not absorbed by this band; each is graded against its own conditional reference (decision space of task-ec-01)." }
 reference_implementations:
   - impl_id: impl-ref-01
     target_ids: [t-main-att]
@@ -88,9 +111,29 @@ reference_implementations:
     validation:
       reproduces_published: within_tolerance
       independent_check:
+        # Clean-room witness written from the paper, the estimand, and the codebook (rubric GT-1).
         performed: true
-        method: cross_language_reimplementation
-        performed_by: shepherd-01
+        method: clean_room_reimplementation
+        performed_by: witness-01
+        agrees: true
+    visibility: internal
+  - impl_id: impl-alt-01
+    target_ids: [t-main-att]
+    kind: alternative_valid_implementation
+    entrypoint: "internal/alternatives/imputation.R"
+    environment:
+      languages: [{ name: r, version: "4.4.1" }]
+      network_required: false
+    files:
+      - { path: "internal/alternatives/imputation.R", visibility: internal, role: code }
+    expected_outputs:
+      - { output_id: att-overall, label: "Overall ATT (imputation estimator)", value: 0.029, std_error: 0.008 }
+    validation:
+      reproduces_published: not_applicable
+      independent_check:
+        performed: true
+        method: clean_room_reimplementation
+        performed_by: witness-01
         agrees: true
     visibility: internal
 critical_decisions:
@@ -159,11 +202,13 @@ failure_modes:
       warrant_types: [contributor_research_experience, methodological_literature]
       observed_in_practice: own_project
     validity_layer: statistical
+    # Static TWFE here is also an estimand–estimator mismatch (verifier protocol §9).
+    secondary_validity_layers: [interpretation]
     status: conditional
     status_claimed_by_contributor: conditional
     status_classifications:
-      - { classifier_id: reviewer-01, status: conditional, rationale: "Effects grow over event time in the paper's event study.", blind: true, round: 1 }
-      - { classifier_id: reviewer-02, status: conditional, rationale: "Bias under heterogeneous timing effects is established; heterogeneity is documented here.", blind: true, round: 1 }
+      - { classifier_id: reviewer-01, status: conditional, rationale: "Conditional on effects that differ across cohorts and grow with event time; the recorded event-study diagnostic shows this on the main data and on both hidden-variant families used for grading.", blind: true, round: 1 }
+      - { classifier_id: reviewer-02, status: conditional, rationale: "Bias of static TWFE under heterogeneous timing effects is established; the recorded heterogeneity diagnostics on the graded data show that the condition holds.", blind: true, round: 1 }
     conditions:
       - statement_id: s-013
         text:
@@ -175,7 +220,7 @@ failure_modes:
       magnitude_note: "Roughly halves the estimate."
       predicted_at: "2026-11-05T10:12:00Z"
       predicted_by: econ-001
-    one_sentence_fact_risk: { level: medium, note: "Naming the estimator would make the task easy; the instruction must not name it." }
+    one_sentence_fact_risk: { level: medium, note: "Naming the estimator would make the task easy; the instruction must not name it. The cell weights in the estimand may themselves point to the estimator (rubric SP-3); the hint ladder will test this." }
     lifecycle: validated
     visibility: hidden
 flawed_variants:
@@ -190,11 +235,12 @@ flawed_variants:
     consequence:
       comparisons:
         - output_id: att-overall
+          quantity: value
           reference_value: 0.031
           flawed_value: 0.014
           difference: -0.017
           difference_in_reference_se: -1.89
-          materiality_rule: "|diff| > 1 reference SE or significance change at 5%"
+          materiality_rule: "Rubric RV-2 default, criterion 1: |θF − θP| ≥ 1 SE_P"
           material: true
       prediction_matched: matched
       robustness: { method: semi_synthetic, n_variants: 200, share_separated: 0.97, separation_margin: 5.6 }
@@ -202,7 +248,6 @@ flawed_variants:
 task_candidates:
   - task_id: task-ec-01
     task_type: error_correction
-    verifiability_tier: V2
     target_capability:
       statement_id: s-020
       text:
@@ -212,12 +257,19 @@ task_candidates:
     agent_facing:
       visibility: agent
       instruction:
-        - { lang: en, text: "(Instruction text written by the shepherd and contributor; omitted in this illustration.)", is_original: true }
+        - { lang: en, text: "(Instruction text written by the shepherd and contributor; omitted in this illustration. It states the estimand θ, assumptions A1–A3, and state-level clustering, and never names the estimator.)", is_original: true }
       instruction_authorship: human_written
+      provided_materials:
+        - { path: "agent/data/county_panel.csv", visibility: agent, role: data, source_access: public_redistributable, data_route: redistributable_original }
+        - { path: "agent/package/analysis.R", visibility: agent, role: code }
       output_contract:
-        description: "Write results.json with the overall ATT and its standard error; provide run.R that reproduces it from the data path given as its first argument."
+        description: "Write results.json in the benchmark-wide results schema for this task type (estimate, standard error, confidence interval, N, number of clusters, cluster variable, estimation-sample hash; estimator family as ungraded free text), and provide run.R, which reproduces the results from the data path given as its first argument. Declare the variance convention from the convention vocabulary."
         results_path: "/workspace/results.json"
+        results_schema: "agent/schemas/results-execution-correction.v1.json"
         code_entrypoint_required: true
+        declared_choices_required: true
+        convention_vocabulary: "DiD-family conventions v1 (agent/conventions/did-family.v1.yaml)"
+        intermediate_outputs_required: [estimation_sample_hash, cohort_sizes, n_clusters]
       environment:
         languages: [{ name: r, version: "4.4.1" }]
         network_required: false
@@ -226,8 +278,92 @@ task_candidates:
     hidden:
       visibility: hidden
       verifier:
-        methods: [acceptance_region, hidden_variant_reexecution, metamorphic_relations]
+        methods: [acceptance_region, numeric_tolerance, hidden_variant_reexecution, metamorphic_relations]
+        graded_outputs:
+          - output_id: att-overall
+            quantity: value
+            verifiability_tier: V2a
+            methods: [acceptance_region, hidden_variant_reexecution, metamorphic_relations]
+            note: "The agent's code is re-run on hidden variants built on bases it never sees (state-resampled panels, outcome-perturbed copies; verifier protocol §5.1). Exact relations: injected effects that differ by cohort and grow with event time, added on the log scale, shift the estimate by the estimand-weighted τ; adding arbitrary county and year effects leaves it unchanged (§5.2–§5.3). On every input the estimate must also match the conditional reference of a selectable decision-space combination within the noise band."
+          - output_id: att-overall
+            quantity: std_error
+            verifiability_tier: V1
+            methods: [numeric_tolerance]
+            tolerance: { kind: relative, value: 0.000001, justification: "Numerical noise only, for the declared variance convention." }
+            note: "Deterministic comparison with the conditional reference for the declared variance convention, on the main data and on every hidden variant (verifier protocol §4 item 7)."
+          - output_id: att-overall
+            quantity: n_obs
+            verifiability_tier: V1
+            methods: [numeric_tolerance]
+            tolerance: { kind: exact, value: 0 }
+            note: "Obtained by re-executing the agent's code, not from its report (verifier protocol §4 item 5)."
+        hidden_datasets:
+          - { path: "hidden/variants/data/resampled-states-001.csv", visibility: hidden, role: data, source_access: public_redistributable, data_route: derived_from_redistributable }
       alternative_solution_impl_ids: [impl-alt-01]
       negative_controls:
         - { variant_id: v-twfe, expected_verdict: reject }
+      decision_space:
+        # The crux: graded only through outcomes on separating hidden variants, never declared.
+        - decision_id: cd-estimator
+          option_id: cs-not-yet-treated
+          option: "Callaway–Sant'Anna group-time ATTs (not-yet-treated comparison, base period g − 1), aggregated with the estimand's cell weights"
+          status: reference
+          source: contributor
+          requires: [cd-anticipation/none]
+        - decision_id: cd-estimator
+          option_id: imputation
+          option: "Imputation estimator (Borusyak, Jaravel & Spiess) fitted on untreated county-years, aggregated with the estimand's cell weights"
+          status: accepted
+          source: reviewer
+          requires: [cd-anticipation/none, cd-parallel-trends/all-years]
+          note: "Needs parallel trends in all pre-periods, which assumption A2 states. Graded against its own conditional reference (impl-alt-01)."
+        - decision_id: cd-estimator
+          option_id: twfe-static
+          option: "Static two-way fixed effects regression on a post-treatment indicator"
+          status: unjustifiable
+          source: contributor
+          note: "Failure mode fm-twfe."
+        # Assumptions the instruction states, recorded as single-option decisions so that options can require them.
+        - decision_id: cd-parallel-trends
+          option_id: all-years
+          option: "Parallel trends in every year 2010–2019 (assumption A2)"
+          status: reference
+          source: contributor
+        - decision_id: cd-anticipation
+          option_id: none
+          option: "No anticipation (assumption A3)"
+          status: reference
+          source: contributor
     review_status: draft
+validation_runs:
+  - run_id: vr-solve-01
+    task_id: task-ec-01
+    kind: expert_solve
+    subject: econ-ext-01
+    executed_at: "2026-11-05T15:00:00Z"
+    expected_verdict: accept
+    observed: { n_accept: 1, n_reject: 0, n_error: 0 }
+    blind: true
+    duration_minutes: 95
+    note: "Blind solve from the agent tier alone (rubric SP-1). The solver repaired the estimator with the imputation estimator, which the decision space accepts."
+    visibility: hidden
+  - run_id: vr-recog-01
+    task_id: task-ec-01
+    kind: recognition_probe
+    subject: "anthropic/claude-opus-5-5"
+    executed_at: "2026-11-05T16:00:00Z"
+    n_runs: 5
+    expected_verdict: not_applicable
+    n_correct_answers: 0
+    note: "Given only the agent tier, the model was asked to name the paper and the original choice at the crux (rubric LK-4)."
+    visibility: hidden
+exposure_log:
+  - entry_id: exp-0001
+    exposed_at: "2026-11-05T10:05:00Z"
+    material_description: "Failure mode fm-twfe and the specification of flawed variant v-twfe, drafted in the interview session."
+    material_refs: [fm-twfe, v-twfe]
+    model: { provider: anthropic, model_id: claude-opus-5-5, client: "illustrative" }
+    service: "Interview on the project's commercial API account"
+    terms: commercial_no_training
+    purpose: interview_session
+    visibility: internal

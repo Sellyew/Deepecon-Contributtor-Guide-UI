@@ -2,9 +2,9 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Noto+Sans+SC:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Noto+Sans+SC:wght@400;600&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
 <style>
-/* Layout: memo with a contents rail; a ~70ch reading column; full-width booktabs tables in the manner of an economics journal. */
+/* Layout: memo with a contents rail; a reading column of about 65–70 characters; full-width booktabs tables in the manner of an economics journal, stacked into labelled rows on phones. */
 :root {
   --paper: #f5f7fa;
   --surface: #ffffff;
@@ -28,6 +28,7 @@
   --step-1: 1.2rem;
   --step-2: 1.5rem;
   --step-3: 2.1rem;
+  --measure: 66ch;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -42,357 +43,583 @@
   color-scheme: dark;
 }
 
-body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.6; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.6; -webkit-text-size-adjust: 100%; }
 .page { max-width: 76rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 2.5rem 4rem; }
 .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
 @media (min-width: 1080px) { .layout { grid-template-columns: 13.5rem minmax(0, 1fr); } }
 
-header.masthead { display: grid; gap: 0.6rem; padding-bottom: 1.6rem; margin-bottom: 2rem; border-bottom: 2px solid var(--rule-strong); }
-.kicker { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
+/* Masthead */
+header.masthead { display: grid; gap: 0.8rem; padding-bottom: 1.6rem; margin-bottom: 2rem; border-bottom: 2px solid var(--rule-strong); }
+.kicker { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); margin: 0; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; text-wrap: balance; margin: 0; }
-h1 { font-size: var(--step-3); }
-h2 { font-size: var(--step-2); margin-top: 3rem; margin-bottom: 0.8rem; }
+h1 { font-size: var(--step-3); max-width: 28ch; }
+h2 { font-size: var(--step-2); margin-top: 3rem; margin-bottom: 0.9rem; }
+h2 .h-note { font-weight: 400; font-size: 0.78em; color: var(--ink-2); }
 h3 { font-size: var(--step-1); margin-top: 1.8rem; margin-bottom: 0.5rem; }
-.dek { font-size: var(--step-1); color: var(--ink-2); max-width: 46rem; margin: 0; }
-.meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; font-size: var(--step--1); color: var(--ink-2); }
-.meta strong { color: var(--ink); font-weight: 600; }
+.version { margin: 0; font-family: var(--font-mono); font-size: 0.88rem; color: var(--ink); }
+.provenance { margin: 0; font-size: var(--step--1); color: var(--ink-2); max-width: 46rem; }
+.status-block { margin: 0.3rem 0 0; display: grid; gap: 0.55rem; max-width: 60rem; }
+.status-block > div { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.1rem 1.25rem; padding-top: 0.55rem; border-top: 1px solid var(--rule); }
+@media (min-width: 640px) { .status-block > div { grid-template-columns: 6.5rem minmax(0, 1fr); } }
+.status-block dt { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); padding-top: 0.15rem; }
+.status-block dd { margin: 0; min-width: 0; max-width: var(--measure); }
 
-nav.toc { font-size: 0.92rem; }
-nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
-nav.toc a { color: var(--ink-2); text-decoration: none; }
-nav.toc a:hover { color: var(--accent); }
+/* Contents rail: a multi-column list above the text on narrow screens, a sticky rail on wide ones */
+nav.toc { font-size: 0.92rem; min-width: 0; padding-bottom: 1.4rem; border-bottom: 1px solid var(--rule); }
 nav.toc .toc-label { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 0.6rem; display: block; }
-@media (min-width: 1080px) { nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 1.5rem); align-self: start; } }
+nav.toc ol { list-style: none; margin: 0; padding: 0; columns: 15rem; column-gap: 2rem; }
+nav.toc li { margin: 0 0 0.35rem; break-inside: avoid; }
+nav.toc a { color: var(--ink-2); text-decoration: none; display: grid; grid-template-columns: 1.7rem minmax(0, 1fr); }
+nav.toc a .n { font-family: var(--font-mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; padding-top: 0.1rem; }
+nav.toc a:hover { color: var(--accent); }
+@media (min-width: 1080px) {
+  nav.toc { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; padding-top: 1.4rem; padding-bottom: 0; border-bottom: 0; max-height: 100vh; overflow-y: auto; }
+  nav.toc ol { columns: auto; }
+}
 
+/* Running text */
 main { min-width: 0; }
-main > section > p, main > section > ul, main > section > ol, .prose { max-width: 46rem; }
 p { margin: 0 0 0.9rem; }
+main p, main li { max-width: var(--measure); text-wrap: pretty; }
+main li.wide { max-width: none; }
 ul, ol { margin: 0 0 1rem; padding-left: 1.3rem; }
-li { margin-bottom: 0.35rem; }
+li { margin-bottom: 0.4rem; }
+li > ul, li > ol { margin-top: 0.4rem; }
 a { color: var(--accent); text-underline-offset: 0.15em; }
-a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+a:focus-visible, .table-wrap:focus-visible, nav.toc:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+a.ref { color: inherit; text-decoration: underline dotted; text-decoration-color: var(--ink-2); text-decoration-thickness: 1px; }
+a.ref:hover { color: var(--accent); text-decoration-color: var(--accent); }
 strong { font-weight: 700; }
 
-.abstract { background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--accent); padding: 1.4rem 1.5rem 0.6rem; max-width: 48rem; }
-.abstract .label { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 0.5rem; }
+/* Executive summary */
+.abstract { background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--accent); padding: 1.3rem 1rem 0.4rem; }
+@media (min-width: 640px) { .abstract { padding: 1.6rem 1.75rem 0.6rem; } }
+.abstract h2 { margin-top: 0; }
 .findings { counter-reset: f; list-style: none; padding: 0; }
-.findings > li { counter-increment: f; position: relative; padding-left: 2rem; margin-bottom: 0.8rem; }
-.findings > li::before { content: counter(f); position: absolute; left: 0; top: 0.05rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); border: 1px solid var(--rule); border-radius: 50%; width: 1.4rem; height: 1.4rem; display: grid; place-items: center; }
+.findings > li { counter-increment: f; position: relative; padding-left: 2.1rem; margin-bottom: 0.9rem; }
+.findings > li::before { content: counter(f); position: absolute; left: 0; top: 0.12rem; font-family: var(--font-mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; color: var(--accent); border: 1px solid var(--rule); border-radius: 50%; width: 1.45rem; height: 1.45rem; display: grid; place-items: center; }
+.findings > li > p { margin-bottom: 0.5rem; }
+.findings > li > ul { padding-left: 1.1rem; }
+.summary-reco { border-left: 3px solid var(--accent); padding-left: 1rem; margin: 1.2rem 0 1rem; }
+.summary-reco p { margin-bottom: 0.4rem; }
+.summary-reco ul { margin-bottom: 0; }
 
-.opt { font-weight: 700; white-space: nowrap; }
-.opt::before { content: ""; display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; margin-right: 0.35rem; vertical-align: 0.05rem; }
+/* Option markers: the same treatment for both options */
+.opt { white-space: nowrap; }
+.opt::before { content: ""; display: inline-block; width: 0.55rem; height: 0.55rem; border-radius: 50%; margin-right: 0.35rem; vertical-align: 0.08rem; }
 .opt.a { color: var(--opt-a); } .opt.a::before { background: var(--opt-a); }
 .opt.b { color: var(--opt-b); } .opt.b::before { background: var(--opt-b); }
 
-.pending { font-family: var(--font-mono); font-size: 0.74rem; color: var(--flag); background: var(--flag-bg); padding: 0.05rem 0.35rem; border-radius: 3px; white-space: nowrap; }
-.ev { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-2); background: var(--chip-bg); padding: 0.05rem 0.35rem; border-radius: 3px; white-space: nowrap; }
+/* Evidence labels */
+.ev { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-2); background: var(--chip-bg); padding: 0.05rem 0.3rem; border-radius: 3px; white-space: nowrap; text-decoration: none; cursor: help; }
 .num { font-variant-numeric: tabular-nums; }
 
+/* Figure */
 figure { margin: 1.5rem 0; }
 figcaption, caption { font-size: 0.95rem; color: var(--ink-2); text-align: left; padding-bottom: 0.6rem; }
+figure figcaption { padding: 0.6rem 0 0; max-width: var(--measure); }
 figcaption b, caption b { color: var(--ink); font-weight: 600; }
-.table-wrap { overflow-x: auto; margin: 1.2rem 0 0.4rem; }
-table.bt { border-collapse: collapse; width: 100%; min-width: 40rem; background: transparent; font-size: 0.95rem; line-height: 1.45; }
+.diagram-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); }
+pre.mermaid { margin: 0; padding: 1rem; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.5; white-space: pre; overflow-x: auto; background: var(--surface); color: var(--ink); }
+
+/* Booktabs tables */
+.table-wrap { overflow-x: auto; margin: 1.2rem 0 0.5rem; }
+table.bt { border-collapse: collapse; width: 100%; min-width: 40rem; background: transparent; font-size: 0.95rem; line-height: 1.45; font-variant-numeric: tabular-nums; }
 table.bt.narrow { min-width: 32rem; }
+table.bt.compact { min-width: 0; max-width: 46rem; }
+table.bt.risks { min-width: 50rem; }
+table.bt col.w-sm { width: 13%; }
+table.bt col.w-md { width: 15%; }
 table.bt thead tr:first-child th { border-top: 2px solid var(--rule-strong); }
 table.bt thead th { text-align: left; font-weight: 600; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--rule-strong); vertical-align: bottom; }
 table.bt thead th .colno { display: block; font-family: var(--font-mono); font-weight: 400; font-size: 0.8rem; color: var(--ink-2); }
 table.bt tbody td, table.bt tbody th { padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--rule); vertical-align: top; text-align: left; }
 table.bt tbody th { font-weight: 600; width: 22%; }
+table.bt.ids tbody th { width: 9rem; white-space: nowrap; }
+table.bt.compact tbody th { width: 36%; }
+table.bt tbody th .th-note { font-weight: 400; color: var(--ink-2); }
 table.bt tbody tr:last-child td, table.bt tbody tr:last-child th { border-bottom: 2px solid var(--rule-strong); }
-.tnotes { font-size: 0.85rem; color: var(--ink-2); max-width: 60rem; margin-bottom: 1.5rem; }
+.tnotes { font-size: 0.85rem; color: var(--ink-2); margin-bottom: 1.5rem; }
 .tnotes i { font-style: italic; }
+@media (max-width: 44rem) {
+  table.bt.stack { min-width: 0; }
+  table.bt.stack, table.bt.stack > caption, table.bt.stack > tbody, table.bt.stack > tbody > tr, table.bt.stack > tbody > tr > th, table.bt.stack > tbody > tr > td { display: block; width: auto; }
+  table.bt.stack > thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  table.bt.stack > tbody { border-top: 2px solid var(--rule-strong); }
+  table.bt.stack > tbody > tr { padding: 0.7rem 0 0.8rem; border-bottom: 1px solid var(--rule); }
+  table.bt.stack > tbody > tr:last-child { border-bottom: 2px solid var(--rule-strong); }
+  table.bt.stack > tbody > tr > th, table.bt.stack > tbody > tr > td { padding: 0; border: 0; white-space: normal; }
+  table.bt.stack > tbody > tr > td { margin-top: 0.45rem; }
+  table.bt.stack td[data-label]::before { content: attr(data-label); display: block; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 0.1rem; }
+  table.bt.stack td.a::before { color: var(--opt-a); }
+  table.bt.stack td.b::before { color: var(--opt-b); }
+  .zh table.bt.stack td[data-label]::before { font-family: var(--font-zh); font-size: 0.78rem; letter-spacing: 0; }
+}
 
-.two-col { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; max-width: 60rem; }
+/* Two options side by side */
+.two-col { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem 2.5rem; max-width: 62rem; }
 @media (min-width: 760px) { .two-col { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .two-col > div { min-width: 0; }
-.two-col h3 { margin-top: 0.5rem; }
+.two-col h3 { margin-top: 0.4rem; }
+.option-card { border-top: 2px solid var(--rule-strong); padding-top: 0.8rem; }
+.option-card.a { border-top-color: var(--opt-a); }
+.option-card.b { border-top-color: var(--opt-b); }
 
-.reco { border-left: 3px solid var(--accent); padding-left: 1.2rem; max-width: 46rem; }
-.reco ol { padding-left: 1.2rem; }
+/* Recommendation and changes */
+.reco { border-left: 3px solid var(--accent); padding-left: 1.2rem; }
+.reco > ol { padding-left: 1.2rem; }
+ul.changes { list-style: none; padding: 0; border-top: 1px solid var(--rule); max-width: var(--measure); }
+ul.changes > li { margin: 0; padding: 0.6rem 0; border-bottom: 1px solid var(--rule); }
 
-pre.mermaid { background: var(--surface); border: 1px solid var(--rule); padding: 1rem; overflow-x: auto; margin: 0; }
+/* Chinese executive summary */
+.zh { font-family: var(--font-zh); line-height: 1.85; }
+.zh h2 { font-family: var(--font-zh); font-weight: 600; }
+.zh em { font-style: normal; text-emphasis: dot; text-emphasis-position: under right; }
+.mt-label { display: inline-block; max-width: 100%; font-size: var(--step--1); line-height: 1.5; color: var(--flag); background: var(--flag-bg); padding: 0.25rem 0.6rem; border-radius: 3px; }
+.mt-label [lang="en"] { font-family: var(--font-body); }
+.zh .note { font-size: var(--step--1); color: var(--ink-2); }
+.zh .note[lang="en"] { font-family: var(--font-body); line-height: 1.6; }
 
-.zh { font-family: var(--font-zh); line-height: 1.8; }
-.zh p, .zh li { max-width: 44rem; }
-.zh .note { font-size: var(--step--1); color: var(--flag); }
+/* Sources */
+.doc-list { list-style: none; margin: 0 0 1.4rem; padding: 0; display: grid; gap: 0.15rem; max-width: 60rem; }
+.doc-list li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 1rem; margin: 0; padding: 0.2rem 0.4rem; max-width: none; border-radius: 3px; }
+@media (min-width: 640px) { .doc-list li { grid-template-columns: 15rem minmax(0, 1fr); } }
+.doc-list li:target { background: var(--chip-bg); }
+.legend { list-style: none; padding: 0; }
+.legend .ev { margin-right: 0.4rem; }
 
 footer.colophon { margin-top: 3.5rem; padding-top: 1.2rem; border-top: 2px solid var(--rule-strong); font-size: var(--step--1); color: var(--ink-2); display: grid; gap: 0.5rem; }
 footer.colophon code, .path { font-family: var(--font-mono); font-size: 0.8rem; overflow-wrap: anywhere; }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 </style>
 
-<div class="page">
+<div class="page" lang="en">
   <header class="masthead">
-    <span class="kicker">DeepEcon Research Benchmark (working title) · Deliverable 7 · Draft for discussion</span>
-    <h1>How economists will contribute: hosted platform or local Claude Code skill?</h1>
-    <p class="dek">A side-by-side comparison of the two candidate contribution architectures, with costs, risks, hybrid options, and a recommendation that follows from the comparison.</p>
-    <div class="meta">
-      <span><strong>Status:</strong> Proposed — nothing here is decided</span>
-      <span><strong>Date:</strong> 2026-11-05</span>
-      <span><strong>Decision owners:</strong> research lead and collaborators</span>
-    </div>
+    <p class="kicker">DeepEcon Research Benchmark (working title) · Deliverable 7</p>
+    <h1>Architecture Decision Brief: How Economists Will Contribute</h1>
+    <p class="version"><span id="brief-version">Draft v0.3.0 for discussion with collaborators · 2026-11-05</span></p>
+    <p class="provenance">This page renders the canonical Markdown brief, <span class="path">docs/architecture/architecture-decision-brief.md</span>, in the project repository. If the two differ, the Markdown governs. <a href="#zh"><span lang="zh-Hans">执行摘要（中文）</span></a>: a machine translation of §1, not reviewed.</p>
+    <dl class="status-block">
+      <div>
+        <dt>Status</dt>
+        <dd><strong>Proposed.</strong> Nothing here is decided. The research lead and collaborators decide; see the <a class="ref" href="#src-decision-log">decision log</a>. v0.3.0 integrates four independent reviews: an advocate for each option, an econometrician, and a benchmark methodologist (<a href="#changes">§11</a>).</dd>
+      </div>
+      <div>
+        <dt>Question</dt>
+        <dd>Should economists contribute through a <strong>hosted web platform we operate</strong> (Option A), through a <strong>Claude Code plugin they run locally</strong> (Option B), or should we pilot both first?</dd>
+      </div>
+      <div>
+        <dt>Basis</dt>
+        <dd><a class="ref" href="#src-option-a">Option A design</a> · <a class="ref" href="#src-option-b">Option B design</a> · <a class="ref" href="#src-cost-model">cost and effort model</a> · <a class="ref" href="#src-submission">submission</a> · <a class="ref" href="#src-bilingual">bilingual design</a> · <a class="ref" href="#src-construction">construction protocol</a> · <a class="ref" href="#src-verifier">verifier validation</a> · <a class="ref" href="#src-interview">interview protocol</a> · <a class="ref" href="#src-pilot">pilot plan</a> · <a class="ref" href="#src-evidence">evidence notes R1–R9</a></dd>
+      </div>
+    </dl>
   </header>
 
   <div class="layout">
     <nav class="toc" aria-label="Contents">
       <span class="toc-label">Contents</span>
       <ol>
-        <li><a href="#summary">1. Executive summary</a></li>
-        <li><a href="#options">2. The two options</a></li>
-        <li><a href="#comparison">3. Side-by-side comparison</a></li>
-        <li><a href="#tradeoffs">4. Key trade-offs</a></li>
-        <li><a href="#costs">5. Costs and effort</a></li>
-        <li><a href="#risks">6. Major risks</a></li>
-        <li><a href="#conditions">7. When each is preferable</a></li>
-        <li><a href="#hybrids">8. Hybrid strategies</a></li>
-        <li><a href="#recommendation">9. Recommendation</a></li>
-        <li><a href="#decisions">10. Decisions needed</a></li>
-        <li><a href="#zh">执行摘要（中文）</a></li>
-        <li><a href="#sources">Sources and status</a></li>
+        <li><a href="#summary"><span class="n">1</span><span>Executive summary</span></a></li>
+        <li><a href="#options"><span class="n">2</span><span>The two options in brief</span></a></li>
+        <li><a href="#comparison"><span class="n">3</span><span>Side-by-side comparison</span></a></li>
+        <li><a href="#tradeoffs"><span class="n">4</span><span>Key trade-offs</span></a></li>
+        <li><a href="#costs"><span class="n">5</span><span>Costs and effort</span></a></li>
+        <li><a href="#risks"><span class="n">6</span><span>Major risks</span></a></li>
+        <li><a href="#conditions"><span class="n">7</span><span>When each option is preferable</span></a></li>
+        <li><a href="#hybrids"><span class="n">8</span><span>Hybrid strategies</span></a></li>
+        <li><a href="#recommendation"><span class="n">9</span><span>Recommendation</span></a></li>
+        <li><a href="#decisions"><span class="n">10</span><span>Decisions needed</span></a></li>
+        <li><a href="#changes"><span class="n">11</span><span>Changes from v0.2</span></a></li>
+        <li><a href="#zh"><span class="n">中</span><span lang="zh-Hans">执行摘要（中文）</span></a></li>
+        <li><a href="#sources"><span class="n">·</span><span>Sources and status</span></a></li>
       </ol>
     </nav>
 
     <main>
-      <section id="summary">
-        <div class="abstract">
-          <span class="label">Executive summary</span>
-          <p><strong>What we are deciding.</strong> Only the contributor-facing layer: where the AI-guided interview runs, where code runs, who pays for the model, and who holds the materials. The scientific method — interview protocol, correct and deliberately flawed replication packages, verifier validation, independent review — is the same under both options.</p>
-          <ol class="findings">
-            <li><strong>The interface matters less than the shared method.</strong> Both options run the same interview protocol, produce the same standardized package, and feed the same internal pipeline, in which a benchmark-team <em>shepherd</em> turns each candidate into a verified task. That shared core (≈ 9–16 engineer-weeks) is needed whichever option is chosen.</li>
-            <li><strong>Money is not the main differentiator.</strong> At API list prices the AI interview costs about <span class="num">$17</span> per contribution (range <span class="num">$6–46</span>) under either option, about <span class="num">$3,400</span> for 200 contributions. Human effort dominates: about 20 shepherd hours per admitted task, roughly <span class="num">4,000</span> hours at 200 contributions.</li>
-            <li><strong>Five real differences separate the options:</strong> access (a browser versus Claude Code plus a plan plus a plugin); who runs the code (local Stata/R/Python in <span class="opt b">B</span>, run kits, staff or a sandbox in <span class="opt a">A</span>); consistency and data-use terms (enforced in A, uniform in B only if the project provides model access); custody of unpublished materials; and upkeep (a web service versus a plugin tracking a fast-moving client).</li>
-            <li><strong>The hardest risks are shared:</strong> <em>AI influence on experts</em> — in a 2026 study, analysts with causal-inference experience followed an AI agent's secretly randomized lean on design choices 86% of the time and rarely credited it, so the protocol measures influence rather than trusting self-reports; access for contributors in mainland China (needs legal review); shepherd capacity; contamination of tasks derived from public papers; and a name collision with an existing econometrics package called “deepecon”.</li>
-          </ol>
-          <p><strong>Recommendation, argued in §9.</strong> Build the shared core first. Then pilot thin slices of <em>both</em> options on the same paper, with decision thresholds agreed in advance. If a choice must be made earlier, choose by expected contributor population: <span class="opt a">Option A</span> for a largely non-technical, senior, bilingual cohort; <span class="opt b">Option B</span> with project-provided model access for technically fluent contributors and limited engineering capacity.</p>
+      <section id="summary" class="abstract" aria-labelledby="h-summary">
+        <h2 id="h-summary">1. Executive summary</h2>
+        <p><strong>What we are deciding.</strong> Only the <em>contributor-facing layer</em>: where the AI-guided interview runs, where code runs, who pays for the model, and who holds the materials. The scientific method is the same under both options and is specified separately: the interview protocol, the correct and flawed packages, verifier validation, and independent review.</p>
+        <p><strong>What the analysis shows.</strong></p>
+        <ol class="findings">
+          <li><strong>The interface matters less than the shared method.</strong> Both options run the same interview protocol, produce the same schema-valid package, and feed the same internal pipeline, in which a benchmark-team <em>shepherd</em> turns each candidate into a verified task. The shared core costs about 10–17.5 engineer-weeks whichever option we choose. <strong>Beyond it, engineering effort is comparable:</strong> about 12–19.5 engineer-weeks for A and 11.5–20.5 for B.</li>
+          <li><strong>Money is not the main differentiator.</strong> The AI interview costs about <strong>$13–17 per contribution</strong> at API list prices (range $5–46), or about $3,400 for 200 contributions. Human effort and validation dominate: about <strong>8,000 shepherd-team hours</strong>, 3,000 outside-economist hours, and <strong>$100,000 of validation-trial compute</strong> at 200 contributions (central estimates <abbr class="ev" title="Unverified">[U]</abbr>). Whether the architecture changes shepherd hours is untested and could outweigh every other cost difference.</li>
+          <li class="wide">
+            <p><strong>Five real differences separate the options:</strong></p>
+            <div class="table-wrap">
+              <table class="bt stack" aria-label="Five real differences between the options">
+                <thead>
+                  <tr><th scope="col">Difference</th><th scope="col"><span class="opt a">Option A</span> (hosted)</th><th scope="col"><span class="opt b">Option B</span> (local)</th></tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Access</th><td class="a" data-label="Option A (hosted)">A browser; about 15–35 minutes before the interview, nothing to install</td><td class="b" data-label="Option B (local)">Claude Code (terminal, or the desktop app’s Code tab) and a downloadable workspace; about 31–66 minutes before the interview</td></tr>
+                  <tr><th scope="row">Code execution</th><td class="a" data-label="Option A (hosted)">The contributor’s own environment, including Stata, through run kits (a round trip per run); staff machines; optional R/Python sandbox</td><td class="b" data-label="Option B (local)">The contributor’s own environment, including Stata, with the model iterating in the session</td></tr>
+                  <tr><th scope="row">Consistency</th><td class="a" data-label="Option A (hosted)">The whole interviewer configuration (prompt, tools, model, effort) fixed server-side</td><td class="b" data-label="Option B (local)">Model pinned, switch-blocked, and recorded; client version and contributors’ user-level configuration vary and are recorded</td></tr>
+                  <tr><th scope="row">Custody</th><td class="a" data-label="Option A (hosted)">The project and its processors hold uploads, drafts, and transcripts from the first session</td><td class="b" data-label="Option B (local)">Drafts stay local; the project receives the same package at submission; local hidden-tier copies persist unless purged</td></tr>
+                  <tr><th scope="row">Research on the interview</th><td class="a" data-label="Option A (hosted)">All consented sessions observable, including abandoned ones; randomization on the server</td><td class="b" data-label="Option B (local)">Metrics only from submitted packages; assignments visible to the contributor</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Under both options Anthropic receives whatever the model reads.</p>
+          </li>
+          <li><strong>Three constraints bind both options.</strong>
+            <ul>
+              <li><strong>Regional policy.</strong> Anthropic’s Supported Regions Policy (effective 2026-11-12) does not cover mainland China, Hong Kong, or Macau, and its Usage Policy prohibits facilitating access there “(including end users)”. Neither option can serve contributors located there with Claude. The constraint is equal; the fallbacks are not (<a href="#risks">§6</a>).</li>
+              <li><strong>AI influence on experts.</strong> In a 2026 study, analysts with causal-inference experience followed an AI agent’s secretly randomized lean on design choices 86% of the time and rarely credited it. The interview protocol therefore <em>measures</em> influence rather than trusting self-reports.</li>
+              <li><strong>Exposure of hidden material.</strong> The proposed rule is that any session that sees flawed variants or answer keys runs under commercial no-training terms. Option A meets it by construction. <strong>Option B then needs commercial-terms access</strong> from the project (if Anthropic’s terms permit it, O-018) or from contributors’ institutions; consumer plans are not enough.</li>
+            </ul>
+          </li>
+          <li><strong>Other shared risks:</strong> shepherd capacity; contamination of tasks derived from public papers; and a name collision with an existing econometrics package called “deepecon”.</li>
+        </ol>
+        <div class="summary-reco">
+          <p><strong>Recommendation (argued in <a href="#recommendation">§9</a>, after the comparison).</strong></p>
+          <ul>
+            <li>Build the shared core first.</li>
+            <li>Start the legal and terms inquiries now; they gate both options (O-007, O-018).</li>
+            <li>Pilot <strong>thin slices of both options on the same paper</strong>, with symmetric thresholds registered in advance, plus a methodology arm that tests the construction pipeline itself.</li>
+            <li>If the group must choose before the pilot, contributors’ fluency with developer tools decides. For the senior cohort the brief targets, the lower-downside choice is <strong>Option A</strong> until the pilot’s setup test shows that they or their research assistants are fluent. For a fluent cohort, <strong>Option B with commercial-terms access</strong>.</li>
+          </ul>
         </div>
+        <p><strong>Decisions needed now</strong> (<a href="#decisions">§10</a>): pilot both or a cheaper variant; the exposure rule; release policy; who pays for model access; legal and terms review; shepherd staffing; contributor credit; project name.</p>
       </section>
 
-      <section id="options">
-        <h2>2. The two options</h2>
+      <section id="options" aria-labelledby="h-options">
+        <h2 id="h-options">2. The two options in brief</h2>
         <figure>
-          <pre class="mermaid">
+          <div class="diagram-wrap">
+<pre class="mermaid">
 flowchart TB
   subgraph A["Option A: hosted platform"]
     A1[Contributor's browser] --> A2[Project web app and interview orchestrator]
-    A2 --> A3[(Model API, project account)]
-    A2 -. run kits or staff .-> A4[Local or staff execution]
+    A2 --> A3[(Claude API, project account)]
+    A2 -. run kits, staff, or sandbox .-> A4[Execution]
   end
   subgraph B["Option B: local Claude Code plugin"]
-    B1[Contributor's Claude Code] --> B2[DeepEcon plugin and local workspace]
-    B1 --> B3[(Model API, contributor or project account)]
+    B1[Contributor's Claude Code] --> B2[DeepEcon workspace and plugin]
+    B1 --> B3[(Claude API, commercial-terms account)]
     B2 --> B4[Local Stata / R / Python]
   end
   A2 --> P[Same standardized package]
   B2 --> P
-  P --> C[Shared core: validator, review store, shepherds, independent reviewers]
-          </pre>
-          <figcaption><b>Figure 1.</b> Both options feed the same package format and the same internal pipeline; they differ only in the contributor-facing layer.</figcaption>
+  P --> C[Shared core: validator, review store, shepherd console, shepherds, independent reviewers]
+</pre>
+          </div>
+          <figcaption><b>Figure 1.</b> Both options feed the same standardized package into the shared core.</figcaption>
         </figure>
-        <p><span class="opt a">Option A — hosted platform.</span> The contributor signs in, uploads the paper and code, and conducts the interview in the browser, with a progress display and a live dossier panel showing who said what. Code runs on the contributor's or a research assistant's machine through generated <em>run kits</em> (A1), on staff machines during shepherding, or in a hosted R/Python sandbox for public data (A2). The project pays for one pinned model under commercial terms.</p>
-        <p><span class="opt b">Option B — local plugin.</span> The contributor installs Claude Code and the DeepEcon plugin, opens a folder beside the replication package, and runs the interview there. The model reads the local paper and code, drafts flawed variants in a separate folder, and runs them in the contributor's own Stata, R, or Python. Layered safeguards keep the original package untouched. Model access comes from the contributor's plan unless the project provides it.</p>
+        <div class="two-col">
+          <div class="option-card a">
+            <p><strong><span class="opt a">Option A</span> — hosted platform.</strong> The contributor signs in with an e-mail link or ORCID, attests their location, uploads the paper and code, and conducts the interview in the browser. A progress display and a live dossier panel show who said what. Code runs by one of three routes:</p>
+            <ul>
+              <li><em>run kits</em> on the contributor’s or a research assistant’s machine, including Stata (A1);</li>
+              <li>on staff machines during shepherding;</li>
+              <li>in a hosted R/Python sandbox for public data (A2).</li>
+            </ul>
+            <p>The project pays for one pinned model under commercial terms. Variants under study: materials held in the browser until submission, an EU-region model route, and in-browser execution (Option A §3.3).</p>
+          </div>
+          <div class="option-card b">
+            <p><strong><span class="opt b">Option B</span> — local plugin.</strong> The contributor installs Claude Code, downloads the DeepEcon workspace (which registers the plugin), places the replication package in it, and opens it. The model reads the local paper and code, drafts flawed variants in a separate folder, and runs them in the contributor’s own Stata, R, or Python. Layered safeguards keep the original package untouched, with a checksum check as the backstop. Variants: Claude Code on the web for public-data R/Python packages, Remote Control or SSH sessions that keep execution on a research assistant’s machine, and deferring operationalization to staff (Option B §3.2).</p>
+          </div>
+        </div>
       </section>
 
-      <section id="comparison">
-        <h2>3. Side-by-side comparison</h2>
+      <section id="comparison" aria-labelledby="h-comparison">
+        <h2 id="h-comparison">3. Side-by-side comparison</h2>
         <div class="table-wrap">
-          <table class="bt">
-            <caption><b>Table 1.</b> Comparison on the research lead's twelve dimensions</caption>
+          <table class="bt stack">
+            <caption><b>Table 1.</b> Comparison on the research lead’s twelve dimensions, plus one the reviews added. Ratings are qualitative judgments on verified evidence; † marks dimensions the pilot is designed to test.</caption>
             <thead>
-              <tr><th scope="col">Dimension</th><th scope="col"><span class="colno">(1)</span><span class="opt a">Option A</span> — hosted platform</th><th scope="col"><span class="colno">(2)</span><span class="opt b">Option B</span> — local plugin</th></tr>
+              <tr><th scope="col">Dimension</th><th scope="col"><span class="colno">(1)</span> <span class="opt a">Option A</span> — hosted platform</th><th scope="col"><span class="colno">(2)</span> <span class="opt b">Option B</span> — local plugin</th></tr>
             </thead>
             <tbody>
-              <tr><th scope="row">Scientific quality: consistency</th><td><strong>Strong.</strong> One pinned model, configuration, and protocol version for everyone.</td><td><strong>Moderate.</strong> Model and client vary unless the project provides access; per-model protocol evaluations needed.</td></tr>
-              <tr><th scope="row">Scientific quality: evidence anchoring</th><td><strong>Good.</strong> Model reads uploaded code with line references; execution is indirect.</td><td><strong>Strong.</strong> Model reads and runs code in the real environment, including Stata.</td></tr>
-              <tr><th scope="row">Contributor accessibility †</th><td><strong>High for the interview</strong> (browser only); someone must still run code unless staff or a sandbox does.</td><td><strong>Lower.</strong> Install, plan, plugin; eased by the desktop app <span class="pending">pending R2</span> and research-assistant mode.</td></tr>
-              <tr><th scope="row">Expert engagement †</th><td>Guided, structured, polished; less hands-on with code.</td><td>Hands-on, code-level discussion; suits fluent experts; setup may deter others.</td></tr>
-              <tr><th scope="row">Development effort (beyond the shared core)</th><td class="num">≈ 11–18 engineer-weeks (A1); +3–6 for a sandbox</td><td class="num">≈ 7–12 engineer-weeks</td></tr>
-              <tr><th scope="row">Operating costs (project)</th><td>≈ $17 inference per contribution; hosting tens to low hundreds of dollars a month <span class="pending">pending R9</span>; 0.1–0.25 FTE operations.</td><td>Near-zero hosting; $0 inference unless access is provided; 0.05–0.15 FTE maintenance; more support time.</td></tr>
-              <tr><th scope="row">Cost distribution</th><td>Project pays everything.</td><td>Contributors pay model access unless the project provides it.</td></tr>
-              <tr><th scope="row">Privacy and confidentiality</th><td>Project holds code and transcripts (security and data-protection duties); no data upload needed in A1.</td><td>Materials stay local except what the model reads, which goes to the provider under the contributor's terms <span class="pending">pending R3</span>.</td></tr>
-              <tr><th scope="row">Reproducibility</th><td>Uniform; central or staff re-runs, or uploaded outputs.</td><td>Heterogeneous environments; metadata captured; everything re-run at intake.</td></tr>
-              <tr><th scope="row">Quality control</th><td>Enforced centrally: protocol version, budgets, validation on upload.</td><td>Local plus intake validation; version drift possible.</td></tr>
-              <tr><th scope="row">Version management</th><td>Instant central updates; protocol pinned per contribution.</td><td>Marketplace updates; contributors may lag; version recorded per package.</td></tr>
-              <tr><th scope="row">Scalability and sustainability</th><td>Linear inference cost; central support; needs funded operations and a sunset plan.</td><td>Uses contributors' resources; support grows with environment diversity; depends on a fast-moving client.</td></tr>
+              <tr><th scope="row">Scientific quality: consistency</th><td class="a" data-label="Option A — hosted platform"><strong>Strong.</strong> The whole interviewer configuration is fixed: prompt, tools, model, effort level. A flagged turn may be answered by a fallback model unless refusals are left to stand (the same for B).</td><td class="b" data-label="Option B — local plugin"><strong>Moderate.</strong> The model is pinned, switch-blocked, and recorded by the workspace, and enforced only with managed settings or a gateway. The client version, Claude Code’s own system prompt, and contributors’ user-level instructions, skills, plugins, and MCP servers vary; they are recorded per package.</td></tr>
+              <tr><th scope="row">Scientific quality: evidence anchoring</th><td class="a" data-label="Option A — hosted platform"><strong>Good.</strong> Line-referenced discussion of uploaded code; execution happens outside the conversation.</td><td class="b" data-label="Option B — local plugin"><strong>Strong.</strong> The model reads and runs code in the real environment, including Stata, and iterates in the session.</td></tr>
+              <tr><th scope="row">Contributor accessibility †</th><td class="a" data-label="Option A — hosted platform"><strong>High for the interview:</strong> browser only, about 15–35 minutes before it starts. Code execution still needs a contributor, RA, staff member, or sandbox.</td><td class="b" data-label="Option B — local plugin"><strong>Lower:</strong> about 31–66 minutes of setup and commercial-terms access. The desktop app’s Code tab is the no-terminal path for the conversation, but the workspace is still required. Variants: web sessions for public-data R/Python; Remote Control or SSH so execution stays on an RA’s machine (these need Team or Enterprise seats under the exposure rule); deferring execution to staff.</td></tr>
+              <tr><th scope="row">Expert engagement †</th><td class="a" data-label="Option A — hosted platform">Guided, with line-referenced code discussion.</td><td class="b" data-label="Option B — local plugin">Hands-on, with in-session execution.</td></tr>
+              <tr><th scope="row">Development effort <span class="th-note">(beyond the shared core)</span></th><td class="a" data-label="Option A — hosted platform">≈ 12–19.5 engineer-weeks (A1 + staff execution); sandbox +1.5–3 (managed) or +3–6 (self-built)</td><td class="b" data-label="Option B — local plugin">≈ 11.5–20.5 engineer-weeks, including the upload endpoint, project page, subagents, and helper binaries</td></tr>
+              <tr><th scope="row">Operating costs (project)</th><td class="a" data-label="Option A — hosted platform">≈ $13 inference per contribution (A1, staff), $17 with a sandbox; hosting ≈ $13–210 a month; 0.1–0.25 FTE; evaluation inference ≈ $1,500 a year</td><td class="b" data-label="Option B — local plugin">≈ $17 inference per contribution with project-provided access, $0 with institutional access; hosting ≈ $0–5 a month; 0.1–0.2 FTE; evaluation inference ≈ $3,100 a year; more support time</td></tr>
+              <tr><th scope="row">Cost distribution</th><td class="a" data-label="Option A — hosted platform">The project pays everything.</td><td class="b" data-label="Option B — local plugin">The project or contributors’ institutions pay for commercial-terms access; contributors provide their own software and time.</td></tr>
+              <tr><th scope="row">Privacy and confidentiality</th><td class="a" data-label="Option A — hosted platform">The project and its processors (hosting, database, storage, tracing, error tracking) hold uploads, drafts, and consented transcripts from the first session; EU hosting proposed, API data at rest in the US; deletion on withdrawal. No data upload with run kits.</td><td class="b" data-label="Option B — local plugin">Nothing reaches the project before submission; it then receives the same package as under A. Unread files stay local; hidden-tier copies persist on the contributor’s machine unless purged.</td></tr>
+              <tr><th scope="row">Reproducibility</th><td class="a" data-label="Option A — hosted platform">Final verification is identical under both options: central re-runs and a clean-room check. Contributor-side outputs come from heterogeneous machines under A1, and from project machines under staff execution and A2.</td><td class="b" data-label="Option B — local plugin">As A for final verification. Contributor-side outputs come from heterogeneous machines, with metadata captured.</td></tr>
+              <tr><th scope="row">Quality control</th><td class="a" data-label="Option A — hosted platform">The free-recall lock, suggestion gate, and role separation are enforced server-side; the taxonomy and known-valid controls never reach the contributor; validation at upload.</td><td class="b" data-label="Option B — local plugin">Enforced by the helper’s state machine, subagents, and instructions; the taxonomy and controls are readable in the plugin unless served from a project endpoint; local and intake validation.</td></tr>
+              <tr><th scope="row">Version management</th><td class="a" data-label="Option A — hosted platform">Instant central updates; protocol pinned per contribution.</td><td class="b" data-label="Option B — local plugin">Auto-update enabled by the workspace (to be tested), on the client’s stable channel; protocol pinned per contribution by the workspace snapshot; versions recorded per package.</td></tr>
+              <tr><th scope="row">Scalability and sustainability</th><td class="a" data-label="Option A — hosted platform">Linear inference cost; central support; needs funded operations and a sunset plan. The model provider is replaceable behind the orchestrator.</td><td class="b" data-label="Option B — local plugin">Uses contributors’ compute; support grows with environment diversity; tied to Claude Code (another tool loses hooks, permissions, and packaging), but the portable skill runs elsewhere without project hosting.</td></tr>
+              <tr><th scope="row">Research on the interview <span class="th-note">(influence, drop-off, protocol experiments)</span></th><td class="a" data-label="Option A — hosted platform"><strong>Strong.</strong> All consented sessions observable, including abandoned ones; randomization on the server. Every AI-interview platform reviewed is hosted.</td><td class="b" data-label="Option B — local plugin"><strong>Limited.</strong> Metrics only from submitted packages; assignments sit in files the contributor can read.</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="tnotes"><i>Notes:</i> Ratings are qualitative judgments on the evidence assembled so far. † marks dimensions the pilot is designed to test. Engineering figures are planning estimates, not measurements. Inference prices are Anthropic list prices cached 2026-10-06.</p>
+        <p class="tnotes"><i>Notes:</i> FTE = full-time equivalent. Engineering figures and setup times are planning estimates <abbr class="ev" title="Unverified">[U]</abbr>. Prices are Anthropic and vendor list prices verified on 2026-11-05. The regional policy applies to both columns.</p>
       </section>
 
-      <section id="tradeoffs">
-        <h2>4. Key trade-offs</h2>
+      <section id="tradeoffs" aria-labelledby="h-tradeoffs">
+        <h2 id="h-tradeoffs">4. Key trade-offs</h2>
         <ol>
-          <li><strong>Consistency versus reach.</strong> Option A gives every contributor the same interviewer, which makes contributions comparable and the protocol testable. Option B meets people in their own tools, but consistency has to be bought back by providing model access — which also removes most of B's cost advantage.</li>
-          <li><strong>Who runs the code.</strong> Building a flawed variant and measuring its consequence is where Option B shines. Option A routes execution through run kits, staff, or a sandbox. If shepherds and research assistants do most execution anyway, as <em>Good Benchmarks</em> suggests (domain experts and task builders are different roles), B's advantage matters most for them, not for the economist.</li>
-          <li><strong>Custody versus dispersion.</strong> Option A concentrates unpublished code and transcripts on project servers. Option B leaves them on contributors' machines, but whatever the model reads still goes to the model provider: local execution is not local inference.</li>
-          <li><strong>Building and operating versus supporting.</strong> Option A costs more engineering and ongoing operations. Option B costs less to build but more to support across operating systems, software setups, plan limits, and client updates.</li>
-          <li><strong>Who pays, and on what terms.</strong> Inference is cheap either way. The substantive question is whether contributor sessions run under commercial terms or consumer terms <span class="pending">pending R3</span>. For a benchmark with hidden answers, that is a scientific-integrity question as well as a cost question.</li>
+          <li><strong>Consistency versus reach.</strong> Option A gives every contributor the same interviewer, which makes contributions comparable and the protocol testable. Option B reaches people in their own tools and pins and records the model, but project-provided access standardizes only the data terms and, with managed settings, the model, not the client or contributors’ own configuration. Provided access moves inference (about $3,400 at 200 contributions) to the project. With comparable engineering, B’s remaining cost advantages are small hosting costs and lighter custody during drafting, partly offset by more support and onboarding.</li>
+          <li><strong>Who runs the code.</strong> Both options can use the contributor’s own Stata. Option B lets the model iterate on a run within the session, which is where building a flawed variant and measuring its consequence is easiest; A1 needs a round trip per run, and staff execution moves the work onto shepherds. If research assistants do most of the execution, B’s execution advantage matters most for them. Symmetrically, if research assistants install and operate Claude Code, B’s setup burden also falls mostly on them, although the economist still installs Claude Code for the interview unless a Remote Control setup proves workable <abbr class="ev" title="Unverified">[U]</abbr>. <em>Good Benchmarks</em> argues that domain experts and task builders are different roles.</li>
+          <li><strong>Custody versus dispersion.</strong> Under both options Anthropic receives whatever the model reads, and the project receives the submitted package. Option A additionally holds drafts, abandoned contributions, and transcripts on project servers and processors, with the security and data-protection duties that brings. Option B leaves drafts, and hidden-tier copies, on contributors’ machines.</li>
+          <li><strong>Building and operating versus supporting.</strong> Engineering effort is comparable. Option A operates and secures a web service and its project API account. Option B supports varied operating systems and software, keeps a plugin compatible with a client that ships several releases a week (on its stable channel), runs a small upload service, and spends more on re-evaluating the interviewer per certified client release.</li>
+          <li><strong>Who pays, and on what terms.</strong> Inference is cheap either way. The substantive question is whether contributor sessions run under commercial terms (no training on inputs) or consumer terms (training unless the user opts out). For a benchmark with hidden answers that is a question of scientific integrity, so the proposed exposure rule requires commercial terms wherever hidden material is handled. Option A satisfies it by construction; Option B depends on project-provided access (O-018) or institutional accounts.</li>
+          <li><strong>Studying the interview.</strong> The protocol’s influence and drop-off measures are research outputs in their own right. Option A can observe every consented session and randomize centrally; Option B sees only what contributors submit.</li>
         </ol>
       </section>
 
-      <section id="costs">
-        <h2>5. Costs and effort</h2>
+      <section id="costs" aria-labelledby="h-costs">
+        <h2 id="h-costs">5. Costs and effort</h2>
         <div class="table-wrap">
-          <table class="bt">
-            <caption><b>Table 2.</b> Cost categories under shared assumptions</caption>
+          <table class="bt stack" aria-label="Costs and effort by option">
             <thead>
-              <tr><th scope="col">Category</th><th scope="col"><span class="colno">(1)</span><span class="opt a">Option A</span></th><th scope="col"><span class="colno">(2)</span><span class="opt b">Option B</span></th><th scope="col"><span class="colno">(3)</span>Shared core</th></tr>
+              <tr><th scope="col">Category</th><th scope="col"><span class="opt a">Option A</span></th><th scope="col"><span class="opt b">Option B</span></th><th scope="col">Shared (either option)</th></tr>
             </thead>
             <tbody>
-              <tr><th scope="row">Initial development</th><td class="num">11–18 engineer-weeks (A1); +3–6 for A2</td><td class="num">7–12 engineer-weeks</td><td class="num">9–16 engineer-weeks</td></tr>
-              <tr><th scope="row">Fixed operating</th><td>Hosting <span class="pending">pending R9</span>; 0.1–0.25 FTE</td><td>Near zero; 0.05–0.15 FTE</td><td>Review store: small</td></tr>
-              <tr><th scope="row">Variable per contribution (project)</th><td class="num">≈ $17 inference ($6–46)</td><td class="num">$0, or ≈ $17 if access is provided</td><td>—</td></tr>
-              <tr><th scope="row">Contributor-side</th><td>Time</td><td>Time; model plan unless provided <span class="pending">pending R3</span>; own software</td><td>—</td></tr>
-              <tr><th scope="row">Human effort per admitted task</th><td>—</td><td>—</td><td class="num">≈ 20 shepherd hours (10–40) and ≈ 8 review hours</td></tr>
+              <tr><th scope="row">Initial development</th><td class="a" data-label="Option A">≈ 12–19.5 engineer-weeks; sandbox +1.5–3 (managed) or +3–6 (self-built)</td><td class="b" data-label="Option B">≈ 11.5–20.5 engineer-weeks</td><td data-label="Shared (either option)">Core ≈ 10–17.5 engineer-weeks, including the shepherd console</td></tr>
+              <tr><th scope="row">Fixed operating</th><td class="a" data-label="Option A">Hosting ≈ $13–210 a month; 0.1–0.25 FTE</td><td class="b" data-label="Option B">Hosting ≈ $0–5 a month; 0.1–0.2 FTE</td><td data-label="Shared (either option)">Internal review store: small</td></tr>
+              <tr><th scope="row">Variable per contribution (project)</th><td class="a" data-label="Option A">≈ $13 inference (A1, staff) or ≈ $17 (A2)</td><td class="b" data-label="Option B">≈ $17 with project-provided access; $0 with institutional access</td><td data-label="Shared (either option)">Validation-trial compute ≈ $500 per admitted task ($250–750)</td></tr>
+              <tr><th scope="row">Evaluation inference <span class="th-note">(interviewer regression suite)</span></th><td class="a" data-label="Option A">≈ $1,500 a year</td><td class="b" data-label="Option B">≈ $3,100 a year (monthly certification)</td><td data-label="Shared (either option)">—</td></tr>
+              <tr><th scope="row">Contributor-side</th><td class="a" data-label="Option A">Time</td><td class="b" data-label="Option B">Time; installation; own software</td><td data-label="Shared (either option)">—</td></tr>
+              <tr><th scope="row">Human effort</th><td class="a" data-label="Option A">Staff execution adds ≈ 4 shepherd hours per contribution</td><td class="b" data-label="Option B">Contributors pre-run part of the operationalization <abbr class="ev" title="Unverified">[U]</abbr></td><td data-label="Shared (either option)">≈ 10 shepherd-team hours per contribution for screening, plus ≈ 30 per admitted task; ≈ 8 reviewer and ≈ 15 outside-economist hours per admitted task</td></tr>
             </tbody>
           </table>
         </div>
         <div class="table-wrap">
-          <table class="bt narrow">
-            <caption><b>Table 3.</b> Scenario analysis, central estimates [ranges]</caption>
+          <table class="bt compact">
+            <caption><b>At 200 contributions</b> (central estimates <abbr class="ev" title="Unverified">[U]</abbr>)</caption>
             <thead>
-              <tr><th scope="col">Contributions</th><th scope="col">Inference (Opus 5.5)</th><th scope="col">Shepherd hours</th><th scope="col">Review hours</th><th scope="col">Support hours (A / B)</th></tr>
+              <tr><th scope="col">Item</th><th scope="col">Estimate</th></tr>
             </thead>
-            <tbody class="num">
-              <tr><th scope="row">10</th><td>$170 [61–462]</td><td>200 [50–600]</td><td>80 [20–180]</td><td>5 / 10</td></tr>
-              <tr><th scope="row">50</th><td>$851 [307–2,310]</td><td>1,000 [250–3,000]</td><td>400 [100–900]</td><td>25 / 50</td></tr>
-              <tr><th scope="row">200</th><td>$3,404 [1,230–9,240]</td><td>4,000 [1,000–12,000]</td><td>1,600 [400–3,600]</td><td>100 / 200</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="tnotes"><i>Notes:</i> Planning estimates under stated assumptions (≈ 3-hour interview, ≈ 100 turns, ≈ 100k cached tokens per turn, prompt caching, one admitted task per contribution). Human effort is shown in hours; convert with institutional rates. All numbers are computed by the scripts in <span class="path">docs/architecture/cost-model/</span>.</p>
-      </section>
-
-      <section id="risks">
-        <h2>6. Major risks</h2>
-        <div class="table-wrap">
-          <table class="bt">
-            <caption><b>Table 4.</b> Scientific and operational risks</caption>
-            <thead><tr><th scope="col">Risk</th><th scope="col">Affects</th><th scope="col">Mitigation</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Non-technical economists do not complete setup</th><td><span class="opt b">B</span></td><td>Desktop app; research-assistant mode; onboarding sessions; hosted onboarding</td></tr>
-              <tr><th scope="row">Hand-offs stall the operationalization of errors</th><td><span class="opt a">A</span> (A1)</td><td>Staff execution; sandbox for public data; research-assistant mode</td></tr>
-              <tr><th scope="row">Inconsistent interviewer (model or version drift)</th><td><span class="opt b">B</span></td><td>Project-provided access; pre-flight checks; per-model evaluations</td></tr>
-              <tr><th scope="row">Breach of unpublished code or transcripts</th><td><span class="opt a">A</span></td><td>Minimal retention; encryption; security review; no data upload in A1</td></tr>
-              <tr><th scope="row">Hidden materials enter model training through consumer accounts</th><td><span class="opt b">B</span></td><td>Project-provided access or documented opt-out <span class="pending">pending R3</span></td></tr>
-              <tr><th scope="row">Contributors in mainland China cannot participate</th><td>Both</td><td>Legal review; alternative models with validation caveats; RA- or staff-led routes</td></tr>
-              <tr><th scope="row">Shepherd capacity limits throughput</th><td>Both</td><td>Staffing plan; tooling; quality over quantity</td></tr>
-              <tr><th scope="row">Tasks from public papers become solvable by memory or lookup</th><td>Both</td><td>Offline environments; perturbed or semi-synthetic data; re-execution on hidden data; private held-out set</td></tr>
-              <tr><th scope="row">Interview leads experts or fabricates errors (experts followed a planted AI lean 86% of the time in a 2026 study)</th><td>Both</td><td>Free-recall lock before suggestions; exposure tracking; measured influence and known-valid controls; independent status classification; human-authored task text; randomized suggestion phase in the pilot</td></tr>
-              <tr><th scope="row">Name collision (“deepecon” Python package)</th><td>Both</td><td>Rename before public launch</td></tr>
+              <tr><th scope="row">Interview inference</th><td class="num">≈ $3,400 (≈ $2,600 under A1 or staff execution)</td></tr>
+              <tr><th scope="row">Validation-trial compute</th><td class="num">≈ $100,000 ($10,000–225,000)</td></tr>
+              <tr><th scope="row">Shepherd-team effort</th><td class="num">≈ 8,000 hours (1,600–22,000), plus ≈ 800 under A’s staff execution</td></tr>
+              <tr><th scope="row">Reviewers</th><td class="num">≈ 1,600 hours</td></tr>
+              <tr><th scope="row">Outside economists <span class="th-note">(blind solves, classification, calibration)</span></th><td class="num">≈ 3,000 hours</td></tr>
+              <tr><th scope="row">Support</th><td class="num">≈ 150 hours (A) versus ≈ 200 hours (B)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>v0.2 of this brief understated human effort (it counted 20 shepherd hours per admitted task and ignored dropped candidates, outside economists, and validation compute) and overstated the engineering gap between the options. Funding sources exist for model use, for example AI for Science credits of up to $50k per project; they matter most for validation compute. All assumptions are in the <a class="ref" href="#src-cost-model">cost and effort model</a>.</p>
+      </section>
+
+      <section id="risks" aria-labelledby="h-risks">
+        <h2 id="h-risks">6. Major risks</h2>
+        <p>Rows cover every risk the reviews identified as decision-relevant for either option. Each option’s full register, under one inclusion rule, is in its design document.</p>
+        <div class="table-wrap">
+          <table class="bt stack risks" aria-label="Major risks">
+            <colgroup><col><col class="w-md"><col class="w-md"><col class="w-sm"><col></colgroup>
+            <thead>
+              <tr><th scope="col">Risk</th><th scope="col">Affects</th><th scope="col">Likelihood</th><th scope="col">Impact</th><th scope="col">Mitigation</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Contributors in mainland China, Hong Kong, or Macau cannot be served with Claude</th><td data-label="Affects">Both</td><td data-label="Likelihood">Certain for those located there</td><td data-label="Impact">High for that group</td><td data-label="Mitigation">Legal review (O-007). Fallbacks are unequal: A needs a second provider integration, a China-reachable host, and PIPL duties as custodian; B’s portable skill runs in other agent tools without project hosting. Neither has model parity</td></tr>
+              <tr><th scope="row">Interview leads experts or fabricates errors (experts followed a planted AI lean 86% of the time in a 2026 study)</th><td data-label="Affects">Both</td><td data-label="Likelihood">High without safeguards</td><td data-label="Impact">High</td><td data-label="Mitigation">Free-recall lock before suggestions; exposure tracking; measured influence with known-valid controls; independent status classification; human-authored task text; randomized suggestion experiment in the pilot</td></tr>
+              <tr><th scope="row">Shepherd capacity limits throughput (≈ 8,000 hours at 200 contributions; Stata ports add work)</th><td data-label="Affects">Both</td><td data-label="Likelihood">High</td><td data-label="Impact">High</td><td data-label="Mitigation">Staffing plan (O-009); tooling; quality over quantity</td></tr>
+              <tr><th scope="row">Tasks from public papers become solvable by memory or recognition</th><td data-label="Affects">Both</td><td data-label="Likelihood">High</td><td data-label="Impact">High</td><td data-label="Mitigation">Offline environments; recognition probe; restructured presentations; answer-changing hidden variants on data the agent never sees; private held-out split</td></tr>
+              <tr><th scope="row">Hidden material reaches model training or the public</th><td data-label="Affects">Both; <span class="opt b">B</span> more exposed (account types, local copies)</td><td data-label="Likelihood">Low if the exposure rule holds</td><td data-label="Impact">High</td><td data-label="Mitigation">Commercial no-training terms for every session that sees hidden material; exposure log; purge of local copies (B)</td></tr>
+              <tr><th scope="row">Engineering takes longer than planned</th><td data-label="Affects"><span class="opt a">A</span> (Medium–High); <span class="opt b">B</span> (Medium)</td><td data-label="Likelihood">See left</td><td data-label="Impact">Medium</td><td data-label="Mitigation">Narrow MVPs; proven components (A); early tests of the client features B relies on (B)</td></tr>
+              <tr><th scope="row">Non-technical economists do not complete setup</th><td data-label="Affects"><span class="opt b">B</span></td><td data-label="Likelihood">Medium–High; high if the cohort is senior and non-technical</td><td data-label="Impact">High</td><td data-label="Mitigation">Desktop app; typing-free workspace; research-assistant mode; onboarding sessions; hosted onboarding (H1)</td></tr>
+              <tr><th scope="row">Hand-offs stall the operationalization of errors</th><td data-label="Affects"><span class="opt a">A</span> (run kits) and <span class="opt b">B</span> (research-assistant mode)</td><td data-label="Likelihood">Medium</td><td data-label="Impact">Medium–High</td><td data-label="Mitigation">Staff execution under either option; sandbox or web sessions for public data; Remote Control or SSH (B)</td></tr>
+              <tr><th scope="row">Interviewer configuration drifts (client version, user-level configuration)</th><td data-label="Affects"><span class="opt b">B</span></td><td data-label="Likelihood">Medium</td><td data-label="Impact">Medium–High</td><td data-label="Mitigation">Pinned and recorded model; configuration recorded per package; pre-flight warnings; per-model evaluations</td></tr>
+              <tr><th scope="row">Long interview degraded by context compaction</th><td data-label="Affects"><span class="opt b">B</span></td><td data-label="Likelihood">Medium</td><td data-label="Impact">Medium</td><td data-label="Mitigation">Core rules first in the skill; state re-injection</td></tr>
+              <tr><th scope="row">Breach of unpublished code, drafts, or transcripts</th><td data-label="Affects"><span class="opt a">A</span> (held from upload); <span class="opt b">B</span> (submitted packages, local copies)</td><td data-label="Likelihood">Low–Medium</td><td data-label="Impact">High</td><td data-label="Mitigation">Encryption, minimal retention, processor agreements (A); purge step and deletion agreement (B)</td></tr>
+              <tr><th scope="row">Project API account suspended or capped (one user’s breach can suspend the account)</th><td data-label="Affects"><span class="opt a">A</span>; <span class="opt b">B</span> with project-provided keys</td><td data-label="Likelihood">Low–Medium</td><td data-label="Impact">High: interviews stop</td><td data-label="Mitigation">Location attestation and country checks; separate evaluation workspace; spend alerts; Scale tier before recruitment waves</td></tr>
+              <tr><th scope="row">Operating burden persists after the grant period</th><td data-label="Affects"><span class="opt a">A</span></td><td data-label="Likelihood">Medium</td><td data-label="Impact">Medium</td><td data-label="Mitigation">Small stack; managed services; sunset plan</td></tr>
+              <tr><th scope="row">Interview less evidence-anchored than with local code access</th><td data-label="Affects"><span class="opt a">A</span></td><td data-label="Likelihood">Medium</td><td data-label="Impact">Medium</td><td data-label="Mitigation">Code index and viewer; staff execution; sandbox; research-assistant mode</td></tr>
+              <tr><th scope="row">Terms do not allow project-provided access for external contributors</th><td data-label="Affects"><span class="opt b">B</span></td><td data-label="Likelihood">Low–Medium: a definitional question about “authorized users”</td><td data-label="Impact">High: B then depends on institutional accounts or on relaxing the exposure rule</td><td data-label="Mitigation">Ask Anthropic (O-018); identify institutional accounts early</td></tr>
+              <tr><th scope="row">Terms bar the server-side Agent SDK variant (H2)</th><td data-label="Affects">Hybrid H2</td><td data-label="Likelihood">Medium–High: an explicit bar on paying for end users’ usage</td><td data-label="Impact">Medium</td><td data-label="Mitigation">Use a shared protocol with separate hosts instead; ask Anthropic (O-018)</td></tr>
+              <tr><th scope="row">Name collision (“deepecon” Python package)</th><td data-label="Affects">Both</td><td data-label="Likelihood">Certain</td><td data-label="Impact">Medium</td><td data-label="Mitigation">Rename before public launch (O-014)</td></tr>
             </tbody>
           </table>
         </div>
       </section>
 
-      <section id="conditions">
-        <h2>7. When each option is preferable</h2>
+      <section id="conditions" aria-labelledby="h-conditions">
+        <h2 id="h-conditions">7. When each option is preferable</h2>
         <div class="two-col">
           <div>
-            <h3><span class="opt a">Option A</span> is preferable if</h3>
+            <h3><span class="opt a">Option A</span> is preferable if:</h3>
             <ul>
-              <li>most contributors are senior and not fluent with developer tools;</li>
-              <li>comparability of interviews across contributors is itself a research goal;</li>
+              <li>most contributors are senior and not fluent with developer tools, and their research assistants will not operate such tools either;</li>
+              <li>comparability of interviews, and research on the interview itself, are research goals;</li>
               <li>the project can fund engineering and multi-year operations;</li>
-              <li>contributors are comfortable entrusting unpublished code to the project;</li>
-              <li>provider terms and network reachability allow serving all target regions <span class="pending">pending R3, R9</span>.</li>
+              <li>contributors are comfortable entrusting drafts and unpublished code to the project from the first session;</li>
+              <li>shepherds will handle most code execution.</li>
             </ul>
           </div>
           <div>
-            <h3><span class="opt b">Option B</span> is preferable if</h3>
+            <h3><span class="opt b">Option B</span> is preferable if:</h3>
             <ul>
               <li>most contributors, or their research assistants, are technically fluent;</li>
-              <li>packages depend heavily on local environments such as Stata;</li>
-              <li>engineering and operations capacity is small;</li>
-              <li>the project can provide or verify commercial-terms model access;</li>
-              <li>contributors prefer that materials never sit on project servers.</li>
+              <li>packages depend heavily on local environments such as Stata, and in-session iteration on flawed variants matters;</li>
+              <li>commercial-terms access is available, from the project (subject to O-018) or from contributors’ institutions;</li>
+              <li>contributors prefer that drafts never sit on project servers;</li>
+              <li>operations capacity after the grant period is small.</li>
             </ul>
           </div>
         </div>
-        <p class="prose"><strong>Neither option removes</strong> the need for shepherds and independent reviewers, the legal review for China, the release-policy decision, or the contamination controls.</p>
+        <h3>Neither option removes:</h3>
+        <ul>
+          <li>the regional constraint;</li>
+          <li>the need for shepherds, outside economists, and independent reviewers;</li>
+          <li>the release-policy decision;</li>
+          <li>the contamination controls and the exposure rule.</li>
+        </ul>
       </section>
 
-      <section id="hybrids">
-        <h2>8. Hybrid strategies</h2>
-        <p class="prose">Considered as possible end states, not as substitutes for the A-versus-B comparison.</p>
+      <section id="hybrids" aria-labelledby="h-hybrids">
+        <h2 id="h-hybrids">8. Hybrid strategies <span class="h-note">(considered, not substitutes for the A/B comparison)</span></h2>
         <div class="table-wrap">
-          <table class="bt">
-            <caption><b>Table 5.</b> Hybrid strategies</caption>
-            <thead><tr><th scope="col">Hybrid</th><th scope="col">Idea</th><th scope="col">Main benefit</th><th scope="col">Main cost or risk</th></tr></thead>
+          <table class="bt stack" aria-label="Hybrid strategies">
+            <thead>
+              <tr><th scope="col">Hybrid</th><th scope="col">Idea</th><th scope="col">Main benefit</th><th scope="col">Main cost or risk</th></tr>
+            </thead>
             <tbody>
-              <tr><th scope="row">H1 Website plus plugin</th><td>Option B with hosted onboarding, documentation, and submission</td><td>Better first impression and support for B</td><td>Still requires local setup</td></tr>
-              <tr><th scope="row">H2 One protocol, two hosts</th><td>The same skill runs locally (B) and server-side via the Claude Agent SDK (A) <span class="pending">pending R2</span></td><td>One interview codebase; cheap to prototype both</td><td>Server-side containers to operate</td></tr>
-              <tr><th scope="row">H3 Split by role</th><td>Economists use the hosted interview; RAs and shepherds use the local plugin to operationalize errors</td><td>Plays to each option's strength; matches the expert / task-builder division</td><td>Two surfaces; a hand-over between them</td></tr>
-              <tr><th scope="row">H4 Split by contributor</th><td>Hosted for non-technical contributors, local for technical ones</td><td>Maximizes reach</td><td>Two interviewer configurations to keep comparable</td></tr>
+              <tr><th scope="row">H1 Website plus plugin</th><td data-label="Idea">Option B with hosted onboarding, documentation, and submission</td><td data-label="Main benefit">Better first impression and support for B</td><td data-label="Main cost or risk">Still requires local setup and commercial-terms access</td></tr>
+              <tr><th scope="row">H2 One protocol, two hosts</th><td data-label="Idea">The same six-field skill runs locally (B) and server-side through the Claude Agent SDK (A)</td><td data-label="Main benefit">One interview codebase; cheap to prototype both</td><td data-label="Main cost or risk">Technically feasible, but Anthropic’s terms for running Claude Code in products bar the customer from paying for end users’ usage. Needs confirmation (O-018). A shared <em>protocol</em> with separate hosts (the Messages API for A) avoids this.</td></tr>
+              <tr><th scope="row">H3 Split by role</th><td data-label="Idea">Economists use the hosted interview; RAs and shepherds use the local plugin to operationalize errors</td><td data-label="Main benefit">Plays to each option’s strength; matches the division between domain expert and task builder</td><td data-label="Main cost or risk">Two surfaces to maintain; a hand-over between them</td></tr>
+              <tr><th scope="row">H4 Split by contributor</th><td data-label="Idea">Hosted interview for non-technical contributors, local plugin for technical ones</td><td data-label="Main benefit">Maximizes reach</td><td data-label="Main cost or risk">Two interviewer configurations to keep comparable</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="prose">Terminal-Bench-Science already runs a hybrid of this family: hosted intake (web form, community channels, office hours), then local technical building and pull-request submission <span class="ev">P-full</span>.</p>
+        <p>Terminal-Bench-Science already runs a hybrid of this family. Contributors start with hosted intake (a web form, community channels, office hours), then build and test tasks locally and submit them as pull requests <abbr class="ev" title="Primary source, read in full">[P-full]</abbr>.</p>
       </section>
 
-      <section id="recommendation">
-        <h2>9. Recommendation</h2>
+      <section id="recommendation" aria-labelledby="h-recommendation">
+        <h2 id="h-recommendation">9. Recommendation</h2>
         <div class="reco">
           <ol>
-            <li><strong>Build the architecture-independent core now:</strong> protocol assets, schema, validator, packager, internal review store. Every scenario needs it, and scientific quality depends on it most.</li>
-            <li><strong>Pilot thin slices of both options</strong> on one paper, with the crossover design in the pilot plan and decision thresholds agreed in advance. The decisive questions are empirical: do senior economists complete setup, do hand-offs stall, do the options differ in output quality or ownership? With the core in place, the second slice costs roughly 4–9 engineer-weeks — small next to building the wrong full system.</li>
-            <li><strong>If a choice must be made before the pilot,</strong> for a mostly senior, non-technical, bilingual cohort the evidence leans toward <span class="opt a">Option A</span> (A1, with staff or research-assistant execution); for fluent early adopters with limited engineering capacity, toward <span class="opt b">Option B</span> with project-provided model access.</li>
-            <li><strong>The end state may be H3</strong> (hosted interview for economists, local tooling for operationalization) — adopt it only if the pilot supports it.</li>
+            <li><strong>Build the architecture-independent core now:</strong> protocol assets, schema, validator, packager, internal review store, and shepherd console. Every scenario needs them, and scientific quality depends on them most.</li>
+            <li><strong>Start the legal and terms inquiries immediately.</strong> Ask how the regional policy applies to the intended contributors and what diligence is expected (O-007), and whether the project may provide API access to external contributors as its “authorized users” (O-018). Under the proposed exposure rule, the second answer decides whether Option B can run as designed without institutional accounts.</li>
+            <li><strong>Pilot thin slices of both options</strong> on one paper, using the <a class="ref" href="#src-pilot">pilot plan</a>’s symmetric thresholds, registered before the first session. <em>Why both:</em> the decisive questions are empirical. Will senior economists, with designed onboarding, complete setup? Do run kits and research-assistant hand-offs stall? Do the options differ in validated variants, output quality, or measured AI influence? With the core in place, the second slice costs roughly <strong>8–14 engineer-weeks</strong> <abbr class="ev" title="Unverified">[U]</abbr> (v0.2 said 4–9), which is still small next to building the wrong full system and operating it for years.
+              <ul>
+                <li>If engineering capacity is the binding constraint, a cheaper variant builds one slice plus setup and hand-off probes of the other. It cannot compare output quality or influence between the options (O-019).</li>
+                <li>Either way, add the pilot’s <strong>methodology arm</strong>: every candidate that reaches a run flawed variant with a material consequence goes through the full validation ladder, because the construction pipeline’s yield and cost are at least as uncertain as the architecture.</li>
+              </ul>
+            </li>
+            <li><strong>If a choice must be made before the pilot,</strong> contributors’ fluency with developer tools decides:
+              <ul>
+                <li>The brief targets senior economists. Until the setup test shows that they or their research assistants are fluent, the lower-downside choice is <strong>Option A</strong> (run kits plus staff execution). Its main failure mode, stalled hand-offs, comes after the interview and has a staff fallback; B’s, abandoned setup, comes before any content exists.</li>
+                <li>For a fluent cohort, or one whose research assistants are fluent and will operate the tools, <strong>Option B with commercial-terms access</strong> (from the project if O-018 permits, or from institutions) offers better evidence anchoring and in-session execution at comparable engineering cost.</li>
+              </ul>
+            </li>
+            <li><strong>The end state may be H1, H3, or H4.</strong> Choose on pilot evidence.</li>
           </ol>
         </div>
       </section>
 
-      <section id="decisions">
-        <h2>10. Decisions needed before implementation</h2>
+      <section id="decisions" aria-labelledby="h-decisions">
+        <h2 id="h-decisions">10. Decisions needed before implementation</h2>
         <div class="table-wrap">
-          <table class="bt narrow">
-            <caption><b>Table 6.</b> Open decisions (identifiers refer to the project's decision log)</caption>
+          <table class="bt narrow stack ids" aria-label="Decisions needed before implementation">
             <thead><tr><th scope="col">ID</th><th scope="col">Decision</th><th scope="col">Why now</th></tr></thead>
             <tbody>
-              <tr><th scope="row">O-002</th><td>Pilot both slices, or choose one option now</td><td>Determines the scope of the next phase</td></tr>
-              <tr><th scope="row">O-001</th><td>Release policy: public, private, or public development set plus private held-out set</td><td>Constrains submission channels and leakage controls</td></tr>
-              <tr><th scope="row">O-006</th><td>Who pays for contributors' model access in Option B</td><td>Determines B's consistency, terms, and cost</td></tr>
-              <tr><th scope="row">O-007</th><td>Legal review of access for contributors in mainland China</td><td>Affects recruitment under both options</td></tr>
-              <tr><th scope="row">O-009</th><td>Shepherd and reviewer staffing</td><td>The dominant cost and throughput constraint</td></tr>
-              <tr><th scope="row">O-005</th><td>Contributor credit and incentives</td><td>Recruitment of senior economists</td></tr>
-              <tr><th scope="row">O-003 · O-004</th><td>First-release task scope; treatment of “one-sentence-fact” tasks</td><td>Shapes what the interview must elicit</td></tr>
-              <tr><th scope="row">O-008 · O-013</th><td>Pilot paper; ethics review</td><td>Prerequisites for the pilot</td></tr>
-              <tr><th scope="row">O-014</th><td>Project name</td><td>Before any public launch</td></tr>
+              <tr><th scope="row">O-002 · O-019</th><td data-label="Decision">Pilot both slices, choose one option now, or pilot one slice plus probes of the other</td><td data-label="Why now">Determines the scope and cost of Phase 5</td></tr>
+              <tr><th scope="row">P-026</th><td data-label="Decision">Approve or relax the exposure rule for hidden material</td><td data-label="Why now">Determines Option B’s access requirements and the private split’s integrity</td></tr>
+              <tr><th scope="row">O-007</th><td data-label="Decision">Legal review: regional policy, expected diligence, and the intended contributors</td><td data-label="Why now">Gates recruitment under both options</td></tr>
+              <tr><th scope="row">O-018</th><td data-label="Decision">Terms review: project-provided access for external contributors; the server-side Agent SDK variant</td><td data-label="Why now">Gates Option B as designed, and H2</td></tr>
+              <tr><th scope="row">O-001</th><td data-label="Decision">Release policy: public, private, or public development set plus private held-out set</td><td data-label="Why now">Constrains submission channels and leakage controls</td></tr>
+              <tr><th scope="row">O-006</th><td data-label="Decision">Who pays for contributors’ model access in Option B</td><td data-label="Why now">Determines B’s consistency, terms, and cost</td></tr>
+              <tr><th scope="row">O-009</th><td data-label="Decision">Shepherd, reviewer, and outside-economist staffing</td><td data-label="Why now">The dominant cost and throughput constraint</td></tr>
+              <tr><th scope="row">O-005</th><td data-label="Decision">Contributor credit and incentives</td><td data-label="Why now">Recruitment of senior economists</td></tr>
+              <tr><th scope="row">O-003 · O-004 · O-017</th><td data-label="Decision">First-release task scope; “one-sentence-fact” tasks; whether the interview offers AI suggestions</td><td data-label="Why now">Shapes what the interview must elicit</td></tr>
+              <tr><th scope="row">O-008 · O-013</th><td data-label="Decision">Pilot paper; ethics review</td><td data-label="Why now">Prerequisites for the pilot</td></tr>
+              <tr><th scope="row">O-014</th><td data-label="Decision">Project name</td><td data-label="Why now">Before any public launch</td></tr>
             </tbody>
           </table>
         </div>
       </section>
 
-      <section id="zh" class="zh" lang="zh-Hans">
-        <h2>执行摘要（中文）</h2>
-        <p class="note">本节为机器翻译，尚待双语经济学者审校；如与英文原文有出入，以英文原文为准。</p>
-        <p><strong>我们要决定的是什么：</strong>仅仅是面向贡献者的那一层——AI 引导访谈在哪里运行、代码在哪里运行、谁为模型付费、材料由谁保管。科学方法本身（访谈规程、正确的与刻意植入错误的复现包、验证程序的校验、独立评审）在两种方案下完全相同。</p>
-        <ol>
-          <li><strong>界面不如共享方法重要。</strong>两种方案运行同一访谈规程，产出同一标准化贡献包，并进入同一内部流程，由基准团队的任务引导人（shepherd）把候选内容转化为经过验证的任务。这一共享核心约需 9–16 个工程师周，无论选择哪种方案都必须建设。</li>
-          <li><strong>资金不是主要区别。</strong>按 API 标价计算，每份贡献的 AI 访谈成本约 17 美元（区间 6–46 美元），200 份贡献约 3,400 美元。人力投入占主导：每个入选任务约需 20 小时的引导人工时，200 份贡献约 4,000 小时。</li>
-          <li><strong>真正的区别有五点：</strong>可及性（方案 A 只需浏览器；方案 B 需要安装 Claude Code、具备合适的订阅或由项目提供的访问权限，并安装插件）；代码由谁运行（方案 B 在贡献者本地运行 Stata、R 或 Python；方案 A 通过“运行包”、工作人员或托管沙箱执行）；一致性与数据使用条款（方案 A 统一固定模型并适用商业条款；方案 B 仅在项目提供模型访问时才能统一）；未发表材料的保管责任；以及维护方式（运营网络服务，或维护需跟进快速迭代客户端的插件）。</li>
-          <li><strong>最难的风险是共同的：</strong>AI 对专家判断的影响——2026 年的一项研究中，具有因果推断经验的分析师在研究设计选择上 86% 的情况下采纳了 AI 智能体被秘密随机设定的倾向，且很少意识到这一点，因此访谈规程以测量而非自我报告来评估这种影响；中国大陆贡献者的可及性（需法律审查）；任务引导人的人手；基于公开论文的任务被“污染”的风险；以及项目工作名称与现有计量软件包“deepecon”重名。</li>
-        </ol>
-        <p><strong>建议（在完成比较之后提出）：</strong>先建设与架构无关的共享核心；然后在同一篇论文上对两种方案的精简原型进行试点，并事先约定决策阈值。如必须在试点前做出选择：若贡献者以不熟悉开发工具的资深双语经济学家为主，倾向方案 A（托管访谈，由研究助理或工作人员执行代码）；若以技术熟练者为主且工程资源有限，倾向由项目提供模型访问的方案 B。</p>
+      <section id="changes" aria-labelledby="h-changes">
+        <h2 id="h-changes">11. Changes from v0.2</h2>
+        <p>Four independent reviews (2026-11-05) found that v0.2 compared the options on unequal assumptions in several places, and understated the shared human effort. Corrections:</p>
+        <ul class="changes">
+          <li><strong>Engineering</strong> is comparable once Option B’s upload endpoint, project page, subagents, and binaries are counted, the shepherd console moves to the shared core, and A’s run kits get the same cross-platform testing as B (v0.2: 12–19 against 8–14 engineer-weeks).</li>
+          <li><strong>Custody</strong> is stated symmetrically: both options send what the model reads to Anthropic, and the project receives the same package; A also holds drafts with its processors, B leaves copies on contributors’ machines.</li>
+          <li><strong>Consistency</strong> credits B’s documented pin, block, and record controls, and states what provided access does not standardize.</li>
+          <li><strong>Accessibility</strong> adds B’s variants and both options’ setup times; <strong>code execution</strong> credits A1’s use of the contributor’s Stata.</li>
+          <li>New dimensions and risks: research on the interview (A’s advantage); quality control enforced server-side versus by instructions; A’s engineering, operating, and account-suspension risks; B’s hidden-tier copies and research-assistant hand-offs; unequal China fallbacks; the terms risk split between project-provided keys and H2. The auto-mode risk was removed (the workspace disables auto mode).</li>
+          <li><strong>The exposure rule</strong> makes commercial-terms access a requirement for B.</li>
+          <li><strong>Costs:</strong> shepherd-team effort doubled to include dropped candidates; outside-economist hours and validation-trial compute added; route-specific inference; maintenance and evaluation inference for both options.</li>
+          <li><strong>Recommendation:</strong> the research-assistant argument is applied symmetrically; the end state is left open among H1, H3, and H4; the second pilot slice is costed at 8–14 engineer-weeks, with a cheaper variant as an open question.</li>
+        </ul>
       </section>
 
-      <section id="sources">
-        <h2>Sources and status</h2>
-        <p class="prose">This page renders the canonical Markdown brief in the project repository. Every claim is traceable to the design documents and dated evidence notes listed there, each labelled by evidence level: <span class="ev">P-full</span> primary, full text · <span class="ev">P-page</span> primary page · <span class="ev">S</span> secondary · <span class="ev">U</span> unverified.</p>
-        <ul class="prose">
-          <li>Brief (canonical): <span class="path">docs/architecture/architecture-decision-brief.md</span></li>
-          <li>Option designs: <span class="path">docs/architecture/option-a-hosted-platform.md</span>, <span class="path">docs/architecture/option-b-local-skill.md</span></li>
-          <li>Cost model: <span class="path">docs/architecture/cost-and-effort-model.md</span></li>
-          <li>Method: <span class="path">docs/methodology/</span>, <span class="path">docs/interview/expert-interview-protocol.md</span>, <span class="path">schemas/</span></li>
-          <li>Pilot: <span class="path">docs/pilot/pilot-evaluation-plan.md</span> · Decisions: <span class="path">docs/decisions/decision-log.md</span></li>
+      <section id="zh" class="zh" lang="zh-Hans" aria-labelledby="h-zh">
+        <h2 id="h-zh">执行摘要</h2>
+        <p class="mt-label"><span>机器翻译，未经审校</span> <span aria-hidden="true">·</span> <span lang="en">Machine translation, not reviewed</span></p>
+        <p class="note">本节为第 1 节的机器翻译，术语依据项目的中英术语表（该术语表同样未经审校，见 <span class="path">docs/architecture/bilingual-design.md</span>）。如与英文原文有出入，以英文原文为准。</p>
+        <p class="note" lang="en">Machine translation of §1. Its terms follow the project’s EN–ZH glossary, which has not been reviewed either. Where the two texts differ, the English governs.</p>
+        <p><strong>我们要决定的是什么。</strong>仅限于<em>面向贡献者的那一层</em>：AI 引导的访谈在哪里运行，代码在哪里运行，谁为模型付费，以及材料由谁持有。科学方法在两种方案下相同，并另行规定：访谈规程、正确复现包与错误版本复现包、验证程序校验，以及独立评审。</p>
+        <p><strong>分析表明：</strong></p>
+        <ol class="findings">
+          <li><strong>界面不如共享方法重要。</strong>两种方案运行同一套访谈规程，产出同样符合数据模式（schema）的贡献包，并进入同一条内部流程；在这条流程中，评测基准团队的<em>任务引导人</em>（shepherd）将每个候选项转化为经过验证的任务。无论选择哪种方案，共享核心约需 10–17.5 个工程师周。<strong>除此之外，两种方案的工程投入相当：</strong>方案 A 约需 12–19.5 个工程师周，方案 B 约需 11.5–20.5 个工程师周。</li>
+          <li><strong>资金不是主要区别。</strong>按 API 标价计算，AI 访谈每份贡献约需 <strong>13–17 美元</strong>（区间为 5–46 美元），200 份贡献约需 3,400 美元。人力投入与验证占主导：200 份贡献约需 <strong>8,000 小时任务引导团队工时</strong>、3,000 小时外部经济学者工时，以及 <strong>100,000 美元的验证试验算力</strong>（中心估计值 <abbr class="ev" title="未经核实（unverified）">[U]</abbr>）。架构是否会改变任务引导工时尚未经过检验，其影响可能超过其他所有成本差异。</li>
+          <li class="wide">
+            <p><strong>两种方案之间有五项实质区别：</strong></p>
+            <div class="table-wrap">
+              <table class="bt stack" aria-label="两种方案之间的五项实质区别">
+                <thead>
+                  <tr><th scope="col">区别</th><th scope="col"><span class="opt a">方案 A</span>（托管）</th><th scope="col"><span class="opt b">方案 B</span>（本地）</th></tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">接入</th><td class="a" data-label="方案 A（托管）">一个浏览器；访谈开始前约需 15–35 分钟，无需安装</td><td class="b" data-label="方案 B（本地）">Claude Code（终端，或桌面应用的 Code 标签页）以及一个可下载的工作区；访谈开始前约需 31–66 分钟</td></tr>
+                  <tr><th scope="row">代码执行</th><td class="a" data-label="方案 A（托管）">贡献者自己的环境（包括 Stata），通过运行包（run kit）执行，每次运行需往返一次；工作人员的机器；可选的 R/Python 沙箱</td><td class="b" data-label="方案 B（本地）">贡献者自己的环境（包括 Stata），由模型在会话中迭代运行</td></tr>
+                  <tr><th scope="row">一致性</th><td class="a" data-label="方案 A（托管）">整套访谈者配置（提示词、工具、模型、推理强度）在服务器端固定</td><td class="b" data-label="方案 B（本地）">模型被固定、禁止切换并予以记录；客户端版本和贡献者的用户级配置各不相同，并予以记录</td></tr>
+                  <tr><th scope="row">保管</th><td class="a" data-label="方案 A（托管）">项目方及其数据处理方自首次会话起即持有上传内容、草稿和对话记录</td><td class="b" data-label="方案 B（本地）">草稿保留在本地；项目方在提交时收到同样的贡献包；本地的隐藏层级副本除非被清除，否则会一直保留</td></tr>
+                  <tr><th scope="row">对访谈本身的研究</th><td class="a" data-label="方案 A（托管）">所有经同意的会话均可观察，包括中途放弃的会话；在服务器端随机分配</td><td class="b" data-label="方案 B（本地）">只能从已提交的贡献包获取指标；分组分配对贡献者可见</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>两种方案下，Anthropic 都会收到模型读取的任何内容。</p>
+          </li>
+          <li><strong>三项约束同时适用于两种方案。</strong>
+            <ul>
+              <li><strong>地区政策。</strong>Anthropic 的《支持地区政策》（Supported Regions Policy，2026-11-12 生效）不涵盖中国大陆、香港和澳门，其《使用政策》（Usage Policy）禁止为这些地区提供访问便利（“包括终端用户”）。两种方案都无法用 Claude 为位于这些地区的贡献者提供服务。这一约束对两者相同；备选方案则并不对等（<a href="#risks">第 6 节</a>）。</li>
+              <li><strong>AI 对专家的影响。</strong>在 2026 年的一项研究中，具有因果推断经验的分析师在设计选择上有 86% 的情况遵循了 AI 智能体被秘密随机设定的倾向，且很少将其归功于 AI。因此，访谈规程对这种影响进行<em>测量</em>，而不是依赖自我报告。</li>
+              <li><strong>隐藏材料的暴露。</strong>拟议规则是：任何接触到错误版本或标准答案的会话，都在禁止用于训练的商业条款下运行。方案 A 在设计上即满足这一规则。<strong>方案 B 因而需要商业条款下的访问权限</strong>，由项目方提供（前提是 Anthropic 的条款允许，O-018），或由贡献者所在机构提供；消费者订阅计划并不足够。</li>
+            </ul>
+          </li>
+          <li><strong>其他共同风险：</strong>任务引导人的人手；基于公开论文的任务受到污染；以及与一个名为“deepecon”的现有计量经济学软件包重名。</li>
+        </ol>
+        <div class="summary-reco">
+          <p><strong>建议（在比较之后，于<a href="#recommendation">第 9 节</a>论证）。</strong></p>
+          <ul>
+            <li>先建设共享核心。</li>
+            <li>现在就启动法律与条款方面的问询；两种方案都取决于其结果（O-007、O-018）。</li>
+            <li><strong>在同一篇论文上试点两种方案的精简原型（thin slice）</strong>，采用事先登记的对称阈值，并增设一个检验构建流程本身的方法学组。</li>
+            <li>如果团队必须在试点之前做出选择，则由贡献者对开发者工具的熟练程度决定。对于简报所针对的资深贡献者群体，在试点的安装测试表明他们或其研究助理能够熟练使用之前，下行风险较低的选择是<strong>方案 A</strong>。对于熟练的群体，则是<strong>具备商业条款访问权限的方案 B</strong>。</li>
+          </ul>
+        </div>
+        <p><strong>当前需要做出的决定</strong>（<a href="#decisions">第 10 节</a>）：试点两种方案，或采用更省成本的变体；暴露规则；发布政策；由谁支付模型访问费用；法律与条款审查；任务引导人的人员配置；贡献者署名；项目名称。</p>
+      </section>
+
+      <section id="sources" aria-labelledby="h-sources">
+        <h2 id="h-sources">Sources and status</h2>
+        <p>This page renders the canonical Markdown brief, <span class="path">docs/architecture/architecture-decision-brief.md</span> (Draft v0.3.0, 2026-11-05). If the two differ, the Markdown governs. The brief’s links point to files in the project repository, which do not open from this page; their repository paths are listed here as text.</p>
+        <ul class="doc-list">
+          <li id="src-decision-log"><span>Decision log</span><span class="path">docs/decisions/decision-log.md</span></li>
+          <li id="src-option-a"><span>Option A design</span><span class="path">docs/architecture/option-a-hosted-platform.md</span></li>
+          <li id="src-option-b"><span>Option B design</span><span class="path">docs/architecture/option-b-local-skill.md</span></li>
+          <li id="src-cost-model"><span>Cost and effort model</span><span class="path">docs/architecture/cost-and-effort-model.md</span></li>
+          <li id="src-submission"><span>Submission</span><span class="path">docs/architecture/submission-mechanisms.md</span></li>
+          <li id="src-bilingual"><span>Bilingual design (EN–ZH glossary)</span><span class="path">docs/architecture/bilingual-design.md</span></li>
+          <li id="src-construction"><span>Construction protocol</span><span class="path">docs/methodology/benchmark-construction-protocol.md</span></li>
+          <li id="src-verifier"><span>Verifier validation</span><span class="path">docs/methodology/verifier-validation-protocol.md</span></li>
+          <li id="src-interview"><span>Interview protocol</span><span class="path">docs/interview/expert-interview-protocol.md</span></li>
+          <li id="src-pilot"><span>Pilot plan</span><span class="path">docs/pilot/pilot-evaluation-plan.md</span></li>
+          <li id="src-evidence"><span>Evidence notes R1–R9</span><span class="path">docs/research/evidence/</span></li>
+        </ul>
+        <h3>Evidence labels</h3>
+        <p>The project labels factual claims by the evidence behind them:</p>
+        <ul class="legend">
+          <li><abbr class="ev" title="Primary source, read in full">[P-full]</abbr> primary source read in full</li>
+          <li><abbr class="ev" title="Primary page">[P-page]</abbr> primary abstract, landing page, README, or official doc page</li>
+          <li><abbr class="ev" title="Secondary source">[S]</abbr> secondary source</li>
+          <li><abbr class="ev" title="Unverified">[U]</abbr> unverified</li>
         </ul>
       </section>
 
       <footer class="colophon">
         <span>Repository: <code>github.com/Sellyew/Deepecon-Contributtor-Guide-UI</code>, branch <code>claude/friendly-gauss-jno17p</code> (access may be required).</span>
-        <span>Prepared by the project's research-engineering collaborator (Claude) for the research lead. Status: Proposed. Nothing on this page is a decision.</span>
+        <span>The version shown at the top is checked against the Markdown brief by <code>tests/docs/check_report_version.py</code>.</span>
+        <span>Prepared by the project’s research-engineering collaborator (Claude) for the research lead. Status: Proposed. Nothing on this page is a decision.</span>
       </footer>
     </main>
   </div>
