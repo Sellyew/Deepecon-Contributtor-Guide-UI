@@ -158,6 +158,7 @@ Recall of a known-issues key is computed on pre-exposure items only. The similar
 - **Independent check:** methods `clean_room_reimplementation` and `blind_expert_solve` (rubric GT-1); a port or a code review does not qualify.
 - **Output contract:** declarations limited to non-crux conventions from a benchmark-wide `convention_vocabulary`; a benchmark-wide results schema; intermediate outputs taken from re-execution (VVP §4 items 4–5).
 - **Interview records:** `suggestion_assignments` and `suggestion_ledger[].adjudication` (protocol v0.2.1).
+- **Rubric assessments:** `assessor_role` adds `blind_outside_economist`, `status_classifier`, and `release_editor`; an optional `stage` (0–8) records the construction stage of each assessment, per the rubric's stage map.
 - **Descriptions** aligned with VVP v0.3.0 and rubric v0.2.0: noise-only tolerances, the RV-2 materiality rule, the L7 separation bound, and status classification after RV-2 and L4/L7 by one or two classifiers.
 - **Example:** estimand in potential-outcome terms, with the comparison group moved to the identifying assumptions; a noise-only tolerance; a decision space with `requires`; tiers V2a (injection-checked estimate) and V1 (deterministic comparisons); data routes; a blind expert solve, a recognition probe, and an exposure-log entry.
 - **Tests** for each new constraint.

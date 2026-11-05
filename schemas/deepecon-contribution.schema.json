@@ -2315,8 +2315,18 @@
             "shepherd",
             "independent_domain_reviewer",
             "independent_benchmark_reviewer",
+            "blind_outside_economist",
+            "status_classifier",
+            "release_editor",
             "automated_check"
-          ]
+          ],
+          "description": "Who assessed the criteria, as named in the rubric's Who / when column. Blind outside economists assess SP-1, PR-2 and DC-2 from the agent tier only; status classifiers assess GT-2; the release editor approves deviations from the materiality rule (RV-2) and admission."
+        },
+        "stage": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8,
+          "description": "Construction stage (0-8) at which this assessment was made, per the rubric's stage map. A criterion assessed at several stages gets one assessment per stage."
         },
         "assessor_id": {
           "type": "string"

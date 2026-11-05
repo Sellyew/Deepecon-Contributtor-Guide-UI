@@ -373,6 +373,23 @@ def test_accepts_clean_room_independent_check():
         assert _valid(inst), method
 
 
+
+def test_rubric_assessment_roles_and_stage():
+    def assessment(**over):
+        a = {"rubric_version": "0.2.0", "assessor_role": "blind_outside_economist",
+             "assessed_at": "2026-11-06T10:00:00Z", "stage": 5,
+             "items": [{"criterion_id": "SP-1", "rating": "pass"}], "overall": "ready_for_next_stage"}
+        a.update(over)
+        return a
+    for role in ["blind_outside_economist", "status_classifier", "release_editor", "shepherd"]:
+        inst = _example()
+        inst["task_candidates"][0]["quality_assessments"] = [assessment(assessor_role=role)]
+        assert _valid(inst), role
+    for bad in [assessment(stage=9), assessment(stage=-1), assessment(assessor_role="journal_editor")]:
+        inst = _example()
+        inst["task_candidates"][0]["quality_assessments"] = [bad]
+        assert not _valid(inst), bad
+
 if __name__ == "__main__":
     tests = [f for name, f in sorted(globals().items()) if name.startswith("test_")]
     for t in tests:
