@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** team policy v0.2 (2026-11-06). v0.1 answered the research lead's question: "if we discuss locally with a public LLM, will it cause leakage, and is there a solution?" v0.2 applies the task tiers the lead agreed the same day (D-032): the local-only rule now covers held-out tasks, and D-018 governs the rest. Builds on D-018, D-031, and D-032. |
+| **Status** | **Proposed** team policy v0.2 (2026-11-06). v0.1 answered the research lead's question: "if we discuss locally with a public LLM, will it cause leakage, and is there a solution?" v0.2 applies the task tiers the lead agreed the same day (D-032): the local-only rule now covers held-out tasks, and D-018 governs the rest. Builds on D-018, D-031, and D-032. §5 (added the same day) summarizes proposal P-054 on LLM assistance in building tasks. |
 | **Applies to** | Everyone who prepares, reviews, or handles benchmark materials: the team, students, and invited contributors |
 
 ---
@@ -58,7 +58,18 @@ An isolated evaluation environment stops the third risk but not the second: a mo
    - It is not needed for validity: the held-out tier can be handled without any model.
 5. **If a hosted service is used for development or evaluation material,** use it only with the research lead's explicit configuration (D-018), under commercial no-training terms with zero data retention where available, and log it.
 
-## 5. This design work
+## 5. LLM assistance in building tasks (P-054, proposed)
+
+Using an LLM to help build tasks is not prohibited; the rules above decide only where the model may run. In DeepEcon a drafted candidate error is the answer key, so:
+
+- **Development tasks:** a local model, or an external API the research lead configures under no-training terms. Never a personal chat account.
+- **Evaluation tasks:** a local model. Hosted drafting would require amending D-032.
+- **Held-out tasks:** a local model only.
+- **Every candidate records its origin** (team, LLM with model and where it ran, or contributor) and who edited and validated it. Agent-facing text and code edits are written or finally edited by people.
+
+Evidence: [R11](../research/evidence/R11-llm-assistance-in-benchmark-construction.md).
+
+## 6. This design work
 
 These documents are prepared with Claude, which is a hosted model. The V5 package file was uploaded to the Claude session, so it is stored on Anthropic's infrastructure: in the upload and in the session's cloud container. Only its structure entered the model's context. How Anthropic may use stored session files depends on the account's terms [U: account type not known to me].
 

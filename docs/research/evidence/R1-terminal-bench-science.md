@@ -547,6 +547,8 @@ See §8. [P-full]
 | Rubric maintenance | Rubric Regression (100% catch rate on planted defects) and Rubric Eval (precision and recall) [P-full] | `review` key | Gates rubric edits |
 | Authorship | `/authorship`: Pangram document-level Human / Mixed / AI verdict on `instruction.md` or the task sections of a proposal [P-full] | n/a | No: advisory, reviewer-triggered |
 
+*Correction (2026-11-06, [R11](R11-llm-assistance-in-benchmark-construction.md) §7):* the trial-analysis judge (`analyze`) moved from Codex with GPT-6 Astra to Claude Code with Claude Opus 5.5 on 2026-11-05. The implementation rubric also says "Tests should be hand-written, readable, and concise".
+
 **AI-text detection.** Pangram is "Reviewer-run by design: an automatic score on every push becomes something contributors optimise against". `check-ai-detection.py` (GPTZero; fails at ≥ 70% AI probability on `instruction.md` and `solve.sh`) exists but is "not wired into the default validate workflow". [P-full]
 
 **Policy on AI-written instructions.** Contributors are told to write instructions "without AI assistance". The PR checklist asks for a human-written `instruction.md` and a `solve.sh` written "with minimal help from a language model". The rubric judge, however, evaluates only the text and does not fail LLM assistance. Policy is therefore self-attested and backed by advisory detection. This matches GB §9's concern ("it's verbose, it's over-structured, and it reads like it was written to maximize the probability the agent succeeds") only partially. [P-full]

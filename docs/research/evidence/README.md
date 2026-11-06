@@ -21,5 +21,6 @@ Working research notes produced on 2026-11-05 by research agents under the lead 
 | [R8](R8-replication-standards-and-econometric-pitfalls.md) | Replication-package standards and licensing; catalogue of econometric pitfalls; documented real and contested errors; pilot candidates |
 | [R9](R9-hosted-stack-and-compliance.md) | Hosted-platform stack, cost anchors, sandboxes, Stata licensing, data protection, ethics review |
 | [R10](R10-contamination-and-evaluation-isolation.md) | Training contamination versus evaluation-time leakage: held-out splits, semi-private sets, dating, isolation failures (2026-11-06) |
+| [R11](R11-llm-assistance-in-benchmark-construction.md) | LLM assistance in benchmark construction: Terminal-Bench family rules, practice in 20 other benchmarks, exposure and measurement risks, provider data-use defaults (2026-11-06) |
 
 **Environment limits that shaped these notes.** arxiv.org, github.com (web and API), docs.github.com, and several vendor sites were outside the cloud environment's allowed network domains. Papers on arXiv were therefore often verified only through search-engine snippets ([S]) or alternative hosts. *Good Benchmarks* was read in full from a PDF supplied by the research lead.

@@ -19,7 +19,7 @@ Invited contributors (the paper's authors, or invited domain experts) use a smal
 No step needs an AI model, and the site sends nothing to any AI provider (§7). The interface text is translated by the team, from an LLM draft reviewed by people (§6.3). Item text, papers, and code are shown in their original language and are not translated (D-030).
 
 **Out of scope for v1.**
-- Ruled out by the research lead on 2026-11-06: an AI interview; AI-generated errors or flawed packages; Claude Code or other client software; paper discovery; complex onboarding.
+- Ruled out by the research lead on 2026-11-06: an AI interview; AI generation of errors or flawed packages on the site (whether the team may use LLMs offline to draft candidates is proposal P-054); Claude Code or other client software; paper discovery; complex onboarding.
 - Deferred: code execution on the site; grading of agent submissions; real-time collaboration; dashboards; e-mail sent from the site.
 
 ## 2. Decisions recorded on 2026-11-06
