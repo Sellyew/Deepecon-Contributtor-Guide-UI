@@ -1,0 +1,74 @@
+{
+  "schema_version": "0.2.0",
+  "paper_id": "example-school-leadership",
+  "assignment_id": "asg-001",
+  "contributor_id": "ctr-001",
+  "relationship_to_paper": "author",
+  "language": "en",
+  "rubric_version": "example_rubric_1",
+  "candidate_version": "EXAMPLE_V1",
+  "reviews": [
+    {
+      "item_id": "A",
+      "category": "conceptual",
+      "verdict": "keep_with_changes",
+      "checks": {
+        "realistic": "yes",
+        "consequential": "yes",
+        "repair_correct": "unsure"
+      },
+      "suggested_description": "Fictional: the repair should also restrict the robustness sample.",
+      "updated_at": "2026-11-10T09:00:00Z"
+    },
+    {
+      "item_id": "M1",
+      "category": "missing",
+      "verdict": "reject",
+      "reject_reason": "not_consequential",
+      "comment": "Fictional: the appendix already reports this.",
+      "updated_at": "2026-11-10T09:05:00Z"
+    },
+    {
+      "item_id": "T01",
+      "category": "technical",
+      "verdict": "keep",
+      "checks": {
+        "realistic": "yes"
+      },
+      "updated_at": "2026-11-10T09:06:00Z"
+    }
+  ],
+  "proposals": [
+    {
+      "proposal_id": "prop-001",
+      "category": "unsure",
+      "location": "code/analysis/weights.do",
+      "description": "Fictional: weights at the wrong level.",
+      "created_at": "2026-11-10T09:10:00Z"
+    }
+  ],
+  "messages": [
+    {
+      "message_id": "msg-001",
+      "item_id": "A",
+      "author": "contributor",
+      "text": "Fictional: which years does the window cover?",
+      "created_at": "2026-11-10T09:02:00Z"
+    },
+    {
+      "message_id": "msg-002",
+      "item_id": "A",
+      "author": "team",
+      "text": "Fictional answer.",
+      "created_at": "2026-11-10T11:00:00Z"
+    }
+  ],
+  "confirmations": [
+    {
+      "version": 1,
+      "confirmed_at": "2026-11-10T09:15:00Z",
+      "content_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+    }
+  ],
+  "frozen": false
+}

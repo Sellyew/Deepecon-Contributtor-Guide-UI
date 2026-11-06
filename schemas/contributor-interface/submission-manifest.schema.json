@@ -1,68 +1,391 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://deepecon.example/schemas/contributor-interface/submission-manifest/0.1.0",
+  "$id": "https://deepecon.example/schemas/contributor-interface/submission-manifest/0.2.0",
   "title": "Submission manifest",
-  "description": "What a contributor provided for one paper: uploaded files with SHA-256 (the convention of the V5 package's SHA256.json), or a public reference, or another agreed channel; which checklist entries are covered; and the declaration that no data are included.",
+  "description": "What a contributor provided for one paper: a full runnable replication package (D-027) by upload, public reference, or another agreed channel; files with SHA-256; software and run information; the status of every dataset and, for data that cannot be shared, the route by which the team can still run the code.",
   "type": "object",
-  "required": ["schema_version", "paper_id", "assignment_id", "channel", "checklist_coverage", "no_data_declaration", "created_at"],
+  "required": [
+    "schema_version",
+    "paper_id",
+    "assignment_id",
+    "channel",
+    "package",
+    "datasets",
+    "checklist_coverage",
+    "declarations",
+    "created_at"
+  ],
   "properties": {
-    "schema_version": {"const": "0.1.0"},
-    "paper_id": {"$ref": "#/$defs/id"},
-    "assignment_id": {"$ref": "#/$defs/id"},
-    "channel": {"enum": ["upload", "public_reference", "other_agreed"]},
+    "schema_version": {
+      "const": "0.2.0"
+    },
+    "paper_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"
+    },
+    "assignment_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"
+    },
+    "channel": {
+      "enum": [
+        "upload",
+        "public_reference",
+        "other_agreed"
+      ]
+    },
     "files": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["path", "size_bytes", "sha256"],
+        "required": [
+          "path",
+          "size_bytes",
+          "sha256"
+        ],
         "properties": {
-          "path": {"type": "string", "minLength": 1},
-          "size_bytes": {"type": "integer", "minimum": 0},
-          "sha256": {"$ref": "#/$defs/sha256"}
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
         },
         "additionalProperties": false
       }
     },
     "public_reference": {
       "type": "object",
-      "required": ["repository", "identifier", "version"],
+      "required": [
+        "repository",
+        "identifier",
+        "version"
+      ],
       "properties": {
-        "repository": {"type": "string", "minLength": 1},
-        "identifier": {"type": "string", "minLength": 1},
-        "version": {"type": "string", "minLength": 1},
-        "url": {"type": "string", "format": "uri"},
-        "doi": {"type": "string", "pattern": "^10\\.[0-9]{4,9}/\\S+$"}
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "description": "For example openICPSR, Dataverse, Zenodo."
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "doi": {
+          "type": "string",
+          "pattern": "^10\\.[0-9]{4,9}/\\S+$"
+        }
       },
       "additionalProperties": false
     },
-    "other_channel_note": {"type": "string", "minLength": 1},
+    "other_channel_note": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package": {
+      "type": "object",
+      "required": [
+        "master_script",
+        "readme",
+        "software"
+      ],
+      "properties": {
+        "master_script": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path of the script that runs everything in order."
+        },
+        "readme": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path of the README, ideally following the SSDE template README."
+        },
+        "software": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "version"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "dependencies_included": {
+          "type": "boolean"
+        },
+        "author_run_log_included": {
+          "type": "boolean"
+        },
+        "expected_outputs_included": {
+          "type": "boolean"
+        },
+        "run_time": {
+          "enum": [
+            "<10 minutes",
+            "10-60 minutes",
+            "1-2 hours",
+            "2-8 hours",
+            "8-24 hours",
+            "1-3 days",
+            "3-14 days",
+            ">14 days"
+          ],
+          "description": "Bands as in the SSDE template README."
+        },
+        "hardware_note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "datasets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "availability"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string"
+          },
+          "terms": {
+            "type": "string",
+            "description": "Licence or terms of use."
+          },
+          "availability": {
+            "enum": [
+              "included",
+              "public_elsewhere",
+              "restricted_not_included",
+              "confidential_not_included"
+            ]
+          },
+          "where": {
+            "type": "string",
+            "description": "URL, DOI, or provider for data not included."
+          },
+          "access_route": {
+            "enum": [
+              "author_runs_and_returns_outputs",
+              "team_applies_for_access",
+              "secure_environment",
+              "fully_synthetic_substitute",
+              "to_be_decided"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "availability": {
+                  "enum": [
+                    "restricted_not_included",
+                    "confidential_not_included"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "access_route"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "availability": {
+                  "const": "public_elsewhere"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "where"
+              ]
+            }
+          }
+        ]
+      }
+    },
     "checklist_coverage": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["checklist_id", "status"],
+        "required": [
+          "checklist_id",
+          "status"
+        ],
         "properties": {
-          "checklist_id": {"$ref": "#/$defs/id"},
-          "status": {"enum": ["provided", "in_public_package", "not_available", "not_applicable"]},
-          "note": {"type": "string"}
+          "checklist_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"
+          },
+          "status": {
+            "enum": [
+              "provided",
+              "in_public_package",
+              "not_available",
+              "not_applicable"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
       }
     },
-    "no_data_declaration": {"const": true, "description": "The contributor confirms that no raw, restricted, or derived data are included."},
-    "created_at": {"type": "string", "format": "date-time"},
-    "received_at": {"type": "string", "format": "date-time"},
-    "verification_status": {"enum": ["pending", "verified", "mismatch"], "default": "pending"},
-    "verified_by": {"type": "string"}
+    "declarations": {
+      "type": "object",
+      "required": [
+        "no_restricted_or_confidential_data_included"
+      ],
+      "properties": {
+        "no_restricted_or_confidential_data_included": {
+          "const": true
+        },
+        "permission_to_share_included_data": {
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verification_status": {
+      "enum": [
+        "pending",
+        "verified",
+        "mismatch"
+      ]
+    },
+    "verified_by": {
+      "type": "string"
+    }
   },
   "additionalProperties": false,
   "allOf": [
-    {"if": {"properties": {"channel": {"const": "upload"}}}, "then": {"required": ["files"], "properties": {"files": {"minItems": 1}}}},
-    {"if": {"properties": {"channel": {"const": "public_reference"}}}, "then": {"required": ["public_reference"]}},
-    {"if": {"properties": {"channel": {"const": "other_agreed"}}}, "then": {"required": ["other_channel_note"]}}
-  ],
-  "$defs": {
-    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"},
-    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
-  }
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "upload"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "files"
+        ],
+        "properties": {
+          "files": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "public_reference"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "public_reference"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "other_agreed"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "other_channel_note"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "datasets": {
+            "contains": {
+              "properties": {
+                "availability": {
+                  "const": "included"
+                }
+              },
+              "required": [
+                "availability"
+              ]
+            }
+          }
+        },
+        "required": [
+          "datasets"
+        ]
+      },
+      "then": {
+        "properties": {
+          "declarations": {
+            "required": [
+              "no_restricted_or_confidential_data_included",
+              "permission_to_share_included_data"
+            ]
+          }
+        }
+      }
+    }
+  ]
 }

@@ -1,95 +1,173 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://deepecon.example/schemas/contributor-interface/paper-config/0.1.0",
+  "$id": "https://deepecon.example/schemas/contributor-interface/paper-config/0.2.0",
   "title": "Paper configuration",
-  "description": "One configured paper and task version for the contributor interface: what contributors see and what the team asks them to provide.",
+  "description": "One configured paper and task version: categories (which vary by field), what contributors see, translations with provenance, the original-file-name map built by the team, the materials checklist, and submission settings.",
   "type": "object",
-  "required": ["schema_version", "paper_id", "citation", "task_version", "rubric_version", "group_targets", "visible_item_fields", "materials_checklist"],
+  "required": [
+    "schema_version",
+    "paper_id",
+    "citation",
+    "task_version",
+    "rubric_version",
+    "categories",
+    "materials_checklist"
+  ],
   "properties": {
-    "schema_version": {"const": "0.1.0"},
-    "paper_id": {"$ref": "#/$defs/id"},
+    "schema_version": {
+      "const": "0.2.0"
+    },
+    "paper_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"
+    },
+    "field": {
+      "type": "string",
+      "description": "Free label of the field template, e.g. empirical-micro, theory, macro-quantitative."
+    },
     "citation": {
       "type": "object",
-      "required": ["authors", "title", "journal", "year"],
+      "required": [
+        "authors",
+        "title",
+        "journal",
+        "year"
+      ],
       "properties": {
-        "authors": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "title": {"type": "string", "minLength": 1},
-        "journal": {"type": "string", "minLength": 1},
-        "year": {"type": "integer", "minimum": 1900, "maximum": 2100},
-        "volume": {"type": "string"},
-        "issue": {"type": "string"},
-        "pages": {"type": "string"},
-        "doi": {"type": "string", "pattern": "^10\\.[0-9]{4,9}/\\S+$"}
+        "authors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "journal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1900,
+          "maximum": 2100
+        },
+        "volume": {
+          "type": "string"
+        },
+        "issue": {
+          "type": "string"
+        },
+        "pages": {
+          "type": "string"
+        },
+        "doi": {
+          "type": "string",
+          "pattern": "^10\\.[0-9]{4,9}/\\S+$"
+        }
       },
       "additionalProperties": false
     },
-    "replication_package": {"$ref": "#/$defs/publicReference", "description": "The public replication package the team already holds, if any."},
-    "task_version": {"type": "string", "minLength": 1, "description": "For example V5."},
-    "rubric_version": {"type": "string", "minLength": 1, "description": "Must equal the version of the imported rubric."},
-    "candidate_version": {"type": "string"},
-    "candidate_package_sha256": {"$ref": "#/$defs/sha256"},
-    "candidate_package_visible_to_contributors": {"type": "boolean", "default": false, "description": "Whether the assigned contributor may download the agent-facing package (question Q5)."},
-    "group_targets": {
+    "replication_package": {
       "type": "object",
-      "required": ["conceptual", "missing", "technical"],
+      "required": [
+        "repository",
+        "identifier",
+        "version"
+      ],
       "properties": {
-        "conceptual": {"type": "integer", "minimum": 0},
-        "missing": {"type": "integer", "minimum": 0},
-        "technical": {"type": "integer", "minimum": 0}
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "description": "For example openICPSR, Dataverse, Zenodo."
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "doi": {
+          "type": "string",
+          "pattern": "^10\\.[0-9]{4,9}/\\S+$"
+        }
       },
       "additionalProperties": false,
-      "description": "Planning targets shown to contributors; never quotas."
+      "description": "The public replication package, if one exists."
     },
-    "visible_item_fields": {
+    "task_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rubric_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_version": {
+      "type": "string"
+    },
+    "candidate_package_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "candidate_package_visible_to_contributors": {
+      "type": "boolean",
+      "default": true,
+      "description": "The assigned contributor may download the agent-facing package (D-028)."
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/category"
+      }
+    },
+    "translations": {
       "type": "object",
-      "required": ["conceptual", "missing", "technical"],
-      "properties": {
-        "conceptual": {"$ref": "#/$defs/fieldList"},
-        "missing": {"$ref": "#/$defs/fieldList"},
-        "technical": {"$ref": "#/$defs/fieldList"}
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_.-]{1,16}$"
       },
-      "additionalProperties": false,
-      "description": "Item fields shown to contributors (question Q1). Every other field stays hidden."
-    },
-    "item_display_text": {
-      "type": "object",
-      "description": "Human-written display text per item ID and language (question Q6). No machine translation by default.",
-      "propertyNames": {"pattern": "^[A-Za-z0-9_.-]{1,16}$"},
       "additionalProperties": {
         "type": "object",
-        "propertyNames": {"enum": ["en", "zh-Hans"]},
+        "propertyNames": {
+          "enum": [
+            "en",
+            "zh-Hans"
+          ]
+        },
         "additionalProperties": {
-          "type": "object",
-          "required": ["title", "translated_by"],
-          "properties": {
-            "title": {"type": "string", "minLength": 1},
-            "description": {"type": "string"},
-            "translated_by": {"type": "string", "minLength": 1},
-            "machine_translated": {"const": false}
-          },
-          "additionalProperties": false
+          "$ref": "#/$defs/translation"
         }
       }
     },
     "file_name_map": {
       "type": "array",
-      "description": "Optional map from candidate file names to the author's original file names (question Q2).",
+      "description": "Built by the team from the contributor's original file names (D-026).",
       "items": {
         "type": "object",
-        "required": ["candidate_path", "original_path"],
-        "properties": {"candidate_path": {"type": "string", "minLength": 1}, "original_path": {"type": "string", "minLength": 1}},
-        "additionalProperties": false
-      }
-    },
-    "paired_variants": {
-      "type": "array",
-      "description": "Key points for which the team prepared both an error and a missing version, shown side by side (question Q3).",
-      "items": {
-        "type": "object",
-        "required": ["key_point_id", "item_ids"],
+        "required": [
+          "candidate_path",
+          "original_path"
+        ],
         "properties": {
-          "key_point_id": {"$ref": "#/$defs/id"},
-          "item_ids": {"type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": {"type": "string"}}
+          "candidate_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "original_path": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "additionalProperties": false
       }
@@ -99,44 +177,314 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "label", "requirement"],
+        "required": [
+          "id",
+          "label",
+          "requirement"
+        ],
         "properties": {
-          "id": {"$ref": "#/$defs/id"},
-          "label": {"$ref": "#/$defs/bilingualText"},
-          "help": {"$ref": "#/$defs/bilingualText"},
-          "requirement": {"enum": ["required", "optional", "confirm_existing", "not_needed"]}
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"
+          },
+          "label": {
+            "type": "object",
+            "required": [
+              "en"
+            ],
+            "properties": {
+              "en": {
+                "type": "string",
+                "minLength": 1
+              },
+              "zh-Hans": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "help": {
+            "type": "object",
+            "required": [
+              "en"
+            ],
+            "properties": {
+              "en": {
+                "type": "string",
+                "minLength": 1
+              },
+              "zh-Hans": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "requirement": {
+            "enum": [
+              "required",
+              "optional",
+              "confirm_existing",
+              "not_needed"
+            ]
+          }
         },
         "additionalProperties": false
       }
     },
-    "languages": {"type": "array", "items": {"enum": ["en", "zh-Hans"]}, "uniqueItems": true, "default": ["en", "zh-Hans"]}
+    "submission": {
+      "type": "object",
+      "properties": {
+        "runnable_package_required": {
+          "type": "boolean",
+          "default": true
+        },
+        "max_upload_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "accepted_channels": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "upload",
+              "public_reference",
+              "other_agreed"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "languages": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "en",
+          "zh-Hans"
+        ]
+      }
+    }
   },
   "additionalProperties": false,
   "$defs": {
-    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"},
-    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "fieldList": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {"enum": ["id", "title", "files", "file", "criterion", "available_evidence_and_boundary", "acceptable_work", "repair", "critical_requirements", "points", "allowed_scores", "tiers", "scoring_method", "evidence_record_required"]}
-    },
-    "bilingualText": {
+    "category": {
       "type": "object",
-      "required": ["en"],
-      "properties": {"en": {"type": "string", "minLength": 1}, "zh-Hans": {"type": "string", "minLength": 1}},
-      "additionalProperties": false
-    },
-    "publicReference": {
-      "type": "object",
-      "required": ["repository", "identifier", "version"],
+      "required": [
+        "id",
+        "source_array",
+        "label",
+        "summary",
+        "field_roles",
+        "visible_roles"
+      ],
       "properties": {
-        "repository": {"type": "string", "minLength": 1, "description": "For example openICPSR."},
-        "identifier": {"type": "string", "minLength": 1},
-        "version": {"type": "string", "minLength": 1},
-        "url": {"type": "string", "format": "uri"},
-        "doi": {"type": "string", "pattern": "^10\\.[0-9]{4,9}/\\S+$"}
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"
+        },
+        "source_array": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Key of the item array in the team's rubric file (V5: conceptual, missing, technical)."
+        },
+        "label": {
+          "type": "object",
+          "required": [
+            "en"
+          ],
+          "properties": {
+            "en": {
+              "type": "string",
+              "minLength": 1
+            },
+            "zh-Hans": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "summary": {
+          "type": "object",
+          "required": [
+            "en"
+          ],
+          "properties": {
+            "en": {
+              "type": "string",
+              "minLength": 1
+            },
+            "zh-Hans": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false,
+          "description": "One line telling contributors what this category means."
+        },
+        "target": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Planning target, never a quota."
+        },
+        "location_kind": {
+          "enum": [
+            "code",
+            "paper",
+            "data",
+            "mixed"
+          ]
+        },
+        "field_roles": {
+          "type": "object",
+          "required": [
+            "title"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "points": {
+              "type": "string",
+              "minLength": 1
+            },
+            "locations": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            "acceptable_answer": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            "critical_requirements": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false,
+          "description": "Which fields of the team's rubric items fill each display role. Fields not named here are never shown."
+        },
+        "visible_roles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "title",
+              "summary",
+              "locations",
+              "change",
+              "description",
+              "acceptable_answer",
+              "critical_requirements",
+              "affected_results",
+              "consequence",
+              "weight"
+            ]
+          },
+          "description": "Roles shown to contributors. summary, change, affected_results and consequence come from the item map; weight is the item's points."
+        }
       },
       "additionalProperties": false
+    },
+    "translation": {
+      "type": "object",
+      "required": [
+        "title",
+        "method"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "consequence": {
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "llm",
+            "human"
+          ]
+        },
+        "model": {
+          "type": "object",
+          "required": [
+            "name",
+            "mode"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "type": "string"
+            },
+            "mode": {
+              "enum": [
+                "local",
+                "external_api"
+              ],
+              "description": "local: a model on project hardware (no third party). external_api: a provider's API (data leave the project; needs the research lead's explicit configuration)."
+            }
+          },
+          "additionalProperties": false
+        },
+        "translated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reviewed_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "llm"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "model"
+            ]
+          }
+        }
+      ],
+      "description": "Contributors see a translation only after a team member has reviewed it (reviewed_by and reviewed_at present); it is labelled with its method."
     }
   }
 }

@@ -1,0 +1,91 @@
+{
+  "version": "example_rubric_1",
+  "maximum": 25,
+  "candidate_version": "EXAMPLE_V1",
+  "conceptual": [
+    {
+      "id": "A",
+      "points": 8,
+      "title": "FICTIONAL: comparison group includes units treated before the study window",
+      "files": "02_code/example_build_panel.do; 02_code/example_table_main.do",
+      "criterion": "Fictional placeholder.",
+      "scoring_method": "Fictional placeholder.",
+      "allowed_scores": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ],
+      "tiers": {
+        "0": "Fictional placeholder.",
+        "2": "Fictional placeholder.",
+        "4": "Fictional placeholder.",
+        "6": "Fictional placeholder.",
+        "8": "Fictional placeholder."
+      },
+      "critical_requirements": [
+        "Fictional requirement one.",
+        "Fictional requirement two."
+      ],
+      "evidence_record_required": [
+        "file",
+        "mechanism"
+      ]
+    }
+  ],
+  "missing": [
+    {
+      "id": "M1",
+      "points": 14,
+      "title": "FICTIONAL: pre-trend check removed from the event-study workflow",
+      "available_evidence_and_boundary": "Fictional placeholder.",
+      "acceptable_work": "Fictional placeholder.",
+      "scoring_method": "Fictional placeholder.",
+      "allowed_scores": [
+        0,
+        3,
+        6,
+        10,
+        14
+      ],
+      "tiers": {
+        "0": "Fictional placeholder.",
+        "3": "Fictional placeholder.",
+        "6": "Fictional placeholder.",
+        "10": "Fictional placeholder.",
+        "14": "Fictional placeholder."
+      },
+      "critical_requirements": [
+        "Fictional requirement."
+      ]
+    }
+  ],
+  "technical": [
+    {
+      "id": "T01",
+      "points": 3,
+      "title": "FICTIONAL: merge keeps unmatched rows from the wrong side",
+      "file": "02_code/example_merge_registry.do",
+      "repair": "Fictional placeholder.",
+      "allowed_scores": [
+        0,
+        1,
+        3
+      ],
+      "tiers": {
+        "0": "Fictional placeholder.",
+        "1": "Fictional placeholder.",
+        "3": "Fictional placeholder."
+      },
+      "scoring_method": "Fictional placeholder."
+    }
+  ],
+  "penalties": {
+    "verified_false_assertion_per_root": 10
+  },
+  "global_policy": {
+    "coarse_scores": "Fictional placeholder."
+  },
+  "calibration_status": "Fictional example; not calibrated."
+}

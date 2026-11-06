@@ -21,12 +21,12 @@ From a published paper, the team prepares a validated **correct** replication an
 
 | Document | Status |
 |---|---|
-| [MVP contributor interface](docs/architecture/mvp-contributor-interface.md) (v0.2) and its [implementation plan](docs/architecture/mvp-implementation-plan.md) | **Current**, Proposed drafts; six questions for the research lead (§9) |
+| [MVP contributor interface](docs/architecture/mvp-contributor-interface.md) (v0.3) and its [implementation plan](docs/architecture/mvp-implementation-plan.md) (v0.2) | **Current**, Proposed drafts; the research lead's answers of 2026-11-06 recorded (D-025 to D-029) |
 | [Example package V5: structural review](docs/requirements/2026-11-06-example-package-v5-review.md) | Reference (structure only; no rubric content) |
 | [Bilingual design](docs/architecture/bilingual-design.md) | Current (principles and glossary) |
 | [Verifier validation protocol](docs/methodology/verifier-validation-protocol.md), [task-quality rubric](docs/methodology/task-quality-rubric.md), [construction protocol](docs/methodology/benchmark-construction-protocol.md) | The team's internal methodology for turning confirmed candidates into tasks; interview-related passages superseded |
 | [Research and methodology review](docs/research/research-and-methodology-review.md); [evidence notes](docs/research/evidence/); [reading notes](docs/research/reading-notes/) | Reference |
-| [Contributor-interface schemas](schemas/contributor-interface/README.md) | **Current**, Proposed draft 0.1.0 with synthetic examples and tests; the [earlier schema](schemas/README.md) is superseded |
+| [Contributor-interface schemas](schemas/contributor-interface/README.md) | **Current**, Proposed draft 0.2.0 with fictional empirical and theory examples and tests; the [earlier schema](schemas/README.md) is superseded |
 | [Decision brief](docs/architecture/architecture-decision-brief.md), [Option A](docs/architecture/option-a-hosted-platform.md), [Option B](docs/architecture/option-b-local-skill.md), [interview protocol](docs/interview/expert-interview-protocol.md), [pilot plan](docs/pilot/pilot-evaluation-plan.md), [cost model](docs/architecture/cost-and-effort-model.md), [submission mechanisms](docs/architecture/submission-mechanisms.md), [initial assessment](docs/assessment/initial-assessment.md) | Superseded on 2026-11-06; kept as records |
 
 ## Repository layout

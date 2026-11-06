@@ -1,0 +1,164 @@
+{
+  "schema_version": "0.2.0",
+  "paper_id": "example-matching-theory",
+  "field": "theory",
+  "citation": {
+    "authors": [
+      "Example, Ana",
+      "Placeholder, Ben"
+    ],
+    "title": "Matching with Frictions (FICTIONAL EXAMPLE)",
+    "journal": "Journal of Examples",
+    "year": 2026
+  },
+  "task_version": "EXAMPLE_V1",
+  "rubric_version": "example_theory_rubric_1",
+  "candidate_version": "EXAMPLE_V1",
+  "candidate_package_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "candidate_package_visible_to_contributors": true,
+  "categories": [
+    {
+      "id": "derivation",
+      "source_array": "derivation_errors",
+      "label": {
+        "en": "Derivation error",
+        "zh-Hans": "推导错误"
+      },
+      "summary": {
+        "en": "A step of a derivation made wrong.",
+        "zh-Hans": "推导中的某一步被改错。"
+      },
+      "target": 1,
+      "location_kind": "paper",
+      "field_roles": {
+        "title": "title",
+        "points": "points",
+        "locations": [
+          "location"
+        ],
+        "description": [
+          "explanation"
+        ],
+        "acceptable_answer": [
+          "correct_step"
+        ]
+      },
+      "visible_roles": [
+        "title",
+        "summary",
+        "locations",
+        "change",
+        "description",
+        "acceptable_answer",
+        "affected_results"
+      ]
+    },
+    {
+      "id": "assumption",
+      "source_array": "assumption_errors",
+      "label": {
+        "en": "Assumption error",
+        "zh-Hans": "假设错误"
+      },
+      "summary": {
+        "en": "An assumption a result needs is removed or misstated.",
+        "zh-Hans": "某个结论所需的假设被删除或表述有误。"
+      },
+      "target": 1,
+      "location_kind": "paper",
+      "field_roles": {
+        "title": "title",
+        "points": "points",
+        "locations": [
+          "location"
+        ],
+        "description": [
+          "explanation"
+        ],
+        "acceptable_answer": [
+          "acceptable_fix"
+        ]
+      },
+      "visible_roles": [
+        "title",
+        "summary",
+        "locations",
+        "change",
+        "description",
+        "acceptable_answer",
+        "affected_results"
+      ]
+    },
+    {
+      "id": "proof-gap",
+      "source_array": "proof_gaps",
+      "label": {
+        "en": "Proof gap",
+        "zh-Hans": "证明缺口"
+      },
+      "summary": {
+        "en": "A necessary step of a proof is removed.",
+        "zh-Hans": "证明中的某个必要步骤被删除。"
+      },
+      "target": 1,
+      "location_kind": "paper",
+      "field_roles": {
+        "title": "title",
+        "points": "points",
+        "locations": [
+          "location"
+        ],
+        "description": [
+          "explanation"
+        ],
+        "acceptable_answer": [
+          "acceptable_fix"
+        ]
+      },
+      "visible_roles": [
+        "title",
+        "summary",
+        "locations",
+        "change",
+        "description",
+        "acceptable_answer"
+      ]
+    }
+  ],
+  "materials_checklist": [
+    {
+      "id": "source",
+      "label": {
+        "en": "LaTeX source of the paper and appendix",
+        "zh-Hans": "论文及附录的 LaTeX 源文件"
+      },
+      "requirement": "required"
+    },
+    {
+      "id": "numerical",
+      "label": {
+        "en": "Any code used to check derivations or compute examples, with a master script",
+        "zh-Hans": "用于核验推导或计算示例的代码，并有一个主脚本"
+      },
+      "requirement": "optional"
+    },
+    {
+      "id": "file-names",
+      "label": {
+        "en": "Your original file names, so that we can map them to the task files",
+        "zh-Hans": "您的原始文件名，以便我们将其与任务文件对应"
+      },
+      "requirement": "required"
+    }
+  ],
+  "submission": {
+    "runnable_package_required": false,
+    "accepted_channels": [
+      "upload"
+    ]
+  },
+  "languages": [
+    "en",
+    "zh-Hans"
+  ]
+}

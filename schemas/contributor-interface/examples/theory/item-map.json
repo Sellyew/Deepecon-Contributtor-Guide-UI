@@ -1,0 +1,108 @@
+{
+  "schema_version": "0.1.0",
+  "paper_id": "example-matching-theory",
+  "rubric_version": "example_theory_rubric_1",
+  "nodes": [
+    {
+      "id": "s3",
+      "kind": "paper_section",
+      "label": {
+        "en": "Section 3: Equilibrium"
+      },
+      "order": 1
+    },
+    {
+      "id": "p2",
+      "kind": "proposition",
+      "label": {
+        "en": "Proposition 2"
+      },
+      "parent": "s3",
+      "order": 2
+    },
+    {
+      "id": "app-a",
+      "kind": "appendix",
+      "label": {
+        "en": "Appendix A"
+      },
+      "order": 3
+    },
+    {
+      "id": "eq-a7",
+      "kind": "derivation",
+      "label": {
+        "en": "Equation (A.7)"
+      },
+      "parent": "app-a",
+      "order": 4
+    },
+    {
+      "id": "app-b",
+      "kind": "appendix",
+      "label": {
+        "en": "Appendix B"
+      },
+      "order": 5
+    },
+    {
+      "id": "l1",
+      "kind": "proposition",
+      "label": {
+        "en": "Lemma 1"
+      },
+      "parent": "app-b",
+      "order": 6
+    }
+  ],
+  "edges": [
+    {
+      "from": "l1",
+      "to": "p2"
+    },
+    {
+      "from": "eq-a7",
+      "to": "p2"
+    }
+  ],
+  "items": {
+    "D1": {
+      "summary": "Fictional: a sign flips in the first-order condition.",
+      "anchors": [
+        "eq-a7"
+      ],
+      "affected_results": [
+        "p2"
+      ],
+      "change": {
+        "kind": "text",
+        "original": {
+          "locator": "Appendix A, eq. (A.7)",
+          "text": "u'(c) = λ (fictional)"
+        },
+        "modified": {
+          "locator": "Appendix A, eq. (A.7)",
+          "text": "u'(c) = -λ (fictional)"
+        }
+      }
+    },
+    "S1": {
+      "summary": "Fictional: concavity is no longer assumed.",
+      "anchors": [
+        "p2"
+      ],
+      "affected_results": [
+        "p2"
+      ]
+    },
+    "G1": {
+      "summary": "Fictional: the existence step is gone.",
+      "anchors": [
+        "l1"
+      ],
+      "affected_results": [
+        "p2"
+      ]
+    }
+  }
+}

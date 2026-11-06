@@ -1,0 +1,253 @@
+{
+  "schema_version": "0.2.0",
+  "paper_id": "example-school-leadership",
+  "field": "empirical-micro",
+  "citation": {
+    "authors": [
+      "Example, Ana",
+      "Placeholder, Ben"
+    ],
+    "title": "School Leadership and Student Outcomes (FICTIONAL EXAMPLE)",
+    "journal": "Journal of Examples",
+    "year": 2026
+  },
+  "task_version": "EXAMPLE_V1",
+  "rubric_version": "example_rubric_1",
+  "candidate_version": "EXAMPLE_V1",
+  "candidate_package_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "candidate_package_visible_to_contributors": true,
+  "categories": [
+    {
+      "id": "conceptual",
+      "source_array": "conceptual",
+      "label": {
+        "en": "Conceptual error",
+        "zh-Hans": "学理错误"
+      },
+      "summary": {
+        "en": "An economic-analysis error planted in the code.",
+        "zh-Hans": "在代码中植入的经济学分析错误。"
+      },
+      "target": 1,
+      "location_kind": "code",
+      "field_roles": {
+        "title": "title",
+        "points": "points",
+        "locations": [
+          "files"
+        ],
+        "description": [
+          "criterion"
+        ],
+        "critical_requirements": "critical_requirements"
+      },
+      "visible_roles": [
+        "title",
+        "summary",
+        "locations",
+        "change",
+        "affected_results",
+        "consequence",
+        "description",
+        "acceptable_answer",
+        "critical_requirements"
+      ]
+    },
+    {
+      "id": "missing",
+      "source_array": "missing",
+      "label": {
+        "en": "Missing analysis",
+        "zh-Hans": "缺失分析"
+      },
+      "summary": {
+        "en": "A necessary analysis removed, which a careful researcher should add.",
+        "zh-Hans": "被删除的必要分析，细心的研究者应当补上。"
+      },
+      "target": 1,
+      "location_kind": "code",
+      "field_roles": {
+        "title": "title",
+        "points": "points",
+        "description": [
+          "available_evidence_and_boundary"
+        ],
+        "acceptable_answer": [
+          "acceptable_work"
+        ],
+        "critical_requirements": "critical_requirements"
+      },
+      "visible_roles": [
+        "title",
+        "summary",
+        "locations",
+        "change",
+        "affected_results",
+        "consequence",
+        "description",
+        "acceptable_answer",
+        "critical_requirements"
+      ]
+    },
+    {
+      "id": "technical",
+      "source_array": "technical",
+      "label": {
+        "en": "Technical error",
+        "zh-Hans": "技术错误"
+      },
+      "summary": {
+        "en": "A code-level error.",
+        "zh-Hans": "代码层面的错误。"
+      },
+      "target": 1,
+      "location_kind": "code",
+      "field_roles": {
+        "title": "title",
+        "points": "points",
+        "locations": [
+          "file"
+        ],
+        "description": [
+          "repair"
+        ]
+      },
+      "visible_roles": [
+        "title",
+        "summary",
+        "locations",
+        "change",
+        "affected_results",
+        "consequence",
+        "description",
+        "acceptable_answer",
+        "critical_requirements"
+      ]
+    }
+  ],
+  "materials_checklist": [
+    {
+      "id": "readme",
+      "label": {
+        "en": "README following the journal data-editor template (data availability statement, software, run time, licences)",
+        "zh-Hans": "遵循期刊数据编辑模板的 README（数据可得性说明、软件、运行时间、许可）"
+      },
+      "requirement": "required"
+    },
+    {
+      "id": "code",
+      "label": {
+        "en": "Complete code from raw inputs to every table and figure, with one master script",
+        "zh-Hans": "从原始输入到全部表格和图形的完整代码，并有一个主脚本"
+      },
+      "requirement": "confirm_existing"
+    },
+    {
+      "id": "dependencies",
+      "label": {
+        "en": "User-written packages included or pinned, with software versions",
+        "zh-Hans": "附上或固定版本的用户编写程序包，以及软件版本"
+      },
+      "requirement": "confirm_existing"
+    },
+    {
+      "id": "data",
+      "label": {
+        "en": "Data you may share, or for each dataset you may not share: source, terms, and how we can run the code",
+        "zh-Hans": "可以共享的数据；对不能共享的数据集，说明来源、条款以及我们如何运行代码"
+      },
+      "requirement": "required"
+    },
+    {
+      "id": "run-log",
+      "label": {
+        "en": "Log of your own complete run, and the outputs it produced",
+        "zh-Hans": "您本人完整运行一次的日志及其输出"
+      },
+      "requirement": "required"
+    },
+    {
+      "id": "results-map",
+      "label": {
+        "en": "Which script produces each table and figure in the paper",
+        "zh-Hans": "论文中每张表格和图形由哪个脚本生成"
+      },
+      "requirement": "required"
+    },
+    {
+      "id": "file-names",
+      "label": {
+        "en": "Your original file names, so that we can map them to the task files",
+        "zh-Hans": "您的原始文件名，以便我们将其与任务文件对应"
+      },
+      "requirement": "required"
+    },
+    {
+      "id": "qualifications",
+      "label": {
+        "en": "Known qualifications or limitations you want recorded",
+        "zh-Hans": "您希望记录的已知限定条件或局限"
+      },
+      "requirement": "optional"
+    }
+  ],
+  "submission": {
+    "runnable_package_required": true,
+    "max_upload_bytes": 21474836480,
+    "accepted_channels": [
+      "upload",
+      "public_reference",
+      "other_agreed"
+    ]
+  },
+  "languages": [
+    "en",
+    "zh-Hans"
+  ],
+  "replication_package": {
+    "repository": "example-archive",
+    "identifier": "000000",
+    "version": "V1"
+  },
+  "translations": {
+    "A": {
+      "zh-Hans": {
+        "title": "虚构示例：对照组包含研究窗口之前已受处理的单位",
+        "summary": "虚构示例摘要。",
+        "method": "llm",
+        "model": {
+          "name": "example-local-model",
+          "mode": "local"
+        },
+        "translated_at": "2026-11-07T08:00:00Z",
+        "reviewed_by": "team-member-01",
+        "reviewed_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    "T01": {
+      "zh-Hans": {
+        "title": "虚构示例：合并时保留了错误一侧的未匹配行",
+        "method": "llm",
+        "model": {
+          "name": "example-local-model",
+          "mode": "local"
+        },
+        "translated_at": "2026-11-07T08:00:00Z"
+      }
+    }
+  },
+  "file_name_map": [
+    {
+      "candidate_path": "02_code/example_build_panel.do",
+      "original_path": "code/build/panel.do"
+    },
+    {
+      "candidate_path": "02_code/example_merge_registry.do",
+      "original_path": "code/build/registry_merge.do"
+    },
+    {
+      "candidate_path": "02_code/example_table_main.do",
+      "original_path": "code/analysis/table2.do"
+    }
+  ]
+}

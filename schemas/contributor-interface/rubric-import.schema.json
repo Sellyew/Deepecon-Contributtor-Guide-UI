@@ -1,55 +1,24 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://deepecon.example/schemas/contributor-interface/rubric-import/0.1.0",
-  "title": "Rubric import (team rubric, V5 format)",
-  "description": "Validates the structure the contributor interface relies on in the team's rubric file (the V5 Rubric.json format: three item groups with fixed points). It is deliberately permissive: every field not listed here is preserved untouched and is hidden from contributors unless the paper configuration makes it visible. Cross-field rules (points equal the largest allowed score; tier keys equal the allowed scores; unique item IDs; group points sum to the maximum) are checked by validation/rubric_checks.py.",
+  "$id": "https://deepecon.example/schemas/contributor-interface/rubric-import/0.2.0",
+  "title": "Rubric import (the team's own rubric file)",
+  "description": "Deliberately minimal: the team's rubric is imported as it is, whatever its field. Item categories and points differ by field (V5's conceptual / missing / technical groups are one example; a theory paper may have derivation errors). Which arrays hold items, and which item fields fill each display role, is declared in the paper configuration (categories[].source_array and field_roles); validation/rubric_checks.py checks the file against that declaration. Every field is preserved; contributors see only configured roles.",
   "type": "object",
-  "required": ["version", "maximum", "conceptual", "missing", "technical"],
+  "required": [
+    "version"
+  ],
   "properties": {
-    "version": {"type": "string", "minLength": 1, "description": "Rubric version label, recorded with every contributor review."},
-    "maximum": {"type": "integer", "minimum": 1},
-    "candidate_version": {"type": "string", "description": "Version label of the agent-facing candidate package the rubric belongs to."},
-    "conceptual": {"type": "array", "items": {"$ref": "#/$defs/conceptualItem"}, "description": "Economic-analysis errors planted in the code (学理)."},
-    "missing": {"type": "array", "items": {"$ref": "#/$defs/missingItem"}, "description": "Necessary analyses removed, which a careful researcher should add (补全)."},
-    "technical": {"type": "array", "items": {"$ref": "#/$defs/technicalItem"}, "description": "Code-level errors (技术)."},
-    "penalties": {"type": "object"},
-    "gates": {"type": "object"},
-    "global_policy": {"type": "object"},
-    "calibration_status": {"type": "string"}
-  },
-  "additionalProperties": true,
-  "$defs": {
-    "baseItem": {
-      "type": "object",
-      "required": ["id", "points", "title"],
-      "properties": {
-        "id": {"type": "string", "pattern": "^[A-Za-z0-9_.-]{1,16}$"},
-        "points": {"type": "integer", "minimum": 0},
-        "title": {"type": "string", "minLength": 1},
-        "allowed_scores": {"type": "array", "minItems": 2, "items": {"type": "integer", "minimum": 0}},
-        "tiers": {"type": "object", "propertyNames": {"pattern": "^[0-9]+$"}, "additionalProperties": {"type": "string"}},
-        "critical_requirements": {"type": "array", "items": {"type": "string"}},
-        "evidence_record_required": {"type": "array", "items": {"type": "string"}},
-        "scoring_method": {"type": "string"}
-      }
+    "version": {
+      "type": "string",
+      "minLength": 1
     },
-    "conceptualItem": {
-      "allOf": [
-        {"$ref": "#/$defs/baseItem"},
-        {"required": ["files", "criterion"], "properties": {"files": {"type": "string", "minLength": 1}, "criterion": {"type": "string", "minLength": 1}}}
-      ]
+    "maximum": {
+      "type": "integer",
+      "minimum": 1
     },
-    "missingItem": {
-      "allOf": [
-        {"$ref": "#/$defs/baseItem"},
-        {"required": ["acceptable_work"], "properties": {"available_evidence_and_boundary": {"type": "string"}, "acceptable_work": {"type": "string", "minLength": 1}}}
-      ]
-    },
-    "technicalItem": {
-      "allOf": [
-        {"$ref": "#/$defs/baseItem"},
-        {"required": ["file", "repair"], "properties": {"file": {"type": "string", "minLength": 1}, "repair": {"type": "string", "minLength": 1}}}
-      ]
+    "candidate_version": {
+      "type": "string"
     }
-  }
+  },
+  "additionalProperties": true
 }

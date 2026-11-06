@@ -1,0 +1,40 @@
+{
+  "version": "example_theory_rubric_1",
+  "maximum": 30,
+  "derivation_errors": [
+    {
+      "id": "D1",
+      "points": 12,
+      "title": "FICTIONAL: sign error in the first-order condition",
+      "location": "Appendix A, eq. (A.7)",
+      "explanation": "Fictional placeholder.",
+      "correct_step": "Fictional placeholder.",
+      "allowed_scores": [
+        0,
+        4,
+        8,
+        12
+      ]
+    }
+  ],
+  "assumption_errors": [
+    {
+      "id": "S1",
+      "points": 10,
+      "title": "FICTIONAL: concavity assumption dropped from Proposition 2",
+      "location": "Section 3, Proposition 2",
+      "explanation": "Fictional placeholder.",
+      "acceptable_fix": "Fictional placeholder."
+    }
+  ],
+  "proof_gaps": [
+    {
+      "id": "G1",
+      "points": 8,
+      "title": "FICTIONAL: existence step removed from the proof of Lemma 1",
+      "location": "Appendix B, proof of Lemma 1",
+      "explanation": "Fictional placeholder.",
+      "acceptable_fix": "Fictional placeholder."
+    }
+  ]
+}

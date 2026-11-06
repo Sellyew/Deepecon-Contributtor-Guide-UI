@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deepecon.example/schemas/contributor-interface/item-map/0.1.0",
+  "title": "Item map (expert-only)",
+  "description": "Prepared by the team. A map of the paper's workflow or argument (nodes and edges) and, for each item, where it sits on the map, the local change (original versus modified excerpt), the results it affects, and a one-line summary and consequence. Expert-only tier: it shows the planted changes, so it is visible only to the assigned contributor and never to agents.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "paper_id",
+    "rubric_version",
+    "nodes",
+    "items"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "paper_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"
+    },
+    "rubric_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+          },
+          "kind": {
+            "enum": [
+              "data_input",
+              "data_build",
+              "analysis",
+              "output_table",
+              "output_figure",
+              "paper_section",
+              "assumption",
+              "derivation",
+              "proposition",
+              "appendix",
+              "other"
+            ]
+          },
+          "label": {
+            "type": "object",
+            "required": [
+              "en"
+            ],
+            "properties": {
+              "en": {
+                "type": "string",
+                "minLength": 1
+              },
+              "zh-Hans": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "original_path": {
+            "type": "string",
+            "description": "The contributor's own file name or paper locator."
+          },
+          "parent": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "items": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_.-]{1,16}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "anchors"
+        ],
+        "properties": {
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "description": "One plain-language sentence, in English; translations live in the paper configuration."
+          },
+          "anchors": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+            }
+          },
+          "affected_results": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+            }
+          },
+          "consequence": {
+            "type": "string"
+          },
+          "change": {
+            "type": "object",
+            "required": [
+              "kind",
+              "original",
+              "modified"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "code",
+                  "text"
+                ]
+              },
+              "original": {
+                "$ref": "#/$defs/excerpt"
+              },
+              "modified": {
+                "$ref": "#/$defs/excerpt"
+              }
+            },
+            "additionalProperties": false
+          },
+          "paired_with": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,16}$"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "excerpt": {
+      "type": "object",
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "line_start": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "line_end": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "locator": {
+          "type": "string",
+          "description": "For paper text: section, page, equation or proposition number."
+        },
+        "text": {
+          "type": "string",
+          "description": "May be empty, e.g. where a missing item removes a step."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

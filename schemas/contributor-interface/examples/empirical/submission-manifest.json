@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.2.0",
+  "paper_id": "example-school-leadership",
+  "assignment_id": "asg-001",
+  "channel": "upload",
+  "files": [
+    {
+      "path": "example_replication_package.zip",
+      "size_bytes": 48211337,
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  ],
+  "package": {
+    "master_script": "code/run_all.do",
+    "readme": "README.pdf",
+    "software": [
+      {
+        "name": "Stata",
+        "version": "18"
+      }
+    ],
+    "dependencies_included": true,
+    "author_run_log_included": true,
+    "expected_outputs_included": true,
+    "run_time": "1-2 hours"
+  },
+  "datasets": [
+    {
+      "name": "Fictional school census",
+      "source": "Fictional ministry",
+      "terms": "Fictional open licence",
+      "availability": "included"
+    },
+    {
+      "name": "Fictional student records",
+      "source": "Fictional agency",
+      "terms": "Fictional data-use agreement",
+      "availability": "restricted_not_included",
+      "access_route": "author_runs_and_returns_outputs",
+      "notes": "Fictional."
+    }
+  ],
+  "checklist_coverage": [
+    {
+      "checklist_id": "readme",
+      "status": "provided"
+    },
+    {
+      "checklist_id": "code",
+      "status": "provided"
+    },
+    {
+      "checklist_id": "dependencies",
+      "status": "provided"
+    },
+    {
+      "checklist_id": "data",
+      "status": "provided"
+    },
+    {
+      "checklist_id": "run-log",
+      "status": "provided"
+    },
+    {
+      "checklist_id": "results-map",
+      "status": "provided"
+    },
+    {
+      "checklist_id": "file-names",
+      "status": "provided"
+    },
+    {
+      "checklist_id": "qualifications",
+      "status": "not_applicable"
+    }
+  ],
+  "declarations": {
+    "no_restricted_or_confidential_data_included": true,
+    "permission_to_share_included_data": true
+  },
+  "created_at": "2026-11-12T14:00:00Z",
+  "verification_status": "pending"
+}

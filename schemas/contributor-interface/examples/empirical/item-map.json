@@ -1,0 +1,156 @@
+{
+  "schema_version": "0.1.0",
+  "paper_id": "example-school-leadership",
+  "rubric_version": "example_rubric_1",
+  "nodes": [
+    {
+      "id": "stage-data",
+      "kind": "data_build",
+      "label": {
+        "en": "Data construction",
+        "zh-Hans": "数据构建"
+      },
+      "order": 1
+    },
+    {
+      "id": "f-panel",
+      "kind": "data_build",
+      "label": {
+        "en": "Build panel"
+      },
+      "original_path": "code/build/panel.do",
+      "parent": "stage-data",
+      "order": 2
+    },
+    {
+      "id": "f-merge",
+      "kind": "data_build",
+      "label": {
+        "en": "Merge registry"
+      },
+      "original_path": "code/build/registry_merge.do",
+      "parent": "stage-data",
+      "order": 3
+    },
+    {
+      "id": "stage-analysis",
+      "kind": "analysis",
+      "label": {
+        "en": "Analysis",
+        "zh-Hans": "分析"
+      },
+      "order": 4
+    },
+    {
+      "id": "f-event",
+      "kind": "analysis",
+      "label": {
+        "en": "Event study"
+      },
+      "original_path": "code/analysis/event.do",
+      "parent": "stage-analysis",
+      "order": 5
+    },
+    {
+      "id": "stage-results",
+      "kind": "output_table",
+      "label": {
+        "en": "Results in the paper",
+        "zh-Hans": "论文结果"
+      },
+      "order": 6
+    },
+    {
+      "id": "r-table2",
+      "kind": "output_table",
+      "label": {
+        "en": "Table 2"
+      },
+      "parent": "stage-results",
+      "order": 7
+    },
+    {
+      "id": "r-figure3",
+      "kind": "output_figure",
+      "label": {
+        "en": "Figure 3"
+      },
+      "parent": "stage-results",
+      "order": 8
+    }
+  ],
+  "edges": [
+    {
+      "from": "f-merge",
+      "to": "f-panel"
+    },
+    {
+      "from": "f-panel",
+      "to": "f-event"
+    },
+    {
+      "from": "f-event",
+      "to": "r-figure3"
+    },
+    {
+      "from": "f-panel",
+      "to": "r-table2"
+    }
+  ],
+  "items": {
+    "A": {
+      "summary": "Fictional: the control group admits units already treated.",
+      "anchors": [
+        "f-panel"
+      ],
+      "affected_results": [
+        "r-table2"
+      ],
+      "consequence": "Fictional: the main estimate shrinks.",
+      "change": {
+        "kind": "code",
+        "original": {
+          "path": "02_code/example_build_panel.do",
+          "line_start": 40,
+          "line_end": 41,
+          "text": "keep if first_treat > year  // fictional"
+        },
+        "modified": {
+          "path": "02_code/example_build_panel.do",
+          "line_start": 40,
+          "line_end": 41,
+          "text": "keep if first_treat >= year - 2  // fictional"
+        }
+      }
+    },
+    "M1": {
+      "summary": "Fictional: the pre-trend figure is no longer produced.",
+      "anchors": [
+        "f-event"
+      ],
+      "affected_results": [
+        "r-figure3"
+      ],
+      "change": {
+        "kind": "code",
+        "original": {
+          "path": "code/analysis/event.do",
+          "text": "* fictional pre-trend block"
+        },
+        "modified": {
+          "text": ""
+        }
+      }
+    },
+    "T01": {
+      "summary": "Fictional: unmatched registry rows are kept.",
+      "anchors": [
+        "f-merge"
+      ],
+      "affected_results": [
+        "r-table2",
+        "r-figure3"
+      ]
+    }
+  }
+}

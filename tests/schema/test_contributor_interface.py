@@ -1,7 +1,9 @@
-"""Tests for the contributor-interface schemas and checks (MVP proposal v0.2).
+"""Tests for the contributor-interface schemas and checks (MVP proposal v0.3).
 
 Run from the repository root:  python3 tests/schema/test_contributor_interface.py
-Requires: jsonschema>=4.18. Examples are synthetic; no example-package content is used.
+Requires: jsonschema>=4.18. All examples are synthetic and marked fictional; no example-package
+content is used. Two fields are covered: an empirical paper (V5-style categories) and a theory
+paper (different categories), because item categories and points differ by field.
 """
 import copy
 import json
@@ -12,175 +14,220 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCHEMAS = ROOT / "schemas" / "contributor-interface"
+EX = SCHEMAS / "examples"
 sys.path.insert(0, str(ROOT / "validation"))
 import rubric_checks as rc  # noqa: E402
 
-NAMES = ["rubric-import", "paper-config", "contributor-review", "submission-manifest"]
+SCHEMA_FOR = {"rubric": "rubric-import", "paper-config": "paper-config", "item-map": "item-map",
+              "contributor-review": "contributor-review", "submission-manifest": "submission-manifest"}
 
 
-def load(name):
+def schema(name):
     return json.loads((SCHEMAS / f"{name}.schema.json").read_text(encoding="utf-8"))
 
 
-def example(name):
-    return json.loads((SCHEMAS / "examples" / f"{name}.example.json").read_text(encoding="utf-8"))
+def ex(field, name):
+    return json.loads((EX / field / f"{name}.json").read_text(encoding="utf-8"))
 
 
 def valid(name, inst):
-    return Draft202012Validator(load(name), format_checker=FormatChecker()).is_valid(inst)
+    return Draft202012Validator(schema(name), format_checker=FormatChecker()).is_valid(inst)
+
+
+def bundle(field):
+    r, c, m = ex(field, "rubric"), ex(field, "paper-config"), ex(field, "item-map")
+    items, problems = rc.normalize(r, c)
+    assert problems == [], problems
+    return r, c, m, items
 
 
 def test_schemas_are_valid_draft_2020_12():
-    for n in NAMES:
-        Draft202012Validator.check_schema(load(n))
+    for name in set(SCHEMA_FOR.values()):
+        Draft202012Validator.check_schema(schema(name))
 
 
 def test_examples_validate():
-    for n in NAMES:
-        errors = list(Draft202012Validator(load(n), format_checker=FormatChecker()).iter_errors(example(n)))
-        assert not errors, (n, [e.message for e in errors])
+    for field in ("empirical", "theory"):
+        for f in sorted((EX / field).glob("*.json")):
+            name = SCHEMA_FOR[f.stem]
+            errors = list(Draft202012Validator(schema(name), format_checker=FormatChecker()).iter_errors(json.loads(f.read_text(encoding="utf-8"))))
+            assert not errors, (f.name, [e.message for e in errors])
 
 
-def test_example_rubric_is_consistent_and_matches_config():
-    r, c = example("rubric-import"), example("paper-config")
-    assert rc.check_rubric(r) == []
-    assert rc.check_config_against_rubric(c, r) == []
+def test_examples_are_consistent():
+    for field in ("empirical", "theory"):
+        r, c, m, items = bundle(field)
+        assert rc.check_rubric(r, c) == [], field
+        assert rc.check_item_map(m, items) == [], field
 
 
-def test_rubric_import_preserves_unknown_fields_and_requires_groups():
-    r = example("rubric-import")
-    r["some_future_section"] = {"anything": 1}
-    r["conceptual"][0]["previous_component_weights_for_history"] = {"x": 2}
-    assert valid("rubric-import", r)
-    for group in rc.GROUPS:
-        bad = example("rubric-import")
-        del bad[group]
-        assert not valid("rubric-import", bad), group
+def test_categories_are_configurable_per_field():
+    _, _, _, emp = bundle("empirical")
+    _, _, _, th = bundle("theory")
+    assert {i["category"] for i in emp} == {"conceptual", "missing", "technical"}
+    assert {i["category"] for i in th} == {"derivation", "assumption", "proof-gap"}
 
 
-def test_rubric_items_need_group_specific_description():
-    for group, field in [("conceptual", "criterion"), ("missing", "acceptable_work"), ("technical", "repair")]:
-        bad = example("rubric-import")
-        del bad[group][0][field]
-        assert not valid("rubric-import", bad), group
-    bad = example("rubric-import")
-    del bad["technical"][0]["title"]
-    assert not valid("rubric-import", bad)
+def test_normalize_reports_missing_arrays_and_fields():
+    r, c = ex("theory", "rubric"), ex("theory", "paper-config")
+    del r["proof_gaps"]
+    assert any("no item array 'proof_gaps'" in p for p in rc.normalize(r, c)[1])
+    r = ex("empirical", "rubric")
+    del r["technical"][0]["repair"]
+    assert any("T01: none of the description fields" in p for p in rc.normalize(r, ex("empirical", "paper-config"))[1])
 
 
 def test_rubric_consistency_checks_catch_errors():
-    r = example("rubric-import")
+    c = ex("empirical", "paper-config")
+    r = ex("empirical", "rubric")
     r["conceptual"][0]["points"] = 7
-    msgs = rc.check_rubric(r)
+    msgs = rc.check_rubric(r, c)
     assert any("largest allowed score" in m for m in msgs) and any("sum to" in m for m in msgs)
-    r = example("rubric-import")
+    r = ex("empirical", "rubric")
     r["technical"][0]["id"] = "A"
-    assert any("duplicate item id" in m for m in rc.check_rubric(r))
-    r = example("rubric-import")
+    assert any("duplicate item id" in m for m in rc.check_rubric(r, c))
+    r = ex("empirical", "rubric")
     del r["missing"][0]["tiers"]["6"]
-    assert any("tier keys" in m for m in rc.check_rubric(r))
-    r = example("rubric-import")
-    r["technical"][0]["allowed_scores"] = [1, 3]
-    assert any("start at 0" in m for m in rc.check_rubric(r))
+    assert any("tier keys" in m for m in rc.check_rubric(r, c))
+    c2 = copy.deepcopy(c)
+    c2["rubric_version"] = "other"
+    assert any("rubric_version" in m for m in rc.check_rubric(ex("empirical", "rubric"), c2))
 
 
-def test_consistency_messages_never_contain_item_text():
-    r = example("rubric-import")
-    for g in rc.GROUPS:
+def test_messages_never_contain_item_text():
+    r, c = ex("empirical", "rubric"), ex("empirical", "paper-config")
+    for g in ("conceptual", "missing", "technical"):
         r[g][0]["points"] += 1
-    texts = [str(v) for g in rc.GROUPS for it in r[g] for k, v in it.items() if k not in ("id", "points")]
-    for m in rc.check_rubric(r):
-        assert not any(t in m for t in texts if len(t) > 3), m
+    texts = [v for g in ("conceptual", "missing", "technical") for it in r[g] for k, v in it.items() if isinstance(v, str) and k != "id" and len(v) > 3]
+    for msg in rc.check_rubric(r, c):
+        assert not any(t in msg for t in texts), msg
 
 
-def test_contributor_view_shows_only_configured_fields():
-    r, c = example("rubric-import"), example("paper-config")
-    view = rc.contributor_view(r, c)
-    for group in rc.GROUPS:
-        allowed = set(c["visible_item_fields"][group]) | {"id", "group", "display_title", "display_description"}
-        for item in view[group]:
-            assert set(item) <= allowed, (group, set(item) - allowed)
-            for hidden in ("points", "tiers", "allowed_scores", "scoring_method", "evidence_record_required"):
-                assert hidden not in item
+def test_item_map_checks():
+    _, _, m, items = bundle("empirical")
+    bad = copy.deepcopy(m)
+    bad["items"]["A"]["anchors"] = ["nowhere"]
+    assert any("unknown node nowhere" in p for p in rc.check_item_map(bad, items))
+    bad = copy.deepcopy(m)
+    del bad["items"]["T01"]
+    assert any("T01 is not placed on the map" in p for p in rc.check_item_map(bad, items))
+    bad = copy.deepcopy(m)
+    bad["items"]["A"]["paired_with"] = "M1"
+    assert any("not mutual" in p for p in rc.check_item_map(bad, items))
+    bad["items"]["M1"]["paired_with"] = "A"
+    assert not any("not mutual" in p for p in rc.check_item_map(bad, items))
+
+
+def test_contributor_view_shows_only_configured_roles():
+    r, c, m, items = bundle("empirical")
     r["technical"][0]["secret_note"] = "must never show"
-    assert "secret_note" not in rc.contributor_view(r, c)["technical"][0]
+    items, _ = rc.normalize(r, c)
+    view = rc.contributor_view(items, c, m)
+    allowed = {"id", "category", "paired_with", "translation"} | set(rc.ROLE_FROM_MAP) | {
+        "title", "weight", "locations", "description", "acceptable_answer", "critical_requirements"}
+    flat = json.dumps(view, ensure_ascii=False)
+    for word in ("tiers", "allowed_scores", "scoring_method", "evidence_record_required", "must never show", "Fictional example; not calibrated"):
+        assert word not in flat, word
+    for cat, entries in view.items():
+        for v in entries:
+            assert set(v) <= allowed, set(v) - allowed
+            assert "weight" not in v          # weight is not in the default visible roles
+    c2 = copy.deepcopy(c)
+    c2["categories"][0]["visible_roles"].append("weight")
+    assert rc.contributor_view(items, c2, m)["conceptual"][0]["weight"] == 8
 
 
-def test_contributor_view_maps_original_file_names_and_language():
-    r, c = example("rubric-import"), example("paper-config")
-    en = rc.contributor_view(r, c, "en")
-    assert "code/build/panel.do (02_code/example_build_panel.do)" in en["conceptual"][0]["files"]
-    assert "display_title" not in en["conceptual"][0]
-    zh = rc.contributor_view(r, c, "zh-Hans")
-    assert zh["conceptual"][0]["display_title"].startswith("虚构示例")
+def test_whole_picture_and_local_change():
+    _, c, m, items = bundle("empirical")
+    v = rc.contributor_view(items, c, m)["conceptual"][0]
+    assert v["change"]["original"]["path"] == "code/build/panel.do (02_code/example_build_panel.do)"
+    assert v["affected_results"] == ["r-table2"]
+    mv = rc.map_view(m, items, {"A": "keep"})
+    node = {n["id"]: n for n in mv["nodes"]}
+    assert [x["item_id"] for x in node["f-panel"]["items_here"]] == ["A"]
+    assert node["f-panel"]["items_here"][0]["status"] == "keep"
+    assert {x["item_id"] for x in node["r-table2"]["affected_by"]} == {"A", "T01"}
+    for n in mv["nodes"]:
+        for mk in n["items_here"] + n["affected_by"]:
+            assert set(mk) == {"item_id", "category", "status"}
 
 
-def test_config_rejects_unknown_fields_and_negative_targets():
-    c = example("paper-config")
-    c["visible_item_fields"]["technical"].append("secret_answer")
+def test_original_file_names_are_shown():
+    _, c, m, items = bundle("empirical")
+    v = rc.contributor_view(items, c, m)["technical"][0]
+    assert v["locations"] == ["code/build/registry_merge.do (02_code/example_merge_registry.do)"]
+
+
+def test_only_reviewed_translations_are_shown_and_labelled():
+    _, c, m, items = bundle("empirical")
+    zh = rc.contributor_view(items, c, m, "zh-Hans")
+    a = zh["conceptual"][0]
+    assert a["translation"]["title"].startswith("虚构示例") and a["translation"]["method"] == "llm"
+    assert "translation" not in zh["technical"][0]       # T01's translation is not reviewed yet
+    bad = copy.deepcopy(c)
+    del bad["translations"]["A"]["zh-Hans"]["model"]   # an LLM translation must record its model
+    assert not valid("paper-config", bad)
+    bad = copy.deepcopy(c)
+    bad["translations"]["A"]["zh-Hans"]["model"]["mode"] = "cloud"
+    assert not valid("paper-config", bad)
+
+
+def test_config_rejects_unknown_roles_and_fields():
+    c = ex("empirical", "paper-config")
+    c["categories"][0]["visible_roles"].append("tiers")
     assert not valid("paper-config", c)
-    c = example("paper-config")
-    c["group_targets"]["missing"] = -1
+    c = ex("empirical", "paper-config")
+    c["categories"][0]["field_roles"]["answer_key"] = "tiers"
     assert not valid("paper-config", c)
-    c = example("paper-config")
-    c["item_display_text"]["A"]["zh-Hans"]["machine_translated"] = True
+    c = ex("empirical", "paper-config")
+    c["categories"][0]["target"] = -1
     assert not valid("paper-config", c)
-    c = example("paper-config")
-    c["materials_checklist"][0]["requirement"] = "must"
-    assert not valid("paper-config", c)
-
-
-def test_config_version_must_match_rubric():
-    r, c = example("rubric-import"), example("paper-config")
-    c["rubric_version"] = "other"
-    assert rc.check_config_against_rubric(c, r)
-    c = example("paper-config")
-    c["paired_variants"] = [{"key_point_id": "kp-1", "item_ids": ["A", "ZZ"]}]
-    assert any("unknown item ZZ" in m for m in rc.check_config_against_rubric(c, r))
 
 
 def test_review_rules():
-    base = example("contributor-review")
+    base = ex("empirical", "contributor-review")
     bad = copy.deepcopy(base)
-    bad["reviews"][2]["reject_reason"] = "other"          # reason only with a rejection
+    bad["reviews"][2]["reject_reason"] = "other"
     assert not valid("contributor-review", bad)
     bad = copy.deepcopy(base)
-    bad["reviews"][0] = {"item_id": "A", "group": "conceptual", "verdict": "keep_with_changes", "updated_at": "2026-11-10T09:00:00Z"}
-    assert not valid("contributor-review", bad)            # changes need some text
-    bad = copy.deepcopy(base)
-    bad["reviews"][0]["verdict"] = "approve"
+    bad["reviews"][0] = {"item_id": "A", "category": "conceptual", "verdict": "keep_with_changes", "updated_at": "2026-11-10T09:00:00Z"}
     assert not valid("contributor-review", bad)
     bad = copy.deepcopy(base)
     bad["invitation_token"] = "abc"
-    assert not valid("contributor-review", bad)            # no credentials in exports
+    assert not valid("contributor-review", bad)
     ok = copy.deepcopy(base)
     ok["reviews"][1].pop("reject_reason")
-    assert valid("contributor-review", ok)                 # a rejection reason is optional
+    ok["reviews"][1]["category"] = "proof-gap"            # categories are not fixed
+    assert valid("contributor-review", ok)
 
 
-def test_submission_rules():
-    base = example("submission-manifest")
+def test_submission_requires_a_runnable_description_and_data_routes():
+    base = ex("empirical", "submission-manifest")
     bad = copy.deepcopy(base)
-    bad["files"] = []
+    del bad["package"]["master_script"]
     assert not valid("submission-manifest", bad)
     bad = copy.deepcopy(base)
-    bad["files"][0]["sha256"] = "XYZ"
+    del bad["datasets"][1]["access_route"]               # restricted data need a route
     assert not valid("submission-manifest", bad)
     bad = copy.deepcopy(base)
-    bad["no_data_declaration"] = False
+    del bad["declarations"]["permission_to_share_included_data"]   # included data need permission
     assert not valid("submission-manifest", bad)
+    bad = copy.deepcopy(base)
+    bad["declarations"]["no_restricted_or_confidential_data_included"] = False
+    assert not valid("submission-manifest", bad)
+    ok = copy.deepcopy(base)
+    ok["datasets"] = [ok["datasets"][1]]
+    del ok["declarations"]["permission_to_share_included_data"]    # nothing included, nothing to permit
+    assert valid("submission-manifest", ok)
     pub = copy.deepcopy(base)
     pub["channel"] = "public_reference"
     del pub["files"]
     assert not valid("submission-manifest", pub)
     pub["public_reference"] = {"repository": "example-archive", "identifier": "000000", "version": "V1"}
     assert valid("submission-manifest", pub)
-    other = copy.deepcopy(base)
-    other["channel"] = "other_agreed"
-    del other["files"]
-    assert not valid("submission-manifest", other)
-    other["other_channel_note"] = "Delivered on an institutional drive; checksums recorded by the team."
-    assert valid("submission-manifest", other)
+    bad = copy.deepcopy(base)
+    bad["datasets"][0]["availability"] = "public_elsewhere"
+    assert not valid("submission-manifest", bad)         # needs where
 
 
 if __name__ == "__main__":
