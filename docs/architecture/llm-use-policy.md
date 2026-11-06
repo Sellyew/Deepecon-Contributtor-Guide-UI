@@ -35,7 +35,7 @@ An isolated evaluation environment stops the third risk but not the second: a mo
 | Class | Examples | Allowed tools |
 |---|---|---|
 | **Public** | The published paper; the public replication package; development tasks once published | Any |
-| **Development and evaluation tasks, unpublished** (D-032) | Candidate packages, candidate items, rubrics, item maps, flawed code and diffs, expert guides, pilot results | **No external AI service by default (D-018).** The research lead may explicitly configure one, such as the DeepSeek API with the lead's own key, for a stated use; an evaluation task's agent-facing package, however, goes to a provider only in an evaluation run of that provider's models (D-032). Each use and each run is logged with the provider, its terms, and the date (§4) |
+| **Development and evaluation tasks, unpublished** (D-032) | Candidate packages, candidate items, rubrics, item maps, flawed code and diffs, expert guides, pilot results | **No external AI service by default (D-018).** The research lead may explicitly configure one, such as the DeepSeek API with the lead's own key, for a stated use; an evaluation task's agent-facing package, however, goes to a provider only in an evaluation run of that provider's models (D-032). Each use and each run is logged with the provider, its terms, and the date (§4). For an evaluation task, sending answer-key material (candidate items, rubrics, item maps, flawed code, expert guides) to a provider exposes it and moves the task to the development tier (§4) |
 | **Held-out tasks** (D-032) | Everything belonging to a held-out task: answer key, grader, item map, flawed code, expert guides, and its agent-facing package | **Local model only (D-031, D-032)** for all team work. Never paste into a hosted chatbot or coding assistant. Only exception: for evaluation, the agent-facing package (never the answer key or grader) may be run on a closed model under a no-retention agreement, configured by the research lead and logged (D-032; clarification pending) |
 | **Contributor responses and unpublished materials** | Reviews, comments, proposals, messages, unpublished code | **Local model only** (proposed: stricter than D-018, which allows an API the research lead configures; P-035; contributors have not consented to anything else) |
 | **Restricted data** | Patient, personnel, or other licensed microdata | **No model at all**, and only in environments the data's terms allow |
@@ -60,12 +60,12 @@ An isolated evaluation environment stops the third risk but not the second: a mo
 
 ## 5. LLM assistance in building tasks (P-054, proposed)
 
-Using an LLM to help build tasks is not prohibited; the rules above decide only where the model may run. In DeepEcon a drafted candidate error is the answer key, so:
+If the research lead accepts P-054, an LLM may help build tasks, provided experts validate every candidate. Until the lead decides, D-021 applies as written. The rules above still decide where the model may run. In DeepEcon a drafted candidate error is the answer key, so each task's tier is set before any drafting:
 
-- **Development tasks:** a local model, or an external API the research lead configures under no-training terms. Never a personal chat account.
-- **Evaluation tasks:** a local model. Hosted drafting would require amending D-032.
-- **Held-out tasks:** a local model only.
-- **Every candidate records its origin** (team, LLM with model and where it ran, or contributor) and who edited and validated it. Agent-facing text and code edits are written or finally edited by people.
+- **Development tasks:** a local model, or an external API that the research lead configures under written no-training terms. Never a personal chat account.
+- **Evaluation and held-out tasks:** a local model only. A hosted model would receive answer-key material, and the task would become a development task (§4 item 3, D-032).
+- **Whatever the tier:** restricted data go to no model; contributors' unpublished materials and responses go only to a local model.
+- **Every candidate records its origin** (team, LLM with model and where it ran, or contributor) and who edited and validated it. People write or finally edit agent-facing text and code edits. Contributors review candidates without hosted AI assistants.
 
 Evidence: [R11](../research/evidence/R11-llm-assistance-in-benchmark-construction.md).
 
