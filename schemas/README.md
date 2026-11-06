@@ -182,4 +182,4 @@ Recall of a known-issues key is computed on pre-exposure items only. The similar
 - Whether contributor identity fields (e-mail, ORCID) should live outside the package in a separate registry (data minimization).
 - Whether `numericResult` needs vector/matrix outputs (event-study coefficient paths), or a file reference suffices.
 - Where the exposure log should live: in each contribution package, or in a benchmark-wide registry, since external evaluations happen long after submission.
-- A `split` field (public or held-out) once O-001 is decided; all tasks and twins from one paper, across contributions, would share it (VVP §10 item 3).
+- A tier field (development, evaluation, or held-out; O-001 was closed by D-032 on 2026-11-06); all tasks and twins from one paper, across contributions, would share it (VVP §10 item 3).

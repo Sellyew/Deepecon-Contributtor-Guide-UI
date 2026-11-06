@@ -35,9 +35,9 @@ An isolated evaluation environment stops the third risk but not the second: a mo
 | Class | Examples | Allowed tools |
 |---|---|---|
 | **Public** | The published paper; the public replication package; development tasks once published | Any |
-| **Development and evaluation tasks, unpublished** (D-032) | Candidate packages, candidate items, rubrics, item maps, flawed code and diffs, expert guides, pilot results | **No external AI service by default (D-018).** The research lead may explicitly configure one, such as the DeepSeek API with the lead's own key, for a stated use. Each use is logged, and for evaluation tasks it sets the task's exposure date. An evaluation task's agent-facing package also reaches a provider when that provider's models are evaluated |
-| **Held-out tasks** (D-032) | Everything belonging to a held-out task, including its agent-facing package | **Local model only (D-031, D-032).** Never paste into a hosted chatbot or coding assistant |
-| **Contributor responses and unpublished materials** | Reviews, comments, proposals, messages, unpublished code | **Local model only** (D-018; contributors have not consented to anything else) |
+| **Development and evaluation tasks, unpublished** (D-032) | Candidate packages, candidate items, rubrics, item maps, flawed code and diffs, expert guides, pilot results | **No external AI service by default (D-018).** The research lead may explicitly configure one, such as the DeepSeek API with the lead's own key, for a stated use; an evaluation task's agent-facing package, however, goes to a provider only in an evaluation run of that provider's models (D-032). Each use and each run is logged with the provider, its terms, and the date (§4) |
+| **Held-out tasks** (D-032) | Everything belonging to a held-out task: answer key, grader, item map, flawed code, expert guides, and its agent-facing package | **Local model only (D-031, D-032)** for all team work. Never paste into a hosted chatbot or coding assistant. Only exception: for evaluation, the agent-facing package (never the answer key or grader) may be run on a closed model under a no-retention agreement, configured by the research lead and logged (D-032; clarification pending) |
+| **Contributor responses and unpublished materials** | Reviews, comments, proposals, messages, unpublished code | **Local model only** (proposed: stricter than D-018, which allows an API the research lead configures; P-035; contributors have not consented to anything else) |
 | **Restricted data** | Patient, personnel, or other licensed microdata | **No model at all**, and only in environments the data's terms allow |
 
 ## 4. Solutions
@@ -47,7 +47,10 @@ An isolated evaluation environment stops the third risk but not the second: a mo
    - Embed one random GUID in every answer-key file and every task package.
    - If a model ever reproduces it, the material reached training data. Terminal-Bench-Science uses this practice [P-full, R1].
    - It detects leakage; it does not prevent it.
-3. **Keep an exposure log.** Record what reached a provider or the public, which provider and service, and when, whether by accident, by decision, or through a closed-model evaluation run. The first entry for a task is its **exposure date**. Scores are reported against each model's training cutoff, and an exposed evaluation task moves to the development tier and is replaced (D-032).
+3. **Keep an exposure log.** Record what reached a provider or the public, which provider and service, under which terms, and when, whether by accident, by decision, or through a closed-model evaluation run.
+   - A closed-model evaluation run exposes only the agent-facing package, and only to that provider. The run is logged, that provider's models with a later training cutoff are reported separately on the task, and the task keeps its tier.
+   - If a task's answer key or grader reaches a provider or the public, or its agent-facing package is published, that date is the task's **exposure date**: the task moves to the development tier and is replaced (D-032).
+   - This reading of D-032 awaits the research lead's confirmation.
 4. **Offer a sanctioned local model if the team wants LLM help on held-out tasks or contributors' responses.**
    - Serve an open-weight model on a project GPU server or a strong workstation, reachable only from the team's network, with outbound traffic blocked and no telemetry.
    - Point a simple chat interface, or the IDE assistants students already use, at it.

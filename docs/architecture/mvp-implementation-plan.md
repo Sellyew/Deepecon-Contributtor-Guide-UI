@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | **Proposed** draft v0.3 (2026-11-06). For review by the research lead; nothing is built until it is approved. v0.2 added configurable categories per field (D-025), the map-and-panel review screen, and runnable packages with data routes (D-027); interface languages are catalogues reviewed by the team, and item text is not translated (D-030). v0.3 stages the hosting (P-053): everything up to the demo runs on a team member's computer, and deployment to a server moves to its own milestone (M6), done only before the first outside contributor. It also records each paper's task tier (D-032). |
-| **Implements** | [MVP proposal v0.3](mvp-contributor-interface.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) |
+| **Implements** | [MVP proposal v0.5](mvp-contributor-interface.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) |
 | **Principles** | Lightweight; self-hosted; no model and no third-party service in the default configuration (D-018); the team's existing formats are imported as they are. |
 
 ---
@@ -14,13 +14,13 @@
 |---|---|---|
 | Application | **Django** (one project with two apps, `contributors` and `papers`) | The built-in administration interface covers most of the administrator entry; it also provides internationalization, sessions, CSRF protection, migrations, and a mature security record |
 | Pages | Server-rendered templates, plus a small vanilla JavaScript file for autosave, keyboard shortcuts, and keeping the map and item panel in sync. The map is plain HTML and CSS (nested lists in a grid, with markers); the matrix is an HTML table | No build pipeline, no front-end framework, no charting library, no external assets |
-| Where it runs | **Stage 0:** a team member's computer with full-disk encryption, not reachable from the internet, with synthetic examples and the demo paper only. **Stage 1** (M6): one small project-controlled server outside mainland China, before the first outside contributor (P-053) | No server decision is needed for the demo; moving is copying one data folder and one settings file |
+| Where it runs | **Stage 0:** a team member's computer with full-disk encryption; the application listens only on the loopback address (127.0.0.1), with synthetic examples and the demo paper only. **Stage 1** (M6): one small project-controlled server outside mainland China, before the first outside contributor (P-053) | No server decision is needed for the demo; moving is installing the pinned application with Stage 1 settings and, if wanted, copying the data folder (M6) |
 | Database | SQLite, in WAL mode | Enough for tens of contributors (team's plan); move to PostgreSQL on the same server if needed |
-| Files | A private directory on an encrypted volume, outside the web root, served only by an authorized Django view (through the reverse proxy's internal-redirect feature) | Private storage, with downloads only after an authorization check |
+| Files | A private directory on an encrypted volume, outside the web root, served only by an authorized Django view (streamed by Django at Stage 0; through the reverse proxy's internal-redirect feature at Stage 1) | Private storage, with downloads only after an authorization check |
 | Interface languages | Django's gettext catalogues (`en`, `zh-Hans`; a language is added as one more catalogue), drafted with an LLM and reviewed by the team; per-paper labels are localized in the paper configuration | Interface text contains no project material (D-030); item text is not translated |
 | Fonts | System font stacks (PingFang SC, Microsoft YaHei, Noto Sans CJK, then Latin fallbacks) | No web-font service |
 | Reverse proxy (Stage 1) | Caddy or nginx, with TLS | Uses the institution's certificate, or an ACME certificate if the lead accepts that external (non-AI) certificate authority (O-021) |
-| Model gateway | A module that refuses every call; v1 has no caller | Any later model use is configured by the research lead (D-018); held-out tasks and contributor responses only ever go to a local model (D-031, D-032) |
+| Model gateway | A module that refuses every call; v1 has no caller | Any later model use is configured by the research lead (D-018); held-out tasks only ever go to a local model (D-031, D-032); contributor responses likewise (proposed: P-035, LLM use policy §3) |
 
 ## 2. Components
 
@@ -61,14 +61,15 @@
 
 ## 3. Security and privacy controls
 
-Controls marked *(Stage 1)* apply once the site runs on a server (M6). On the demo computer the site is not reachable from the internet and holds only synthetic and demo material.
+Controls marked *(Stage 1)* apply once the site runs on a server (M6). On the demo computer the site is reached only from that computer (loopback address only) and holds only synthetic and demo material. The demo data folder is kept outside any workspace opened by a hosted AI coding assistant (LLM use policy §1), and screen-shared demos run with the meeting service's recording and AI features switched off.
 
 | Control | How it is checked |
 |---|---|
+| Stage 0 binding | A request from a second machine on the same network is refused |
 | No outbound connections in the default configuration | Release test (the firewall part is Stage 1): run the server in a network namespace with egress denied and exercise every page and export; the server's firewall (nftables or ufw) also denies egress except the operating-system update mirror, if the lead allows it |
 | No external assets | A Content-Security-Policy of `default-src 'self'`; a test scans rendered pages for any `http(s)://` resource that is not the site's own |
 | Authorization on every request | Tests with two contributors and two papers: guessed IDs, copied URLs, and other assignments' API calls, files, and exports are all refused (team plan, acceptance tests) |
-| Field visibility | A test that contributor pages and API responses contain only the configured item fields; points, tiers, scoring methods, and researchers-only material never appear |
+| Field visibility | A test that contributor pages and API responses contain only the configured item fields; points, score tiers, scoring methods, and researchers-only material never appear |
 | Agent-facing exports | A test that exports marked agent-facing contain no expert-only field |
 | Tokens and content kept out of logs | A test that greps the logs after a scripted session for tokens and for contributor text |
 | Backups *(Stage 1)* | An encrypted nightly backup to a second location, plus a documented restore test before the first outside contributor |
@@ -84,11 +85,11 @@ Controls marked *(Stage 1)* apply once the site runs on a server (M6). On the de
 | M2 | Selection | Overview; the map and item panel with the matrix toggle; layered cards; the four answers, reasons, and ticks; proposals; "Ask the team"; autosave with conflicts; confirmation with versions; review export | 2–3 |
 | M3 | Guidance and submission | Configurable checklist; guidance page; resumable upload with SHA-256 receipt; dataset declarations and routes; public-reference option; manifest export | 1–1.5 |
 | M4 | Languages and privacy pass | Reviewed Chinese catalogue; data quarantine and steward check; every control in §3 not marked Stage 1 tested on the demo computer | 0.75–1 |
-| M5 | Demo configuration | The demo paper (D-024) configured from the team's files, with categories, item map, and a synthetic stand-in for its restricted data; a dry run by a team member as a contributor; fixes | 0.5–1.5 |
-| M6 | Stage 1 deployment (only before the first outside contributor, O-036) | One server outside mainland China with TLS, egress firewall, encrypted disk, backups, and a restore test; the Stage 1 controls in §3 tested | 0.25–0.5 |
+| M5 | Demo configuration | The demo paper (D-024) configured from the team's files, with categories and item map; a dry run by a team member as a contributor; fixes | 0.5–1.5 |
+| M6 | Stage 1 deployment (only before the first outside contributor, O-036) | One server outside mainland China with TLS, egress firewall, encrypted disk, backups, and a restore test; demo invitations and test accounts revoked; a reachability test from mainland China and from abroad; the Stage 1 controls in §3 tested | 0.25–0.5 |
 | | **Total** | | **≈ 6–9.5 engineer-weeks** for one developer |
 
-The estimate assumes a developer familiar with Django; it excludes the team's work on items, translations of item text, and hosting procurement.
+The estimate assumes a developer familiar with Django; it excludes the team's work on items (and any synthetic stand-in for the run kit), the team's review of the interface catalogue, and hosting procurement.
 
 ## 5. Acceptance tests (from the team's plan, adapted)
 

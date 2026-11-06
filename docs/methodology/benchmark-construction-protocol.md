@@ -88,7 +88,7 @@ Each stage has gate lines taken from the rubric's *Who / when* column: **Gate** 
 | Software | Any for contributor-side work; task environments use open-source software (R or Python) unless a licensed track is created | Stata appears in 71.6% of packages [S, R8], so most tasks need an R or Python port, checked for numerical equivalence. A licensed Stata track has its own leakage problem (the evaluated agent could read the mounted licence file) and unclear terms for automated use [R8]. |
 | Design | Coverage across designs: difference-in-differences and event studies, IV, RD, randomized experiments, shift-share, synthetic control, panel fixed effects; structural work later | Breadth of capabilities |
 | Consequential decisions | At least one critical decision whose mis-handling is a known pitfall | Raw material for flawed variants |
-| Contamination | Note how famous the paper is. For the **held-out split**, prefer Path B packages that are unpublished or published after the evaluated models' training cutoffs; record both dates | Perturbed data defeat memorized numbers, not memory of the paper (rubric LK-4) |
+| Contamination | Note how famous the paper is. For the **held-out tier**, prefer Path B packages that are unpublished or published after the evaluated models' training cutoffs; record both dates | Perturbed data defeat memorized numbers, not memory of the paper (rubric LK-4) |
 | Contributor | Ideally an original author (Path B) or an economist with deep knowledge of the paper | Tacit knowledge (brief §3.1) |
 
 **Gate:** EN-3. **Automatable:** metadata harvesting, package availability and licence checks, compute screening. **Human judgment:** whether the paper has consequential, teachable decisions; data route; contamination risk.
@@ -190,7 +190,7 @@ The release editor, with the benchmark reviewer, admits tasks to a release or to
 
 **Gate:** LK-1, LK-5.
 
-**Release policy** depends on Open question O-001 (public, private, or split benchmark) and is not decided here.
+**Release policy:** decided by the research lead on 2026-11-06 as development, evaluation, and held-out task tiers (D-032, closing O-001).
 
 ## 5. Automation versus human judgment (summary)
 
@@ -227,11 +227,11 @@ Journal placement is not a ground-truth label (X-001). Instead, the interview el
 | Threat | Control |
 |---|---|
 | Published coefficients memorized or retrievable | No internet; perturbed or fully synthetic data; re-execution of agent code on answer-changing hidden variants with unseen bases (rubric LK-2; VVP §5.1) |
-| Paper or package recognized from the agent tier | Shared restructured presentation (Stage 4); recognition probe (LK-4); unpublished or post-cutoff packages for the held-out split (Stage 0) |
+| Paper or package recognized from the agent tier | Shared restructured presentation (Stage 4); recognition probe (LK-4); unpublished or post-cutoff packages for the held-out tier (Stage 0) |
 | Flawed code compared against the public source package | Restructured or ported presented code; no internet; naturalness review (LK-3) |
 | Hidden-tier material reaching model providers (VVP §10) | Every session, trial, or LLM call that sees hidden-tier material, interviews included, runs under commercial no-training terms (zero data retention where available); consumer accounts, even after an opt-out, handle only agent-tier or public material. Option A meets this by construction; Option B needs project-provided (if O-018 permits) or institutional commercial access ([Option B](../architecture/option-b-local-skill.md) §10.2). Terms are recorded in `consent.contributor_account_terms`, exposures in the log (LK-5) |
 | Held-out split worn down or leaked | Run only by the project, vetted evaluators, or locally hosted open-weight models; exposures logged (LK-5); refresh after a set number of external evaluations; all tasks from one paper, twins included, in the same split; catalogue without those papers' identifiers (§7); disclosure embargo in contributor agreements |
-| Task materials entering training data after release | Canary string; held-out split (O-001); periodic refresh |
+| Task materials entering training data after release | Canary string; held-out tier (D-032); periodic refresh |
 | Hidden material in agent-facing text | Physical tier separation; automated leakage scan (LK-1) |
 | Public submission channels | Private channels for any package containing hidden-tier material |
 
