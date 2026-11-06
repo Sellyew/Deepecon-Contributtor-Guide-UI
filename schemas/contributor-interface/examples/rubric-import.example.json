@@ -1,0 +1,50 @@
+{
+  "version": "example_rubric_1",
+  "maximum": 25,
+  "candidate_version": "EXAMPLE_V1",
+  "conceptual": [
+    {
+      "id": "A",
+      "points": 8,
+      "title": "FICTIONAL EXAMPLE: comparison group includes units treated before the study window",
+      "files": "02_code/example_build_panel.do; 02_code/example_table_main.do",
+      "criterion": "Fictional placeholder text. A full answer identifies the planted change, explains why it biases the stated estimand, repairs it, and states the assumptions of the repair.",
+      "scoring_method": "Fictional placeholder.",
+      "allowed_scores": [0, 2, 4, 6, 8],
+      "tiers": {"0": "Fictional.", "2": "Fictional.", "4": "Fictional.", "6": "Fictional.", "8": "Fictional."},
+      "critical_requirements": ["Fictional requirement one.", "Fictional requirement two."],
+      "evidence_record_required": ["file", "line_or_block", "mechanism"]
+    }
+  ],
+  "missing": [
+    {
+      "id": "M1",
+      "points": 14,
+      "title": "FICTIONAL EXAMPLE: pre-trend check removed from the event-study workflow",
+      "available_evidence_and_boundary": "Fictional placeholder describing what the agent can see.",
+      "acceptable_work": "Fictional placeholder describing what an acceptable added analysis must contain.",
+      "scoring_method": "Fictional placeholder.",
+      "allowed_scores": [0, 3, 6, 10, 14],
+      "tiers": {"0": "Fictional.", "3": "Fictional.", "6": "Fictional.", "10": "Fictional.", "14": "Fictional."},
+      "critical_requirements": ["Fictional requirement."],
+      "evidence_record_required": ["goal", "gap", "implemented_analysis"]
+    }
+  ],
+  "technical": [
+    {
+      "id": "T01",
+      "points": 3,
+      "title": "FICTIONAL EXAMPLE: merge keeps unmatched rows from the wrong side",
+      "file": "02_code/example_merge_registry.do",
+      "repair": "Fictional placeholder describing the correct repair.",
+      "allowed_scores": [0, 1, 3],
+      "tiers": {"0": "Fictional.", "1": "Fictional.", "3": "Fictional."},
+      "scoring_method": "Fictional placeholder.",
+      "evidence_record_required": ["file", "line_or_block"]
+    }
+  ],
+  "penalties": {"verified_false_assertion_per_root": 10},
+  "gates": {"no_substantive_justification": "zero"},
+  "global_policy": {"coarse_scores": "Fictional placeholder."},
+  "calibration_status": "Fictional example; not calibrated."
+}

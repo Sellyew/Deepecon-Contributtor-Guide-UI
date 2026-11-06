@@ -2,216 +2,196 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft v0.1 (2026-11-06). Replaces the Option A / Option B proposals as the basis for the first version. **Sections 6–8 are provisional:** the contribution data model, the submission requirements, and the implementation plan will be finalized only after the example contribution package has been reviewed (D-023). |
-| **Requirements** | [Research lead's revision, 2026-11-06](../requirements/2026-11-06-research-lead-revision.md) (governs) · [team handover plan, 2026-11-05](../requirements/2026-11-05-team-handover-plan.md) · [original brief](../requirements/2026-11-05-research-lead-brief.md) |
-| **Supersedes** | The [decision brief](architecture-decision-brief.md), [Option A](option-a-hosted-platform.md), [Option B](option-b-local-skill.md), the [interview protocol](../interview/expert-interview-protocol.md), the [pilot plan](../pilot/pilot-evaluation-plan.md), and the [cost model](cost-and-effort-model.md). They are kept as records only. |
+| **Status** | **Proposed** draft v0.2 (2026-11-06). v0.2 rebuilds the workflow, data model, and guidance from the [example contribution package V5](../requirements/2026-11-06-example-package-v5-review.md) (D-023). Six questions for the research lead (§9) may still change details. |
+| **Requirements** | [Research lead's revision, 2026-11-06](../requirements/2026-11-06-research-lead-revision.md) (governs) · [team handover plan, 2026-11-05](../requirements/2026-11-05-team-handover-plan.md) · [example package V5 review](../requirements/2026-11-06-example-package-v5-review.md) · [original brief](../requirements/2026-11-05-research-lead-brief.md) |
+| **Companion documents** | [Implementation plan](mvp-implementation-plan.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) |
+| **Supersedes** | The decision brief, Options A and B, the interview protocol, the pilot plan, and the cost model (kept as records) |
 
 ---
 
 ## 1. What the first version does
 
-Invited contributors use a small bilingual website (English and Simplified Chinese). Contributors are the paper's authors or invited domain experts. The website has two functions.
+Invited contributors (the paper's authors, or invited domain experts) use a small bilingual website, in English and Simplified Chinese, for two things.
 
-1. **Selection.** The contributor opens their own paper, which the team has already configured. They review the candidate errors the team prepared locally. For each candidate they can select, modify, reject, mark as uncertain, or comment, and they can propose additional errors.
-2. **Guidance.** The contributor reads what materials to provide, how to prepare them, and how to submit them. They then upload the materials or record the agreed submission channel.
+1. **Selection.** The contributor opens their own paper, already configured, and reviews the **candidate items the team prepared**. In the V5 package these are the 15 rubric items of a benchmark task. For each item the contributor says whether to keep it as is, keep it with changes, reject it, or mark it as unsure, with optional reasons and comments. They may also propose additional items.
+2. **Guidance.** The contributor reads which materials the team needs from them, how to prepare them, and how to submit them, and then uploads them or records where they already are.
 
-**No step of this workflow needs an AI model.** The website runs on infrastructure the project controls and, by default, sends nothing to any AI provider (§5).
+No step needs an AI model. The site runs on infrastructure the project controls, and by default it sends nothing to any AI provider (§6).
 
-**Out of scope for the first version:**
+**Out of scope for v1.**
 - Decided by the research lead on 2026-11-06:
   - an AI interview;
   - AI-generated errors or flawed packages;
-  - Claude Code or any other client software for contributors;
+  - Claude Code or any client software for contributors;
   - paper discovery;
   - onboarding beyond a short notice.
 - Deferred, as in the team's plan:
   - code execution;
+  - grading of agent submissions;
   - an online review platform;
   - real-time collaboration;
-  - voice;
   - dashboards;
-  - automatic evaluation;
-  - sending e-mail from the site.
+  - e-mail from the site.
 
-## 2. Users and roles
+## 2. What the example package settled
 
-| Role | Who | What they do on the site |
-|---|---|---|
-| **Contributor** | An author of the paper, or an invited domain expert. The assignment records which (`relationship_to_paper`) | Reviews the candidates for their assigned paper(s), comments, proposes additions, follows the guidance, submits materials |
-| **Administrator** | Research team | Configures papers, materials, candidates, targets, and invitations; follows progress; exports decisions; receives submissions; freezes versions |
-| *Later, offline in v1* | Implementers, independent reviewers | Work outside the site, as in the team's three verification rounds; the administrator records the results |
+From the [structural review](../requirements/2026-11-06-example-package-v5-review.md):
+
+| Finding | Consequence for the interface |
+|---|---|
+| A finished contribution is a **static code-review task**. The agent receives a short neutral abstract, a 43-file Stata workflow, a codebook, and instructions, and submits an audit plus revised code. | Contributors review the planted items. For tasks like this, the materials they supply are **code and documentation, not data**. |
+| The prepared candidates are **15 rubric items in three groups** with fixed points: *conceptual* (学理, 5 × 8), *missing* (补全, 3 × 14), and *technical* (技术, 7 items of 2–3 points), totalling 100. | The Selection screen shows items grouped this way. The team's `Rubric.json` format is imported as it is (P-041). |
+| Materials sit in **separate tiers**: agent-facing (the candidate ZIP), expert-only (rubric, guides, checks), and researchers-only (the pilot report). Each part carries a SHA-256 manifest. | The site keeps these tiers apart and adds a fourth, contributor-submitted materials (P-043). Contributors see expert-only fields only for their own paper, and only the fields the configuration allows. |
+| Versions are explicit (V4 → V5, with file mappings, patches, and frozen hashes). | Every review records the rubric version and candidate version the contributor saw. |
+| The agent-facing presentation is **restructured**, with neutral titles and file names. | Locations shown to authors may need their original file names (Q2). |
+| The package contains no patient-level data, and Stata was not executed. | Restricted microdata are never needed for static-review tasks and are never uploaded. |
 
 ## 3. The contributor's path
 
 | Step | Screen | Content |
 |---|---|---|
-| 1 | **Invitation and notice** | The contributor opens a personal invitation link (sent by the team by e-mail or WeChat), chooses English or 中文, and reads a short notice: what is stored, who can see it, that no AI service processes it, how to withdraw, and a confidentiality request for the candidate material (§5.4). Then they accept. |
-| 2 | **My paper** | The contributor's paper is already listed (usually one), with title, version, and a team contact. They open it; there is no search or catalogue. |
-| 3 | **Task overview** | One paragraph on the purpose. The candidates are **deliberate, hypothetical modifications prepared to build benchmark tasks, not claims that the published paper contains these errors.** The two types are explained in one line each: *error* (an analysis step is done wrongly) and *missing* (a necessary step is removed). The team's target numbers are shown as planning targets, not quotas. Below is a list of all candidates with their status: not yet reviewed, needs material, selected, rejected, uncertain. |
-| 4 | **Candidate review**, about five per batch | Each card covers one key point:<br>• **where** it is: a paper page or a code file and lines, with an excerpt shown on request or the PDF opened at that page;<br>• **the proposed modification**: where the team prepared both an *error* and a *missing* variant, they are shown side by side with equal weight and no preselection;<br>• **the expected consequence**, as prepared by the team.<br>**Actions:** select one or both variants; edit a variant (the original is kept); reject, with an optional reason (not realistic, not consequential, not implementable, other); mark uncertain; skip for now; comment.<br>The contributor can move between batches, revisit, and reorder. |
-| 5 | **Propose an addition** (optional, available throughout) | A short form: location, what would be changed, why it matters, and an optional expected consequence. The addition is stored as contributor-originated and does not replace any prepared candidate. |
-| 6 | **Review and confirm** | A summary of every action, with the contributor's own words as entered. The contributor confirms. Each confirmation creates a new version, and they can return and revise until the team freezes the paper's version. |
-| 7 | **Materials guidance** | What to provide (a checklist), how to prepare it (steps), the rules for restricted data, and how to submit. *The content depends on the example package (§8).* |
-| 8 | **Submit materials** | The contributor uploads to the project server (resumable, with a checksum receipt) or records that the materials go through another agreed channel. The page then shows receipt status. |
+| 1 | **Invitation and notice** | The contributor opens a personal invitation link (sent by the team through e-mail or WeChat) and chooses English or 中文. A short notice says what is stored, who can see it, that no AI service processes it, and how to withdraw. It also asks the contributor to keep the items confidential, because they are answer-key material. The contributor accepts. |
+| 2 | **My paper** | The contributor's paper (full citation) and the task version, for example "V5", already configured. Usually there is one; there is no search. |
+| 3 | **Overview** | One paragraph on the purpose. A plain statement that **the items are deliberate modifications made to build a benchmark task, not claims that the published paper contains these problems**. One line on each group:<br>• *conceptual*: an economic-analysis error planted in the code;<br>• *missing*: a necessary analysis removed, which a careful researcher should add;<br>• *technical*: a code-level error.<br>The planned number of items per group, shown as targets rather than quotas. A list of all items with their status: not reviewed, kept, kept with changes, rejected, unsure. |
+| 4 | **Item review**, about five items per screen | Each card shows, by default:<br>• the item's ID, group, and title;<br>• **where** it is: files, with the author's original file names when a mapping is configured (Q2);<br>• **what was changed and what a correct answer must do**: for *conceptual*, the criterion; for *missing*, the available evidence and boundary plus the acceptable work; for *technical*, the repair;<br>• the critical requirements.<br>By default the card does **not** show points, score tiers, the scoring method, evidence-record rules, or historical weights (Q1).<br>**The contributor answers:** keep as is / keep with changes / reject / unsure. Optional ticks: a realistic mistake; consequential for the paper's conclusions; the stated repair or acceptable work is correct. Optional text: suggested wording, other valid repairs, comment. A rejection asks for a short reason (not realistic, not consequential, repair or acceptable work wrong, other), but the reason is not required.<br>Where the team prepared both an *error* and a *missing* version of the same key point (as in the team's plan), both appear side by side with equal weight and no preselection.<br>The contributor can move between screens, revisit items, and reorder. |
+| 5 | **Propose an addition** (optional, available throughout) | Group (or "not sure"), location, what would be changed, why it matters, and a suggested repair. It is stored as contributor-originated and does not replace any prepared item. |
+| 6 | **Review and confirm** | A summary of every answer, in the contributor's own words. The contributor confirms. Each confirmation creates a numbered version, and they can return and revise until the team freezes the paper's version. |
+| 7 | **Materials guidance** | The checklist configured for this paper, with preparation steps and the rules on data (§4). |
+| 8 | **Submit** | Either upload one ZIP, with a SHA-256 receipt shown on screen, or give the public reference (DOI or repository URL and version) of a package the team should use, plus uploads of any missing pieces. The page then shows receipt status. |
 
-**Interaction rules** carried over from the team's plan:
-- one column, with one main action per screen;
-- evidence opens on request and returns to the same card without losing edits;
-- autosave reports success or failure explicitly, and a refresh restores state;
-- "neither suitable" and "uncertain" are as easy as "select", nobody is asked to fill a quota, and stopping early is fine;
-- rejections and uncertainty count as reviewed but not as confirmed;
-- the site works with a keyboard and on laptops; on phones it supports reading, choosing, and short edits.
+**Interaction rules** from the team's plan:
+- one column, one main action per screen;
+- autosave that reports success or failure explicitly, and recovery after a refresh;
+- "reject" and "unsure" are as easy as "keep", nobody is asked to fill a quota, and stopping early is fine;
+- the site works with a keyboard and on laptops; on phones it supports reading and simple choices.
 
-## 4. Administrator functions (v1)
+## 4. Guidance: what contributors provide
+
+**Default checklist for static-review tasks**, derived from the V5 candidate package. The administrator marks each entry as required, optional, or not needed for each paper. If the team already holds the public replication package, most entries become "confirm or fill gaps" (Q4).
+
+| # | Material | Why the team needs it | V5 counterpart |
+|---|---|---|---|
+| 1 | **Complete analysis code**, from raw inputs to every table and figure, with the master script and the run order | The task is built from the real workflow | `00_run_all.do` and the 43-file workflow |
+| 2 | **Dependencies:** user-written commands (ado files) or their exact names and versions, plus the software version | Static review needs to know what each command does | `01_dependencies.do` |
+| 3 | **Variable dictionary:** each variable's name, definition, unit, source, and construction, plus sample restrictions | Reviewers judge measurement and sample choices from it | `study_dictionary.txt` |
+| 4 | **Documentation of custom programs:** inputs, outputs, and assumptions | Reviewers can judge a program without running it | `command_contracts.txt` |
+| 5 | **Results map:** which script produces each table and figure in the paper | Connects the code to the paper's claims | Table and chart scripts; file index |
+| 6 | **Known qualifications and limitations** the authors want recorded (optional) | Keeps genuine limitations apart from planted items | The analysis and qualification notes |
+| 7 | **Confirmation of the short research background** the team drafts for agents, that it is accurate and gives nothing away (optional) | Agents see only this abstract | `article.txt` (255 words) |
+
+**Preparation steps** shown on the page:
+1. Keep your original file names and folder structure. Do not tidy or rewrite the code; the team needs the workflow as it is.
+2. Use plain-text formats: `.do`, `.ado`, `.R`, `.py`, `.txt`, `.md`, or `.csv` for dictionaries, in UTF-8.
+3. Add a short README listing what is included and anything missing.
+4. Put everything in one ZIP file. Code and documentation are usually small; the whole V5 candidate package is about 117 KB.
+
+**Data rules** shown on the page:
+- **Do not include data.** This applies to raw or restricted data and to any file derived from them (P-027). It covers patient-level and personnel records and anything covered by a data-use agreement.
+- **Describe the data instead,** in the dictionary: source, access conditions, and coverage.
+- The upload screen repeats this rule and asks the contributor to confirm it before uploading.
+
+**Submission:** upload on the site, or give the public reference (DOI or URL and version) plus uploads of the missing pieces. If a contributor cannot upload, the team arranges another channel and records it.
+
+## 5. Administrator functions (v1)
 
 - **Configure:**
-  - papers (title, version, PDFs, code index);
-  - contributors and assignments;
-  - targets for each type;
-  - the candidate pool, imported from the file the team prepares locally (the format is settled from the example package).
-- **Invite:** create and revoke invitation links. The team delivers them through its existing e-mail or WeChat contact, so the site sends no e-mail in v1.
-- **Follow up:** progress per contributor and per candidate.
+  - **Import the team's rubric file** (`Rubric.json`, in the V5 format) as the source of the items.
+  - **Paper configuration:** citation, task version, candidate-package hash, group targets, which item fields contributors see, optional Chinese display text for items, an optional mapping from original to candidate file names, and the materials checklist.
+  - **Contributors and assignments.**
+- **Optionally attach the agent-facing candidate ZIP**, so that contributors can see exactly what an agent sees (Q5).
+- **Invite:** create and revoke invitation links. The team delivers them through e-mail or WeChat; the site sends no e-mail.
+- **Follow up:** progress per contributor and per item.
 - **Export:**
-  - the contributor's decisions as JSON;
+  - the contributor's review as JSON;
   - a readable bilingual summary;
-  - an engineering task list for the team's implementation round.
-- **Receive submissions:** verify checksums and record receipt.
-- **Freeze** a paper's decision version; later changes create a new version. Every change goes into an event log.
+  - a list of suggested rubric changes against the imported version, which the team applies offline to produce the next rubric version.
+- **Receive submissions:** verify SHA-256 hashes and record receipt.
+- **Freeze** a paper's review version, and keep an event log.
 
-A built-in administration interface is enough; no separate review platform is built.
+## 6. Privacy and data-flow architecture
 
-## 5. Privacy and data-flow architecture
+### 6.1 Principle
+Research data, replication code, paper materials, contributor responses, and intermediate outputs are never sent to Anthropic or any other third-party AI service (D-018). The site works completely without any model.
 
-### 5.1 Principle
-
-Research data, replication code, paper materials, contributor responses, and intermediate outputs are never sent to Anthropic or any other third-party AI service (D-018). The site works completely without any model. A model is used only if the research lead deploys or configures one, and every external integration is off until explicitly configured.
-
-### 5.2 Data flows in the default configuration
+### 6.2 Data flows in the default configuration
 
 | Flow | What travels | Between |
 |---|---|---|
-| Contributor ↔ site | Pages, the assigned paper's candidates and evidence, the contributor's responses, uploads | The contributor's browser and the project server only, over TLS |
-| Administrator ↔ site | Configuration, imports, exports | The team and the project server, over TLS; optionally restricted to the team's network or a VPN |
-| Invitations | The link only, no research content | The team's existing e-mail or WeChat channel |
+| Contributor ↔ site | Pages; the assigned paper's items, in the configured fields; the contributor's answers and uploads | The contributor's browser and the project server only, over TLS |
+| Administrator ↔ site | Configuration, imports, exports | The team and the project server, over TLS; optionally limited to the team's network or a VPN |
+| Invitations | The link only | The team's existing e-mail or WeChat channel |
 | Backups | Encrypted copies | Project-controlled storage |
-| **Anything else** | **Nothing** | The site has no analytics, error-tracking service, content delivery network, web fonts, maps, or embedded third-party content. All scripts, styles, and fonts are served by the project server, and outbound network access from the server is blocked except for destinations the administrator configures |
+| **Anything else** | **Nothing** | No analytics, error-tracking service, content delivery network, web fonts, or embedded third-party content. Every asset is served by the project server, and outbound network access from the server is blocked by default |
 
-Hosting is itself a choice about who can access the machine: an institutional server, or a virtual machine the project rents (O-021). Neither is an AI service, but the choice decides who operates the hardware and where the data reside.
-
-### 5.3 Model integration: three modes
+### 6.3 Model integration: three modes
 
 | Mode | Meaning | Where the data go | Default |
 |---|---|---|---|
-| **0: Off** | No model calls. Every contributor and administrator feature works. | Nowhere | **On** (v1 runs in this mode) |
-| **1: Local model** | A model served on hardware the project controls, for example an open-weight model run by the research lead | Stays inside project infrastructure; no third party receives it | Off; enabled by configuration |
-| **2: External API** | A provider's hosted API, for example the DeepSeek API with the research lead's own key | **Leaves project infrastructure.** The provider processes it under its own terms, outside project control | Off; needs explicit configuration **and** a per-material permission |
+| **0: Off** | No model calls; every feature works | Nowhere | **On** (v1 implements only this mode) |
+| **1: Local model** | A model on hardware the project controls | Stays inside project infrastructure | Off |
+| **2: External API** | A provider's hosted API, for example the DeepSeek API with the research lead's key | **Leaves the project** and is processed under the provider's terms | Off; needs explicit configuration **and** a per-material permission |
 
-**Using a DeepSeek API key is Mode 2, not Mode 1.** Only a model running on the project's own hardware is Mode 1.
+**Using a DeepSeek API key is Mode 2, not Mode 1.** v1 ships a single gateway module that refuses every call; Modes 1 and 2 are added only when the research lead asks. Even then:
+- expert-only material, contributor responses, and restricted material are never eligible for Mode 2 (P-035);
+- every call is logged as metadata only;
+- the server's firewall allows only the configured endpoint;
+- machine translation counts as a model call.
 
-**Enforcement:**
-- **One gateway.** All model calls go through a single server module, and nothing else in the code base may open a model connection. The gateway refuses every call in Mode 0.
-- **Explicit configuration.** Modes 1 and 2 need explicit settings (mode, endpoint, model name). The administrator page always shows the current mode.
-- **Per-material permission.** Each material carries `allowed_model_destinations` (from the team's plan). A call in Mode 2 is refused unless every input is marked as allowed for that destination.
-- **Proposed default for Mode 2 (P-035):** contributor responses, restricted materials, unpublished materials, and candidate answer material are never eligible for external models.
-- **Disclosure and logging.** Contributors are told before any of their content could reach a model. Every call is logged with metadata only (time, mode, destination, material IDs), never content.
-- **Network check.** The server's outbound firewall permits only the configured model endpoint. A release test confirms that in Mode 0 no outbound connection succeeds.
-- **Machine translation is a model call.** No external translation service is used. Contributor text is stored as written; if translation is needed, a person or a Mode 1 model does it.
+### 6.4 Storage tiers and access
 
-Running a large open-weight model locally needs substantial GPU hardware; the exact requirements depend on the model and are unverified here [U]. A smaller local model is cheaper, but its quality for these tasks is unvalidated.
-
-### 5.4 Storage, access, and confidentiality
-
-- **Invitation credentials:**
-  - random (at least 128 bits), time-limited, and revocable;
-  - stored only as hashes and never written to logs;
-  - optionally paired with a short passcode sent through a second channel (O-022).
-- **Server-side authorization on every request** (page, API, file preview, download, export). A contributor reaches only the materials and candidates of their own assignments; guessing an ID or copying a URL fails.
-- **Private storage.** Files sit outside the web root on an encrypted disk. Downloads use short-lived links issued after the authorization check.
-- **Logs** record actions and object IDs, never invitation credentials, contributor text, or file contents.
-- **Retention and withdrawal.** Contributor responses and uploads are deleted on withdrawal, subject to the contributor agreement. A retention period is set before launch.
-- **Candidates are answer-key material.** They are never public and never appear in any material prepared for evaluated agents. The notice asks contributors to keep them confidential (O-026).
-
-### 5.5 Restricted data
-
-The site never asks for restricted microdata. The upload screen warns against including it, and the guidance explains how to document data access instead. For the pilot paper, the public replication package already has empty DEIS and SIRH raw-data directories (team handover plan §7). Derived files built from restricted data inherit the original licence (P-027).
-
-## 6. Data model *(provisional; finalized from the example package)*
-
-The model starts from the team's objects (handover plan §5) and keeps only what the contributor interface needs. Team-side objects (implementation, review, rubric, release) stay in the team's own workflow until the back office is designed.
-
-| Object | Purpose | Key fields (provisional) |
+| Tier | Example (V5) | Who can see it on the site |
 |---|---|---|
-| **Paper** | A configured paper (the team's *Project*) | paper_id, paper_version, title, citation, status, target_error_count, target_missing_count |
-| **Material** | A file attached to a paper | material_id, paper_id, file_role, file_version, checksum, private_storage_key, access_scope, allowed_model_destinations (default: none), allowed_for_contestant |
-| **Assignment** | A contributor's access to a paper | assignment_id, contributor_id, paper_id, relationship_to_paper (author / invited expert), invited_at, invitation status |
-| **Candidate** | A prepared key point | candidate_id, paper_id, version, origin (team / contributor), domain (engineering / economics), variants (*error* and/or *missing*: description, location, expected consequence, feasibility note), evidence_refs (file, PDF page index, printed page, code path and lines), display order |
-| **Decision** | A contributor's response to a candidate | candidate_id, candidate_version, action (select-error, select-missing, select-both, modify, reject, uncertain, skip), reason, original text, edited variant text, comment, version, confirmed_at |
-| **Proposal** | A contributor-suggested addition | proposal_id, paper_id, location, description, rationale, expected consequence |
-| **Submission** | Materials the contributor provides | submission_id, assignment_id, channel (upload / other agreed channel), files and checksums, declared contents, restricted-data declaration, status |
-| **EventLog** | Audit trail | actor, operation, object_id, before and after version, timestamp |
+| **Agent-facing** | The candidate ZIP | The administrator; the assigned contributor, if configured (Q5) |
+| **Expert-only** | The rubric and guides | The administrator; the assigned contributor sees only the configured item fields for their own paper |
+| **Researchers-only** | Pilot reports, model results | The administrator only; never imported into contributor views |
+| **Contributor-submitted** | Uploaded ZIPs, answers | The administrator and the contributor who submitted it |
 
-Rules from the team's plan apply:
-- a team-prepared candidate is never shown as confirmed until the contributor confirms it;
-- new material marks dependent decisions "needs re-review";
-- confirmed content is never overwritten;
-- frozen versions are immutable.
+**Access and handling rules:**
+- **Invitation credentials** are random (at least 128 bits), time-limited, and revocable; they are stored hashed and never logged.
+- **Every request is authorized on the server**: pages, the API, files, and exports.
+- **Files are private:** stored outside the web root on an encrypted disk, and downloaded only through authorized, short-lived links.
+- **Logs** record actions and object IDs, never contributor text or file contents.
+- **Withdrawal** deletes the contributor's material; a retention period is set before launch.
+- **Agent-facing exports** never include expert-only fields.
 
-The team's teacher-model estimates and ranks are internal fields. They set the initial order but are not shown as recommendations.
+## 7. Data model (draft)
 
-## 7. Technology direction *(provisional; decided in the implementation plan)*
+Defined as JSON Schemas in [`schemas/contributor-interface/`](../../schemas/contributor-interface/README.md), with synthetic examples and tests.
 
-- **Shape.** One server application with server-rendered pages and a little progressive enhancement, SQLite (as the team's plan suggests), private files on the server's encrypted disk, and message catalogues for English and Simplified Chinese.
-- **Leading candidate: Django.** Its built-in administration interface covers most of the administrator entry, and it has internationalization, sessions, CSRF protection, and migrations. The final choice depends on the example package and on the team's skills.
-- **Fonts.** System font stacks (PingFang SC, Microsoft YaHei, Noto Sans CJK, then Latin fallbacks); no Google Fonts or other external font service, whose reachability from mainland China is also contested [S].
-- **Uploads.** Chunked, resumable uploads to the server, with size limits set from the example package and a published fallback channel for very large packages.
-- **Deployment.** One server behind a TLS reverse proxy, with outbound traffic blocked by default and restorable encrypted backups.
+| Object | Purpose | Key fields |
+|---|---|---|
+| **Paper configuration** | One configured paper and task version | paper_id, citation, replication-package reference, task_version, rubric_version, candidate_version, candidate-package SHA-256, group targets, visible item fields, optional item translations, optional file-name map, materials checklist |
+| **Rubric import** | The team's `Rubric.json`, imported as it is | version, maximum, the arrays `conceptual`, `missing`, and `technical` (each item has id, points, and title, plus group-specific description fields). All other fields are preserved untouched and hidden from contributors unless configured |
+| **Contributor review** (export) | One contributor's answers | assignment, relationship to the paper (author or invited expert), language, rubric and candidate versions, one review per item (verdict, checks, reason, suggested wording, other valid repairs, comment), proposals, confirmations (numbered versions with timestamps and hashes) |
+| **Submission manifest** | What the contributor provided | channel (upload, public reference, or another agreed channel), files with sizes and SHA-256 (the package's own convention), checklist entries covered, a declaration that no data are included, receipt and verification |
 
-## 8. What the example package should settle
+Internal fields such as tiers, scoring methods, and historical weights stay with the team's grading workflow. The site preserves them so that an export can be traced back to the exact rubric version.
 
-The review of the example contribution package (expected next) should answer these questions before the schema and the implementation plan are finalized.
+## 8. Implementation
 
-1. **Structure:** the folder layout, file naming, and which files are the paper, code, data, outputs, and documentation.
-2. **Candidate errors:** how a prepared candidate is represented (fields, error and missing variants, evidence locations, expected consequences, code changes), and how the contributor's choices are recorded.
-3. **What contributors provide:** code, data or data-access documentation, logs, a README, the map from paper results to scripts, software versions, licences.
-4. **Size and format:** typical and maximum size; compression; checksums.
-5. **Restricted data:** how it is documented, and what may and may not be sent.
-6. **Versioning and confirmation:** how the coauthor marked what was confirmed, changed, or added.
-7. **Languages:** which parts are in English or Chinese, and what must be bilingual.
+See the [implementation plan](mvp-implementation-plan.md) (Proposed draft). In brief:
+- **Stack:** one Django application with server-rendered pages, SQLite, encrypted local storage, the built-in administration interface, and English and Chinese message catalogues.
+- **Defaults:** no external assets, and outbound traffic blocked.
+- **Milestones:** five, beginning with synthetic data and ending with the V5 paper as the first real configuration.
+- **Effort:** about 4–7 engineer-weeks for one developer [U: planning estimate].
 
-## 9. What carries over from the earlier work
+## 9. Questions for the research lead
 
-- **Still useful, as the team's internal methodology** for turning confirmed candidates into verified tasks: the [verifier validation protocol](../methodology/verifier-validation-protocol.md), the [rubric](../methodology/task-quality-rubric.md), and the [construction protocol](../methodology/benchmark-construction-protocol.md). They are to be aligned with the team's three verification rounds. Their passages that assume an AI interview, Options A and B, or Claude-based sessions are superseded.
-- **Proposals that remain open for review:**
-  - derived data inherit the licence (P-027);
-  - an independent check of the reference (P-028);
-  - the materiality rule (P-029);
-  - scoring (P-030);
-  - contamination controls (P-032);
-  - pitfall-status corrections (P-033).
-- **Also kept:** the bilingual principles and glossary ([bilingual design](bilingual-design.md)) and the evidence labels.
-- **Superseded:**
-  - the Option A versus Option B comparison;
-  - the AI interview protocol and its influence measures;
-  - the exposure rule's implications for Claude accounts;
-  - the A/B pilot;
-  - the cost model.
+| # | Question | Proposed default |
+|---|---|---|
+| Q1 | Which item fields do contributors see? | Title, location, the description (criterion; evidence boundary and acceptable work; repair), and critical requirements. Not shown: points, tiers, scoring method, evidence-record rules |
+| Q2 | Should locations use the author's **original** file names? That needs a mapping from the original package to the candidate files, like `Mapping_From_V4.json` but from the original package | Yes, if the team can produce the mapping; otherwise show the candidate file names with a note |
+| Q3 | Do contributors review the **three rubric groups** (as in V5) or **key points with paired error and missing variants** (as in the team's plan)? | The three groups, showing paired variants only where the team prepared both |
+| Q4 | What must authors provide when their replication package is already public (as on openICPSR)? | Confirm the public package and supply only what is missing (dictionary, custom-program notes, results map); no data |
+| Q5 | Should contributors see the **agent-facing candidate package**, so they can judge whether each item is discoverable from what an agent sees? | Yes, as an optional download for the assigned contributor |
+| Q6 | The rubric items are written in English. Who provides Chinese display text for Chinese-speaking contributors? | The team, by hand; no machine translation by default |
+
+Earlier open questions still apply: hosting and operator (O-021), invitation delivery and a second factor (O-022), model use (O-023), evaluation-phase exposure (O-025), confidentiality (O-026), release policy (O-001), credit (O-005), ethics (O-013), the name (O-014), and who operates and funds the site after the initial period (O-020).
 
 ## 10. Points for the research lead
 
-1. **Framing for authors.** An author shown "errors" in their own paper may read them as criticism. The overview and every card should say plainly that these are deliberate modifications for building tasks (P-037). The paper's own acknowledged limitations are recorded separately, as the team's plan already does.
-2. **Easy agreement.** Contributors shown prepared errors may accept them without much scrutiny. The team's design of symmetric variants, no preselection, and no quotas is the right defence. I would add an optional one-line reason when a contributor selects a candidate, and report acceptance and rejection rates per paper; the team's plan already records rejection reasons.
-3. **The evaluation phase.** Evaluating a closed model as an agent means sending the agent-facing task material to that model's provider. The privacy rule therefore cannot cover that phase in the same way. I suggest deciding now what may be sent at evaluation time (agent-facing material only, never candidate answers or contributor responses), and how held-out tasks are protected (O-025).
-4. **The teacher model in the team's plan** ranks and proposes candidates. It falls under the same modes: if it is a hosted model, such as either candidate named in the plan used through its API, it is Mode 2 and is off by default.
-5. **This design work.** These documents are prepared with Claude, so anything shared in that work, including the example package, reaches Anthropic. Where material should not, share its structure and synthetic stand-ins instead.
-
-## 11. Open questions
-
-| ID | Question |
-|---|---|
-| O-021 | Where the site is hosted and who operates it: an institutional server or a project-controlled virtual machine; region; reachability for contributors in mainland China and elsewhere; backups |
-| O-022 | How invitations reach contributors and whether a second factor (a passcode by a second channel) is required |
-| O-023 | Whether v1 uses any model at all; if so, for which tasks, in Mode 1 or Mode 2, and for which material classes |
-| O-024 | The submission channel and limits for replication packages (to be settled from the example package) |
-| O-025 | What may be sent to model providers when the finished benchmark is used to evaluate closed models |
-| O-026 | Whether contributors agree to keep candidate material confidential, and how this is recorded |
-| O-001, O-005, O-013, O-014, O-020 | Release policy; contributor credit; ethics review; project name; who operates and funds the site after the initial period (unchanged) |
+1. **Framing for authors.** The overview and every card say that the items are deliberate modifications made to build a benchmark task, not claims about the published paper (P-037).
+2. **Easy agreement.** "Reject" and "unsure" are as easy as "keep", nothing is preselected, and the reasons and ticks are optional but visible. Acceptance and rejection rates are reported per paper (P-038).
+3. **Grader agreement (methodology).** V5 grades a static audit against coarse rubric tiers, so whether two independent graders agree matters more than any interface choice. The rubric checks are labelled consistency-only. Measuring agreement between two independent graders on the eight pilot submissions would show whether the tiers are reproducible. The rubric's `calibration_status` field may already address this; I did not read it.
+4. **The evaluation phase.** Evaluating a closed model sends the agent-facing package to its provider. The V5 README already keeps expert materials out of agent sessions. The same rule should decide what may ever be sent to a provider (O-025).
+5. **This design work.** I inspected the V5 expert folder and report only at the level of structure, for the reason the package's own README gives (see the [review](../requirements/2026-11-06-example-package-v5-review.md)). Tell me if you want me to read particular fields' contents.

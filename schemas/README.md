@@ -1,6 +1,6 @@
 # Deliverable 4 — Contribution Data Schema
 
-> **To be redesigned (2026-11-06).** The contribution schema will be rebuilt from the coauthor's example contribution package (D-023; [MVP proposal](../docs/architecture/mvp-contributor-interface.md) §6). This 0.3.0 draft and its tests are kept as a record of the earlier design, which assumed an AI interview.
+> **Superseded (2026-11-06).** The current draft schemas are in [`contributor-interface/`](contributor-interface/README.md), derived from the example contribution package V5 (D-023). This 0.3.0 draft and its tests are kept as a record of the earlier design, which assumed an AI interview.
 
 | | |
 |---|---|
