@@ -66,6 +66,8 @@ Random, time-limited, revocable invitation credentials, never in ordinary logs; 
 
 ## 7. Pilot paper and material boundary
 
+> **Clarified by the research lead, 2026-11-06:** this paper is a **demo** for building and testing the interface; the team has no contact with its authors (D-024).
+
 - **Pilot:** Muñoz, Pablo, and Cristóbal Otero (2025), "Managers and Public Hospital Performance", *American Economic Review* 115(11): 4040–4074, doi:10.1257/aer.20240615. Replication package: openICPSR project 234421, version 1.
 - **Experts:** two invited health and labor economists from the team's network; when they co-author tasks they belong to the task-writing team, and independent review is arranged separately.
 - **Materials:** the inspected replication package contains Stata code and some public inputs; the **DEIS and SIRH raw-data directories are empty**. The team first builds a "paper result → script → input data" map to see which paths can be run. Patient and employee records need separate checks of usage permission and processing environment; restricted parts can collect expert judgment first, with repair verification only once data and authorization are in place.

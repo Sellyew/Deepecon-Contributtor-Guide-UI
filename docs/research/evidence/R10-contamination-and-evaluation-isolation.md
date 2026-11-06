@@ -6,7 +6,7 @@
 | Date | 2026-11-06. Searches run 2026-11-06. |
 | Author | lead collaborator (Claude session), answering the research lead's question of 2026-11-06 on training use and evaluation isolation |
 | Evidence labels | As in the [evidence README](README.md). Every new claim here is **[S]**: it comes from search-engine summaries, because the primary pages (arxiv.org, arcprize.org, labs.scale.com) are outside this session's network allowlist. Claims carried over from R1, R4, R6 and R8 keep their original labels. Text marked *(assessment)* is analysis, not a sourced fact. |
-| Relation to other notes | Extends [R1](R1-terminal-bench-science.md) §1.6 (TBS internet policy) and [R4](R4-replication-benchmarks.md) implication 9 (contamination and public originals). Supports proposals P-051 to P-053 in the [decision log](../../decisions/decision-log.md). |
+| Relation to other notes | Extends [R1](R1-terminal-bench-science.md) §1.6 (TBS internet policy) and [R4](R4-replication-benchmarks.md) implication 9 (contamination and public originals). Supports D-032 (adopted from P-051 on 2026-11-06) and proposals P-052 and P-053 in the [decision log](../../decisions/decision-log.md); §5 adds small-server price anchors to those in [R9](R9-hosted-stack-and-compliance.md) §7. |
 
 ---
 
@@ -47,6 +47,17 @@
 4. **Evaluating a closed model exposes its task.** The provider receives the agent-facing package and the whole trajectory. ARC's "semi-private" tier names this honestly; a held-out tier must either stay with open-weight models run locally or rely on a no-retention agreement.
 5. **Hidden channels need testing.** The SWE-bench case shows that leaks come from places nobody thought of (version-control history). An isolation check should try to find answers from inside the agent environment before release.
 
-## 4. Search log
+## 4. Small-server price anchors (for O-021)
 
-Searches (WebSearch, standard mode, 2026-11-06): HLE private held-out set; ARC Prize semi-private and private sets; FrontierMath holdout; LiveCodeBench release dates; SWE-Bench Pro held-out and commercial subsets; PaperBench blacklist; SWE-bench Verified future-commit leak. Fetches of arxiv.org, arcprize.org and labs.scale.com failed (outside the network allowlist).
+Both from search summaries of third-party listings and an official pricing page whose table did not extract cleanly; check the provider's own page before any commitment.
+
+| Provider | Size | Price | Label |
+|---|---|---|---|
+| Hetzner Cloud (CX22, possibly replaced by CX23 in 2026) | 2 vCPU, 4 GB RAM, 40 GB disk | About €3.79–4.59 a month before VAT; sources disagree after 2026 price changes | [S] |
+| Alibaba Cloud Simple Application Server (regions include Hong Kong and Singapore) | Plans with 2 vCPU | Official tiers of about US$4.5, 9, 15, 19 and 35 a month; Hong Kong overage traffic US$0.153/GB | [S] |
+
+*(assessment)* A server big enough for the contributor site costs roughly US$5–20 a month; object storage for backups costs about US$0.015–0.020 per GB-month ([R9](R9-hosted-stack-and-compliance.md) §7, [P-page]).
+
+## 5. Search log
+
+Searches (WebSearch, standard mode, 2026-11-06): Hetzner CX22 price; Alibaba Cloud Simple Application Server price; HLE private held-out set; ARC Prize semi-private and private sets; FrontierMath holdout; LiveCodeBench release dates; SWE-Bench Pro held-out and commercial subsets; PaperBench blacklist; SWE-bench Verified future-commit leak. Fetches of arxiv.org, arcprize.org and labs.scale.com failed (outside the network allowlist).

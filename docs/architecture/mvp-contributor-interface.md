@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft v0.4 (2026-11-06). v0.3 recorded the research lead's answers (D-025 to D-028) and proposed the layered item card (§4.2) and the map-and-panel review screen (§4.1). v0.4 corrects the translation scope: the **interface** is bilingual and extensible, and item text, papers, and code are not translated (D-030). It adds the rule that answer-key material never goes to any API provider (D-031), and makes proposals for the pilot's restricted data (O-034, §5.4) and the data-sharing check (O-035, §5.5). |
+| **Status** | **Proposed** draft v0.5 (2026-11-06). v0.3 recorded the research lead's answers (D-025 to D-028) and proposed the layered item card (§4.2) and the map-and-panel review screen (§4.1). v0.4 corrects the translation scope: the **interface** is bilingual and extensible, and item text, papers, and code are not translated (D-030). It adds the rule that answer-key material never goes to any API provider (D-031), and makes proposals for the pilot's restricted data (O-034, §5.4) and the data-sharing check (O-035, §5.5). **v0.5** records the task tiers (D-032), which narrow D-031 to held-out tasks while D-018 stays unchanged; records that the pilot paper is a demo with no contact with its authors (D-024, clarified), so §5.4 becomes the general route for contributors' restricted data; and proposes staged hosting: the demo on a team member's computer, then one small server before the first outside contributor (§9, P-053). |
 | **Requirements** | [Research lead's revision, 2026-11-06](../requirements/2026-11-06-research-lead-revision.md) (governs) · [team handover plan](../requirements/2026-11-05-team-handover-plan.md) · [example package V5 review](../requirements/2026-11-06-example-package-v5-review.md) |
 | **Companion documents** | [Implementation plan](mvp-implementation-plan.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) · [LLM use policy](llm-use-policy.md) |
 | **Supersedes** | The decision brief, Options A and B, the interview protocol, the pilot plan, and the cost model (kept as records) |
@@ -31,7 +31,9 @@ No step needs an AI model, and the site sends nothing to any AI provider (§7). 
 | D-027 | The team needs a **full runnable package**. | The guidance asks for a package a journal data editor would accept, with data or a route to run with data (§5). |
 | D-028 | Contributors may download the **agent-facing package**. | It is a download on the paper page. |
 | D-030 | The **interface** is bilingual (Chinese and English), with more languages possible later; interface text is translated with an LLM and reviewed by the team. (Clarifies an earlier misreading, D-029, that item text would be translated.) | Interface strings live in translation catalogues, and a language is added with a reviewed catalogue. Item text, papers, and code stay in their original language. |
-| D-031 | **Answer-key material is never sent to any API provider**; any LLM processing of it happens only on a locally deployed model. | Applies to candidate items, rubrics, item maps, flawed code, guides, and contributor responses. See the [LLM use policy](llm-use-policy.md). |
+| D-031 | **Answer-key material is never sent to any API provider**; any LLM processing of it happens only on a locally deployed model. Narrowed by D-032 to held-out tasks. | Held-out material goes only to a local model; other answer-key material follows D-018 (no external AI unless the lead configures it). See the [LLM use policy](llm-use-policy.md). |
+| D-032 | **Task tiers:** development tasks (V5 is one) may be published with a canary; evaluation tasks keep answer keys unpublished; a few held-out tasks never leave project hardware. Each task records when its material first reached a provider or the public. D-018 is unchanged. | The site records each paper's tier. A contributor whose paper is an evaluation or held-out task is asked to keep its items confidential (O-026). |
+| D-024 (clarified) | The pilot paper is a **demo** for building and testing the interface; the team has no contact with its authors. | The demo paper is configured for dry runs by team members, with a synthetic stand-in for its restricted data (§5.4). |
 
 ## 3. The contributor's path
 
@@ -110,7 +112,7 @@ The map comes from a file the team prepares for each paper (the [item map](../..
 | Restricted or confidential, such as administrative health or personnel records | **Never upload it.** Choose one of:<br>(a) the author or their RA runs the team's modified versions in the authorized environment and returns logs and outputs;<br>(b) the team applies to the provider for access;<br>(c) a secure environment where authorized team members run it;<br>(d) a fully synthetic substitute built from the codebook | With (a)–(c), run everything. With (d), check only that the code runs, not the results |
 | Not yet decided | Record it as "to be decided" | The team follows up |
 
-For the pilot paper, the public package's restricted data directories are empty (team handover plan §7), so route (a) or (b) will be needed (§5.4).
+For the demo paper, the public package's restricted data directories are empty (team handover plan §7) and the team has no contact with its authors, so the demo uses a synthetic stand-in only (§5.4).
 
 ### 5.2 Checklist (configured per paper; default for empirical papers)
 
@@ -141,16 +143,33 @@ For a **theory paper** the default checklist is different: the LaTeX source of t
   - or use another channel agreed with the team (for very large packages, for example an institutional transfer).
 - **Declare** each dataset's route, and confirm that nothing restricted or confidential is included. If any data are included, the contributor also confirms permission to share them with the project.
 
-### 5.4 Proposal for the pilot paper's restricted data (O-034)
+### 5.4 Restricted data in contributed papers: the run kit (P-049)
 
-1. **First, read the package's data availability statement.** The public openICPSR package's README should say how each restricted dataset can be obtained and by whom. That decides how expensive route (b) is. *(Not read here.)*
-2. **Start with route (a), the author runs.** Ask the authors whether they or a research assistant still have authorized access.
-   - The team sends one **run kit**: the reference code and every confirmed modified version, applied to a copy of the original package, with a single script that runs them all in turn and collects the outputs.
-   - The authors run it inside their authorized environment and return only logs and the aggregate tables and figures.
-   - Before sending, they check the outputs against their data agreement's disclosure rules, for example small cells.
-   - The authors already see the items as reviewers, so the run kit reveals nothing new to them.
-3. **In parallel, build a fully synthetic stand-in (d)** from the codebook, with the same variable names, types, and panel structure. The team uses it to check that every modified version runs and produces its outputs before anything is sent to the authors. One round with the authors then usually suffices. The synthetic data never replace the real results.
-4. **Fall back to route (b)**, applying for access, or (c), a secure environment, if the authors no longer have access or cannot run the kit.
+Contributors are usually the paper's authors, so they or their research assistant normally still have authorized access to the data. The run kit lets the team obtain real results without receiving any restricted data. *(O-034 asked this for the pilot paper; it was closed because that paper is a demo, D-024.)*
+
+1. **First, read the package's data availability statement and the data editor's report.** Some inputs may turn out to be public, or aggregate derived files may be shareable; the team then runs most versions itself. The report also says whether the original results were ever reproduced: for restricted data, the AEA Data Editor sometimes only inspects the code [P-full, R8 §2.4].
+2. **Build the run kit** after Selection, so that it contains only the items the contributor confirmed. It is code only:
+   ```
+   runkit_<paper>/
+     README_EN.txt, README_ZH.txt   what it does, time needed, what to send back
+     settings.do                    the only file to edit: the path to the data
+     run_all.do                     runs each version in its own copy, writes results/
+     versions/ref/                  the original code, unchanged
+     versions/combined/             the full candidate package (all items together)
+     versions/item_<id>/            one confirmed item each, applied alone
+     check_outputs.do               lists every output and flags small cells
+   ```
+   - Each item runs **alone**, as well as in the combined package, because the candidate package mixes all items and only separate runs show each item's effect.
+   - The data are **built once**; each version reruns only from the first step it changes.
+   - Commands that print individual records (for example `list`) are removed or neutralized.
+3. **Test it first on a fully synthetic stand-in** built from the codebook, with the same variable names, types, and panel structure, so the kit runs on the first try. The synthetic data never replace the real results.
+4. **The contributor or their RA runs it** where the data already are: they edit one line, run one script (about 1–2 hours of their time [U]; the machine can run overnight), and check the outputs against their data agreement's disclosure rules.
+5. **They return** `results.zip` through the submission page: logs, tables, and figures for each version, a file list with SHA-256, and a short note (software version, run time, errors). **No data.**
+6. **The team compares** the reference outputs with the published paper, and each version with the reference, and records each item's measured effect.
+
+**Fallbacks**, in order of effort: the data provider's own remote-execution service, if it has one [U]; an access application (route b); a secure environment (route c); and, labelled as such, a static check plus the synthetic run, which shows that each version runs and changes the outputs but not by how much.
+
+**The demo paper** uses the synthetic stand-in only.
 
 ### 5.5 What the data-sharing check means (O-035)
 
@@ -201,7 +220,7 @@ Interface text contains no project material, so drafting it with any LLM leaks n
 - **Model modes:**
   - Mode 0, Off: the site itself uses no model in v1;
   - Mode 1, a local model, keeps data on project hardware;
-  - Mode 2, an external API such as DeepSeek with the lead's key, sends data out of the project. It needs explicit configuration and is **never** used for answer-key material (D-031), contributor responses, or restricted data;
+  - Mode 2, an external API such as DeepSeek with the lead's key, sends data out of the project. It needs explicit configuration (D-018) and is **never** used for held-out tasks (D-031, D-032), contributor responses, or restricted data; any other use is logged and sets the task's exposure date;
   - the team's own use of LLMs outside the site follows the [LLM use policy](llm-use-policy.md).
 - **Data on the server.** Data are uploaded now (D-027), but only data the author may share. They go to the encrypted project server, never to any AI service, and are readable only by team members with the data role. Retention and deletion follow the contributor agreement and the data's terms. Restricted and confidential data are never uploaded (§5.1).
 - **Storage tiers:**
@@ -228,11 +247,17 @@ Five JSON Schemas in [`schemas/contributor-interface/`](../../schemas/contributo
 
 ## 9. Implementation
 
-See the [implementation plan](mvp-implementation-plan.md) v0.2:
+See the [implementation plan](mvp-implementation-plan.md) v0.3:
 - one Django application, server-rendered, with SQLite and encrypted storage;
 - the map and item panel rendered on the server with plain HTML and CSS;
 - resumable uploads for multi-gigabyte packages;
 - about 6–9.5 engineer-weeks for one developer [U: planning estimate].
+
+**Where it runs (P-053, staged).**
+- **Stage 0, the demo:** a team member's computer with full-disk encryption, with synthetic examples and the demo paper only. It is not reachable from the internet, and others see it by screen sharing. No decision about servers or storage is needed for this stage.
+- **Stage 1, before the first outside contributor uses it with real material:** the same application on one small project-controlled server outside mainland China, where most contributors are. Ideally the university provides it; otherwise a rented server costs about US$5–20 a month [S, R10 §4]. It has HTTPS, an encrypted disk, nightly encrypted backups with a restore test, and one named administrator.
+- **Moving between stages** means copying one data folder and one settings file.
+- **Not proposed:** exposing the demo computer through a tunnel service.
 
 ## 10. Open questions
 
@@ -240,6 +265,7 @@ See the [implementation plan](mvp-implementation-plan.md) v0.2:
 |---|---|---|
 | O-027 | Does the layered card (§4.2) suit contributors? | Pilot it with the first paper's two experts |
 | O-029 | Does the map with the item panel (§4.1) suit contributors? | Pilot it, with the matrix toggle as the alternative |
-| O-034 | Which route the pilot paper's restricted data take | §5.4: read the data availability statement; route (a) with a run kit, checked first on a synthetic stand-in; fall back to (b) or (c) |
 | O-035 | Who checks that data included in an upload may be shared with the project? | §5.5: a named data steward, with uploads quarantined until checked |
-| O-021, O-022, O-025, O-026 | Hosting; invitation delivery; what may be sent at evaluation time; confidentiality agreement | Unchanged |
+| O-021 | Hosting | §9: staged, a team member's computer for the demo, then one small server outside mainland China before the first outside contributor (P-053) |
+| O-036 | The first real contributor and paper | A contact named by the research lead; the paper's field sets its categories |
+| O-022, O-026 | Invitation delivery; confidentiality agreement | Unchanged; under D-032, confidentiality is needed at least for evaluation and held-out tasks |
