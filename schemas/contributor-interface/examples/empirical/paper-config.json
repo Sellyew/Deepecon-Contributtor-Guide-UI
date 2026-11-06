@@ -209,33 +209,6 @@
     "identifier": "000000",
     "version": "V1"
   },
-  "translations": {
-    "A": {
-      "zh-Hans": {
-        "title": "虚构示例：对照组包含研究窗口之前已受处理的单位",
-        "summary": "虚构示例摘要。",
-        "method": "llm",
-        "model": {
-          "name": "example-local-model",
-          "mode": "local"
-        },
-        "translated_at": "2026-11-07T08:00:00Z",
-        "reviewed_by": "team-member-01",
-        "reviewed_at": "2026-11-07T10:00:00Z"
-      }
-    },
-    "T01": {
-      "zh-Hans": {
-        "title": "虚构示例：合并时保留了错误一侧的未匹配行",
-        "method": "llm",
-        "model": {
-          "name": "example-local-model",
-          "mode": "local"
-        },
-        "translated_at": "2026-11-07T08:00:00Z"
-      }
-    }
-  },
   "file_name_map": [
     {
       "candidate_path": "02_code/example_build_panel.do",

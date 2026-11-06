@@ -36,10 +36,9 @@
       ]
     },
     "language": {
-      "enum": [
-        "en",
-        "zh-Hans"
-      ]
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+      "description": "Interface language the contributor used; their answers are stored as written."
     },
     "rubric_version": {
       "type": "string",

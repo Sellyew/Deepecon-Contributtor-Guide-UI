@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://deepecon.example/schemas/contributor-interface/paper-config/0.2.0",
   "title": "Paper configuration",
-  "description": "One configured paper and task version: categories (which vary by field), what contributors see, translations with provenance, the original-file-name map built by the team, the materials checklist, and submission settings.",
+  "description": "One configured paper and task version: categories (which vary by field), what contributors see, the original-file-name map built by the team, the materials checklist, and submission settings. Interface text in this file (category labels and meanings, checklist entries) is localized; item text from the rubric is shown in its original language and is not translated (D-030).",
   "type": "object",
   "required": [
     "schema_version",
@@ -131,25 +131,6 @@
         "$ref": "#/$defs/category"
       }
     },
-    "translations": {
-      "type": "object",
-      "propertyNames": {
-        "type": "string",
-        "pattern": "^[A-Za-z0-9_.-]{1,16}$"
-      },
-      "additionalProperties": {
-        "type": "object",
-        "propertyNames": {
-          "enum": [
-            "en",
-            "zh-Hans"
-          ]
-        },
-        "additionalProperties": {
-          "$ref": "#/$defs/translation"
-        }
-      }
-    },
     "file_name_map": {
       "type": "array",
       "description": "Built by the team from the contributor's original file names (D-026).",
@@ -188,38 +169,10 @@
             "pattern": "^[a-z0-9][a-z0-9_-]{1,63}$"
           },
           "label": {
-            "type": "object",
-            "required": [
-              "en"
-            ],
-            "properties": {
-              "en": {
-                "type": "string",
-                "minLength": 1
-              },
-              "zh-Hans": {
-                "type": "string",
-                "minLength": 1
-              }
-            },
-            "additionalProperties": false
+            "$ref": "#/$defs/localizedText"
           },
           "help": {
-            "type": "object",
-            "required": [
-              "en"
-            ],
-            "properties": {
-              "en": {
-                "type": "string",
-                "minLength": 1
-              },
-              "zh-Hans": {
-                "type": "string",
-                "minLength": 1
-              }
-            },
-            "additionalProperties": false
+            "$ref": "#/$defs/localizedText"
           },
           "requirement": {
             "enum": [
@@ -260,13 +213,13 @@
     },
     "languages": {
       "type": "array",
+      "minItems": 1,
       "uniqueItems": true,
       "items": {
-        "enum": [
-          "en",
-          "zh-Hans"
-        ]
-      }
+        "type": "string",
+        "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+      },
+      "description": "Interface languages offered; the first is the default. English and Simplified Chinese at launch; a language is added with a reviewed interface catalogue."
     }
   },
   "additionalProperties": false,
@@ -292,38 +245,10 @@
           "description": "Key of the item array in the team's rubric file (V5: conceptual, missing, technical)."
         },
         "label": {
-          "type": "object",
-          "required": [
-            "en"
-          ],
-          "properties": {
-            "en": {
-              "type": "string",
-              "minLength": 1
-            },
-            "zh-Hans": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          "additionalProperties": false
+          "$ref": "#/$defs/localizedText"
         },
         "summary": {
-          "type": "object",
-          "required": [
-            "en"
-          ],
-          "properties": {
-            "en": {
-              "type": "string",
-              "minLength": 1
-            },
-            "zh-Hans": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          "additionalProperties": false,
+          "$ref": "#/$defs/localizedText",
           "description": "One line telling contributors what this category means."
         },
         "target": {
@@ -404,87 +329,19 @@
       },
       "additionalProperties": false
     },
-    "translation": {
+    "localizedText": {
       "type": "object",
       "required": [
-        "title",
-        "method"
+        "en"
       ],
-      "properties": {
-        "title": {
-          "type": "string",
-          "minLength": 1
-        },
-        "summary": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "consequence": {
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "llm",
-            "human"
-          ]
-        },
-        "model": {
-          "type": "object",
-          "required": [
-            "name",
-            "mode"
-          ],
-          "properties": {
-            "name": {
-              "type": "string",
-              "minLength": 1
-            },
-            "version": {
-              "type": "string"
-            },
-            "mode": {
-              "enum": [
-                "local",
-                "external_api"
-              ],
-              "description": "local: a model on project hardware (no third party). external_api: a provider's API (data leave the project; needs the research lead's explicit configuration)."
-            }
-          },
-          "additionalProperties": false
-        },
-        "translated_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "reviewed_by": {
-          "type": "string",
-          "minLength": 1
-        },
-        "reviewed_at": {
-          "type": "string",
-          "format": "date-time"
-        }
+      "propertyNames": {
+        "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
       },
-      "additionalProperties": false,
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "method": {
-                "const": "llm"
-              }
-            }
-          },
-          "then": {
-            "required": [
-              "model"
-            ]
-          }
-        }
-      ],
-      "description": "Contributors see a translation only after a team member has reviewed it (reviewed_by and reviewed_at present); it is labelled with its method."
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Interface text keyed by BCP 47 language tag (en required; zh-Hans at launch; more languages can be added)."
     }
   }
 }

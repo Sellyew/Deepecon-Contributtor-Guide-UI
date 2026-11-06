@@ -2,21 +2,21 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft v0.3 (2026-11-06). v0.3 records the research lead's answers of 2026-11-06 (D-025 to D-029) and proposes two contributor-experience designs that the lead asked for: a layered item card (§4.2) and a review screen that shows the whole picture and the local change together (§4.1). |
+| **Status** | **Proposed** draft v0.4 (2026-11-06). v0.3 recorded the research lead's answers (D-025 to D-028) and proposed the layered item card (§4.2) and the map-and-panel review screen (§4.1). v0.4 corrects the translation scope: the **interface** is bilingual and extensible, and item text, papers, and code are not translated (D-030). It adds the rule that answer-key material never goes to any API provider (D-031), and makes proposals for the pilot's restricted data (O-034, §5.4) and the data-sharing check (O-035, §5.5). |
 | **Requirements** | [Research lead's revision, 2026-11-06](../requirements/2026-11-06-research-lead-revision.md) (governs) · [team handover plan](../requirements/2026-11-05-team-handover-plan.md) · [example package V5 review](../requirements/2026-11-06-example-package-v5-review.md) |
-| **Companion documents** | [Implementation plan](mvp-implementation-plan.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) |
+| **Companion documents** | [Implementation plan](mvp-implementation-plan.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) · [LLM use policy](llm-use-policy.md) |
 | **Supersedes** | The decision brief, Options A and B, the interview protocol, the pilot plan, and the cost model (kept as records) |
 
 ---
 
 ## 1. What the first version does
 
-Invited contributors (the paper's authors, or invited domain experts) use a small bilingual website, in English and Simplified Chinese. It has two functions.
+Invited contributors (the paper's authors, or invited domain experts) use a small website whose interface is in English and Simplified Chinese, with more languages possible later. It has two functions.
 
 1. **Selection.** The contributor opens their own paper and reviews the items the team prepared: the deliberate errors and removed steps that will become a benchmark task. For each item they keep it, keep it with changes, reject it, or mark it as unsure. They can comment and propose additional items.
 2. **Guidance.** The contributor learns what to provide (a full runnable replication package and their original file names), how to prepare it, and how to submit it.
 
-No step needs an AI model, and by default the site sends nothing to any AI provider (§7). The only planned model use is team-side translation of item text, which the team reviews before contributors see it (§6.3).
+No step needs an AI model, and the site sends nothing to any AI provider (§7). The interface text is translated by the team, from an LLM draft reviewed by people (§6.3). Item text, papers, and code are shown in their original language and are not translated (D-030).
 
 **Out of scope for v1.**
 - Ruled out by the research lead on 2026-11-06: an AI interview; AI-generated errors or flawed packages; Claude Code or other client software; paper discovery; complex onboarding.
@@ -30,7 +30,8 @@ No step needs an AI model, and by default the site sends nothing to any AI provi
 | D-026 | Contributors provide their **original file names**, and the team does the mapping. | The checklist asks for original names. The team builds the map, and every location on the site is shown with the original name first. |
 | D-027 | The team needs a **full runnable package**. | The guidance asks for a package a journal data editor would accept, with data or a route to run with data (§5). |
 | D-028 | Contributors may download the **agent-facing package**. | It is a download on the paper page. |
-| D-029 | Item text is **translated with an LLM and reviewed by the team**. | Translation is an offline team-side step. Contributors see only reviewed translations, labelled. Whether the model is local or an external API is an open decision (O-033, §6.3). |
+| D-030 | The **interface** is bilingual (Chinese and English), with more languages possible later; interface text is translated with an LLM and reviewed by the team. (Clarifies an earlier misreading, D-029, that item text would be translated.) | Interface strings live in translation catalogues, and a language is added with a reviewed catalogue. Item text, papers, and code stay in their original language. |
+| D-031 | **Answer-key material is never sent to any API provider**; any LLM processing of it happens only on a locally deployed model. | Applies to candidate items, rubrics, item maps, flawed code, guides, and contributor responses. See the [LLM use policy](llm-use-policy.md). |
 
 ## 3. The contributor's path
 
@@ -92,7 +93,7 @@ The map comes from a file the team prepares for each paper (the [item map](../..
 - **Optional ticks** (realistic, consequential, repair correct) and short text fields, folded until needed.
 - **"Ask the team"** on every item: a short question stored on the site, which the team answers in the admin page. The answer appears next time the contributor opens the item. There is no AI and no e-mail; the team can also reply by its usual channel.
 - **Keyboard shortcuts:** arrow keys for previous and next; K, C, R, U for the four answers.
-- **Language toggle per item:** a reviewed Chinese translation, with the English original one click away. Translations are labelled "machine-translated, reviewed by the team".
+- **Interface language switch** (English / 中文, more later) on every page. Item text appears in its original language, and contributors may answer in either language; answers are stored as written.
 - **Progress and time:** "6 of 15 reviewed, about 20 minutes left". The session resumes where the contributor left off, and "Unsure" counts as reviewed, so nobody feels forced to decide.
 - **A download of their own review** (a PDF or Markdown summary) after confirmation, for their records. It carries the confidentiality notice.
 
@@ -109,7 +110,7 @@ The map comes from a file the team prepares for each paper (the [item map](../..
 | Restricted or confidential, such as administrative health or personnel records | **Never upload it.** Choose one of:<br>(a) the author or their RA runs the team's modified versions in the authorized environment and returns logs and outputs;<br>(b) the team applies to the provider for access;<br>(c) a secure environment where authorized team members run it;<br>(d) a fully synthetic substitute built from the codebook | With (a)–(c), run everything. With (d), check only that the code runs, not the results |
 | Not yet decided | Record it as "to be decided" | The team follows up |
 
-For the pilot paper, the public package's restricted data directories are empty (team handover plan §7), so route (a) or (b) will be needed.
+For the pilot paper, the public package's restricted data directories are empty (team handover plan §7), so route (a) or (b) will be needed (§5.4).
 
 ### 5.2 Checklist (configured per paper; default for empirical papers)
 
@@ -140,6 +141,30 @@ For a **theory paper** the default checklist is different: the LaTeX source of t
   - or use another channel agreed with the team (for very large packages, for example an institutional transfer).
 - **Declare** each dataset's route, and confirm that nothing restricted or confidential is included. If any data are included, the contributor also confirms permission to share them with the project.
 
+### 5.4 Proposal for the pilot paper's restricted data (O-034)
+
+1. **First, read the package's data availability statement.** The public openICPSR package's README should say how each restricted dataset can be obtained and by whom. That decides how expensive route (b) is. *(Not read here.)*
+2. **Start with route (a), the author runs.** Ask the authors whether they or a research assistant still have authorized access.
+   - The team sends one **run kit**: the reference code and every confirmed modified version, applied to a copy of the original package, with a single script that runs them all in turn and collects the outputs.
+   - The authors run it inside their authorized environment and return only logs and the aggregate tables and figures.
+   - Before sending, they check the outputs against their data agreement's disclosure rules, for example small cells.
+   - The authors already see the items as reviewers, so the run kit reveals nothing new to them.
+3. **In parallel, build a fully synthetic stand-in (d)** from the codebook, with the same variable names, types, and panel structure. The team uses it to check that every modified version runs and produces its outputs before anything is sent to the authors. One round with the authors then usually suffices. The synthetic data never replace the real results.
+4. **Fall back to route (b)**, applying for access, or (c), a secure environment, if the authors no longer have access or cannot run the kit.
+
+### 5.5 What the data-sharing check means (O-035)
+
+When a contributor includes data in an upload, the project then holds those data. The data's own licence or data-use agreement decides whether that is allowed:
+- some sources allow redistribution to anyone, for example IPUMS extracts within its terms;
+- others forbid passing data to third parties, for example PSID or WRDS (Compustat, CRSP) [P-full, R8];
+- confidential administrative data usually need a formal agreement.
+
+If an author uploads data that may not be shared with the project, by mistake or misunderstanding, the project would be in breach of the provider's terms. **The proposal:**
+- **Quarantine.** Uploads that include data stay encrypted and unopened until a named team member, the **data steward**, has checked each dataset's declared terms against its source.
+- **Clear.** A dataset that passes the check is released to the team.
+- **Delete.** A dataset that fails is deleted. The contributor is told why and offered route (a).
+- **Record.** Each check is logged with the dataset, its terms, and the decision.
+
 ## 6. Administrator functions (v1)
 
 ### 6.1 Configure a paper
@@ -155,16 +180,17 @@ For a **theory paper** the default checklist is different: the LaTeX source of t
 - Receive submissions and verify their SHA-256.
 - Freeze the paper's version; every action goes into an event log.
 
-### 6.3 Translation (D-029)
-1. **Draft.** An offline command, `translate_items`, drafts Chinese text for each item's title, summary, description, and consequence. It runs only when a model is explicitly configured.
-2. **Record.** Each draft records the method, the model name and version, and the mode, local or external API.
-3. **Review.** A team member reviews and corrects each draft in the admin page.
-4. **Publish.** Only reviewed translations reach contributors, and they carry the label "machine-translated, reviewed by the team". The English original stays one click away.
+### 6.3 Interface languages (D-030)
 
-**A privacy point the research lead should decide (O-033).** Item text is expert-only answer material: it describes the planted errors and their repairs.
-- **A local model (Mode 1)** keeps it on project hardware. This is the recommended mode for item text.
-- **The DeepSeek API (Mode 2)** would send the answer key to DeepSeek. That conflicts with D-018 unless the research lead explicitly configures it, and it also exposes the answers to a provider whose models might later be evaluated on these tasks [U: DeepSeek API data terms not checked].
-- **Agent-facing text** (the task instructions and the neutral abstract) carries less risk, if the lead wants Mode 2 for that alone.
+All interface text (buttons, notices, the overview, category meanings, the guidance, and the checklist) is kept in translation catalogues, one per language.
+
+1. **Draft.** The team drafts the Chinese catalogue with an LLM.
+2. **Review.** A team member reviews and corrects it.
+3. **Ship.** The reviewed catalogue is committed with the code.
+
+Interface text contains no project material, so drafting it with any LLM leaks nothing. Per-paper interface text, such as a category's one-line meaning and the checklist entries, goes through the same draft-and-review step. Because these entries describe categories, not planted errors, they may be drafted with any model. **Item text is not translated.**
+
+**Adding a language** means adding one catalogue and the per-paper labels, then reviewing both; no code changes.
 
 ## 7. Privacy and data-flow architecture
 
@@ -173,14 +199,14 @@ For a **theory paper** the default checklist is different: the LaTeX source of t
   - no analytics, web fonts, content delivery networks, or embedded third-party content;
   - outbound traffic blocked.
 - **Model modes:**
-  - Mode 0, Off, is the default for everything contributors do;
+  - Mode 0, Off: the site itself uses no model in v1;
   - Mode 1, a local model, keeps data on project hardware;
-  - Mode 2, an external API such as DeepSeek with the lead's key, sends data out of the project, needs explicit configuration, and is never used for contributor responses or restricted data;
-  - the only planned model use is team-side translation (§6.3).
+  - Mode 2, an external API such as DeepSeek with the lead's key, sends data out of the project. It needs explicit configuration and is **never** used for answer-key material (D-031), contributor responses, or restricted data;
+  - the team's own use of LLMs outside the site follows the [LLM use policy](llm-use-policy.md).
 - **Data on the server.** Data are uploaded now (D-027), but only data the author may share. They go to the encrypted project server, never to any AI service, and are readable only by team members with the data role. Retention and deletion follow the contributor agreement and the data's terms. Restricted and confidential data are never uploaded (§5.1).
 - **Storage tiers:**
   - agent-facing (the candidate package);
-  - expert-only (rubric, item map, translations of item text);
+  - expert-only (rubric, item map);
   - researchers-only (pilot reports; never shown to contributors);
   - contributor-submitted (packages, answers, messages).
 - **Access controls:**
@@ -190,12 +216,12 @@ For a **theory paper** the default checklist is different: the LaTeX source of t
 
 ## 8. Data model (draft 0.2.0)
 
-Five JSON Schemas in [`schemas/contributor-interface/`](../../schemas/contributor-interface/README.md), with fictional empirical and theory examples and 15 tests. The team's real V5 rubric imports through the generic path, and its scoring fields never reach the contributor view (checked 2026-11-06; only pass/fail was printed).
+Five JSON Schemas in [`schemas/contributor-interface/`](../../schemas/contributor-interface/README.md), with fictional empirical and theory examples and 16 tests. The team's real V5 rubric imports through the generic path, and its scoring fields never reach the contributor view (checked 2026-11-06; only pass/fail was printed).
 
 | Schema | Holds |
 |---|---|
 | Rubric import | The team's own rubric file, preserved as it is |
-| Paper configuration | Field, citation, categories (field roles and visible roles), translations with provenance, original-file-name map, checklist, submission settings |
+| Paper configuration | Field, citation, categories (field roles and visible roles), localized interface text (category labels and meanings, checklist), languages, original-file-name map, checklist, submission settings |
 | Item map | Workflow or argument nodes and edges; per item: anchors, affected results, original and modified excerpts, summary, consequence, pairing |
 | Contributor review | Answers per item, proposals, "Ask the team" messages, confirmations |
 | Submission manifest | Channel, files and hashes, package information (master script, README, software, run log, expected outputs, run time), datasets with their availability and route, declarations |
@@ -205,9 +231,8 @@ Five JSON Schemas in [`schemas/contributor-interface/`](../../schemas/contributo
 See the [implementation plan](mvp-implementation-plan.md) v0.2:
 - one Django application, server-rendered, with SQLite and encrypted storage;
 - the map and item panel rendered on the server with plain HTML and CSS;
-- the translation command behind the model gateway;
 - resumable uploads for multi-gigabyte packages;
-- about 6–10 engineer-weeks for one developer [U: planning estimate].
+- about 6–9.5 engineer-weeks for one developer [U: planning estimate].
 
 ## 10. Open questions
 
@@ -215,7 +240,6 @@ See the [implementation plan](mvp-implementation-plan.md) v0.2:
 |---|---|---|
 | O-027 | Does the layered card (§4.2) suit contributors? | Pilot it with the first paper's two experts |
 | O-029 | Does the map with the item panel (§4.1) suit contributors? | Pilot it, with the matrix toggle as the alternative |
-| O-033 | Which model translates item text: local, or the DeepSeek API? | A local model for expert-only item text |
-| O-034 | Which route the pilot paper's restricted data take (§5.1) | Route (a) if the authors agree; otherwise (b) |
-| O-035 | Who checks, before upload, that included data may be shared with the project? | A team member, from the README's data availability statement |
+| O-034 | Which route the pilot paper's restricted data take | §5.4: read the data availability statement; route (a) with a run kit, checked first on a synthetic stand-in; fall back to (b) or (c) |
+| O-035 | Who checks that data included in an upload may be shared with the project? | §5.5: a named data steward, with uploads quarantined until checked |
 | O-021, O-022, O-025, O-026 | Hosting; invitation delivery; what may be sent at evaluation time; confidentiality agreement | Unchanged |

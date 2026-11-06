@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft v0.2 (2026-11-06). For review by the research lead; nothing is built until it is approved. v0.2 adds configurable categories per field (D-025), the map-and-panel review screen, team-side translation with review (D-029), and runnable packages with data routes (D-027). |
+| **Status** | **Proposed** draft v0.2 (2026-11-06). For review by the research lead; nothing is built until it is approved. v0.2 adds configurable categories per field (D-025), the map-and-panel review screen, and runnable packages with data routes (D-027); interface languages are catalogues reviewed by the team, and item text is not translated (D-030). |
 | **Implements** | [MVP proposal v0.3](mvp-contributor-interface.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) |
 | **Principles** | Lightweight; self-hosted; no model and no third-party service in the default configuration (D-018); the team's existing formats are imported as they are. |
 
@@ -16,10 +16,10 @@
 | Pages | Server-rendered templates, plus a small vanilla JavaScript file for autosave, keyboard shortcuts, and keeping the map and item panel in sync. The map is plain HTML and CSS (nested lists in a grid, with markers); the matrix is an HTML table | No build pipeline, no front-end framework, no charting library, no external assets |
 | Database | SQLite, in WAL mode | Enough for tens of contributors (team's plan); move to PostgreSQL on the same server if needed |
 | Files | A private directory on an encrypted volume, outside the web root, served only by an authorized Django view (through the reverse proxy's internal-redirect feature) | Private storage, with downloads only after an authorization check |
-| Translations | Django's gettext catalogues (`en`, `zh-Hans`), maintained by people | No machine translation (D-018) |
+| Interface languages | Django's gettext catalogues (`en`, `zh-Hans`; a language is added as one more catalogue), drafted with an LLM and reviewed by the team; per-paper labels are localized in the paper configuration | Interface text contains no project material (D-030); item text is not translated |
 | Fonts | System font stacks (PingFang SC, Microsoft YaHei, Noto Sans CJK, then Latin fallbacks) | No web-font service |
 | Reverse proxy | Caddy or nginx, with TLS | Uses the institution's certificate, or an ACME certificate if the lead accepts that external (non-AI) certificate authority (O-021) |
-| Model gateway | A module that refuses every call unless a model is explicitly configured. In v1 its only caller is the offline `translate_items` command; contributor-facing code never calls it | Local (Mode 1) or external API (Mode 2) only by the research lead's configuration (O-033) |
+| Model gateway | A module that refuses every call; v1 has no caller | Any later model use is configured by the research lead; answer-key material only ever goes to a local model (D-031) |
 
 ## 2. Components
 
@@ -28,7 +28,6 @@
    - `import_rubric`: stores the team's rubric file as it is, keyed by version, and normalizes it through the configured categories (`validation/rubric_checks.py`). It refuses the import if any check fails.
    - `import_item_map`: validates the item map (nodes, edges, anchors, excerpts) against the rubric.
    - `import_candidate_package`: stores the agent-facing ZIP that contributors may download, and checks its SHA-256.
-   - `translate_items`: drafts translations through the model gateway when a model is configured, and stores them as unreviewed; a team member reviews them in the admin page.
 2. **Invitations.**
    - Tokens are generated with `secrets.token_urlsafe(32)` and stored as SHA-256 hashes, with an expiry and a revocation flag.
    - The first visit sets a session.
@@ -71,8 +70,8 @@
 | Tokens and content kept out of logs | A test that greps the logs after a scripted session for tokens and for contributor text |
 | Backups | An encrypted nightly backup to project storage, plus a documented restore test before launch |
 | Withdrawal | An administrator action that deletes a contributor's reviews, proposals, and uploads, recorded in the event log |
-| Translation | The gateway refuses every call without explicit configuration; each draft records model and mode; a test shows contributors never see an unreviewed translation; external-API mode, if ever configured, logs metadata only and is refused for contributor responses and restricted data |
-| Uploaded data | Stored encrypted; readable only by team accounts with the data role; deleted according to the contributor agreement and the data's terms; never sent to any model |
+| Model gateway | A test that the gateway refuses every call in v1 and that no module other than the gateway opens a model connection |
+| Uploaded data | Quarantined, encrypted and unopened, until the data steward has checked each dataset's terms (MVP §5.5); then readable only by team accounts with the data role; deleted according to the contributor agreement and the data's terms; never sent to any model |
 
 ## 4. Milestones
 
@@ -81,9 +80,9 @@
 | M1 | Skeleton | Django project, models, importers for configuration, rubric, and item map (both example fields), administration pages, invitation tokens, and both languages; runs with **synthetic** examples only | 1.5–2 engineer-weeks |
 | M2 | Selection | Overview; the map and item panel with the matrix toggle; layered cards; the four answers, reasons, and ticks; proposals; "Ask the team"; autosave with conflicts; confirmation with versions; review export | 2–3 |
 | M3 | Guidance and submission | Configurable checklist; guidance page; resumable upload with SHA-256 receipt; dataset declarations and routes; public-reference option; manifest export | 1–1.5 |
-| M4 | Translation and privacy pass | The `translate_items` command behind the gateway; the review workflow; every control in §3 tested; deployment with TLS, egress firewall, backups, and a restore test | 1–2 |
-| M5 | First real configuration | The pilot paper configured from the team's files, with categories, item map, and reviewed translations; a dry run by a team member as a contributor; fixes | 0.5–1.5 |
-| | **Total** | | **≈ 6–10 engineer-weeks** for one developer |
+| M4 | Languages and privacy pass | Reviewed Chinese catalogue; data quarantine and steward check; every control in §3 tested; deployment with TLS, egress firewall, backups, and a restore test | 1–1.5 |
+| M5 | First real configuration | The pilot paper configured from the team's files, with categories and item map; a dry run by a team member as a contributor; fixes | 0.5–1.5 |
+| | **Total** | | **≈ 6–9.5 engineer-weeks** for one developer |
 
 The estimate assumes a developer familiar with Django; it excludes the team's work on items, translations of item text, and hosting procurement.
 
@@ -92,7 +91,7 @@ The estimate assumes a developer familiar with Django; it excludes the team's wo
 - A contributor's invitation opens their paper directly; there is no paper search and no questionnaire.
 - Items appear in the paper's configured categories: the V5 profile and the theory example both work. Fewer or more items work, and proposals never overwrite prepared items.
 - Selecting a marker on the map opens its item; moving to the next item moves the ring on the map; selecting a result highlights the items that affect it.
-- Locations and excerpts show the author's original file names; only reviewed translations appear, with their label.
+- Locations and excerpts show the author's original file names; switching the interface language changes every interface string but no item text.
 - "Reject", "unsure", "keep only one", "revisit across batches", and "change then undo" are all saved correctly.
 - Refreshing, losing the connection, timing out, submitting twice, and editing in two tabs never lose data silently.
 - The confirmation summary shows the contributor's own words; confirmation creates a new version, and a frozen version cannot be changed.
@@ -102,4 +101,4 @@ The estimate assumes a developer familiar with Django; it excludes the team's wo
 
 ## 6. Not in v1
 
-Any model use other than the offline translation command; e-mail sending; grading of agent submissions; code execution; reviewer accounts; dashboards; real-time collaboration. Each needs a separate request from the research lead.
+Any model use; e-mail sending; grading of agent submissions; code execution; reviewer accounts; dashboards; real-time collaboration. Each needs a separate request from the research lead.

@@ -54,21 +54,7 @@
             ]
           },
           "label": {
-            "type": "object",
-            "required": [
-              "en"
-            ],
-            "properties": {
-              "en": {
-                "type": "string",
-                "minLength": 1
-              },
-              "zh-Hans": {
-                "type": "string",
-                "minLength": 1
-              }
-            },
-            "additionalProperties": false
+            "$ref": "#/$defs/localizedText"
           },
           "original_path": {
             "type": "string",
@@ -122,7 +108,7 @@
           "summary": {
             "type": "string",
             "minLength": 1,
-            "description": "One plain-language sentence, in English; translations live in the paper configuration."
+            "description": "One plain-language sentence, in the item's original language (not translated)."
           },
           "anchors": {
             "type": "array",
@@ -203,6 +189,20 @@
         }
       },
       "additionalProperties": false
+    },
+    "localizedText": {
+      "type": "object",
+      "required": [
+        "en"
+      ],
+      "propertyNames": {
+        "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Interface text keyed by BCP 47 language tag (en required; zh-Hans at launch; more languages can be added)."
     }
   }
 }

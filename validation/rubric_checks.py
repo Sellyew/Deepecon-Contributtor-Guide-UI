@@ -8,8 +8,12 @@ fields fill each display role.
 normalize(rubric, config)            -> (items, problems)
 check_rubric(rubric, config)         -> problems  (structure, IDs, scores, total)
 check_item_map(item_map, items)      -> problems  (nodes, edges, anchors, pairs)
-contributor_view(items, config, item_map, language) -> {category_id: [item views]}
+contributor_view(items, config, item_map) -> {category_id: [item views]}
 map_view(item_map, items, statuses)  -> nodes with item markers (the "whole picture")
+localize(text, language)             -> interface text in a language, falling back to English
+
+Item text is shown in its original language and never translated (D-030); only interface
+text (category labels, checklist entries, node labels) is localized.
 
 Problem messages contain category IDs, item IDs, node IDs and field names only, never item
 text. Standard library only.
@@ -87,9 +91,6 @@ def check_rubric(rubric, config):
         problems.append(f"item points sum to {total}, not the maximum {rubric['maximum']}")
     if config.get("rubric_version") != rubric.get("version"):
         problems.append("configuration rubric_version differs from the rubric version")
-    for iid in config.get("translations", {}):
-        if iid not in seen:
-            problems.append(f"translation for unknown item {iid}")
     return problems
 
 
@@ -130,17 +131,22 @@ def _map_path(text, file_map):
     return text
 
 
-def _reviewed_translation(config, iid, language):
-    t = config.get("translations", {}).get(iid, {}).get(language)
-    if t and t.get("reviewed_by") and t.get("reviewed_at"):
-        return t
-    return None
+def localize(text, language):
+    """Interface text (a {language tag: string} object) in the requested language,
+    falling back to the base language and then to English."""
+    if language in text:
+        return text[language]
+    base = language.split("-")[0]
+    for tag, value in text.items():
+        if tag.split("-")[0] == base:
+            return value
+    return text["en"]
 
 
-def contributor_view(items, config, item_map=None, language="en"):
+def contributor_view(items, config, item_map=None):
     """What a contributor may see, per category. Only configured roles appear; rubric
-    fields not mapped to a visible role never appear; translations appear only after
-    review and carry their method."""
+    fields not mapped to a visible role never appear. Item text stays in its original
+    language (D-030)."""
     file_map = {m["candidate_path"]: m["original_path"] for m in config.get("file_name_map", [])}
     overlays = (item_map or {}).get("items", {})
     cats = {c["id"]: c for c in config["categories"]}
@@ -169,10 +175,6 @@ def contributor_view(items, config, item_map=None, language="en"):
             v["change"] = {**ch, "original": {**ch["original"], "path": _map_path(ch["original"].get("path"), file_map)}}
         if ov.get("paired_with"):
             v["paired_with"] = ov["paired_with"]
-        tr = _reviewed_translation(config, it["id"], language) if language != "en" else None
-        if tr:
-            v["translation"] = {k: tr[k] for k in ("title", "summary", "description", "consequence") if k in tr}
-            v["translation"]["method"] = tr["method"]
         view[it["category"]].append(v)
     return view
 

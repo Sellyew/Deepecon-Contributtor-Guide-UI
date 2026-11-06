@@ -123,7 +123,7 @@ def test_contributor_view_shows_only_configured_roles():
     r["technical"][0]["secret_note"] = "must never show"
     items, _ = rc.normalize(r, c)
     view = rc.contributor_view(items, c, m)
-    allowed = {"id", "category", "paired_with", "translation"} | set(rc.ROLE_FROM_MAP) | {
+    allowed = {"id", "category", "paired_with"} | set(rc.ROLE_FROM_MAP) | {
         "title", "weight", "locations", "description", "acceptable_answer", "critical_requirements"}
     flat = json.dumps(view, ensure_ascii=False)
     for word in ("tiers", "allowed_scores", "scoring_method", "evidence_record_required", "must never show", "Fictional example; not calibrated"):
@@ -158,17 +158,28 @@ def test_original_file_names_are_shown():
     assert v["locations"] == ["code/build/registry_merge.do (02_code/example_merge_registry.do)"]
 
 
-def test_only_reviewed_translations_are_shown_and_labelled():
+def test_item_text_stays_in_original_language():
     _, c, m, items = bundle("empirical")
-    zh = rc.contributor_view(items, c, m, "zh-Hans")
-    a = zh["conceptual"][0]
-    assert a["translation"]["title"].startswith("虚构示例") and a["translation"]["method"] == "llm"
-    assert "translation" not in zh["technical"][0]       # T01's translation is not reviewed yet
+    view = rc.contributor_view(items, c, m)
+    assert view["conceptual"][0]["title"].startswith("FICTIONAL")
+    assert "translation" not in json.dumps(view)
     bad = copy.deepcopy(c)
-    del bad["translations"]["A"]["zh-Hans"]["model"]   # an LLM translation must record its model
-    assert not valid("paper-config", bad)
+    bad["translations"] = {"A": {"zh-Hans": {"title": "x"}}}
+    assert not valid("paper-config", bad)              # no item-translation channel exists
+
+
+def test_interface_text_supports_more_languages():
+    c = ex("empirical", "paper-config")
+    c["languages"] = ["zh-Hans", "en", "es"]
+    c["categories"][0]["label"]["es"] = "Error conceptual (ejemplo)"
+    assert valid("paper-config", c)
+    label = c["categories"][0]["label"]
+    assert rc.localize(label, "es") == "Error conceptual (ejemplo)"
+    assert rc.localize(label, "zh-Hans") == "学理错误"
+    assert rc.localize(label, "zh") == "学理错误"      # base-language fallback
+    assert rc.localize(label, "fr") == "Conceptual error"
     bad = copy.deepcopy(c)
-    bad["translations"]["A"]["zh-Hans"]["model"]["mode"] = "cloud"
+    bad["languages"] = ["Chinese"]
     assert not valid("paper-config", bad)
 
 

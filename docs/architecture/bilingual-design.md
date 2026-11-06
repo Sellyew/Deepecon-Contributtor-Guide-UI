@@ -1,6 +1,6 @@
 # Bilingual Design (English and Simplified Chinese)
 
-> **Note (2026-11-06).** The principles and the glossary apply to the [MVP contributor interface](mvp-contributor-interface.md). The Option B sections are superseded, and machine translation counts as a model call: only people or a locally deployed model translate (D-018).
+> **Note (2026-11-06).** The principles and the glossary apply to the [MVP contributor interface](mvp-contributor-interface.md). The Option B sections are superseded. **Clarified 2026-11-06 (D-030):** the interface is bilingual and extensible to more languages, drafted with an LLM and reviewed by the team; item text, papers, and code are not translated. Answer-key material goes only to a locally deployed model (D-031).
 
 | | |
 |---|---|
