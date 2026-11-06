@@ -1,5 +1,7 @@
 # Verifier Validation Protocol
 
+> **Note (2026-11-06).** The contributor workflow changed: the team prepares candidate errors and contributors review them in a self-hosted interface, with no AI interview and no external AI by default ([revised requirements](../requirements/2026-11-06-research-lead-revision.md); [MVP proposal](../architecture/mvp-contributor-interface.md)). This document remains the team's internal methodology for turning confirmed candidates into verified tasks, to be aligned with the three verification rounds of the [team's plan](../requirements/2026-11-05-team-handover-plan.md). Passages that assume the AI interview, Options A and B, or Claude-based sessions are superseded.
+
 | | |
 |---|---|
 | **Status** | **Proposed** v0.3.0 (2026-11-05). Part of Deliverable 2. Not yet reviewed by the research lead. v0.3.0 integrates an independent econometric review and a benchmark-methodology review (§16). |

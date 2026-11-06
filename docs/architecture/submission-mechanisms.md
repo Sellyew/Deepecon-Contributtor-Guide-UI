@@ -1,5 +1,7 @@
 # Submission and Contribution Management
 
+> **Superseded on 2026-11-06.** The research lead revised the MVP ([revised requirements](../requirements/2026-11-06-research-lead-revision.md)): no AI interview, no Claude Code-based system, and no project data sent to any external AI service by default. The current proposal is the [MVP contributor interface](mvp-contributor-interface.md). This document is kept as a record and is no longer the basis for the design. Submission requirements will be redesigned from the example contribution package (D-023).
+
 | | |
 |---|---|
 | **Status** | **Proposed** v0.1.0 (2026-11-05). Not yet reviewed by the research lead. |

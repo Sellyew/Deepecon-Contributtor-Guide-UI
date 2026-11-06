@@ -1,5 +1,7 @@
 # Architecture Decision Brief: How Economists Will Contribute
 
+> **Superseded on 2026-11-06.** The research lead revised the MVP ([revised requirements](../requirements/2026-11-06-research-lead-revision.md)): no AI interview, no Claude Code-based system, and no project data sent to any external AI service by default. The current proposal is the [MVP contributor interface](mvp-contributor-interface.md). This document is kept as a record and is no longer the basis for the design.
+
 **DeepEcon Research Benchmark (working title) · Deliverable 7 · Draft v0.3.0 for discussion with collaborators · 2026-11-05**
 
 | | |

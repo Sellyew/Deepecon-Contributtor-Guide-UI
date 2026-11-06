@@ -1,5 +1,7 @@
 # Deliverable 5 — Option A: Hosted Contributor Platform
 
+> **Superseded on 2026-11-06.** The research lead revised the MVP ([revised requirements](../requirements/2026-11-06-research-lead-revision.md)): no AI interview, no Claude Code-based system, and no project data sent to any external AI service by default. The current proposal is the [MVP contributor interface](mvp-contributor-interface.md). This document is kept as a record and is no longer the basis for the design.
+
 | | |
 |---|---|
 | **Status** | **Proposed design** v0.2.1 (2026-11-05). One of two candidate architectures; **not selected**. Comparable in depth and assumptions to [Option B](option-b-local-skill.md). v0.2.0 replaced v0.1.0's unverified claims with verified facts; v0.2.1 integrates the independent fairness reviews (§19). |

@@ -2,41 +2,37 @@
 
 An expert-driven benchmark for evaluating whether AI agents can perform rigorous economics research — empirical implementation, causal identification, econometric reasoning, and scientific judgment — built from the experience of economists who publish in leading journals.
 
-> **Project status (2026-11-05): design phase, decision package ready for review.** Phases 1–4 of the [plan](docs/requirements/2026-11-05-research-lead-brief.md#12-proposed-development-process) have produced complete drafts of Deliverables 1–8, revised after four independent reviews (econometrics, benchmark methodology, and one advocate for each architecture). **No contribution architecture has been selected** and nothing has been implemented. All recommendations are *Proposed* until the research lead approves them in the [decision log](docs/decisions/decision-log.md).
+> **Project status (2026-11-06): MVP redirected.** The research lead set a new direction: a **lightweight, self-hosted, privacy-preserving, bilingual contributor interface**. Invited authors review the candidate errors the team prepared, select, reject, or supplement them (*Selection*), and follow clear instructions for submitting their replication materials (*Guidance*). There is no AI interview, no Claude Code-based system, and no project data sent to any external AI service by default. The contribution schema and implementation plan wait for the example contribution package. Nothing has been implemented. Recommendations stay *Proposed* until the research lead approves them in the [decision log](docs/decisions/decision-log.md).
 
 ## The idea in one paragraph
 
-From a published paper, an economist helps build a validated **correct** replication of a specific result and one or more **deliberately flawed** versions, each encoding a plausible, scientifically consequential mistake: the wrong estimator, inference procedure, sample, or treatment timing, or an unsupported interpretation. An AI-guided interview helps the economist make that tacit knowledge explicit. A benchmark team then turns these source materials into short, verifiable tasks whose hidden verifiers accept correct work and reject the expert-identified mistakes. Contributions reach the project through one of two candidate architectures under comparison: a **hosted web platform** (Option A) or a **Claude Code skill run locally** (Option B), both in English and Simplified Chinese.
+From a published paper, the team prepares a validated **correct** replication and candidate **deliberate errors**: plausible, scientifically consequential modifications (an analysis step done wrongly, or a necessary step removed). The paper's authors or invited experts review these candidates in a simple bilingual website, choosing, rejecting, refining, or adding to them, and provide the replication materials needed. The team then implements the confirmed modifications, verifies them in three rounds, and turns them into short, verifiable tasks whose hidden verifiers accept correct work and reject the mistakes.
 
 ## Start here
 
 | If you want… | Read |
 |---|---|
-| The decision we need to make, in a few pages | [Architecture decision brief](docs/architecture/architecture-decision-brief.md) (Deliverable 7); a designed rendering is in [`reports/`](reports/README.md) |
-| Answers to the five assessment questions | [Initial assessment](docs/assessment/initial-assessment.md) |
-| What has been decided, proposed, left open, and rejected | [Decision log](docs/decisions/decision-log.md) |
-| The original requirements | [Research lead's brief](docs/requirements/2026-11-05-research-lead-brief.md) |
+| The current proposal | [MVP contributor interface](docs/architecture/mvp-contributor-interface.md) |
+| The requirements that govern it | [Research lead's revision, 2026-11-06](docs/requirements/2026-11-06-research-lead-revision.md) and the [team's handover plan](docs/requirements/2026-11-05-team-handover-plan.md) |
+| What has been decided, proposed, left open, rejected, or superseded | [Decision log](docs/decisions/decision-log.md) |
+| The original requirements | [Research lead's brief, 2026-11-05](docs/requirements/2026-11-05-research-lead-brief.md) |
 
-## Deliverables
+## Documents
 
-| # | Deliverable | Document | Status |
-|---|---|---|---|
-| 1 | Research and methodology review | [docs/research/research-and-methodology-review.md](docs/research/research-and-methodology-review.md) | Proposed draft |
-| 2 | Benchmark construction protocol | [docs/methodology/benchmark-construction-protocol.md](docs/methodology/benchmark-construction-protocol.md), with the [task-quality rubric](docs/methodology/task-quality-rubric.md) and [verifier validation protocol](docs/methodology/verifier-validation-protocol.md) | Proposed draft |
-| 3 | Expert interview protocol | [docs/interview/expert-interview-protocol.md](docs/interview/expert-interview-protocol.md) | Proposed draft |
-| 4 | Contribution data schema | [schemas/](schemas/README.md) (JSON Schema, example, tests) | Proposed draft |
-| 5 | Option A — hosted platform | [docs/architecture/option-a-hosted-platform.md](docs/architecture/option-a-hosted-platform.md) | Proposed draft |
-| 6 | Option B — local Claude Code skill | [docs/architecture/option-b-local-skill.md](docs/architecture/option-b-local-skill.md) | Proposed draft |
-| 7 | Architecture decision brief | [docs/architecture/architecture-decision-brief.md](docs/architecture/architecture-decision-brief.md) | Proposed draft |
-| 8 | Pilot evaluation plan | [docs/pilot/pilot-evaluation-plan.md](docs/pilot/pilot-evaluation-plan.md) | Proposed draft |
-
-Supporting analyses: [submission mechanisms](docs/architecture/submission-mechanisms.md) · [bilingual design](docs/architecture/bilingual-design.md) · [cost and effort model](docs/architecture/cost-and-effort-model.md) · [reading notes](docs/research/reading-notes/) · [evidence notes](docs/research/evidence/).
+| Document | Status |
+|---|---|
+| [MVP contributor interface](docs/architecture/mvp-contributor-interface.md) | **Current**, Proposed draft; schema and implementation plan provisional until the example package |
+| [Bilingual design](docs/architecture/bilingual-design.md) | Current (principles and glossary) |
+| [Verifier validation protocol](docs/methodology/verifier-validation-protocol.md), [task-quality rubric](docs/methodology/task-quality-rubric.md), [construction protocol](docs/methodology/benchmark-construction-protocol.md) | The team's internal methodology for turning confirmed candidates into tasks; interview-related passages superseded |
+| [Research and methodology review](docs/research/research-and-methodology-review.md); [evidence notes](docs/research/evidence/); [reading notes](docs/research/reading-notes/) | Reference |
+| [Contribution schema](schemas/README.md) | To be redesigned from the example package |
+| [Decision brief](docs/architecture/architecture-decision-brief.md), [Option A](docs/architecture/option-a-hosted-platform.md), [Option B](docs/architecture/option-b-local-skill.md), [interview protocol](docs/interview/expert-interview-protocol.md), [pilot plan](docs/pilot/pilot-evaluation-plan.md), [cost model](docs/architecture/cost-and-effort-model.md), [submission mechanisms](docs/architecture/submission-mechanisms.md), [initial assessment](docs/assessment/initial-assessment.md) | Superseded on 2026-11-06; kept as records |
 
 ## Repository layout
 
 ```
 docs/
-  requirements/     research lead's brief (verbatim; never edited)
+  requirements/     research lead's brief and 2026-11-06 revision (verbatim; never edited); team handover plan
   research/         Deliverable 1, reading notes, evidence notes
   methodology/      Deliverable 2: construction protocol, task-quality rubric, verifier validation
   interview/        Deliverable 3: expert interview protocol
@@ -48,8 +44,8 @@ schemas/            Deliverable 4: JSON Schema, illustrative example
 protocol/           shared interview assets for either architecture (Phase 5; placeholder)
 validation/         architecture-independent validation tools (Phase 5; placeholder)
 implementations/
-  hosted-platform/      Option A (not started; pending decision)
-  claude-code-skill/    Option B (not started; pending decision)
+  contributor-interface/  the self-hosted MVP (not started; waiting for the example package)
+  claude-code-skill/      Option B (rejected 2026-11-06; record only)
 pilot/              pilot materials (placeholder)
 tests/              automated tests: schema tests, Markdown link check, report version check
 reports/            generated, collaborator-facing renderings

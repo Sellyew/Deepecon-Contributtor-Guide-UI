@@ -1,5 +1,7 @@
 # Deliverable 8 — Pilot Evaluation Plan
 
+> **Superseded on 2026-11-06.** The research lead revised the MVP ([revised requirements](../requirements/2026-11-06-research-lead-revision.md)): no AI interview, no Claude Code-based system, and no project data sent to any external AI service by default. The current proposal is the [MVP contributor interface](../architecture/mvp-contributor-interface.md). This document is kept as a record and is no longer the basis for the design. The pilot paper is now set by the team's plan (D-024).
+
 | | |
 |---|---|
 | **Status** | **Proposed** v0.2.0 (2026-11-05). Not yet reviewed by the research lead. Execution belongs to Phases 5–6, after the architecture review. v0.2.0 integrates four independent reviews (§12). |

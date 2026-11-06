@@ -1,5 +1,7 @@
 # Deliverable 3 — Expert Interview Protocol (model-agnostic specification)
 
+> **Superseded on 2026-11-06.** The research lead revised the MVP ([revised requirements](../requirements/2026-11-06-research-lead-revision.md)): no AI interview, no Claude Code-based system, and no project data sent to any external AI service by default. The current proposal is the [MVP contributor interface](../architecture/mvp-contributor-interface.md). This document is kept as a record and is no longer the basis for the design.
+
 | | |
 |---|---|
 | **Status** | **Proposed** protocol v0.2.1 (2026-11-05). Not yet reviewed by the research lead; not yet tested with economists. v0.2.1 integrates two independent reviews of 2026-11-05 (econometric; benchmark methodology); changes are listed in §17. |

@@ -1,5 +1,3 @@
-# Option B — Local Claude Code Skill (implementation)
+# Option B — Local Claude Code Skill
 
-**Status: Not started.** The architecture decision is pending (see [`docs/decisions/decision-log.md`](../../docs/decisions/decision-log.md)).
-
-The design proposal lives in [`docs/architecture/option-b-local-skill.md`](../../docs/architecture/option-b-local-skill.md). Implementation begins only after the research lead and collaborators review the decision brief (Phase 4) and authorize Phase 5.
+**Status: Rejected (2026-11-06, X-006).** The research lead decided that the system must not depend on Anthropic's infrastructure or require contributors to use Claude Code (D-019). Nothing will be implemented here. The earlier design is kept as a record in [`docs/architecture/option-b-local-skill.md`](../../docs/architecture/option-b-local-skill.md).

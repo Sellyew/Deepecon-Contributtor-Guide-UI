@@ -1,5 +1,7 @@
 # Deliverable 4 — Contribution Data Schema
 
+> **To be redesigned (2026-11-06).** The contribution schema will be rebuilt from the coauthor's example contribution package (D-023; [MVP proposal](../docs/architecture/mvp-contributor-interface.md) §6). This 0.3.0 draft and its tests are kept as a record of the earlier design, which assumed an AI interview.
+
 | | |
 |---|---|
 | **Status** | **Proposed** draft 0.3.0 (2026-11-05). Not yet reviewed by the research lead. 0.3.0 integrates two independent reviews of 2026-11-05 (econometric; benchmark methodology): decision-space constraints, tiers per graded output, secondary validity layers, inference-only predictions, data routes, new validation-run kinds, a recognition-task tag, and an exposure log of hidden material (see §8). It is **not backward compatible** with 0.2.0 (§6). |

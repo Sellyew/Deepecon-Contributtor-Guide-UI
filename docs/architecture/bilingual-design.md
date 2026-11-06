@@ -1,5 +1,7 @@
 # Bilingual Design (English and Simplified Chinese)
 
+> **Note (2026-11-06).** The principles and the glossary apply to the [MVP contributor interface](mvp-contributor-interface.md). The Option B sections are superseded, and machine translation counts as a model call: only people or a locally deployed model translate (D-018).
+
 | | |
 |---|---|
 | **Status** | **Proposed** v0.1.1 (2026-11-05). Not yet reviewed by the research lead. The glossary in the appendix has **not** been reviewed by bilingual economists. v0.1.1 adds the glossary entry for "estimate", which the interview probes use. The cross-document consistency pass (2026-11-05) adds further unreviewed entries that the Chinese probes and the Chinese executive summary use (e.g., shepherd, AI agent, material / immaterial, exposure log, engineer-week) and replaces the alternative 错误类型, which collided with "failure-mode category". |

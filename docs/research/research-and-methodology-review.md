@@ -1,5 +1,7 @@
 # Deliverable 1 — Research and Methodology Review
 
+> **Note (2026-11-06).** The landscape review stands. Its descriptions of an AI-guided interview (§6, §7.1) no longer describe the contributor workflow, which is now a self-hosted review of team-prepared candidates ([MVP proposal](../architecture/mvp-contributor-interface.md)).
+
 | | |
 |---|---|
 | **Status** | **Proposed** v0.2.0 (2026-11-05). A search-based review, not a systematic survey. v0.2.0 corrects the novelty statement (§6), the account of effect injection (§7.2), and the validation agenda (§9) after independent reviews; see §11. |

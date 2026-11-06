@@ -6,9 +6,9 @@ Read this file at the start of every session. It records how we work, so the res
 
 An expert-driven benchmark that tests whether AI agents can do rigorous economics research (empirical implementation, causal identification, econometric reasoning, scientific judgment). Economists contribute tasks through an AI-guided interview: from a published paper, they help build a validated **correct** replication package and **deliberately flawed** packages encoding plausible, consequential mistakes, which are then turned into verifiable agent tasks.
 
-- **Canonical requirements:** [`docs/requirements/2026-11-05-research-lead-brief.md`](docs/requirements/2026-11-05-research-lead-brief.md) — verbatim; never edit it.
+- **Canonical requirements:** [`docs/requirements/2026-11-05-research-lead-brief.md`](docs/requirements/2026-11-05-research-lead-brief.md) and the **governing revision** [`docs/requirements/2026-11-06-research-lead-revision.md`](docs/requirements/2026-11-06-research-lead-revision.md) — both verbatim; never edit them. Where they differ, the 2026-11-06 revision governs. The team's own plan is summarized in [`docs/requirements/2026-11-05-team-handover-plan.md`](docs/requirements/2026-11-05-team-handover-plan.md).
 - **Decision status:** [`docs/decisions/decision-log.md`](docs/decisions/decision-log.md) — Decided / Proposed / Open / Rejected.
-- **Current phase (2026-11-05):** Phases 1–4 (discovery, shared methodology, parallel architecture design, decision package) drafted and revised after four independent reviews; awaiting the research lead's review. **No implementation yet. No architecture selected.**
+- **Current phase (2026-11-06):** the research lead redirected the MVP to a **lightweight, self-hosted, privacy-preserving, bilingual contributor interface** with two functions, *Selection* (authors review, select, reject, or supplement candidate errors the team prepared locally) and *Guidance* (what materials to provide and how to submit them). See the [MVP proposal](docs/architecture/mvp-contributor-interface.md). No AI interview, no Claude Code, no external AI by default. **Waiting for the example contribution package** before finalizing the contribution schema or the implementation plan. No implementation yet.
 
 ## Roles and collaboration principles
 
@@ -24,22 +24,24 @@ An expert-driven benchmark that tests whether AI agents can do rigorous economic
 
 1. **Status vocabulary.** Every recommendation is *Proposed* until the research lead approves it. Never convert a proposal into a decision without recording who approved it and when.
 2. **Evidence labels.** Label factual claims: **[P-full]** primary source read in full; **[P-page]** primary abstract, landing page, README, or official doc page; **[S]** secondary source; **[U]** unverified. Never present [U] as fact. Never invent citations, numbers, prices, or URLs.
-3. **Architecture neutrality.** Options A (hosted platform) and B (local Claude Code skill) are developed to the same depth, on the same assumptions. Neither is a strawman. A hybrid never substitutes for the A-versus-B comparison. Do not favour the option that is easier to implement.
+3. **Privacy by default (D-018).** No research data, replication code, paper materials, contributor responses, or intermediate outputs go to Anthropic or any other third-party AI service. The system works with no model at all; a model is used only if the research lead deploys or configures it. Always distinguish a **locally deployed model** (data stay on project hardware) from an **external API** (e.g., the DeepSeek API with the lead's key: data leave the project); external integrations are optional, explicitly configured, and disabled by default. No third-party analytics, fonts, CDNs, or embedded content in the contributor site. *(The former A/B neutrality rule was superseded on 2026-11-06: Option B is rejected and the MVP is decided, D-019, D-020.)*
 4. **Provenance of content.** Contribution records always distinguish what the contributor said, what an LLM suggested, and what has been independently validated. Machine translations are labelled; originals are preserved.
 5. **Leakage.** Reference solutions, flawed implementations, error labels, verifier internals, and hidden test data never go into agent-facing task materials or public channels by accident. Public task materials carry the project canary string (to be defined).
 6. **Originals are sacred.** Tools never modify a contributor's original replication package; flawed variants live in separate, auditable locations.
 7. **Dates and versions.** Use ISO dates (YYYY-MM-DD). Prices and product facts are dated and sourced because they change.
+8. **Claude sessions are an external AI service too.** Anything shared in a Claude session (including this one) is processed by Anthropic. Before asking for or opening project materials (replication code, data, paper materials, contributor responses, candidate errors), say so and offer structure-only or synthetic alternatives; never fetch or open such materials on your own initiative.
+9. **Keep it lightweight.** Do not design AI-agent workflows, Claude Code-based systems, or elaborate interview processes (X-006, X-007). Prefer the team's handover plan and the example contribution package over new inventions.
 
 ## Repository map
 
 | Path | Contents |
 |---|---|
-| `docs/requirements/` | Product requirements (the research lead's brief) |
+| `docs/requirements/` | Product requirements: the research lead's brief (2026-11-05), the governing revision (2026-11-06), and the team's handover plan |
 | `docs/research/` | Deliverable 1, reading notes, evidence notes, source register |
 | `docs/methodology/` | Deliverable 2: construction protocol, task-quality rubric, verifier validation, error taxonomy |
 | `docs/interview/` | Deliverable 3: expert interview protocol |
 | `schemas/` | Deliverable 4: contribution data schema (JSON Schema) and examples |
-| `docs/architecture/` | Deliverables 5–7: Option A, Option B, submission, bilingual design, costs, decision brief |
+| `docs/architecture/` | **Current:** the [MVP contributor interface](docs/architecture/mvp-contributor-interface.md) and the bilingual design. *Superseded records:* Option A, Option B, the decision brief, the cost model, submission mechanisms |
 | `docs/pilot/` | Deliverable 8: pilot evaluation plan |
 | `docs/decisions/` | Decision log and ADRs |
 | `protocol/`, `validation/`, `implementations/`, `pilot/`, `tests/`, `contributor-docs/` | Placeholders until Phase 5 |
@@ -65,4 +67,9 @@ Read the dated evidence notes in [`docs/research/evidence/`](docs/research/evide
 
 Record every correction here with its date so it is never repeated.
 
-- *(none yet)*
+- **2026-11-06 (privacy).** No project content or contributor data may be sent to Anthropic or any other external AI provider. The research lead controls model selection and deployment (DeepSeek with their own key, or a local model); external APIs are optional, explicitly configured, disabled by default, and always distinguished from local deployment. The system must not depend on Anthropic infrastructure or require Claude Code, Team, or Enterprise subscriptions.
+- **2026-11-06 (scope).** The first frontend must be much simpler: authors are contacted directly and their own paper is preconfigured; no paper discovery or complex onboarding.
+- **2026-11-06 (errors).** Candidate errors are prepared locally by the team. No AI interview to discover mistakes and no AI-generated flawed packages; contributors review, select, reject, or supplement the prepared candidates and may comment.
+- **2026-11-06 (focus).** The frontend does two things: Selection and Guidance (what materials to provide, how to prepare them, how to submit).
+- **2026-11-06 (process).** Use the coauthor's example contribution package as the primary reference for the workflow, data structure, and submission requirements; do not assume its contents; do not finalize the schema or the implementation plan before reviewing it.
+- **2026-11-06 (effort).** Do not continue designing expensive AI-agent workflows, Claude Code-based contributor systems, or elaborate expert-interview processes.

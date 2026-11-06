@@ -1,5 +1,7 @@
 # Cost and Effort Model (shared assumptions for Options A and B)
 
+> **Superseded on 2026-11-06.** The research lead revised the MVP ([revised requirements](../requirements/2026-11-06-research-lead-revision.md)): no AI interview, no Claude Code-based system, and no project data sent to any external AI service by default. The current proposal is the [MVP contributor interface](mvp-contributor-interface.md). This document is kept as a record and is no longer the basis for the design. Inference and engineering estimates do not apply to the MVP.
+
 | | |
 |---|---|
 | **Status** | **Proposed** v0.3.0 (2026-11-05). Planning estimates, **not quotes**. To be calibrated with pilot measurements (Deliverable 8, PQ5). v0.3.0 integrates the independent reviews (§8). |

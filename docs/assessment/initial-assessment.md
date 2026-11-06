@@ -1,5 +1,7 @@
 # Initial Assessment: Answers to the Five Questions
 
+> **Superseded on 2026-11-06.** The research lead revised the MVP ([revised requirements](../requirements/2026-11-06-research-lead-revision.md)): no AI interview, no Claude Code-based system, and no project data sent to any external AI service by default. The current proposal is the [MVP contributor interface](../architecture/mvp-contributor-interface.md). This document is kept as a record and is no longer the basis for the design. Question 1 (scientific feasibility) remains relevant; Questions 2–5 concern the superseded design.
+
 | | |
 |---|---|
 | **Status** | **Proposed** assessment, 2026-11-05, for the research lead. Recommendations are not decisions; see the [decision log](../decisions/decision-log.md), whose IDs this assessment cites (D- = decided; P- = proposed; O- = open question; X- = rejected). Revised the same day after four independent reviews (econometrics, benchmark methodology, and one advocate for each architecture); the main corrections are listed at the end. |
