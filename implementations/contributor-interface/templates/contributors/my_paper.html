@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% translate "My paper" %}</h1>
+<section class="citation">
+  <p class="paper-title">{{ citation.title }}</p>
+  <p>{{ citation.authors|join:"; " }}{% if citation.journal %} · {{ citation.journal }}{% endif %}{% if citation.year %} · {{ citation.year }}{% endif %}</p>
+  <p>{% blocktranslate with version=task_version %}Task version: {{ version }}{% endblocktranslate %}</p>
+</section>
+<section class="categories">
+  <h2>{% translate "The prepared items" %}</h2>
+  <ul>
+    {% for category in categories %}
+    <li>
+      <strong>{{ category.label }}</strong>
+      {% blocktranslate count counter=category.count %}{{ counter }} item{% plural %}{{ counter }} items{% endblocktranslate %}
+      {% if category.summary %}<br><span class="summary">{{ category.summary }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="note">{% translate "The review screen is not available yet; the team will tell you when it opens." %}</p>
+</section>
+{% if package %}
+<section class="package">
+  <h2>{% translate "The task package" %}</h2>
+  <p>{% translate "This is the package an evaluated AI system receives. You may download it for your review." %}</p>
+  <p><a href="{% url 'contributors:package' paper_id=paper.paper_id %}">{% translate "Download the task package" %}</a>
+  <span class="hash">SHA-256 {{ package.sha256 }}</span></p>
+</section>
+{% endif %}
+<p><a href="{% url 'contributors:notice' paper_id=paper.paper_id %}">{% translate "Review or change your choices on the notice" %}</a></p>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<p>Each file is checked against the contributor-interface schemas and the consistency checks; nothing is imported if any check fails. Import a paper's configuration first, then its rubric, item map, and candidate package.</p>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" value="Import">
+</form>
+{% endblock %}

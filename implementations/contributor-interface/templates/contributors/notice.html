@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% translate "Before you start" %}</h1>
+<p class="paper-title">{{ paper.title }}</p>
+<section class="notice">
+  <h2>{% translate "What this is" %}</h2>
+  <p>{% translate "The team has prepared items for a benchmark task built from your paper. The items are deliberate modifications made to build the task, not claims about your published paper. You review them: keep, change, reject, or mark as unsure, and you may propose others." %}</p>
+  <h2>{% translate "What is stored, and who sees it" %}</h2>
+  <ul>
+    <li>{% translate "Your decisions, comments, proposals, and uploaded files, with their dates." %}</li>
+    <li>{% translate "Only the project team sees them; other contributors do not." %}</li>
+    <li>{% translate "This site sends nothing to AI services and loads nothing from other websites." %}</li>
+  </ul>
+  <h2>{% translate "What happens to the finished task" %}</h2>
+  <ul>
+    <li>{% translate "The finished task, built from your package, is used to evaluate AI models. It is sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it." %}</li>
+    <li>{% translate "The task may later be published. Your reviews, comments, and messages are not published." %}</li>
+  </ul>
+  <h2>{% translate "What we ask of you" %}</h2>
+  <ul>
+    <li>{% translate "Please keep the items confidential: do not publish or share them." %}</li>
+    <li>{% translate "If you use AI tools, write what you submit in your own words, tell us when AI helped, and never put restricted, confidential, or licensed data into an AI tool." %}</li>
+    <li>{% translate "You may withdraw at any time by telling the team; your reviews, proposals, and uploads are then deleted." %}</li>
+  </ul>
+</section>
+{% if latest %}
+<p class="note">{% blocktranslate with date=latest.recorded_at|date:"Y-m-d" %}You last confirmed these choices on {{ date }}. You can change them below.{% endblocktranslate %}</p>
+{% endif %}
+<form method="post" class="consent">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <p>
+    {{ form.acknowledge_evaluation.errors }}
+    {{ form.acknowledge_evaluation }}
+    <label for="{{ form.acknowledge_evaluation.id_for_label }}">{{ form.acknowledge_evaluation.label }}</label>
+  </p>
+  <fieldset>
+    <legend>{{ form.team_ai_use.label }}</legend>
+    {{ form.team_ai_use }}
+    <p class="hint">{% translate "Either answer is fine. You can change it later." %}</p>
+  </fieldset>
+  <button type="submit">{% translate "Continue" %}</button>
+</form>
+{% endblock %}

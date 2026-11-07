@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.2.0",
+  "schema_version": "0.3.0",
   "paper_id": "example-matching-theory",
   "field": "theory",
   "citation": {
@@ -160,5 +160,10 @@
   "languages": [
     "en",
     "zh-Hans"
-  ]
+  ],
+  "publication_status": {
+    "status": "demo_or_development",
+    "designated_on": "2026-11-07",
+    "designated_by": "research lead (fictional example)"
+  }
 }

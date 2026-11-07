@@ -294,9 +294,9 @@ Interface text contains no project material, so drafting it with any LLM leaks n
   - every request is authorized on the server;
   - logs record actions and IDs, never text or file contents.
 
-## 8. Data model (draft 0.2.0)
+## 8. Data model (draft 0.3.0)
 
-Five JSON Schemas in [`schemas/contributor-interface/`](../../schemas/contributor-interface/README.md), with fictional empirical and theory examples and 16 tests. The team's real V5 rubric imports through the generic path, and its scoring fields never reach the contributor view (checked 2026-11-06; only pass/fail was printed).
+Five JSON Schemas in [`schemas/contributor-interface/`](../../schemas/contributor-interface/README.md), with fictional empirical and theory examples and 19 tests; 0.3.0 adds per-item AI help, consent, item origin, and publication status (D-039, D-040, D-042). The team's real V5 rubric imports through the generic path, and its scoring fields never reach the contributor view (checked 2026-11-06; only pass/fail was printed).
 
 | Schema | Holds |
 |---|---|
@@ -314,7 +314,7 @@ See the [implementation plan](mvp-implementation-plan.md) v0.3:
 - resumable uploads for multi-gigabyte packages;
 - about 6–9.5 engineer-weeks for one developer [U: planning estimate].
 
-**Where it runs (P-053, staged).**
+**Where it runs (staged; D-043).**
 - **Stage 0, the demo:** a team member's computer with full-disk encryption, with synthetic examples and the demo paper only. The application listens only on the computer's own loopback address (127.0.0.1), so it is reached only from that computer. Others see it by screen sharing. No decision about servers or storage is needed for this stage.
 - **Stage 1, before the first outside contributor uses it with real material:** the same application on one small project-controlled server outside mainland China (most contributors are outside mainland China: research lead, 2026-11-06).
   - A site hosted outside mainland China, and not delivered through a content delivery network in China, needs no ICP filing, the registration required for websites hosted in mainland China [P-page/S, R9 §8.5; not a legal opinion].
@@ -331,6 +331,6 @@ See the [implementation plan](mvp-implementation-plan.md) v0.3:
 | O-027 | Does the layered card (§4.2) suit contributors? | Pilot it with the first paper's two experts |
 | O-029 | Does the map with the item panel (§4.1) suit contributors? | Pilot it, with the matrix toggle as the alternative |
 | O-035 | Who checks that data included in an upload may be shared with the project? | §5.5: a named data steward, with uploads quarantined until checked |
-| O-021 | Hosting | §9: staged, a team member's computer for the demo, then one small server outside mainland China before the first outside contributor (P-053) |
+| O-021 | Hosting (Stage 1 server) | §9: staged hosting approved (D-043); which server, before the first outside contributor, is still open |
 | O-036 | The first real contributor and paper | A possible contact the research lead named (the name is not recorded here); the paper's field sets its categories (D-025) |
 | O-022, O-026 | Invitation delivery; confidentiality agreement | Unchanged; every contributor is asked to keep the items confidential (not publish or share them), and AI use follows §5.6 |

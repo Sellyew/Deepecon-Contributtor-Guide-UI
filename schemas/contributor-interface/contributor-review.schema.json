@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://deepecon.example/schemas/contributor-interface/contributor-review/0.2.0",
+  "$id": "https://deepecon.example/schemas/contributor-interface/contributor-review/0.3.0",
   "title": "Contributor review (export)",
   "description": "One contributor's answers on one paper's prepared items (categories as configured for the paper), as exported by the administrator. Identifies the contributor only by a pseudonymous ID; contains no invitation credentials (unknown fields are rejected).",
   "type": "object",
@@ -18,7 +18,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.2.0"
+      "const": "0.3.0"
     },
     "paper_id": {
       "$ref": "#/$defs/id"
@@ -130,6 +130,9 @@
         },
         "additionalProperties": false
       }
+    },
+    "consent": {
+      "$ref": "#/$defs/consent"
     }
   },
   "additionalProperties": false,
@@ -221,6 +224,9 @@
         "updated_at": {
           "type": "string",
           "format": "date-time"
+        },
+        "ai_help": {
+          "$ref": "#/$defs/aiHelp"
         }
       },
       "additionalProperties": false,
@@ -317,6 +323,81 @@
             }
           ],
           "description": "A category ID from the paper configuration, or unsure."
+        },
+        "ai_help": {
+          "$ref": "#/$defs/aiHelp"
+        }
+      },
+      "additionalProperties": false
+    },
+    "aiHelp": {
+      "type": "object",
+      "description": "The contributor's own report of AI help with this answer or proposal (D-039). Self-reported, so probably undercounted; used to report AI-assisted and unassisted validations separately and, when the items or package were entered, to fill the task's exposure log (D-040).",
+      "required": [
+        "used"
+      ],
+      "properties": {
+        "used": {
+          "type": "boolean"
+        },
+        "tool": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "account_kind": {
+          "enum": [
+            "work",
+            "personal",
+            "api",
+            "unknown"
+          ]
+        },
+        "entered_items_or_package": {
+          "type": "boolean",
+          "description": "Whether the items or the task package were put into the AI tool."
+        }
+      },
+      "additionalProperties": false,
+      "if": {
+        "properties": {
+          "used": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "used",
+          "tool",
+          "entered_items_or_package"
+        ]
+      }
+    },
+    "consent": {
+      "type": "object",
+      "description": "The contributor's choices on the notice screen (D-042), recorded with their date; a later change creates a new record in the site, and the export carries the latest.",
+      "required": [
+        "evaluation_through_apis_acknowledged",
+        "team_ai_use_of_unpublished_material",
+        "recorded_at"
+      ],
+      "properties": {
+        "evaluation_through_apis_acknowledged": {
+          "const": true,
+          "description": "The contributor was told that the finished task is sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it."
+        },
+        "team_ai_use_of_unpublished_material": {
+          "type": "boolean",
+          "description": "Whether the team may use AI services with the contributor's unpublished materials and responses."
+        },
+        "notice_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
         }
       },
       "additionalProperties": false

@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.2.0",
+  "schema_version": "0.3.0",
   "paper_id": "example-school-leadership",
   "assignment_id": "asg-001",
   "contributor_id": "ctr-001",
@@ -18,7 +18,13 @@
         "repair_correct": "unsure"
       },
       "suggested_description": "Fictional: the repair should also restrict the robustness sample.",
-      "updated_at": "2026-11-10T09:00:00Z"
+      "updated_at": "2026-11-10T09:00:00Z",
+      "ai_help": {
+        "used": true,
+        "tool": "fictional chat assistant",
+        "account_kind": "work",
+        "entered_items_or_package": false
+      }
     },
     {
       "item_id": "M1",
@@ -26,7 +32,10 @@
       "verdict": "reject",
       "reject_reason": "not_consequential",
       "comment": "Fictional: the appendix already reports this.",
-      "updated_at": "2026-11-10T09:05:00Z"
+      "updated_at": "2026-11-10T09:05:00Z",
+      "ai_help": {
+        "used": false
+      }
     },
     {
       "item_id": "T01",
@@ -70,5 +79,11 @@
       "content_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
     }
   ],
-  "frozen": false
+  "frozen": false,
+  "consent": {
+    "evaluation_through_apis_acknowledged": true,
+    "team_ai_use_of_unpublished_material": false,
+    "notice_version": "2026-11-07",
+    "recorded_at": "2026-11-10T08:55:00Z"
+  }
 }

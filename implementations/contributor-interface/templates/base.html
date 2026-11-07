@@ -1,0 +1,33 @@
+{% load i18n static %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{% if LANG == 'zh-hans' %}zh-Hans{% else %}{{ LANG }}{% endif %}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% translate "DeepEcon contributor site" %}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'site.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <span class="site-name">{% translate "DeepEcon contributor site" %}</span>
+    {% block language_form %}
+    <form class="language" action="{% url 'set_language' %}" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <label for="language-select">{% translate "Interface language" %}</label>
+      {% get_available_languages as AVAILABLE %}
+      <select id="language-select" name="language">
+        {% for code, name in AVAILABLE %}<option value="{{ code }}"{% if code == LANG %} selected{% endif %}>{{ name }}</option>{% endfor %}
+      </select>
+      <button type="submit">{% translate "Change" %}</button>
+    </form>
+    {% endblock %}
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    {% translate "This site sends nothing to AI services and loads nothing from other websites." %}
+  </footer>
+</body>
+</html>

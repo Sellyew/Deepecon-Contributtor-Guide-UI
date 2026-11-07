@@ -241,6 +241,48 @@ def test_submission_requires_a_runnable_description_and_data_routes():
     assert not valid("submission-manifest", bad)         # needs where
 
 
+def test_ai_help_and_consent_fields():
+    base = ex("empirical", "contributor-review")
+    assert valid("contributor-review", base)
+    bad = copy.deepcopy(base)
+    bad["reviews"][0]["ai_help"] = {"used": True}                       # used AI: tool and entry must be stated
+    assert not valid("contributor-review", bad)
+    bad = copy.deepcopy(base)
+    bad["reviews"][0]["ai_help"]["account_kind"] = "shared"
+    assert not valid("contributor-review", bad)
+    bad = copy.deepcopy(base)
+    bad["consent"]["evaluation_through_apis_acknowledged"] = False       # taking part requires the acknowledgement
+    assert not valid("contributor-review", bad)
+    bad = copy.deepcopy(base)
+    del bad["consent"]["recorded_at"]
+    assert not valid("contributor-review", bad)
+
+
+def test_item_origin_is_recorded_but_never_shown():
+    m = ex("empirical", "item-map")
+    assert valid("item-map", m)
+    bad = copy.deepcopy(m)
+    first = next(iter(bad["items"]))
+    bad["items"][first]["origin"] = {"drafted_by": "ai_service", "ai_reviewed": False}   # needs model_family
+    assert not valid("item-map", bad)
+    _, c, m, items = bundle("empirical")
+    assert '"origin":' not in json.dumps(rc.contributor_view(items, c, m))    # "original" excerpts are allowed
+    assert "fictional-model-family" not in json.dumps(rc.contributor_view(items, c, m))
+
+
+def test_publication_status():
+    c = ex("empirical", "paper-config")
+    assert c["publication_status"]["status"] == "scored"
+    t = ex("theory", "paper-config")
+    assert valid("paper-config", t)
+    bad = copy.deepcopy(t)
+    del bad["publication_status"]["designated_on"]                       # demo tasks are designated with a date
+    assert not valid("paper-config", bad)
+    bad = copy.deepcopy(c)
+    bad["publication_status"]["status"] = "held_out"
+    assert not valid("paper-config", bad)
+
+
 if __name__ == "__main__":
     tests = [f for name, f in sorted(globals().items()) if name.startswith("test_")]
     for t in tests:

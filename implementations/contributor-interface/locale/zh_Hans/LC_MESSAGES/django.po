@@ -1,0 +1,135 @@
+# Interface catalogue for Simplified Chinese (D-030).
+# Machine-drafted by Claude (an LLM) on 2026-11-07; to be reviewed and corrected by the team
+# before contributors see it (implementation plan M4). Interface text only: item text,
+# papers, and code are never translated.
+msgid ""
+msgstr ""
+"Project-Id-Version: deepecon-contributor-site M1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-07 00:00+0000\n"
+"PO-Revision-Date: 2026-11-07 00:00+0000\n"
+"Last-Translator: Claude (machine draft, awaiting team review)\n"
+"Language-Team: DeepEcon team\n"
+"Language: zh_Hans\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "I understand that the finished task, built from my package, will be sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it."
+msgstr "我了解：根据我的材料构建的最终任务，将通过各家 AI 公司的 API 发送给模型接受评测的每一家公司；这些公司会收到并可能保存该任务。"
+
+msgid "Taking part requires this acknowledgement."
+msgstr "参与需要您确认此项。"
+
+msgid "May the team use AI services with my unpublished materials and my responses?"
+msgstr "团队可以将 AI 服务用于我未公开的材料和我的回复吗？"
+
+msgid "No"
+msgstr "否"
+
+msgid "Yes"
+msgstr "是"
+
+msgid "DeepEcon contributor site"
+msgstr "DeepEcon 贡献者网站"
+
+msgid "Interface language"
+msgstr "界面语言"
+
+msgid "Change"
+msgstr "切换"
+
+msgid "This site sends nothing to AI services and loads nothing from other websites."
+msgstr "本网站不向任何 AI 服务发送内容，也不从其他网站加载任何内容。"
+
+msgid "This link does not work"
+msgstr "此链接无法使用"
+
+msgid "It may have expired or been replaced. Please ask the team for a new link."
+msgstr "链接可能已过期或已被替换。请向团队索取新链接。"
+
+msgid "My paper"
+msgstr "我的论文"
+
+msgid "Task version: %(version)s"
+msgstr "任务版本：%(version)s"
+
+msgid "The prepared items"
+msgstr "已准备的条目"
+
+msgid "%(counter)s item"
+msgid_plural "%(counter)s items"
+msgstr[0] "%(counter)s 个条目"
+
+msgid "The review screen is not available yet; the team will tell you when it opens."
+msgstr "审阅页面尚未开放；开放时团队会通知您。"
+
+msgid "The task package"
+msgstr "任务包"
+
+msgid "This is the package an evaluated AI system receives. You may download it for your review."
+msgstr "这是接受评测的 AI 系统所收到的任务包。您可以下载它用于审阅。"
+
+msgid "Download the task package"
+msgstr "下载任务包"
+
+msgid "Review or change your choices on the notice"
+msgstr "查看或修改您在须知页面上的选择"
+
+msgid "Please use your personal link"
+msgstr "请使用您的个人链接"
+
+msgid "This site opens only through the personal link the team sent you. There is no sign-up and no search."
+msgstr "本网站只能通过团队发给您的个人链接打开，无需注册，也没有搜索功能。"
+
+msgid "If your link no longer works, please ask the team for a new one."
+msgstr "如果您的链接已无法使用，请向团队索取新链接。"
+
+msgid "Before you start"
+msgstr "开始之前"
+
+msgid "What this is"
+msgstr "这是什么"
+
+msgid "The team has prepared items for a benchmark task built from your paper. The items are deliberate modifications made to build the task, not claims about your published paper. You review them: keep, change, reject, or mark as unsure, and you may propose others."
+msgstr "团队已根据您的论文，为一项评测基准任务准备了若干条目。这些条目是为构建任务而有意做出的修改，并非对您已发表论文的论断。请您逐条审阅：保留、修改、拒绝或标记为不确定，也可以提出新的条目。"
+
+msgid "What is stored, and who sees it"
+msgstr "保存哪些内容，谁能看到"
+
+msgid "Your decisions, comments, proposals, and uploaded files, with their dates."
+msgstr "您的决定、评论、提议和上传的文件，以及相应的日期。"
+
+msgid "Only the project team sees them; other contributors do not."
+msgstr "只有项目团队能看到；其他贡献者看不到。"
+
+msgid "What happens to the finished task"
+msgstr "最终任务将如何使用"
+
+msgid "The finished task, built from your package, is used to evaluate AI models. It is sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it."
+msgstr "根据您的材料构建的最终任务将用于评测 AI 模型。它会通过 API 发送给模型接受评测的每一家 AI 公司；这些公司会收到并可能保存该任务。"
+
+msgid "The task may later be published. Your reviews, comments, and messages are not published."
+msgstr "该任务以后可能会公开发布。您的审阅意见、评论和留言不会公开。"
+
+msgid "What we ask of you"
+msgstr "我们请您做到"
+
+msgid "Please keep the items confidential: do not publish or share them."
+msgstr "请对这些条目保密：不要公开或分享。"
+
+msgid "If you use AI tools, write what you submit in your own words, tell us when AI helped, and never put restricted, confidential, or licensed data into an AI tool."
+msgstr "如果您使用 AI 工具，请用自己的话撰写提交的内容，在 AI 提供帮助时告诉我们，并且切勿将受限、保密或受许可限制的数据输入 AI 工具。"
+
+msgid "You may withdraw at any time by telling the team; your reviews, proposals, and uploads are then deleted."
+msgstr "您可以随时告知团队退出；届时您的审阅意见、提议和上传内容将被删除。"
+
+msgid "You last confirmed these choices on %(date)s. You can change them below."
+msgstr "您最近一次确认这些选择是在 %(date)s。您可以在下方修改。"
+
+msgid "Either answer is fine. You can change it later."
+msgstr "两种回答都可以，之后也可以修改。"
+
+msgid "Continue"
+msgstr "继续"

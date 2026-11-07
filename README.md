@@ -27,7 +27,8 @@ From a published paper, the team prepares a validated **correct** replication an
 | [Bilingual design](docs/architecture/bilingual-design.md) | Current (principles and glossary) |
 | [Verifier validation protocol](docs/methodology/verifier-validation-protocol.md), [task-quality rubric](docs/methodology/task-quality-rubric.md), [construction protocol](docs/methodology/benchmark-construction-protocol.md) | The team's internal methodology for turning confirmed candidates into tasks; interview-related passages superseded |
 | [Research and methodology review](docs/research/research-and-methodology-review.md); [evidence notes](docs/research/evidence/); [reading notes](docs/research/reading-notes/) | Reference |
-| [Contributor-interface schemas](schemas/contributor-interface/README.md) | **Current**, Proposed draft 0.2.0 with fictional empirical and theory examples and tests; the [earlier schema](schemas/README.md) is superseded |
+| [Contributor site (implementation)](implementations/contributor-interface/README.md) | **Current**: milestone M1 (skeleton) built 2026-11-07 after the plan was approved (D-043); fictional examples only |
+| [Contributor-interface schemas](schemas/contributor-interface/README.md) | **Current**, draft 0.3.0 with fictional empirical and theory examples and tests; the [earlier schema](schemas/README.md) is superseded |
 | [Decision brief](docs/architecture/architecture-decision-brief.md), [Option A](docs/architecture/option-a-hosted-platform.md), [Option B](docs/architecture/option-b-local-skill.md), [interview protocol](docs/interview/expert-interview-protocol.md), [pilot plan](docs/pilot/pilot-evaluation-plan.md), [cost model](docs/architecture/cost-and-effort-model.md), [submission mechanisms](docs/architecture/submission-mechanisms.md), [initial assessment](docs/assessment/initial-assessment.md) | Superseded on 2026-11-06; kept as records |
 
 ## Repository layout
@@ -46,7 +47,7 @@ schemas/            Deliverable 4: JSON Schema, illustrative example
 protocol/           shared interview assets for either architecture (Phase 5; placeholder)
 validation/         architecture-independent validation tools (Phase 5; placeholder)
 implementations/
-  contributor-interface/  the self-hosted MVP (not started; waiting for the example package)
+  contributor-interface/  the self-hosted contributor site (Django; M1 built 2026-11-07)
   claude-code-skill/      Option B (rejected 2026-11-06; record only)
 pilot/              pilot materials (placeholder)
 tests/              automated tests: schema tests, Markdown link check, report version check

@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "paper_id": "example-matching-theory",
   "rubric_version": "example_theory_rubric_1",
   "nodes": [
@@ -84,6 +84,10 @@
           "locator": "Appendix A, eq. (A.7)",
           "text": "u'(c) = -λ (fictional)"
         }
+      },
+      "origin": {
+        "drafted_by": "team",
+        "ai_reviewed": false
       }
     },
     "S1": {
@@ -93,7 +97,12 @@
       ],
       "affected_results": [
         "p2"
-      ]
+      ],
+      "origin": {
+        "drafted_by": "ai_service",
+        "model_family": "fictional-model-family",
+        "ai_reviewed": true
+      }
     },
     "G1": {
       "summary": "Fictional: the existence step is gone.",

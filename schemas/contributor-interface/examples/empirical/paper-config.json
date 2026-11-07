@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.2.0",
+  "schema_version": "0.3.0",
   "paper_id": "example-school-leadership",
   "field": "empirical-micro",
   "citation": {
@@ -222,5 +222,8 @@
       "candidate_path": "02_code/example_table_main.do",
       "original_path": "code/analysis/table2.do"
     }
-  ]
+  ],
+  "publication_status": {
+    "status": "scored"
+  }
 }

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block language_form %}{% endblock %}
+{% block content %}
+{# Shown at the invitation URL, where no form is offered; the message appears in every interface language. #}
+{% get_available_languages as AVAILABLE %}
+{% for code, name in AVAILABLE %}{% language code %}
+<section lang="{% if code == 'zh-hans' %}zh-Hans{% else %}{{ code }}{% endif %}">
+  <h1>{% translate "This link does not work" %}</h1>
+  <p>{% translate "It may have expired or been replaced. Please ask the team for a new link." %}</p>
+</section>
+{% endlanguage %}{% endfor %}
+{% endblock %}

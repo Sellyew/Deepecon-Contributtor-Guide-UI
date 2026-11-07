@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<p><strong>Copy each link now: it is shown only on this page and is not stored anywhere.</strong> Send it to the contributor yourself, by e-mail or WeChat (the site sends no e-mail). Only a hash of the link is kept, so a lost link cannot be recovered; create a new one and revoke the old one.</p>
+<table>
+  <thead><tr><th>Assignment</th><th>Link</th><th>Expires</th></tr></thead>
+  <tbody>
+  {% for row in created %}
+    <tr><td>{{ row.assignment }}</td><td><code>{{ row.link }}</code></td><td>{{ row.expires_at|date:"Y-m-d" }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a href="{% url 'admin:contributors_assignment_changelist' %}">Back to assignments</a></p>
+{% endblock %}

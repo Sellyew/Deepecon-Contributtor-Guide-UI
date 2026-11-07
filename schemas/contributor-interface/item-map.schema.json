@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://deepecon.example/schemas/contributor-interface/item-map/0.1.0",
+  "$id": "https://deepecon.example/schemas/contributor-interface/item-map/0.2.0",
   "title": "Item map (expert-only)",
   "description": "Prepared by the team. A map of the paper's workflow or argument (nodes and edges) and, for each item, where it sits on the map, the local change (original versus modified excerpt), the results it affects, and a one-line summary and consequence. Expert-only tier: it shows the planted changes, so it is visible only to the assigned contributor and never to agents.",
   "type": "object",
@@ -13,7 +13,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.1.0"
+      "const": "0.2.0"
     },
     "paper_id": {
       "type": "string",
@@ -154,6 +154,9 @@
           "paired_with": {
             "type": "string",
             "pattern": "^[A-Za-z0-9_.-]{1,16}$"
+          },
+          "origin": {
+            "$ref": "#/$defs/origin"
           }
         },
         "additionalProperties": false
@@ -203,6 +206,47 @@
         "minLength": 1
       },
       "description": "Interface text keyed by BCP 47 language tag (en required; zh-Hans at launch; more languages can be added)."
+    },
+    "origin": {
+      "type": "object",
+      "description": "Team-side provenance of the item (D-039): who drafted it and whether AI helped review it. Never shown to contributors.",
+      "required": [
+        "drafted_by",
+        "ai_reviewed"
+      ],
+      "properties": {
+        "drafted_by": {
+          "enum": [
+            "team",
+            "contributor",
+            "ai_service"
+          ]
+        },
+        "model_family": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Required when an AI service drafted the item."
+        },
+        "ai_reviewed": {
+          "type": "boolean",
+          "description": "Whether AI helped review the item."
+        }
+      },
+      "additionalProperties": false,
+      "if": {
+        "properties": {
+          "drafted_by": {
+            "const": "ai_service"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "drafted_by",
+          "ai_reviewed",
+          "model_family"
+        ]
+      }
     }
   }
 }

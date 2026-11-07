@@ -1,0 +1,33 @@
+/* System fonts only (plan §1): no web-font service. */
+:root {
+  --text: #1f2328;
+  --muted: #59636e;
+  --line: #d0d7de;
+  --accent: #0b5cad;
+  --bg: #ffffff;
+  --soft: #f6f8fa;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+}
+.site-header, .site-footer { padding: 0.75rem 1rem; background: var(--soft); border-bottom: 1px solid var(--line); }
+.site-header { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; justify-content: space-between; }
+.site-footer { border-top: 1px solid var(--line); border-bottom: none; color: var(--muted); font-size: 0.875rem; margin-top: 3rem; }
+.site-name { font-weight: 600; }
+.language { display: flex; gap: 0.5rem; align-items: center; font-size: 0.875rem; }
+main { max-width: 46rem; margin: 0 auto; padding: 1rem; }
+h1 { font-size: 1.6rem; margin: 1rem 0 0.5rem; }
+h2 { font-size: 1.15rem; margin: 1.5rem 0 0.5rem; }
+.paper-title { font-weight: 600; }
+.note, .hint, .summary, .hash { color: var(--muted); font-size: 0.925rem; }
+.hash { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+fieldset { border: 1px solid var(--line); padding: 0.75rem 1rem; }
+button { font: inherit; padding: 0.4rem 1rem; border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 4px; cursor: pointer; }
+.language button { padding: 0.15rem 0.6rem; background: #fff; color: var(--accent); }
+.errorlist { color: #b42318; padding-left: 1.2rem; }

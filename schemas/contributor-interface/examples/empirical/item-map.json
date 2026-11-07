@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "paper_id": "example-school-leadership",
   "rubric_version": "example_rubric_1",
   "nodes": [
@@ -121,6 +121,10 @@
           "line_end": 41,
           "text": "keep if first_treat >= year - 2  // fictional"
         }
+      },
+      "origin": {
+        "drafted_by": "team",
+        "ai_reviewed": false
       }
     },
     "M1": {
@@ -140,6 +144,11 @@
         "modified": {
           "text": ""
         }
+      },
+      "origin": {
+        "drafted_by": "ai_service",
+        "model_family": "fictional-model-family",
+        "ai_reviewed": true
       }
     },
     "T01": {
