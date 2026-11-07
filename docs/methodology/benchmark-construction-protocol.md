@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** v0.2.0 (2026-11-05). Not yet reviewed by the research lead. v0.2.0 integrates two independent reviews (§10). |
+| **Status** | **Proposed** v0.2.0 (2026-11-05). Not yet reviewed by the research lead. v0.2.0 integrates two review passes by Claude agents (AI, not human reviewers; §10). |
 | **Scope** | The complete path from a published paper to an admitted benchmark task: paper selection → correct replication → expert interview → critical-error identification → erroneous implementation → task construction → verifier development → independent review → benchmark admission. |
 | **Architecture independence** | Every stage is defined in terms of roles, artifacts, and gates, never in terms of a user interface. Options A and B implement Stages 1–4 differently; Stages 5–8 run in the project's internal pipeline under either option. The exposure rules (§8) bind both. |
 | **Companion documents** | [Task-quality rubric](task-quality-rubric.md) · [Verifier validation protocol](verifier-validation-protocol.md) (**VVP**) · [Expert interview protocol](../interview/expert-interview-protocol.md) · [Contribution schema](../../schemas/README.md) · [Cost model](../architecture/cost-and-effort-model.md) · [Decision log](../decisions/decision-log.md) |
@@ -251,7 +251,7 @@ These are untested proposals. The pilot's methodology arm takes every candidate 
 
 ## 10. Changes
 
-**v0.2.0** (independent reviews, 2026-11-05): staffing with blinding and hours; data routes; re-execution budget; held-out preference; estimand separation; clean-room check; classification after L7; P-1FACT as a prediction; shared restructured presentation; blind solves; benchmark-wide contract; repair and preservation scoring; gate lines from the rubric; per-output tiers; narrower failure mode 2; scoring; exposure rules; the pilot's methodology arm.
+**v0.2.0** (review passes by Claude agents, 2026-11-05): staffing with blinding and hours; data routes; re-execution budget; held-out preference; estimand separation; clean-room check; classification after L7; P-1FACT as a prediction; shared restructured presentation; blind solves; benchmark-wide contract; repair and preservation scoring; gate lines from the rubric; per-output tiers; narrower failure mode 2; scoring; exposure rules; the pilot's methodology arm.
 
 - Cross-document consistency pass (2026-11-05): terms defined (§1); Paths A and B told apart from Options A and B (§2); gate lines and codes explained (§4); compute screen derived from the re-execution and L9 budgets (Stage 0); flawed variant and clean twin stated plainly (Stage 4); original-data steps for restricted sources assigned (Stage 5); re-run wording (Stage 6); task-resampling bootstrap (§6); methodology-arm wording (§9).
 

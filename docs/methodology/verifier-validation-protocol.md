@@ -4,11 +4,11 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** v0.3.0 (2026-11-05). Part of Deliverable 2. Not yet reviewed by the research lead. v0.3.0 integrates an independent econometric review and a benchmark-methodology review (§16). |
+| **Status** | **Proposed** v0.3.0 (2026-11-05). Part of Deliverable 2. Not yet reviewed by the research lead. v0.3.0 integrates two review passes by Claude agents, one prompted as an applied econometrician and one on benchmark methodology (AI, not human reviewers; §16). |
 | **Purpose** | Establish, with recorded evidence, that a task's verifier accepts correct work and rejects scientifically consequential mistakes, so that the benchmark score means what it claims. |
 | **Inputs** | A task candidate with a reference implementation, at least one validated flawed variant, and a draft verifier (see the [construction protocol](benchmark-construction-protocol.md)). |
 | **Outputs** | `validationRun` records (see the [schema](../../schemas/README.md)), a **kill matrix**, an exposure log, and a pass/fail decision on the verification and leakage criteria of the [rubric](task-quality-rubric.md). |
-| **Evidence** | [R1](../research/evidence/R1-terminal-bench-science.md) (Terminal-Bench-Science practice), [R5](../research/evidence/R5-analysis-causal-econ-benchmarks.md) (analytic dispersion, causal benchmarks), [R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) (testing techniques, numerical checks); independent reviews of 2026-11-05 (§16) |
+| **Evidence** | [R1](../research/evidence/R1-terminal-bench-science.md) (Terminal-Bench-Science practice), [R5](../research/evidence/R5-analysis-causal-econ-benchmarks.md) (analytic dispersion, causal benchmarks), [R6](../research/evidence/R6-error-detection-and-verifier-methodology.md) (testing techniques, numerical checks); review passes by Claude agents of 2026-11-05 (§16) |
 
 ---
 
@@ -266,7 +266,7 @@ Verified at secondary-source level in [R6](../research/evidence/R6-error-detecti
 - Knight & Leveson (1986), *IEEE TSE* SE-12(1), 96–109.
 - Dorie et al. (2019), *Statistical Science* 34, 43–68.
 
-Cited by the independent reviewers, not yet verified [U]:
+Cited by the reviewing Claude agents, not yet verified [U]:
 - Lundberg, Johnson & Stewart (2021), *American Sociological Review*, on separating estimands from estimators.
 - Blandhol, Bonney, Mogstad & Torgovitsky (2022), NBER WP 29709, on 2SLS with covariates.
 - Kolesár & Rothe (2018), *AER*, on clustering by a discrete running variable.
@@ -282,7 +282,7 @@ Primary: Bercovich (2026), *Good Benchmarks* [P-full].
 
 ## 16. Changes
 
-**v0.3.0** (independent reviews, 2026-11-05):
+**v0.3.0** (review passes by Claude agents, 2026-11-05):
 - Effect injection restated precisely: it is an estimator-weighting check, blind to the counterfactual Y(0). Counterfactual-side invariances added (control-span, instrument-orthogonal confounding).
 - Answer-changing variants on unseen bases; differential and policy attacks added.
 - Estimand, assumptions, and estimator separated. Declarations limited to non-crux conventions from a benchmark-wide vocabulary.

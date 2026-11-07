@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft 0.3.0 (2026-11-05). Not yet reviewed by the research lead. 0.3.0 integrates two independent reviews of 2026-11-05 (econometric; benchmark methodology): decision-space constraints, tiers per graded output, secondary validity layers, inference-only predictions, data routes, new validation-run kinds, a recognition-task tag, and an exposure log of hidden material (see §8). It is **not backward compatible** with 0.2.0 (§6). |
+| **Status** | **Proposed** draft 0.3.0 (2026-11-05). Not yet reviewed by the research lead. 0.3.0 integrates two review passes by Claude agents (AI, not human reviewers) of 2026-11-05 (econometric; benchmark methodology): decision-space constraints, tiers per graded output, secondary validity layers, inference-only predictions, data routes, new validation-run kinds, a recognition-task tag, and an exposure log of hidden material (see §8). It is **not backward compatible** with 0.2.0 (§6). |
 | **Machine-readable schema** | [`deepecon-contribution.schema.json`](deepecon-contribution.schema.json) (JSON Schema, draft 2020-12) |
 | **Illustrative instance** | [`examples/illustrative-staggered-did.contribution.yaml`](examples/illustrative-staggered-did.contribution.yaml) — fictional paper and numbers |
 | **Tests** | [`../tests/schema/test_schema.py`](../tests/schema/test_schema.py) |
@@ -139,7 +139,7 @@ Recall of a known-issues key is computed on pre-exposure items only. The similar
 
 ## 8. Changes
 
-### 0.3.0 (independent reviews, 2026-11-05)
+### 0.3.0 (review passes by Claude agents, 2026-11-05)
 
 **Breaking changes, with migration notes:**
 - The task-level `verifiability_tier` is removed. Each task lists `hidden.verifier.graded_outputs[]`, each with its own `verifiability_tier`. Migrate V2 to V2a (exact relation) or V2b (stochastic check) for each graded output.

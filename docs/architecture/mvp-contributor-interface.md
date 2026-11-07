@@ -31,10 +31,10 @@ No step needs an AI model, and the site sends nothing to any AI provider (§7). 
 | D-027 | The team needs a **full runnable package**. | The guidance asks for a package a journal data editor would accept, with data or a route to run with data (§5). |
 | D-028 | Contributors may download the **agent-facing package**. | It is a download on the paper page. |
 | D-030 | The **interface** is bilingual (Chinese and English), with more languages possible later; interface text is translated with an LLM and reviewed by the team. (Clarifies an earlier misreading, D-029, that item text would be translated.) | Interface strings live in translation catalogues, and a language is added with a reviewed catalogue. Item text, papers, and code stay in their original language. |
-| D-031 | **Answer-key material is never sent to any API provider**; any LLM processing of it happens only on a locally deployed model. Narrowed by D-032 to held-out tasks. | Held-out material goes to no model (since D-033, no local model exists); other answer-key material follows D-018 (no external AI unless the lead configures it). See the [LLM use policy](llm-use-policy.md). |
+| D-031 | **Answer-key material is never sent to any API provider**; any LLM processing of it happens only on a locally deployed model. Narrowed by D-032 to held-out tasks. | Held-out answer keys and graders go to no model (since D-033, no local model exists); a held-out agent-facing package reaches a closed model only in a logged evaluation run under a no-retention agreement (D-032); other answer-key material follows D-018 (no external AI unless the lead configures it). See the [LLM use policy](llm-use-policy.md). |
 | D-032 | **Task tiers:** development tasks (V5 is one) may be published with a canary; evaluation tasks keep answer keys unpublished; a few held-out tasks keep their answer keys and graders on project hardware, and closed models see only their agent-facing package, under a no-retention agreement (clarification deferred, O-037). Each task records when its material first reached a provider or the public. D-018 is unchanged. | The site records each paper's tier, visible to administrators only. Every contributor is asked to keep the items confidential (§3 step 1, O-026); this is essential for evaluation and held-out tasks. |
 | D-024 (clarified) | The pilot paper is a **demo** for building and testing the interface; the team has no contact with its authors. | The demo paper is configured for dry runs by team members. It needs no data, because the site runs no code (§5.4). |
-| D-033 | **No locally deployed model** (2026-11-07). | Gateway Mode 1 is not planned; held-out material is processed by no model; contributors' own AI use is proposal P-055 (§5.6). |
+| D-033 | **No locally deployed model** (2026-11-07). | Gateway Mode 1 is not planned; held-out answer keys and graders are processed by no model; whether open-weight models may still be run as evaluated systems is open (O-037); contributors' own AI use is proposal P-055 (§5.6). |
 
 ## 3. The contributor's path
 
@@ -191,7 +191,7 @@ If an author uploads data that may not be shared with the project, by mistake or
 
 ### 5.6 Using AI tools (P-055, proposed)
 
-Contributors may use AI tools, provided what they submit is their own judgment in their own words. The Guidance page shows the text below in the contributor's interface language.
+Contributors may use AI tools, provided what they write for us is their own judgment in their own words. Under this proposal they may put the items, or the task package they download, into an AI tool only for development-tier papers; for evaluation and held-out papers they are asked to review without AI tools (rule 3) until D-032 is revisited (O-037). This is narrower than the research lead's suggestion of 2026-11-07. It also needs the lead's confirmation that contributors' own AI use with development-tier items is an accepted exception to D-018 (P-055). The Guidance page shows the text below in the contributor's interface language.
 
 **Draft text (English)**
 
@@ -199,16 +199,16 @@ Contributors may use AI tools, provided what they submit is their own judgment i
 >
 > You may use AI tools such as ChatGPT or DeepSeek to help you understand code, check your reasoning, or improve your language. Please follow three rules.
 >
-> 1. **Your judgment, in your own words.** Everything you submit (each decision, reason, comment, and proposed error) should state your own judgment and be written, or rewritten, by you. Please do not paste AI output as it is.
-> 2. **Tell us when AI helped.** Tick "AI helped with this" and name the tool. This does not count against your contribution; it lets us describe the benchmark accurately.
-> 3. **Keep the items safe.** If we ask you to review a paper without AI tools, please do not put its items, or your comments on them, into any AI tool. Otherwise, if you use an AI tool with the items, choose a setting that does not use your conversations for training (see the list below), do not use the tool's feedback buttons, and never share the conversation publicly. Never put restricted or confidential data into any AI tool.
+> 1. **Your judgment, in your own words.** Everything you write for us (each decision, reason, comment, and proposed error, and any README text you write) should state your own judgment and be written, or rewritten, by you. This does not apply to your original code and data, which we need exactly as they are. Please do not paste AI output as it is.
+> 2. **Tell us if AI helped.** Tick "AI helped with this", name the tool and the type of account, and say whether training was switched off and whether you entered the items or the task package. This does not count against your contribution; it lets us describe the benchmark accurately.
+> 3. **Keep the items safe.** If we ask you to review a paper without AI tools, please do not put its items, the task package you download from this site, or your comments on them into any AI tool. Otherwise, if you use an AI tool with the items or the package, choose a setting that does not use your conversations for training (see the list below), do not use the tool's feedback buttons, and never share the conversation publicly. Never put restricted or confidential data into any AI tool.
 >
 > **Why this matters**
 >
-> - The benchmark measures whether AI systems can find the mistakes that economists consider plausible and consequential. Your judgment is the standard the AI is measured against. If AI-written reasoning entered the tasks unchanged, the benchmark would partly measure agreement with another AI rather than with an economist.
+> - The benchmark tests whether AI systems can do economics research well: for example, whether they find and correct mistakes that economists consider plausible and consequential, or notice and supply a necessary step that was removed. Your judgment is the standard the AI is measured against. If AI-written reasoning entered the tasks unchanged, the benchmark would partly measure agreement with another AI rather than with an economist.
 > - AI-written text has recognizable patterns. An AI being tested could use them to find the answers without doing the economics.
 > - Tasks shaped by one AI model can be easier or harder for models of the same family, which would make comparisons between AI systems unfair.
-> - The items are the benchmark's answers. An AI service that keeps or trains on what you paste could pass the answers to future models, which would then score well by memory rather than by reasoning.
+> - The items are the benchmark's answers. An AI service that trains on what you paste could pass the answers to future models, which would then score well by memory rather than by reasoning.
 
 **Draft text (Chinese; machine-drafted by Claude, to be reviewed by the team under D-030)**
 
@@ -216,29 +216,33 @@ Contributors may use AI tools, provided what they submit is their own judgment i
 >
 > 您可以使用 ChatGPT、DeepSeek 等 AI 工具来帮助理解代码、检验推理或润色语言。请遵守以下三条规则。
 >
-> 1. **您的判断，您自己的表述。** 您提交的每项内容（每个决定、理由、评论和新提出的错误）都应表达您本人的判断，并由您亲自撰写或改写。请不要直接粘贴 AI 的输出。
-> 2. **请告诉我们 AI 何时提供了帮助。** 请勾选"AI 协助了此项"并注明所用工具。这不会影响对您贡献的评价，只是让我们能够如实描述这一基准。
-> 3. **保护好这些条目。** 如果我们请您在不使用 AI 工具的情况下审阅某篇论文，请不要将其中的条目或您对条目的评论输入任何 AI 工具。在其他情况下，如果您借助 AI 工具处理这些条目，请选择不会将您的对话用于训练的设置（见下方列表），不要使用工具的反馈按钮，也不要公开分享对话。任何情况下都不要将受限或保密数据输入任何 AI 工具。
+> 1. **您的判断，您自己的表述。** 您为我们撰写的每项内容（每个决定、理由、评论、新提出的错误，以及您撰写的 README 文字）都应表达您本人的判断，并由您亲自撰写或改写。此规则不适用于您原有的代码和数据：我们需要它们保持原样。请不要直接粘贴 AI 的输出。
+> 2. **如有 AI 协助，请告诉我们。** 请勾选“AI 协助了此项”，注明所用工具和账户类型，并说明是否已关闭训练、是否输入了条目或任务包。这不会影响对您贡献的评价，只是让我们能够如实描述本评测基准。
+> 3. **保护好这些条目。** 如果我们请您在不使用 AI 工具的情况下审阅某篇论文，请不要将该论文的条目、您从本网站下载的任务包或您对条目的评论输入任何 AI 工具。在其他情况下，如果您借助 AI 工具处理这些条目或该任务包，请选择不会将您的对话用于训练的设置（见下方列表），不要使用工具的反馈按钮，也不要公开分享对话。任何情况下都不要将受限或保密数据输入任何 AI 工具。
 >
 > **为什么这很重要**
 >
-> - 这一基准衡量的是 AI 系统能否发现经济学家认为合理且有实质影响的错误。您的判断就是衡量 AI 的标准。如果 AI 撰写的推理原封不动地进入任务，基准衡量的就部分变成了与另一个 AI 的一致程度，而不是与经济学家的一致程度。
+> - 本评测基准检验 AI 系统能否胜任经济学研究，例如能否发现并纠正经济学家认为确实可能出现且有实质性影响的失误，或发现并补上被删除的必要步骤。您的判断就是衡量 AI 的标准。如果 AI 撰写的推理原封不动地进入任务，评测基准在一定程度上衡量的就成了与另一个 AI 的一致程度，而非与经济学家的一致程度。
 > - AI 撰写的文字有可辨认的模式。接受测试的 AI 可能借助这些模式找到答案，而无需进行经济学推理。
 > - 由某个 AI 模型塑造的任务，对同一系列的模型可能更容易或更难，这会使不同 AI 系统之间的比较有失公平。
-> - 这些条目就是基准的答案。保留您所粘贴的内容或用其训练模型的 AI 服务，可能把答案传给未来的模型，使其靠记忆而非推理取得高分。
+> - 这些条目就是本评测基准的标准答案。用您所粘贴的内容训练模型的 AI 服务，可能把答案传给未来的模型，使其靠记忆而非推理取得高分。
 
-**Settings list for the Guidance page** (dated 2026-11-07; providers change these, so re-check before each invitation round):
+**Settings list for the Guidance page** (compiled 2026-11-07 from R3, accessed 2026-11-05, and R11, accessed 2026-11-06, and not re-checked since; providers change these, so re-check before each invitation round. The Label column is for the team and is not shown on the Guidance page.)
 
 | Tool | Setting that excludes training | Label |
 |---|---|---|
 | ChatGPT, personal plans | Turn off "Improve the model for everyone"; business and enterprise plans are not used for training by default | [S], [R11](../research/evidence/R11-llm-assistance-in-benchmark-construction.md) §5 |
-| Claude, consumer plans | Turn off model training in the privacy settings; commercial plans are not used for training | [P-page], R3 §6 |
-| Gemini app | Turn off Keep Activity | [S], R11 §5 |
-| DeepSeek app | Turn off "Improve the model for everyone" | [S], R11 §5 |
+| Claude, consumer plans | Turn off model training in your account settings (conversations flagged for safety review may still be used); commercial plans are not used for training | [P-page], R3 §6 |
+| Gemini app | Gemini Apps activity is used for training by default for adults; the setting that turns this off is to be confirmed before the first invitation round | [S] default, [U] setting, R11 §5 |
+| DeepSeek app | The app may use inputs to improve services, with an opt-out; the setting's name and location are to be confirmed before the first invitation round | [S]/[U], R11 §5 |
 
-Feedback buttons can send a whole conversation for training even after opting out (Anthropic states this for its consumer plans [P-page, R3 §6]; OpenAI reportedly does the same [S]).
+Feedback buttons can send a whole conversation for training even after opting out: Anthropic states this for its consumer plans [P-page, R3 §6]; whether OpenAI and other providers do the same is unverified [U].
 
-**For the team.** Which papers are reviewed without AI tools follows from their tier (evaluation and held-out tasks) and is not shown to contributors. Each use a contributor reports is entered in the exposure log. When D-032 is revisited (O-037), the team will decide whether AI use under no-training settings can also be allowed for evaluation-tier items.
+**For the team.**
+- Papers in the evaluation and held-out tiers are reviewed without AI tools; their contributors are asked to do so but are not told the tier.
+- Each use a contributor reports is entered in the exposure log.
+- Allowing AI tools gives up one safeguard: reviewers who work without AI keep the expert check independent ([R11](../research/evidence/R11-llm-assistance-in-benchmark-construction.md) §4). Rewriting in one's own words does not prevent anchoring: in one study, 77% of analysts repeated an AI agent's argument and 15% credited it ([R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md) §1). The per-item disclosure is therefore used to report AI-assisted and unassisted validations separately, and AI-assisted decisions on LLM-drafted items are re-checked.
+- When D-032 is revisited (O-037), the research lead will decide whether AI use under no-training settings can also be allowed for evaluation-tier items.
 
 ## 6. Administrator functions (v1)
 
@@ -263,7 +267,7 @@ All interface text (buttons, notices, the overview, category meanings, the guida
 2. **Review.** A team member reviews and corrects it.
 3. **Ship.** The reviewed catalogue is committed with the code.
 
-Interface text contains no project material, so drafting it with any LLM leaks nothing. Per-paper interface text, such as a category's one-line meaning and the checklist entries, goes through the same draft-and-review step. Because these entries describe categories, not planted errors, they may be drafted with a model the research lead has configured (D-018); for held-out papers, only with a local model or by hand (D-032). **Item text is not translated.**
+Interface text contains no project material, so drafting it with any LLM leaks nothing. Per-paper interface text, such as a category's one-line meaning and the checklist entries, goes through the same draft-and-review step. Because these entries describe categories, not planted errors, they may be drafted with a model the research lead has configured (D-018); for held-out papers, by hand only (D-031, D-032, D-033). **Item text is not translated.**
 
 **Adding a language** means adding one catalogue and the per-paper labels, then reviewing both; no code changes.
 
@@ -328,5 +332,5 @@ See the [implementation plan](mvp-implementation-plan.md) v0.3:
 | O-035 | Who checks that data included in an upload may be shared with the project? | §5.5: a named data steward, with uploads quarantined until checked |
 | O-021 | Hosting | §9: staged, a team member's computer for the demo, then one small server outside mainland China before the first outside contributor (P-053) |
 | O-036 | The first real contributor and paper | A possible contact the research lead named (the name is not recorded here); the paper's field sets its categories (D-025) |
-| O-037 | AI use in building tasks, then D-032's held-out and exposure wording | Revise the construction process for the team (P-054) and contributors (P-055) first, then revisit D-032 |
+| O-037 | AI use in building tasks, then D-032's held-out and exposure wording | Revise the construction process for the team (P-054) and contributors (P-055) first, then revisit D-032 and decide whether its clarifications (a) and (b) are still needed |
 | O-022, O-026 | Invitation delivery; confidentiality agreement | Unchanged; confidentiality is asked of every contributor and is essential for evaluation and held-out tasks (D-032) |

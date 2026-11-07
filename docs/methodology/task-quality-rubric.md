@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** v0.2.0 (2026-11-05). Part of Deliverable 2. Not yet reviewed by the research lead. **36 criteria in 10 groups, 20 of them gates.** v0.2.0 integrates two independent reviews ([Changes](#changes)). |
+| **Status** | **Proposed** v0.2.0 (2026-11-05). Part of Deliverable 2. Not yet reviewed by the research lead. **36 criteria in 10 groups, 20 of them gates.** v0.2.0 integrates two review passes by Claude agents (AI, not human reviewers; [Changes](#changes)). |
 | **Primary basis** | Bercovich (2026), *Good Benchmarks* — [reading notes](../research/reading-notes/good-benchmarks-bercovich-2026.md) (bare § numbers below refer to the paper) |
 | **Also informed by** | Terminal-Bench-Science (TBS) proposal, implementation (39 criteria), trial-analysis, and cheat-analysis rubrics, Apache-2.0 ([evidence note R1](../research/evidence/R1-terminal-bench-science.md)); the research lead's brief §4 and §10. Criteria adapted from TBS name their TBS counterpart in brackets. |
 | **Used by** | Contributors (self-assessment), shepherds, outside economists, independent reviewers, automated checks; recorded as `rubricAssessment` in the [schema](../../schemas/README.md). Stages are those of the [construction protocol](benchmark-construction-protocol.md); rungs L0–L13 are those of the [verifier validation protocol](verifier-validation-protocol.md) (**VVP**). |
@@ -173,7 +173,7 @@ The rubric is versioned (`rubric_version`); each assessment records the version 
 
 ## Changes
 
-**v0.2.0** (independent reviews, 2026-11-05): *Who / when* becomes the single stage map (C/T/A codes retired); new gates LK-4 and LK-5 (36 criteria, 20 gates); criteria aligned with VVP v0.3.0, including the RV-2 materiality rule, blind solves (SP-1, PR-2, DC-2), and the hint ladder (SP-3; O-004 stays Open); numeric anchors for SO-3, DF-1, DF-3, and PR-1; stricter change control; a §9 quotation (PR-1) and a cross-reference (RV-4) corrected.
+**v0.2.0** (review passes by Claude agents, 2026-11-05): *Who / when* becomes the single stage map (C/T/A codes retired); new gates LK-4 and LK-5 (36 criteria, 20 gates); criteria aligned with VVP v0.3.0, including the RV-2 materiality rule, blind solves (SP-1, PR-2, DC-2), and the hint ladder (SP-3; O-004 stays Open); numeric anchors for SO-3, DF-1, DF-3, and PR-1; stricter change control; a §9 quotation (PR-1) and a cross-reference (RV-4) corrected.
 
 - Cross-document consistency pass (2026-11-05): a Terms list; GT-2 fixes design-statement conditions in the instruction; SP-1 pass rule under the fallback; one-sided 95% bound for stochastic families (VE-1); DF-3 checks the target band per release.
 
