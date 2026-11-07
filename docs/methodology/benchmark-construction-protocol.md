@@ -19,7 +19,7 @@
 4. **Grade outcomes; test procedures through outcomes** (*Good Benchmarks* #6, §7; brief §10B). Agents deliver results *and* the code that produces them; verifiers re-run that code on hidden data (VVP §5).
 5. **Distinguish validity layers** (D-013): computational (implementation fidelity), measurement, statistical, identification, and interpretation. Each failure mode has a primary layer and optional secondary layers; verifiability tiers (V1, V2a, V2b, V3, V4) are set per graded output, not by layer (VVP §9).
 6. **Candidates until independently validated** (D-010).
-7. **No leakage by construction** (D-009): four physically separated tiers; automated leakage scans; hidden-tier material only under no-training terms (§8).
+7. **No leakage by construction** (D-009): four physically separated tiers; automated leakage scans; every AI provider that receives hidden-tier material is logged, and affected scores are reported separately (§8; D-035).
 8. **Blind first.** Outside economists solve the task from the agent tier alone (rubric SP-1); a port never serves as the reference's independent check (GT-1).
 
 **Terms.**
@@ -88,7 +88,7 @@ Each stage has gate lines taken from the rubric's *Who / when* column: **Gate** 
 | Software | Any for contributor-side work; task environments use open-source software (R or Python) unless a licensed track is created | Stata appears in 71.6% of packages [S, R8], so most tasks need an R or Python port, checked for numerical equivalence. A licensed Stata track has its own leakage problem (the evaluated agent could read the mounted licence file) and unclear terms for automated use [R8]. |
 | Design | Coverage across designs: difference-in-differences and event studies, IV, RD, randomized experiments, shift-share, synthetic control, panel fixed effects; structural work later | Breadth of capabilities |
 | Consequential decisions | At least one critical decision whose mis-handling is a known pitfall | Raw material for flawed variants |
-| Contamination | Note how famous the paper is. For the **held-out tier**, prefer Path B packages that are unpublished or published after the evaluated models' training cutoffs; record both dates | Perturbed data defeat memorized numbers, not memory of the paper (rubric LK-4) |
+| Contamination | Note how famous the paper is. For **new tasks** (D-035), prefer Path B packages that are unpublished or published after the evaluated models' training cutoffs; record both dates | Perturbed data defeat memorized numbers, not memory of the paper (rubric LK-4) |
 | Contributor | Ideally an original author (Path B) or an economist with deep knowledge of the paper | Tacit knowledge (brief §3.1) |
 
 **Gate:** EN-3. **Automatable:** metadata harvesting, package availability and licence checks, compute screening. **Human judgment:** whether the paper has consequential, teachable decisions; data route; contamination risk.
@@ -190,7 +190,7 @@ The release editor, with the benchmark reviewer, admits tasks to a release or to
 
 **Gate:** LK-1, LK-5.
 
-**Release policy:** decided by the research lead on 2026-11-06 as development, evaluation, and held-out task tiers (D-032, closing O-001).
+**Release policy:** answers of scored tasks stay unpublished until the task is retired; demo and development tasks may be published (D-035, 2026-11-07, which replaced the tiers of D-032).
 
 ## 5. Automation versus human judgment (summary)
 
@@ -229,9 +229,9 @@ Journal placement is not a ground-truth label (X-001). Instead, the interview el
 | Published coefficients memorized or retrievable | No internet; perturbed or fully synthetic data; re-execution of agent code on answer-changing hidden variants with unseen bases (rubric LK-2; VVP §5.1) |
 | Paper or package recognized from the agent tier | Shared restructured presentation (Stage 4); recognition probe (LK-4); unpublished or post-cutoff packages for the held-out tier (Stage 0) |
 | Flawed code compared against the public source package | Restructured or ported presented code; no internet; naturalness review (LK-3) |
-| Hidden-tier material reaching model providers (VVP §10) | Every session, trial, or LLM call that sees hidden-tier material, interviews included, runs under commercial no-training terms (zero data retention where available); consumer accounts, even after an opt-out, handle only agent-tier or public material. Option A meets this by construction; Option B needs project-provided (if O-018 permits) or institutional commercial access ([Option B](../architecture/option-b-local-skill.md) §10.2). Terms are recorded in `consent.contributor_account_terms`, exposures in the log (LK-5) |
-| Held-out split worn down or leaked | Run only by the project, vetted evaluators, or locally hosted open-weight models; exposures logged (LK-5); refresh after a set number of external evaluations; all tasks from one paper, twins included, in the same split; catalogue without those papers' identifiers (§7); disclosure embargo in contributor agreements |
-| Task materials entering training data after release | Canary string; held-out tier (D-032); periodic refresh |
+| Hidden-tier material reaching model providers (VVP §10) | Every AI service, trial, or evaluation run that receives hidden-tier material is logged with the kind of account and the date (LK-5). Work, business, or API accounts are preferred, and personal accounts are used with training off; this is practice, not a guarantee. Scores of models whose provider received a task's answer key before the evaluation are reported separately (D-035) |
+| Unpublished tasks worn down by evaluation | Every evaluation run through a provider's API is logged (D-038); new tasks are added over time; all tasks from one paper, twins included, share one publication status; catalogue without unpublished papers' identifiers (§7); disclosure embargo in contributor agreements |
+| Task materials entering training data | Canary string on published material; exposure log and separate reporting (D-035); new tasks over time |
 | Hidden material in agent-facing text | Physical tier separation; automated leakage scan (LK-1) |
 | Public submission channels | Private channels for any package containing hidden-tier material |
 

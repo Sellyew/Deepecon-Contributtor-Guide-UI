@@ -1,78 +1,84 @@
-# LLM Use and Answer-Key Leakage
+# AI Use and Benchmark Integrity Rules
 
 | | |
 |---|---|
-| **Status** | **Proposed** team policy v0.3 (2026-11-07). v0.1 answered the research lead's question: "if we discuss locally with a public LLM, will it cause leakage, and is there a solution?" v0.2 applies the task tiers the lead agreed the same day (D-032): the local-only rule now covers held-out tasks, and D-018 governs the rest. Builds on D-018, D-031, and D-032. §5 (added the same day) summarizes proposal P-054 on LLM assistance in building tasks. v0.3 records that the project will not deploy a local model (D-033): held-out answer keys and graders, and contributors' responses, go to no model, and contributors' own AI use is proposal P-055. |
-| **Applies to** | Everyone who prepares, reviews, or handles benchmark materials: the team, students, and invited contributors |
+| **Status** | **Decided** v1.0 (2026-11-07), written at the research lead's instruction to replace outdated rules with a simpler, consistent set; the wording is open to the lead's review. Recorded as D-034 to D-038 in the [decision log](../decisions/decision-log.md). It replaces the LLM use policy v0.1–v0.3 and decisions D-018, D-031, D-032, and D-033, and rewords D-021 (see the decision log's table of items superseded on 2026-11-07). |
+| **Applies to** | The team, invited contributors, and the evaluation of models |
+| **Evidence** | [R10](../research/evidence/R10-contamination-and-evaluation-isolation.md) (contamination and evaluation isolation); [R11](../research/evidence/R11-llm-assistance-in-benchmark-construction.md) (AI in benchmark construction) |
 
 ---
 
-## 1. Short answer
+## 1. What the rules protect against
 
-**What matters is where the model runs, not where you type.**
-
-| Situation | Does the material leave the project? | Leakage? |
+| Problem | Can we prevent it? | What we do |
 |---|---|---|
-| A hosted chatbot or API: ChatGPT, Claude, DeepSeek's web chat or API, Kimi, Qwen online, and so on | Yes. Every prompt and pasted file goes to the provider's servers | **Yes** |
-| A tool that runs "locally" but calls a hosted model: Claude Code, Cursor, IDE assistants, desktop chat apps | Yes. The client is local, but every prompt and every file the tool reads is sent to the provider | **Yes** |
-| An **open-weight model running on project hardware**, for example an open-weight DeepSeek or Qwen model served on the team's GPU server, with outbound traffic blocked | No | **No** leakage to any provider. Using a model does not change its weights, and nothing is sent anywhere if the serving software has no telemetry and the machine cannot reach the internet |
-| Fine-tuning a local model on answer-key material | Not while the weights stay local | Yes, if the fine-tuned weights are ever shared or published |
+| **The evaluated agent finds the answers during the test**: in its files, on the internet, in version history, or from the grader | Yes: we control the test environment | Isolate the evaluation (Rule 9) |
+| **A model was trained on our answers**, so it scores by memory, not reasoning | No. Every model, including open-weight ones, is evaluated through its provider's API (D-038), so every evaluated provider receives our task packages and the agents' work. Material sent to an AI service while building tasks also stays with that provider. Account settings and contract terms lower the chance of training; they do not stop the provider from receiving and keeping the material (§3) | Keep the answers of scored tasks unpublished (Rule 8). Record which providers received what (Rule 10). Report affected scores separately and keep adding new tasks (Rule 10) |
+| **Tasks reflect an AI's judgment instead of economists'**, carry AI writing patterns, or favour the model family that drafted them | Largely, through how tasks are built | Experts decide; people write the final text; each item records its origin; no filtering by frontier-model success (Rules 4–7) |
+| **Privacy and law** | Yes | Restricted data never go into AI services; the site sends nothing; contributors' material is used only with consent (Rules 1–3) |
 
-So discussing project materials with a local *client* of a public model leaks them, while discussing them with a public *open-weight* model that runs on your own hardware does not. The project will not deploy such a model (D-033), so in practice the choice is between an external service the research lead configures and no model at all.
+## 2. The rules
 
-## 2. Three different risks
+**Privacy and law**
 
-| Risk | What goes wrong | Handled by |
+- **Rule 1. Restricted or confidential data never go into any AI service, by anyone.** *Why:* data agreements and law.
+- **Rule 2. The contributor site sends nothing to AI services** and loads no third-party analytics, fonts, CDNs, or embedded content. An AI feature is added to the site only if the research lead configures it. *Why:* this is what we promise contributors.
+- **Rule 3. The team sends a contributor's unpublished materials or responses to an AI service only with that contributor's consent.** Contributors decide how they use AI with their own materials. *Why:* consent.
+
+**Building tasks**
+
+- **Rule 4. AI may help the team and contributors** draft, vary, check, and word candidate items and other materials, through any AI service. *Why:* established benchmarks do this routinely under expert review (evidence note R11).
+- **Rule 5. Experts decide.** Every item is validated by an expert in the contributor review. Where an item can be run, its effect on the results is confirmed by running it. *Why:* the benchmark's ground truth is economists' judgment.
+- **Rule 6. People write or rewrite what they submit** (decisions, reasons, comments, proposed items, README text) and the final text and code edits the agent sees. AI output is never used as it is. *Why:* the tasks must reflect the authors' own scientific judgment, and AI writing has patterns an evaluated AI could exploit.
+- **Rule 7. Provenance.** Each item records who drafted it (the team, the contributor, or an AI service, with its model family) and whether AI helped review it. Results are reported by these origins. Items are never kept or dropped because frontier models solve or miss them. *Why:* this measures generator bias and AI influence instead of guessing at them; filtering by model success biases comparisons between models (evidence note R11 §4).
+
+**Answers and evaluation**
+
+- **Rule 8. Answers of scored tasks stay unpublished** until the task is retired. Demo and development tasks may be published, with the project canary. *Why:* publication is the one leak we fully control.
+- **Rule 9. Evaluation isolation.** During a test the agent can reach only the instruction, the candidate package, and its model's endpoint. It has no answer files, rubric, original package, version history, or other internet access. Grading runs outside the agent's environment. Before release, a team member tries to find the answers from inside that environment. Task packages use the restructured presentation (neutral names), as in V5. *Why:* stops the agent from looking answers up (evidence note R10 §3).
+- **Rule 10. Exposure log and separate reporting.**
+  - **Log:** for each task, which AI providers received its answer-key material (while building or reviewing it) or its package (in an evaluation run), when, and through what kind of account.
+  - **Report separately:** a model's scores on tasks whose answer keys its provider received before the evaluation.
+  - **Renew:** add new tasks over time, and retire tasks whose answers become public.
+
+  *Why:* detection is the safeguard that works when prevention cannot be verified (evidence note R10 §2: held-out comparisons, dating against training cutoffs).
+- **Rule 11. Practice, not a guarantee.**
+  - With answer-key material, prefer work, business, or API accounts.
+  - On personal accounts, switch model training off, avoid the feedback buttons, and never share conversations publicly.
+
+  *Why:* it closes the leak path that is documented (consumer chat data used for training) and costs nothing. It is not a guarantee, so Rule 10 still applies.
+
+## 3. How reliable are "training off" settings?
+
+Not reliable enough to count as protection, which is why Rule 11 is practice and Rule 10 is the safeguard.
+
+- **The material is still sent and kept.** For example, Anthropic keeps consumer conversations for 30 days with training off, and conversations given feedback or flagged for safety review may still be used for training [P-page, evidence note R3 §6].
+- **Courts can override deletion.** In May 2025 a US court ordered OpenAI to preserve ChatGPT conversations users had deleted, temporary chats, and API outputs without a zero-retention agreement; Enterprise and Edu accounts were excluded [S] ([Engadget](https://www.engadget.com/ai/openai-appeals-court-order-forcing-it-to-preserve-all-chatgpt-data-120032364.html); [JD Supra](https://jdsupra.com/legalnews/court-orders-openai-to-retain-all-9674278)). Its current status was not checked.
+- **We cannot verify a contributor's settings**, and providers change their defaults. Shared chat links were indexed by search engines in 2025 [S, evidence note R11 §4].
+- **Evaluation sends the packages anyway.** With public original packages, a flawed package reveals the planted errors by comparison with the original (evidence note R10 §3).
+
+## 4. What changed from the earlier rules
+
+| Earlier rule | Now | Why |
 |---|---|---|
-| **Confidentiality** | Project content or contributor data leave project control. Even under no-training terms the provider keeps a copy for its retention period | D-018 and this policy |
-| **Training contamination** | A provider trains on a task and its answers, and its later models recall them. Their scores on that task then measure recall, not research ability, and the benchmark evaluates exactly these providers' models | The task tiers (D-032): exposure dates, a held-out tier, replacement of exposed tasks |
-| **Leakage during evaluation** | The evaluated agent finds the answers while working, for example from the internet, version-control history, or the grader | The evaluation design (P-052), not this policy |
+| D-018: no project content to any external AI service | Rules 1–4 | The lead now wants AI in task construction and flexible author use. The privacy safeguards that matter stay: restricted data, the site, consent |
+| D-021 and X-007: no AI-generated flawed packages | Rules 4–6 | "We do not need an AI agent" (revision ¶3) was not a ban; AI may now help, and experts decide |
+| D-031: answer keys only to a local model | Removed | No local models (D-038); exposure is logged and reported (Rule 10) |
+| D-032: development, evaluation, and held-out tiers, with a deferred clarification | Rules 8 and 10 | Every model is evaluated through APIs, so no task stays private from providers; a separate held-out tier would add rules without adding protection. Kept: unpublished answers, exposure dates, separate reporting, new tasks |
+| D-033: no local model, so held-out material goes to no model | D-038 | The lead clarified that open-weight models are evaluated through APIs |
+| P-054 and P-055: tier fixed before drafting; no AI on items for some papers; tier hidden from contributors | Rules 4–7, 10, and 11 | One rule for everyone; exposure is logged instead of forbidden |
+| Rubric gate LK-5 and verifier-protocol §10: consumer accounts never see hidden material; held-out split on local models | Rules 10 and 11 | Logged and reported instead; no local models |
 
-An isolated evaluation environment stops the third risk but not the second: a model that has learned the answers brings them into the sandbox ([R10](../research/evidence/R10-contamination-and-evaluation-isolation.md) §1).
+## 5. What contributors are told
 
-## 3. Material classes and allowed tools
+The Guidance page asks contributors to:
+- write in their own words;
+- say whether AI helped and whether they entered the items;
+- never put restricted data into an AI tool;
+- prefer accounts that do not train on their input.
 
-| Class | Examples | Allowed tools |
-|---|---|---|
-| **Public** | The published paper; the public replication package; development tasks once published | Any |
-| **Development and evaluation tasks, unpublished** (D-032) | Candidate packages, candidate items, rubrics, item maps, flawed code and diffs, expert guides, pilot results | **No external AI service by default (D-018).** The research lead may explicitly configure one, such as the DeepSeek API with the lead's own key, for a stated use; an evaluation task's agent-facing package, however, goes to a provider only in an evaluation run of that provider's models (D-032). Each use and each run is logged with the provider, its terms, and the date (§4). For an evaluation task, sending answer-key material (candidate items, rubrics, item maps, flawed code, expert guides) to a provider counts as exposure. Until D-032 is revisited (O-037), treat it as moving the task to the development tier (§4). Invited contributors: P-055 (proposed; an exception to D-018 that the research lead must confirm) |
-| **Held-out tasks** (D-032) | Everything belonging to a held-out task: answer key, grader, item map, flawed code, expert guides, and its agent-facing package | **No model (D-031, D-032, D-033)** for all team work. Never paste into a hosted chatbot or coding assistant. Only exception: for evaluation, the agent-facing package (never the answer key or grader) may be run on a closed model under a no-retention agreement, configured by the research lead and logged (D-032; clarification deferred, O-037) |
-| **Contributor responses and unpublished materials** | Reviews, comments, proposals, messages, unpublished code | **No model run by the project** (proposed: stricter than D-018, which allows an API the research lead configures; P-035; contributors have not consented to anything else). Contributors' own AI use: P-055 (§5) |
-| **Restricted data** | Patient, personnel, or other licensed microdata | **No model at all**, and only in environments the data's terms allow |
-
-## 4. Solutions
-
-1. **Label the material by tier.** Held-out folders and files carry a visible header such as "HELD-OUT: no AI tools"; other answer-key files carry "ANSWER-KEY MATERIAL: no external AI without the lead's approval". V5's `Expert_Only_Do_Not_Upload` folder name already does this.
-2. **Add a canary string.**
-   - Embed one random GUID in every answer-key file and every task package.
-   - If a model ever reproduces it, the material reached training data. Terminal-Bench-Science uses this practice [P-full, R1].
-   - It detects leakage; it does not prevent it.
-3. **Keep an exposure log.** Record what reached a provider or the public, which provider and service, under which terms, and when, whether by accident, by decision, or through a closed-model evaluation run.
-   - A closed-model evaluation run exposes only the agent-facing package, and only to that provider. The run is logged, that provider's models with a later training cutoff are reported separately on the task, and the task keeps its tier.
-   - If a task's answer key or grader reaches a provider or the public, or its agent-facing package is published, that date is the task's **exposure date**: the task moves to the development tier and is replaced (D-032).
-   - This reading of D-032 is deferred until the construction process is revised (O-037).
-4. **No local model (D-033).** The research lead decided on 2026-11-07 not to deploy one. Held-out answer keys and graders, and contributors' responses, are therefore handled without any model; a held-out agent-facing package reaches a closed model only in a logged evaluation run (D-032).
-5. **If a hosted service is used for development or evaluation material,** use it only with the research lead's explicit configuration (D-018), under commercial no-training terms with zero data retention where available, and log it.
-
-## 5. LLM assistance in building tasks (P-054, proposed)
-
-If the research lead accepts P-054, an LLM may help build tasks, provided experts validate every candidate. Until the lead decides, D-021 applies as written. The rules above still decide where the model may run. In DeepEcon a drafted candidate error is the answer key, so each task's tier is set before any drafting:
-
-- **Development tasks:** an external API that the research lead configures under written no-training terms. Never a personal chat account.
-- **Evaluation tasks:** drafted without an LLM until D-032 is revisited (O-037).
-- **Held-out tasks:** no model (D-031, D-033).
-- **Whatever the tier:** restricted data go to no model; contributors' unpublished materials and responses go to no model run by the project.
-- **Every candidate records its origin** (team, LLM with model and where it ran, or contributor) and who edited and validated it. People write or finally edit agent-facing text and code edits.
-- **Contributors** may use AI tools if what they submit is their own judgment in their own words, they say where AI helped, and they keep the items out of AI tools where the team asks (P-055; [MVP](mvp-contributor-interface.md) §5.6).
-
-Evidence: [R11](../research/evidence/R11-llm-assistance-in-benchmark-construction.md).
+It also explains why ([MVP](mvp-contributor-interface.md) §5.6).
 
 ## 6. This design work
 
-These documents are prepared with Claude, which is a hosted model. The V5 package file was uploaded to the Claude session, so it is stored on Anthropic's infrastructure: in the upload and in the session's cloud container. Only its structure entered the model's context. How Anthropic may use stored session files depends on the account's terms [U: account type not known to me].
-
-**Recorded:**
-- V5 is exposed to Anthropic (exposure date 2026-11-06) and is a **development task** (D-032), so its exposure does not affect headline scores;
-- in future, only structure or synthetic stand-ins are shared with any hosted assistant, as CLAUDE.md requires (D-018 applies to every tier).
-
-The extracted working copies in the session's scratch area were deleted on 2026-11-06.
+The Claude sessions used to write these documents are an AI service like any other: material shared in them reaches Anthropic and belongs in the exposure log. The V5 package was uploaded on 2026-11-06; only its structure was read. It is logged as received by Anthropic and is a demo task. If the research lead's Claude account is a personal plan, model training should be switched off: consumer plans, including Claude Code used with them, may be trained on unless the user opts out [P-page, evidence note R3 §6]. Answer-key content is opened in a Claude session only when the research lead asks.

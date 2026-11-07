@@ -1,6 +1,6 @@
 # Bilingual Design (English and Simplified Chinese)
 
-> **Note (2026-11-06).** The principles and the glossary apply to the [MVP contributor interface](mvp-contributor-interface.md). The Option B sections are superseded. **Clarified 2026-11-06 (D-030):** the interface is bilingual and extensible to more languages, drafted with an LLM and reviewed by the team; item text, papers, and code are not translated. Answer-key material goes only to a locally deployed model (D-031; since D-032 this applies to held-out tasks, and other answer-key material follows D-018; since D-033 no local model is deployed, so held-out answer keys and graders go to no model). Interface text contains no answer-key material.
+> **Note (2026-11-06).** The principles and the glossary apply to the [MVP contributor interface](mvp-contributor-interface.md). The Option B sections are superseded. **Clarified 2026-11-06 (D-030):** the interface is bilingual and extensible to more languages, drafted with an LLM and reviewed by the team; item text, papers, and code are not translated. AI use follows the [AI use and integrity rules](llm-use-policy.md) (D-034 to D-038, 2026-11-07). Interface text contains no answer-key material.
 
 | | |
 |---|---|
