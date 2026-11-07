@@ -1,0 +1,43 @@
+# R13: How benchmarks release, refresh, and officially evaluate tasks
+
+| Field | Value |
+|---|---|
+| Topic | Versioning, freezing, refreshing, and retiring task sets; errata; who runs official evaluations and under what fixed conditions; safeguards against choosing tasks after seeing results |
+| Date | 2026-11-07. All sources accessed 2026-11-07. |
+| Author | lead collaborator (Claude session), for the research lead's request of 2026-11-07 to compare DeepEcon's "open to contribute, open to develop, controlled to evaluate" direction with ARC-AGI, HLE, FrontierMath, Terminal-Bench-Science, and others |
+| Method | Done by AI agents, not human researchers. Two Claude agents run from this session covered two slices: release and refresh; official evaluation protocols. They read fresh read-only clones of public repositories and ran 33 web searches. For each slice a second Claude agent re-checked every claim: 170 checks, 102 confirmed, 44 corrected, 23 left [S] or [U], and 1 cross-benchmark assessment found wrong (replaced below by the checker's version). A second agent of the same model family is not an independent human check |
+| Evidence labels | As in the [evidence README](README.md). Repository facts are [P-page] or [P-full] with the commit; search-summary claims are [S]; *(assessment)* marks analysis |
+| Access limits | Unreachable: tbench.ai, arcprize.org, epoch.ai, lastexam.ai, labs.scale.com, metr.org, livebench.ai, huggingface.co, snorkel.ai, and (by policy) arxiv.org and github.com web pages. ARC policy, Epoch, FrontierMath, and Scale claims are therefore [S] |
+| Relation to other notes | Extends [R1](R1-terminal-bench-science.md) §2.8, [R10](R10-contamination-and-evaluation-isolation.md) §2, and [R12](R12-human-access-to-unreleased-answers.md) |
+
+---
+
+## 1. Short answer
+
+*(assessment)*
+
+1. **Frozen, identified releases are common.** TBS tags immutable semantic versions with DOIs; Terminal-Bench pins each dataset by a SHA-256 digest; SWE-bench-Live freezes its leaderboard splits. They are not universal: LiveBench and LiveCodeBench changed score tables in place, ARC-AGI-2 fixed public tasks in place with a changelog, and HLE has no version tags.
+2. **Official boards are moving to maintainer-run evaluation.** Terminal-Bench moved from self-reported submissions (1.0, 2.0) to maintainer-run boards (2.1, 4.0). ARC, Epoch, METR, and Scale run their own evaluations [S]. SWE-bench stays self-reported, with optional maintainer re-runs.
+3. **Fixed conditions are best enforced in code.** Terminal-Bench's leaderboard checks a pinned dataset digest per trial, rejects timeout and resource overrides, requires at least five trials per task, scores errored trials 0, and pins harness versions and reasoning effort. Task changes are versioned: a patch reuses old trials, a minor change regrades them, a major change re-runs them.
+4. **Choosing tasks after seeing results happens even where it is warned against.** Both TBS and Terminal-Bench warn contributors against adversarial filtering. Yet TBS's manifest planned v0.1 as the set "published after the evals decide what to cut", and moves tasks that are "still too easy for frontier models" to a separate lite set. LiveBench retires saturated tasks, and HLE-Rolling replaced easy questions with harder held-out ones [S].
+5. **No major benchmark publishes a hash of its hidden set before evaluating.** Commitments of this kind exist as research proposals (TRUCE, Hashmarks) [S]; one small Hugging Face benchmark reportedly lists hashes of withheld items [S].
+6. **API evaluation of a hidden set exposes it, and only ARC says so plainly.** Its semi-private set for hosted models has "low leakage probability", it acknowledges leakage over time [S], and it keeps a fully private set for offline runs, which DeepEcon cannot do without local models (D-038). Scale reportedly features a model only the first time its organization meets a set's prompts [S].
+7. **Continuous benchmarks date their items.** LiveBench gives each question a release and removal date; LiveCodeBench lets scores be computed for problems after a model's cutoff; SWE-rebench collects monthly slices after cutoffs [S]. Keeping up a cadence is hard: LiveCodeBench's repository has not been updated since 2025-07-15, and LiveBench made 11 releases in about 24 months against a monthly plan.
+
+## 2. By benchmark
+
+| Benchmark | Release and refresh | Official evaluation | Label |
+|---|---|---|---|
+| **Terminal-Bench-Science** | Immutable semantic-versioned releases with a version DOI and a concept DOI; a manifest allowlist defines each release; minor versions add or remove tasks or change comparability, patches repair; retired tasks go to `archive/`, too-easy tasks to `lite/`; fixes through repair PRs with trajectory evidence, released as new versions; only v0.1.0 so far, and 5 of its 70 tasks have changed on main without a patch release | Maintainer-run release evaluations on Harbor Hub ("3,570 trials across 17 models", R1); v0.1 curated after the evaluations, with no stated criterion; no submission pipeline found | `harbor-framework/terminal-bench-science@87bffe9d` RELEASING.md, `tasks/dataset.toml`, `lite/README.md`, `archive/README.md` [P-full / P-page] |
+| **Terminal-Bench** (continuous; 2.0 to 4.1) | Dataset releases with per-task semantic versions and change logs; v3.0.0 (74 tasks) to v4.0.0 (66) removed 8 tasks and re-ran the leaderboard; v4.1.0 kept the 66 with minor and patch changes; old tasks kept in `legacy/` | Maintainer-run boards for 2.1 and 4.0; dataset digest checked per trial; at least 5 trials; no overrides; errored trials scored 0; harness versions and reasoning effort pinned; an LLM judge audits successful trajectories, maintainers decide disqualifications; accuracy with standard error per dataset version | `harbor-framework/terminal-bench-3@cfc7b6c6` [P-page]; reasons for removing 8 tasks [S] |
+| **ARC-AGI** | Each generation is a new benchmark; public sets fixed and fixed in place with logs; semi-private and private sets reused across competition years (ARC-AGI-1's private set reportedly unchanged 2020 to 2024 [S]) and retired, not published | The ARC team runs verified evaluations of hosted models on the semi-private set (120 tasks for ARC-AGI-2), one run per model, a cost cap per run [S]; the private set only offline on Kaggle; a public harness pins model IDs, temperature, token limits, and prices | `arcprize/ARC-AGI-2` changelog [P-page]; policy [S] |
+| **Humanity's Last Exam** | Public set trimmed from 3,000 to 2,500 questions during 2025 without version tags; since 2026 a dated per-question change log (2026-02-20, 2026-07-27), apparently for HLE-Rolling | Automatic grading with a pinned judge model (o3-mini-2025-01-31), temperature 0, Wald 95% intervals; tool-enabled setting pins harness versions and a logged blocklist; Scale ranks by an upper bound from intervals [S] | `centerforaisafety/hle` [P-page]; leaderboard [S] |
+| **FrontierMath** | Mostly private, a few public samples; v2 (about 2026-06-12) corrected 135 and removed 12 problems after an audit reporting errors in about 42% (other sources 33% or 53%); v1 and v2 scores not comparable | Epoch runs evaluations itself on private problems; logs shown only for public ones; the funder owns most problems, with a holdout withheld from it | [S] throughout |
+| **METR** | Task suites versioned (Time Horizon 1.1 grew from 170 to 228 tasks [S]); not strictly comparable across versions | Runs its own evaluations, partly under NDA [S]; analysis pins suite commits; 95% intervals from a hierarchical bootstrap (family, task, run); problematic tasks shown as a sensitivity analysis | METR public pipeline repository [P-page]; reports [S] |
+| **LiveBench, LiveCodeBench, SWE-bench-Live, SWE-rebench** | Dated items or monthly slices; LiveBench withholds its newest questions for a period [S] and keeps 1,000 questions by swapping; LiveCodeBench documents errata but keeps the problems; SWE-bench-Live keeps frozen leaderboard splits beside a growing pool | Scoring by date window against model cutoffs; LiveBench re-ran all models when its harness changed | Repositories [P-page]; papers [S] |
+| **Scale SEAL** | Unpublished datasets | Scale runs every evaluation once; a model is featured only the first time its organization meets the prompts | [S] |
+
+## 3. Gaps
+
+- No primary source was reachable for ARC's testing policy, Epoch's evaluation settings, Scale's leaderboards, or the reasons Terminal-Bench removed tasks for 4.0.
+- No source states how often protected sets should be refreshed to stay credible; practice ranges from monthly slices to private sets reused for four years.
