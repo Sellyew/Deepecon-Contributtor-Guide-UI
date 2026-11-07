@@ -19,13 +19,15 @@
     <li>
       <p class="paper-title">{{ paper.title }}</p>
       <p>{{ paper.authors|join:"; " }}{% if paper.journal %} · {{ paper.journal }}{% endif %}{% if paper.year %} · {{ paper.year }}{% endif %}</p>
-      {% if paper.worked_on %}<p class="note">{% translate "You have worked on this paper before; your work is kept." %}</p>{% endif %}
+      {% if paper.worked_on %}<p class="note">{% translate "You have opened this paper before; your choices on it are kept." %}</p>{% endif %}
       <p><a href="{% url 'contributors:choose' paper_id=paper.paper_id %}">{% translate "Choose this paper" %}</a></p>
     </li>
     {% endfor %}
   </ul>
-  {% else %}
+  {% elif current %}
   <p>{% translate "No other papers are open to you at the moment. The team will tell you when there are more." %}</p>
+  {% else %}
+  <p>{% translate "No papers are open to you yet. The team will tell you when there are some." %}</p>
   {% endif %}
 </section>
 {% endblock %}

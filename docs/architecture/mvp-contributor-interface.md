@@ -19,7 +19,7 @@ Invited contributors (the paper's authors, or invited domain experts) use a smal
 No step needs an AI model, and the site sends nothing to any AI provider (§7). The interface text is translated by the team, from an LLM draft reviewed by people (§6.3). Item text, papers, and code are shown in their original language and are not translated (D-030).
 
 **Out of scope for v1.**
-- Ruled out by the research lead on 2026-11-06: an AI interview; AI generation of items on the site (the team may use AI outside the site to help draft candidates, D-039); Claude Code or other client software; paper discovery; complex onboarding.
+- Ruled out by the research lead on 2026-11-06: an AI interview; AI generation of items on the site (the team may use AI outside the site to help draft candidates, D-039); Claude Code or other client software; a paper search or complex paper discovery (choosing from the papers the team offers is allowed, D-044); complex onboarding.
 - Deferred: code execution on the site; grading of agent submissions; real-time collaboration; dashboards; e-mail sent from the site.
 
 ## 2. Decisions and proposals that shape the design
@@ -258,7 +258,7 @@ Feedback buttons can send a whole conversation for training even after opting ou
 
 ### 6.2 Run the review
 - Create and revoke invitation links, one per contributor at a time; the team delivers them through e-mail or WeChat.
-- Offer papers: assign a contributor their own paper, or mark a paper as open to all contributors. Opening a scored task to all lets every invited contributor see its items (P-060).
+- Offer papers: assign a paper to a contributor (for an author, their own), or mark a paper as open to all contributors. Opening a scored task to all lets every invited contributor see its items, and closing it again does not withdraw it from those who chose it (P-060).
 - Follow progress and answer "Ask the team" questions.
 - Export each contributor's review (JSON and a readable bilingual summary) and a list of suggested rubric changes.
 - Receive submissions and verify their SHA-256.
@@ -291,7 +291,7 @@ Interface text contains no project material, so drafting it with any LLM leaks n
   - researchers-only (pilot reports; never shown to contributors);
   - contributor-submitted (packages, answers, messages).
 - **Access controls:**
-  - invitation credentials are random, time-limited (expiry stops new sign-ins), revocable (revocation also ends open sessions), stored hashed, and never logged;
+  - invitation credentials are random, time-limited (expiry stops new sign-ins), revocable (revocation also ends open sessions; otherwise a session ends after a year without use, P-060), stored hashed, and never logged;
   - every request is authorized on the server;
   - logs record actions and IDs, never text or file contents.
 

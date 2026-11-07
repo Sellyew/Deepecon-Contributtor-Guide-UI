@@ -9,7 +9,6 @@ import secrets
 from datetime import timedelta
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -46,10 +45,6 @@ class Contributor(models.Model):
 
     def __str__(self):
         return f"{self.display_name} ({self.public_id})"
-
-    def clean(self):
-        if self.current_assignment_id and self.current_assignment.contributor_id != self.pk:
-            raise ValidationError("The current paper must be one of this contributor's assignments.")
 
     def current(self):
         """The current assignment, if it is really this contributor's."""
@@ -100,7 +95,8 @@ class Invitation(models.Model):
     """A contributor's personal link. Only the token's SHA-256 is stored.
 
     The link opens the contributor's current paper. Its expiry stops new sign-ins only; a
-    session already opened with it lasts until the link is revoked (D-044).
+    session already opened with it lasts until the link is revoked, or until it has not been
+    used for SESSION_COOKIE_AGE (a year; D-044, P-060).
     """
 
     contributor = models.ForeignKey(Contributor, on_delete=models.CASCADE, related_name="invitations")
@@ -141,6 +137,23 @@ class Invitation(models.Model):
 
     def link(self, raw):
         return f"{settings.SITE_BASE_URL.rstrip('/')}/i/{raw}/"
+
+
+def set_first_paper(contributor, assignment, actor):
+    """Make `assignment` the contributor's current paper if they have none (D-044).
+
+    The link stays on a paper the contributor chose until they change it, so the team does
+    not move it. Returns a note for the team when the contributor's own choice was kept.
+    """
+    current = contributor.current()
+    if current is None:
+        contributor.current_assignment = assignment
+        contributor.save(update_fields=["current_assignment"])
+        log_event(actor, "current_paper_set", assignment, by="team")
+        return ""
+    if current.pk != assignment.pk:
+        return f"kept the contributor's current paper, {current.paper.paper_id}; they can change it themselves"
+    return ""
 
 
 @transaction.atomic

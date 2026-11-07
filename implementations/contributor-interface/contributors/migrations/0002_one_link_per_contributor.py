@@ -1,24 +1,40 @@
 """Links belong to contributors, and each contributor has a current paper (D-044).
 
-Existing links keep opening the paper they opened before: each contributor's current paper
-becomes the assignment of their most recent invitation.
+Each contributor keeps one link: their newest working one (neither revoked nor expired; if
+none works, their newest one). Its paper becomes their current paper, so that link keeps
+opening the paper it opened before. Their other working links are revoked, as P-060 (g)
+requires, and each revocation is written to the event log.
 """
 import django.db.models.deletion
 from django.db import migrations, models
+from django.utils import timezone
+
+ACTOR = "migration contributors 0002"
 
 
 def forward(apps, schema_editor):
     Invitation = apps.get_model("contributors", "Invitation")
     Contributor = apps.get_model("contributors", "Contributor")
+    EventLog = apps.get_model("papers", "EventLog")
+    now = timezone.now()
     for inv in Invitation.objects.select_related("assignment"):
         inv.contributor_id = inv.assignment.contributor_id
         inv.save(update_fields=["contributor"])
     for contributor in Contributor.objects.all():
-        latest = (Invitation.objects.filter(contributor=contributor).order_by("-created_at", "-pk")
-                  .select_related("assignment").first())
-        if latest is not None:
-            contributor.current_assignment_id = latest.assignment_id
-            contributor.save(update_fields=["current_assignment"])
+        links = Invitation.objects.filter(contributor=contributor).order_by("-created_at", "-pk")
+        working = links.filter(revoked_at__isnull=True, expires_at__gt=now)
+        kept = working.first() or links.first()
+        if kept is None:
+            continue
+        contributor.current_assignment_id = kept.assignment_id
+        contributor.save(update_fields=["current_assignment"])
+        for other in links.filter(revoked_at__isnull=True).exclude(pk=kept.pk):
+            other.revoked_at = now
+            other.save(update_fields=["revoked_at"])
+            EventLog.objects.create(actor=ACTOR, operation="invitation_revoked", object_type="Invitation",
+                                    object_id=f"invitation {other.pk}",
+                                    details={"invitation_id": other.pk, "contributor_id": contributor.public_id,
+                                             "kept_invitation_id": kept.pk})
 
 
 def backward(apps, schema_editor):

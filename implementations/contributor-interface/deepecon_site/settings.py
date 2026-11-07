@@ -128,8 +128,10 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = DATA_DIR / "static"
 
-# Sessions and cookies.
-SESSION_COOKIE_AGE = 14 * 24 * 3600
+# Sessions and cookies. A contributor's session ends when their link is revoked (D-044); the
+# browser limit is a year without use, renewed on every request (P-060).
+SESSION_COOKIE_AGE = 365 * 24 * 3600
+SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_HTTPONLY = True

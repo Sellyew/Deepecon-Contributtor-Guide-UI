@@ -53,6 +53,11 @@ class PaperAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         if "in_pool" in form.changed_data:
             log_event(request.user.get_username(), "pool_changed", obj, in_pool=obj.in_pool)
+            chosen = obj.assignments.filter(added_by="contributor").count()
+            if not obj.in_pool and chosen:
+                self.message_user(request, f"{obj.paper_id} is no longer open to all contributors, but {chosen} "
+                                  "contributor(s) who chose it keep access. To withdraw it, delete their assignments "
+                                  "(Assignments, filtered by this paper and 'Chosen by the contributor').", messages.WARNING)
 
     def get_urls(self):
         return [path("import/", self.admin_site.admin_view(self.import_view), name="papers_import")] + super().get_urls()

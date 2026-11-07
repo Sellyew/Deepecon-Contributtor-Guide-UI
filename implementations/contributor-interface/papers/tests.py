@@ -320,6 +320,21 @@ class AdminPermissionTests(PrivateStorageMixin, TestCase):
         self.paper.refresh_from_db()
         self.assertNotEqual(self.paper.title, "Overwritten")
 
+    def test_opening_a_paper_to_all_is_logged_and_closing_it_warns(self):
+        from contributors.models import Contributor
+        team = get_user_model().objects.create_superuser("team", "team@example.org", "a-long-test-password")
+        self.client.force_login(team)
+        change = reverse("admin:papers_paper_change", args=[self.paper.pk])
+        self.assertEqual(self.client.post(change, {"in_pool": "on"}).status_code, 302)
+        self.paper.refresh_from_db()
+        self.assertTrue(self.paper.in_pool)
+        self.assertEqual(EventLog.objects.filter(operation="pool_changed", details__in_pool=True).count(), 1)
+        Contributor.objects.create(display_name="Carol (fictional)").choose(self.paper)
+        response = self.client.post(change, {}, follow=True)
+        self.paper.refresh_from_db()
+        self.assertFalse(self.paper.in_pool)
+        self.assertContains(response, "who chose it keep access")
+
     def test_exposure_log_is_append_only(self):
         team = get_user_model().objects.create_superuser("team", "team@example.org", "a-long-test-password")
         self.client.force_login(team)

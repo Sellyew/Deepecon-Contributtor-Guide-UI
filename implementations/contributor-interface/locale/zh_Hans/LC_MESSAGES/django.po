@@ -52,8 +52,8 @@ msgstr "要审阅这篇论文吗？"
 msgid "From now on, your personal link will open this paper."
 msgstr "从现在起，您的个人链接将打开这篇论文。"
 
-msgid "Your work on “%(title)s” is kept. You can return to it at any time from “Choose a paper”."
-msgstr "您在《%(title)s》上的工作会被保留。您可以随时通过“选择论文”回到那篇论文。"
+msgid "Your work on “%(title)s” is kept. You can return to it at any time through “Choose another paper”."
+msgstr "您在《%(title)s》上的工作会被保留。您可以随时通过“选择其他论文”回到那篇论文。"
 
 msgid "Work on this paper"
 msgstr "审阅这篇论文"
@@ -179,11 +179,14 @@ msgstr "您可以选择的其他论文"
 msgid "Papers you can choose"
 msgstr "您可以选择的论文"
 
-msgid "You have worked on this paper before; your work is kept."
-msgstr "您之前审阅过这篇论文，您的工作已被保留。"
+msgid "You have opened this paper before; your choices on it are kept."
+msgstr "您之前打开过这篇论文，您对它所做的选择已被保留。"
 
 msgid "Choose this paper"
 msgstr "选择这篇论文"
 
 msgid "No other papers are open to you at the moment. The team will tell you when there are more."
 msgstr "目前没有其他可供您选择的论文。有新的论文时，团队会通知您。"
+
+msgid "No papers are open to you yet. The team will tell you when there are some."
+msgstr "目前还没有可供您选择的论文。有可选论文时，团队会通知您。"

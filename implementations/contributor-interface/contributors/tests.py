@@ -19,7 +19,7 @@ from contributors.access import SESSION_KEY
 from contributors.models import Assignment, Consent, Contributor, Invitation, issue_invitation
 from deepecon_site.testing import PrivateStorageMixin, example_json, import_example
 from papers.importers import package_path
-from papers.models import EventLog
+from papers.models import EventLog, Paper
 
 
 def url(name, paper):
@@ -133,13 +133,20 @@ class InvitationTests(ContributorSiteTestCase):
         self.assertEqual(self.client.cookies[settings.LANGUAGE_COOKIE_NAME].value, "en")
 
     def test_create_invitation_command_prints_the_link_once(self):
-        a_th = self.assign(self.alice, self.theory, relationship="invited_expert", current=False)
+        carol = Contributor.objects.create(display_name="Carol (fictional)")
+        a_c = self.assign(carol, self.theory, relationship="invited_expert", current=False)
         out = io.StringIO()
-        call_command("create_invitation", a_th.public_id, "--days", "3", stdout=out)
+        call_command("create_invitation", a_c.public_id, "--days", "3", stdout=out)
         token = re.search(r"/i/([^/\s]+)/", out.getvalue()).group(1)
         self.assertTrue(Invitation.objects.filter(token_hash=hashlib.sha256(token.encode()).hexdigest()).exists())
+        carol.refresh_from_db()
+        self.assertEqual(carol.current_assignment, a_c)             # with no current paper, it opens this one
+        a_th = self.assign(self.alice, self.theory, relationship="invited_expert", current=False)
+        out = io.StringIO()
+        call_command("create_invitation", a_th.public_id, stdout=out)
         self.alice.refresh_from_db()
-        self.assertEqual(self.alice.current_assignment, a_th)       # an assignment's link opens that paper
+        self.assertEqual(self.alice.current_assignment, self.a_emp)  # the paper she has stays (D-044)
+        self.assertIn("kept the contributor's current paper", out.getvalue())
         self.assertIsNone(Invitation.find_active(self.alice_token))  # and the earlier link is revoked
         out = io.StringIO()
         call_command("create_invitation", self.bo.public_id, stdout=out)
@@ -150,22 +157,29 @@ class InvitationTests(ContributorSiteTestCase):
     def test_admin_actions_show_links_without_storing_them(self):
         admin = get_user_model().objects.create_superuser("team", "team@example.org", "a-long-test-password")
         self.client.force_login(admin)
-        a_th = self.assign(self.alice, self.theory, relationship="invited_expert", current=False)
+        carol = Contributor.objects.create(display_name="Carol (fictional)")
+        a_c = self.assign(carol, self.theory, relationship="invited_expert", current=False)
         response = self.client.post(reverse("admin:contributors_assignment_changelist"),
-                                    {"action": "create_invitation", "_selected_action": [a_th.pk]})
+                                    {"action": "create_invitation", "_selected_action": [a_c.pk]})
         self.assertEqual(response.status_code, 200)
         token = re.search(r"/i/([A-Za-z0-9_-]+)/", response.content.decode()).group(1)
         self.assertTrue(Invitation.objects.filter(token_hash=hashlib.sha256(token.encode()).hexdigest()).exists())
         self.assertIn("no-store", response["Cache-Control"])
+        carol.refresh_from_db()
+        self.assertEqual(carol.current_assignment, a_c)
+        a_th = self.assign(self.alice, self.theory, relationship="invited_expert", current=False)
+        response = self.client.post(reverse("admin:contributors_assignment_changelist"),
+                                    {"action": "create_invitation", "_selected_action": [a_th.pk]})
+        self.assertContains(response, "kept the contributor&#x27;s current paper")
         self.alice.refresh_from_db()
-        self.assertEqual(self.alice.current_assignment, a_th)
+        self.assertEqual(self.alice.current_assignment, self.a_emp)  # the team does not move her link
         for session in Session.objects.all():
             self.assertNotIn(token, str(session.get_decoded()))
         response = self.client.post(reverse("admin:contributors_contributor_changelist"),
                                     {"action": "create_invitation", "_selected_action": [self.alice.pk]})
         self.assertEqual(response.status_code, 200)
         self.alice.refresh_from_db()
-        self.assertEqual(self.alice.current_assignment, a_th)       # a contributor's link keeps their paper
+        self.assertEqual(self.alice.current_assignment, self.a_emp)  # a contributor's link keeps their paper
 
     def test_one_admin_link_per_contributor(self):
         admin = get_user_model().objects.create_superuser("team", "team@example.org", "a-long-test-password")
@@ -175,6 +189,55 @@ class InvitationTests(ContributorSiteTestCase):
         self.client.post(reverse("admin:contributors_assignment_changelist"),
                          {"action": "create_invitation", "_selected_action": [self.a_emp.pk, a_th.pk]})
         self.assertEqual(Invitation.objects.count(), before)
+
+    def test_links_page_warns_when_there_is_nothing_to_choose(self):
+        admin = get_user_model().objects.create_superuser("team", "team@example.org", "a-long-test-password")
+        self.client.force_login(admin)
+        carol = Contributor.objects.create(display_name="Carol (fictional)")
+        response = self.client.post(reverse("admin:contributors_contributor_changelist"),
+                                    {"action": "create_invitation", "_selected_action": [carol.pk]})
+        self.assertContains(response, "nothing to choose yet")
+
+    def test_an_assignments_contributor_and_paper_cannot_be_changed(self):
+        # Consent (and, from M2, reviews) belong to the assignment and must not move.
+        self.signed_in_with_consent()
+        admin = get_user_model().objects.create_superuser("team", "team@example.org", "a-long-test-password")
+        self.client.force_login(admin)
+        response = self.client.post(reverse("admin:contributors_assignment_change", args=[self.a_emp.pk]), {
+            "contributor": self.bo.pk, "paper": self.theory.pk, "relationship_to_paper": "invited_expert"})
+        self.assertEqual(response.status_code, 302)
+        self.a_emp.refresh_from_db()
+        self.assertEqual((self.a_emp.contributor, self.a_emp.paper, self.a_emp.relationship_to_paper),
+                         (self.alice, self.empirical, "invited_expert"))   # authorship stays editable
+        self.assertEqual(self.a_emp.consents.count(), 1)
+
+    def test_opening_a_link_is_logged(self):
+        self.open_link(self.alice_token)
+        self.assertTrue(EventLog.objects.filter(operation="invitation_used", actor=self.alice.public_id).exists())
+
+    def test_sessions_last_while_they_are_used(self):
+        # P-060: a session ends on revocation, or after SESSION_COOKIE_AGE (a year) without use;
+        # every request renews it.
+        self.assertGreaterEqual(settings.SESSION_COOKIE_AGE, 365 * 24 * 3600)
+        self.signed_in_with_consent()
+        Invitation.objects.filter(contributor=self.alice).update(expires_at=timezone.now() - timedelta(days=60))
+        key = self.client.session.session_key
+        Session.objects.filter(session_key=key).update(expire_date=timezone.now() + timedelta(hours=1))
+        self.assertEqual(self.client.get(url("my_paper", self.empirical)).status_code, 200)
+        renewed = Session.objects.get(session_key=key).expire_date
+        self.assertGreater(renewed, timezone.now() + timedelta(days=360))
+
+    def test_demo_loader_can_run_twice(self):
+        for _ in range(2):
+            call_command("load_demo", stdout=io.StringIO())
+        demo = Contributor.objects.filter(display_name__startswith=("Demo")) | Contributor.objects.filter(display_name__startswith="示例")
+        self.assertEqual(demo.count(), 3)
+        for contributor in demo:
+            self.assertEqual(contributor.invitations.filter(revoked_at__isnull=True).count(), 1, contributor)
+        self.assertEqual(set(Paper.objects.filter(in_pool=True).values_list("paper_id", flat=True)),
+                         {self.empirical.paper_id, self.theory.paper_id})
+        expert = Contributor.objects.get(display_name__startswith="Demo invited expert")
+        self.assertIsNone(expert.current_assignment)
 
     def test_view_only_staff_can_neither_invite_nor_revoke(self):
         viewer = get_user_model().objects.create_user("viewer", "viewer@example.org", "a-long-test-password", is_staff=True)
@@ -263,7 +326,7 @@ class PaperChoiceTests(ContributorSiteTestCase):
         self.assertEqual(self.alice.current_assignment.paper, self.theory)
         self.assertRedirects(self.client.get(url("my_paper", self.empirical)), url("choose", self.empirical))
         page = self.client.get(reverse("contributors:papers"))
-        self.assertContains(page, "You have worked on this paper before")
+        self.assertContains(page, "You have opened this paper before")
         self.choose(self.empirical)                               # back to her own paper: consent is kept
         self.assertEqual(self.client.get(url("my_paper", self.empirical)).status_code, 200)
         self.assertEqual(self.a_emp.consents.count(), 1)
@@ -302,9 +365,28 @@ class PaperChoiceTests(ContributorSiteTestCase):
         response = browser.post(url("choose", self.theory), {"csrfmiddlewaretoken": token}, HTTP_ORIGIN="http://testserver")
         self.assertEqual(response.status_code, 302)
 
-    def test_my_paper_offers_another_choice(self):
+    def test_my_paper_and_the_notice_offer_another_choice(self):
+        link = f'href="{reverse("contributors:papers")}"'
+        self.open_link(self.alice_token)
+        self.assertContains(self.client.get(url("notice", self.empirical)), link)
+        self.consent(self.empirical)
+        self.assertContains(self.client.get(url("my_paper", self.empirical)), link)
+
+    def test_the_current_paper_is_listed_once(self):
+        self.open_pool(self.empirical, self.theory)
         self.signed_in_with_consent()
-        self.assertContains(self.client.get(url("my_paper", self.empirical)), reverse("contributors:papers"))
+        page = self.client.get(reverse("contributors:papers")).content.decode()
+        self.assertEqual(page.count(self.empirical.title), 1)
+        self.assertNotIn(url("choose", self.empirical), page)
+
+    def test_choosing_the_current_paper_changes_nothing(self):
+        self.signed_in_with_consent()
+        self.assertRedirects(self.choose(self.empirical), url("my_paper", self.empirical))
+        self.assertFalse(EventLog.objects.filter(operation="paper_chosen").exists())
+
+    def test_an_empty_list_says_so(self):
+        self.open_link(self.carol_token)
+        self.assertContains(self.client.get(reverse("contributors:papers")), "No papers are open to you yet")
 
     def test_a_current_paper_of_another_contributor_is_ignored(self):
         self.carol.current_assignment = self.a_emp                # inconsistent data must not grant access
@@ -456,33 +538,86 @@ class MyPaperTests(ContributorSiteTestCase):
 
 
 class LinkMigrationTests(TransactionTestCase):
-    """contributors 0002 moves links from assignments to contributors and keeps the paper they opened."""
+    """contributors 0002 moves links from assignments to contributors (one working link each)."""
 
-    def test_existing_links_keep_opening_their_paper(self):
+    OLD = [("contributors", "0001_initial"), ("papers", "0001_initial")]
+
+    def executor(self):
         from django.db import connection
         from django.db.migrations.executor import MigrationExecutor
-
         executor = MigrationExecutor(connection)
-        old = [("contributors", "0001_initial"), ("papers", "0001_initial")]
-        executor.migrate(old)
-        apps = executor.loader.project_state(old).apps
-        Paper = apps.get_model("papers", "Paper")
+        executor.loader.build_graph()
+        return executor
+
+    def latest(self, executor):
+        return executor.loader.graph.leaf_nodes()
+
+    def test_each_contributor_keeps_their_newest_working_link(self):
+        executor = self.executor()
+        executor.migrate(self.OLD)
+        apps = executor.loader.project_state(self.OLD).apps
+        Paper_ = apps.get_model("papers", "Paper")
         Contributor_ = apps.get_model("contributors", "Contributor")
         Assignment_ = apps.get_model("contributors", "Assignment")
         Invitation_ = apps.get_model("contributors", "Invitation")
-        first = Paper.objects.create(paper_id="p-one", title="One", config={}, config_sha256="0" * 64)
-        second = Paper.objects.create(paper_id="p-two", title="Two", config={}, config_sha256="1" * 64)
-        person = Contributor_.objects.create(public_id="c-test", display_name="Test (fictional)")
-        a1 = Assignment_.objects.create(public_id="a-one", contributor=person, paper=first, relationship_to_paper="author")
-        a2 = Assignment_.objects.create(public_id="a-two", contributor=person, paper=second, relationship_to_paper="author")
-        Invitation_.objects.create(assignment=a1, token_hash="a" * 64, expires_at=timezone.now())
-        Invitation_.objects.create(assignment=a2, token_hash="b" * 64, expires_at=timezone.now())
+        later, past = timezone.now() + timedelta(days=30), timezone.now() - timedelta(days=1)
+        one = Paper_.objects.create(paper_id="p-one", title="One", config={}, config_sha256="0" * 64)
+        two = Paper_.objects.create(paper_id="p-two", title="Two", config={}, config_sha256="1" * 64)
 
-        executor = MigrationExecutor(connection)
-        executor.loader.build_graph()
-        latest = executor.loader.graph.leaf_nodes()
-        executor.migrate(latest)
+        def person(pid, links):
+            contributor = Contributor_.objects.create(public_id=pid, display_name="Test (fictional)")
+            for n, (paper, expires, revoked) in enumerate(links):
+                assignment, _ = Assignment_.objects.get_or_create(
+                    contributor=contributor, paper=paper,
+                    defaults={"public_id": f"a-{pid}-{n}", "relationship_to_paper": "author"})
+                Invitation_.objects.create(assignment=assignment, token_hash=f"{pid}-{n}".ljust(64, "0"),
+                                           expires_at=expires, revoked_at=timezone.now() if revoked else None)
+            return contributor
+
+        person("c-x", [(one, later, False), (two, later, False)])     # two working links
+        person("c-y", [(one, later, False), (two, later, True)])      # the newest link is revoked
+        person("c-z", [(one, past, False)])                           # only an expired link
+        Contributor_.objects.create(public_id="c-w", display_name="No links (fictional)")
+
+        executor = self.executor()
+        executor.migrate(self.latest(executor))
+        apps = executor.loader.project_state(self.latest(executor)).apps
+        Contributor_ = apps.get_model("contributors", "Contributor")
+        Invitation_ = apps.get_model("contributors", "Invitation")
+        EventLog_ = apps.get_model("papers", "EventLog")
+        found = {}
+        for c in Contributor_.objects.all():
+            current = c.current_assignment.paper.paper_id if c.current_assignment_id else None
+            unrevoked = list(Invitation_.objects.filter(contributor=c, revoked_at__isnull=True).values_list("token_hash", flat=True))
+            found[c.public_id] = (current, [h.rstrip("0") for h in unrevoked])
+        self.assertEqual(found, {"c-x": ("p-two", ["c-x-1"]), "c-y": ("p-one", ["c-y-"]), "c-z": ("p-one", ["c-z-"]),
+                                 "c-w": (None, [])})
+        self.assertEqual(EventLog_.objects.filter(operation="invitation_revoked").count(), 1)
+
+    def test_migrating_back_points_each_link_at_a_paper(self):
+        executor = self.executor()
+        latest = self.latest(executor)
         apps = executor.loader.project_state(latest).apps
-        person = apps.get_model("contributors", "Contributor").objects.get(public_id="c-test")
-        self.assertEqual(apps.get_model("contributors", "Invitation").objects.filter(contributor=person).count(), 2)
-        self.assertEqual(person.current_assignment.public_id, "a-two")           # the most recent link's paper
+        Paper_ = apps.get_model("papers", "Paper")
+        Contributor_ = apps.get_model("contributors", "Contributor")
+        Assignment_ = apps.get_model("contributors", "Assignment")
+        Invitation_ = apps.get_model("contributors", "Invitation")
+        one = Paper_.objects.create(paper_id="p-one", title="One", config={}, config_sha256="0" * 64)
+        two = Paper_.objects.create(paper_id="p-two", title="Two", config={}, config_sha256="1" * 64)
+        chooser = Contributor_.objects.create(public_id="c-v", display_name="Chooser (fictional)")
+        Assignment_.objects.create(public_id="a-v1", contributor=chooser, paper=one, relationship_to_paper="author")
+        chosen = Assignment_.objects.create(public_id="a-v2", contributor=chooser, paper=two,
+                                            relationship_to_paper="invited_expert", added_by="contributor")
+        chooser.current_assignment = chosen
+        chooser.save()
+        Invitation_.objects.create(contributor=chooser, token_hash="v".ljust(64, "0"), expires_at=timezone.now())
+        nobody = Contributor_.objects.create(public_id="c-n", display_name="No paper (fictional)")
+        Invitation_.objects.create(contributor=nobody, token_hash="n".ljust(64, "0"), expires_at=timezone.now())
+
+        back = [("contributors", "0001_initial"), ("papers", "0002_paper_in_pool")]
+        executor.migrate(back)
+        apps = executor.loader.project_state(back).apps
+        Invitation_ = apps.get_model("contributors", "Invitation")
+        self.assertEqual(list(Invitation_.objects.values_list("assignment__public_id", flat=True)), ["a-v2"])
+        executor = self.executor()
+        executor.migrate(self.latest(executor))

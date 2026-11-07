@@ -1,12 +1,12 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
 <p><strong>Copy each link now: it is shown only on this page and is not stored anywhere.</strong> Send it to the contributor yourself, by e-mail or WeChat (the site sends no e-mail). Only a hash of the link is kept, so a lost link cannot be recovered; create a new one, which revokes the old one.</p>
-<p>Each contributor has one link at a time. It opens their current paper; a contributor with no current paper first chooses one from the papers offered to them.</p>
+<p>Each contributor has one link at a time. It opens their current paper; a contributor with no current paper first chooses one from the papers offered to them. A paper the contributor chose stays theirs until they change it.</p>
 <table>
   <thead><tr><th>Contributor</th><th>Opens</th><th>Link</th><th>Expires</th></tr></thead>
   <tbody>
   {% for row in created %}
-    <tr><td>{{ row.contributor }}</td><td>{{ row.opens|default:"(the contributor chooses a paper)" }}</td><td><code>{{ row.link }}</code></td><td>{{ row.expires_at|date:"Y-m-d" }}</td></tr>
+    <tr><td>{{ row.contributor }}</td><td>{{ row.opens }}{% if row.note %}<br><em>{{ row.note }}</em>{% endif %}</td><td><code>{{ row.link }}</code></td><td>{{ row.expires_at|date:"Y-m-d" }}</td></tr>
   {% endfor %}
   </tbody>
 </table>

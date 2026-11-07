@@ -8,7 +8,7 @@
 </section>
 <p>{% translate "From now on, your personal link will open this paper." %}</p>
 {% if current %}
-<p>{% blocktranslate with title=current.title %}Your work on “{{ title }}” is kept. You can return to it at any time from “Choose a paper”.{% endblocktranslate %}</p>
+<p>{% blocktranslate with title=current.title %}Your work on “{{ title }}” is kept. You can return to it at any time through “Choose another paper”.{% endblocktranslate %}</p>
 {% endif %}
 <form method="post" class="choose">
   {% csrf_token %}
