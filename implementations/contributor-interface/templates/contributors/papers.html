@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% translate "Choose a paper" %}</h1>
+<p>{% translate "Your personal link opens one paper at a time: the one you choose here. You can change it at any time, and your work on each paper is kept." %}</p>
+{% if current %}
+<section class="current-paper">
+  <h2>{% translate "Your current paper" %}</h2>
+  <p class="paper-title">{{ current.title }}</p>
+  <p>{{ current.authors|join:"; " }}{% if current.journal %} · {{ current.journal }}{% endif %}{% if current.year %} · {{ current.year }}{% endif %}</p>
+  <p><a href="{% url 'contributors:my_paper' paper_id=current.paper_id %}">{% translate "Continue with this paper" %}</a></p>
+</section>
+{% endif %}
+<section class="paper-pool">
+  <h2>{% if current %}{% translate "Other papers you can choose" %}{% else %}{% translate "Papers you can choose" %}{% endif %}</h2>
+  {% if others %}
+  <ul class="papers">
+    {% for paper in others %}
+    <li>
+      <p class="paper-title">{{ paper.title }}</p>
+      <p>{{ paper.authors|join:"; " }}{% if paper.journal %} · {{ paper.journal }}{% endif %}{% if paper.year %} · {{ paper.year }}{% endif %}</p>
+      {% if paper.worked_on %}<p class="note">{% translate "You have worked on this paper before; your work is kept." %}</p>{% endif %}
+      <p><a href="{% url 'contributors:choose' paper_id=paper.paper_id %}">{% translate "Choose this paper" %}</a></p>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>{% translate "No other papers are open to you at the moment. The team will tell you when there are more." %}</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% translate "Work on this paper?" %}</h1>
+<section class="citation">
+  <p class="paper-title">{{ paper.title }}</p>
+  <p>{{ paper.authors|join:"; " }}{% if paper.journal %} · {{ paper.journal }}{% endif %}{% if paper.year %} · {{ paper.year }}{% endif %}</p>
+</section>
+<p>{% translate "From now on, your personal link will open this paper." %}</p>
+{% if current %}
+<p>{% blocktranslate with title=current.title %}Your work on “{{ title }}” is kept. You can return to it at any time from “Choose a paper”.{% endblocktranslate %}</p>
+{% endif %}
+<form method="post" class="choose">
+  {% csrf_token %}
+  <button type="submit">{% translate "Work on this paper" %}</button>
+</form>
+<p><a href="{% url 'contributors:papers' %}">{% translate "Back to the list of papers" %}</a></p>
+{% endblock %}

@@ -38,12 +38,21 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
 @admin.register(Paper)
 class PaperAdmin(admin.ModelAdmin):
-    list_display = ("paper_id", "title", "field", "publication_status", "designated_on", "imported_at")
+    list_display = ("paper_id", "title", "field", "publication_status", "designated_on", "in_pool", "imported_at")
+    list_filter = ("in_pool", "publication_status")
+    # Everything comes from the imported configuration except whether the paper is open to all
+    # contributors (D-044), which the team switches here.
+    fields = ("paper_id", "title", "field", "publication_status", "designated_on", "in_pool", "config", "config_sha256", "imported_at")
     readonly_fields = ("paper_id", "field", "title", "config", "config_sha256", "publication_status", "designated_on", "imported_at")
     change_list_template = "admin/papers/paper_change_list.html"
 
     def has_add_permission(self, request):
         return False        # papers are created by importing their configuration
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if "in_pool" in form.changed_data:
+            log_event(request.user.get_username(), "pool_changed", obj, in_pool=obj.in_pool)
 
     def get_urls(self):
         return [path("import/", self.admin_site.admin_view(self.import_view), name="papers_import")] + super().get_urls()

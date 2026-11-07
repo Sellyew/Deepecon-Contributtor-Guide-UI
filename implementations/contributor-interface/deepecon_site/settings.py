@@ -155,8 +155,9 @@ if STAGE == "1":
 INVITATION_DAYS = int(os.environ.get("DEEPECON_INVITATION_DAYS", "30"))
 SITE_BASE_URL = os.environ.get("DEEPECON_SITE_BASE_URL", "http://127.0.0.1:8000")
 
-# Version of the notice text that contributors acknowledge (MVP §3 step 1; D-042).
-NOTICE_VERSION = "2026-11-07"
+# Version of the notice text that contributors acknowledge (MVP §3 step 1; D-042). Consent
+# records add the wording shown: "/author" or "/expert" (D-044). ".2" adds the expert wording.
+NOTICE_VERSION = "2026-11-07.2"
 
 # Logs record paths with invitation tokens removed (plan §3). The filter sits on the handler, so
 # it covers every logger that writes to it, including django.security.csrf; the logger-level

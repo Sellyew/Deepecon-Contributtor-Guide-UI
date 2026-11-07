@@ -12,12 +12,13 @@ One Django application (Django 5.2, a long-term-support release) for the [MVP co
 | Security headers (`default-src 'self'`, no referrer, no caching), log redaction of invitation tokens, and the model gateway that refuses every call | `deepecon_site/middleware.py`, `logging_filters.py`, `gateway.py` |
 | Models: papers, rubric versions, items, item maps, candidate packages, the exposure log (Rule 10), and the event log | `papers/models.py` |
 | Importers for the paper configuration, rubric, item map, and candidate package, each checked against the [schemas](../../schemas/contributor-interface/README.md) and [`validation/rubric_checks.py`](../../validation/rubric_checks.py) and refused if any check fails. A rubric version, once imported, is never overwritten; a changed configuration is checked again against the stored rubric and item map; a package is accepted only against the SHA-256 in the configuration. After an evaluation run, a task's publication status and designation date cannot change (Rule 8). Available as commands and as an administration page, which needs the permission to change papers | `papers/importers.py`, `papers/management/commands/`, `papers/admin.py` |
-| Invitations: random tokens stored only as SHA-256 hashes, with expiry and revocation. A link is shown once, never stored or logged. The session remembers the invitation and checks it on every request, so revoking a link, or its expiry, ends sessions already opened with it. Creating and revoking links need their own admin permissions | `contributors/models.py`, `contributors/access.py`, `contributors/admin.py`, `create_invitation` |
-| Contributor pages: invitation landing, notice and consent (dated and changeable), "My paper", and the package download. A link reaches only its own assignment, and every page checks it on the server | `contributors/views.py`, `templates/contributors/` |
+| Personal links: one per contributor at a time (a new link revokes the earlier ones), random tokens stored only as SHA-256 hashes. A link is shown once, never stored or logged. The session remembers the link and checks it on every request: revoking the link ends sessions opened with it, while its expiry only stops new sign-ins (D-044). Creating and revoking links need their own admin permissions | `contributors/models.py`, `contributors/access.py`, `contributors/admin.py`, `create_invitation` |
+| Choosing a paper (D-044, P-060): the link opens one paper at a time, the contributor's current paper. Contributors choose it from the papers offered to them (their assignments, and papers the team marks "open to all contributors" on the paper's admin page), seeing citations only until they choose; they can change it after a confirmation, and earlier work is kept. Every choice is in the event log | `contributors/views.py`, `templates/contributors/papers.html`, `choose.html` |
+| Contributor pages: invitation landing, the list of papers and the confirmation for changing paper, notice and consent (dated and changeable; worded for authors or for invited experts), "My paper", and the package download. Every page checks the requested paper against the current paper on the server | `contributors/views.py`, `templates/contributors/` |
 | Interface languages: English and Simplified Chinese. The Chinese catalogue is **machine-drafted by Claude and awaits the team's review** (M4) | `locale/zh_Hans/LC_MESSAGES/django.po` |
-| Demo loader: the fictional empirical and theory examples, synthetic packages, and three demo contributors | `contributors/management/commands/load_demo.py` |
+| Demo loader: the fictional empirical and theory examples (both open to all), synthetic packages, and three demo contributors: two authors whose link opens their paper, and an invited expert who chooses one | `contributors/management/commands/load_demo.py` |
 | Exposure log (Rule 10): entries are added and viewed, never edited or deleted; the recorder's name comes from the account, and an evaluation run needs the pinned model version and its release date | `papers/models.py`, `papers/admin.py` |
-| Tests (68): importers, invitations and revocation, consent, access to other papers, admin permissions, language switching, security headers, external assets, private storage, the gateway, network imports, and log redaction | `*/tests.py` |
+| Tests (81): importers, links and revocation, choosing and changing paper, consent, access to other papers, admin permissions, language switching, the link migration, security headers, external assets, private storage, the gateway, network imports, and log redaction | `*/tests.py` |
 
 ## Run the demo (Stage 0)
 
@@ -47,7 +48,7 @@ python3 -m venv .venv
 .venv/bin/python manage.py createsuperuser
 ```
 
-At Stage 0 the server refuses to listen on any address other than the loopback address. The data folder is `data/` unless `DEEPECON_DATA_DIR` says otherwise. Keep it on an encrypted disk. A contributor with two assignments gets one link for each.
+At Stage 0 the server refuses to listen on any address other than the loopback address. The data folder is `data/` unless `DEEPECON_DATA_DIR` says otherwise. Keep it on an encrypted disk.
 
 ## Import a paper
 
@@ -67,11 +68,15 @@ At Stage 0 the server refuses to listen on any address other than the loopback a
 .venv/bin/python manage.py import_candidate_package PAPER_ID path/to/candidate.zip
 ```
 
-The same imports are available on the team administration page (Papers, then "Import the team's files"). To invite someone, go to Assignments and use the action "Create an invitation link", or run:
+The same imports are available on the team administration page (Papers, then "Import the team's files"). To offer a paper to every invited contributor, open the paper and tick "open to all contributors"; for a scored task, do this only if any invited contributor may see its items, and otherwise create assignments for individual contributors.
+
+To invite someone, create the link from an assignment (Assignments, action "Create a personal link that opens this paper"), so the link opens that paper, or from a contributor (Contributors, action "Create the personal link"), so they choose from the papers offered to them. Or run, with an assignment ID (`a-…`) or a contributor ID (`c-…`):
 
 ```bash
-.venv/bin/python manage.py create_invitation ASSIGNMENT_ID
+.venv/bin/python manage.py create_invitation PUBLIC_ID
 ```
+
+Each contributor has one link at a time: a new link revokes the earlier ones.
 
 ## Tests and translations
 
@@ -95,7 +100,7 @@ Stage 1 is set by environment variables: `DEEPECON_STAGE=1`, `DEEPECON_SECRET_KE
 
 ## Not yet built
 
-- **M2:** the overview, the review screen, answers with the per-item AI disclosure, proposals, "Ask the team", autosave, confirmation, and export.
+- **M2:** the overview, the review screen, answers with the per-item AI disclosure, proposals, "Ask the team", autosave, confirmation, and export; each task's build date for the exposure log (Rule 10, D-044).
 - **M3:** guidance, uploads, and the submission manifest.
 - **M4:** the reviewed Chinese catalogue, the data quarantine, and the remaining §3 controls.
 - **M5:** the demo paper.

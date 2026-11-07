@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft v0.7 (2026-11-07). v0.7 applies the research lead's framework reset of 2026-11-07: AI use by the team and by contributors follows the [AI use and integrity rules](llm-use-policy.md) (D-038 to D-042), which replace the earlier tiers and exceptions. It also records the earlier decisions D-025 to D-030 and the demo paper (D-024). Earlier version notes are in git history. |
+| **Status** | **Proposed** draft v0.8 (2026-11-07). v0.8 applies the research lead's decision that contributors choose one paper at a time from the papers the team offers, with one personal link that stays on the chosen paper (D-044, P-060). v0.7 applies the research lead's framework reset of 2026-11-07: AI use by the team and by contributors follows the [AI use and integrity rules](llm-use-policy.md) (D-038 to D-042), which replace the earlier tiers and exceptions. It also records the earlier decisions D-025 to D-030 and the demo paper (D-024). Earlier version notes are in git history. |
 | **Requirements** | [Research lead's revision, 2026-11-06](../requirements/2026-11-06-research-lead-revision.md) (background; the [decision log](../decisions/decision-log.md) governs) · [team handover plan](../requirements/2026-11-05-team-handover-plan.md) · [example package V5 review](../requirements/2026-11-06-example-package-v5-review.md) |
 | **Companion documents** | [Implementation plan](mvp-implementation-plan.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) · [AI use and integrity rules](llm-use-policy.md) |
 | **Supersedes** | The decision brief, Options A and B, the interview protocol, the pilot plan, and the cost model (kept as records) |
@@ -13,7 +13,7 @@
 
 Invited contributors (the paper's authors, or invited domain experts) use a small website whose interface is in English and Simplified Chinese, with more languages possible later. It has two functions.
 
-1. **Selection.** The contributor opens their own paper and reviews the items the team prepared: the deliberate errors and removed steps that will become a benchmark task. For each item they keep it, keep it with changes, reject it, or mark it as unsure. They can comment and propose additional items.
+1. **Selection.** The contributor opens their paper (their own, or one they chose from the papers the team offers them, D-044) and reviews the items the team prepared: the deliberate errors and removed steps that will become a benchmark task. For each item they keep it, keep it with changes, reject it, or mark it as unsure. They can comment and propose additional items.
 2. **Guidance.** The contributor learns what to provide (a full runnable replication package and their original file names), how to prepare it, and how to submit it.
 
 No step needs an AI model, and the site sends nothing to any AI provider (§7). The interface text is translated by the team, from an LLM draft reviewed by people (§6.3). Item text, papers, and code are shown in their original language and are not translated (D-030).
@@ -42,7 +42,7 @@ No step needs an AI model, and the site sends nothing to any AI provider (§7). 
 
 | Step | Screen | Content |
 |---|---|---|
-| 1 | **Invitation and notice** | A personal link from the team, a choice of language, and a short notice: what is stored, who can see it, that the site sends nothing to any AI service; that the finished task, built from their package, will be sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it (D-038), and may later be published (D-040), while their reviews, comments, and messages are not published; a yes/no choice, recorded with its date and changeable later, on whether the team may use AI services with their unpublished materials and responses (D-042); how to withdraw; and a request to keep the items confidential (they are answer-key material), with the rules for using AI tools (§5.6). |
+| 1 | **Invitation, paper, and notice** | A personal link from the team and a choice of language. The link opens one paper at a time: the one the team set, or one the contributor chooses from the papers offered to them (citations only until chosen); they can change it later and keep their work (D-044, P-060). Then a short notice: what is stored, who can see it, that the site sends nothing to any AI service; that the finished task, built from their package (for an invited expert, from the paper's package and the reviews), will be sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it (D-038), and may later be published (D-040), while their reviews, comments, and messages are not published; a yes/no choice, recorded with its date and changeable later, on whether the team may use AI services with their unpublished materials and responses (D-042); how to withdraw; and a request to keep the items confidential (they are answer-key material), with the rules for using AI tools (§5.6). |
 | 2 | **My paper** | The citation, the task version, and a download of the agent-facing package (D-028). |
 | 3 | **Overview** | The purpose in one paragraph, and the statement that **the items are deliberate modifications made to build a benchmark task, not claims about the published paper**. One line per category, for example *conceptual error*, *missing analysis*, *technical error*, or *derivation error* for a theory paper. Planning targets, not quotas. An estimate of the time needed (about 2–3 minutes per item [U: to be measured]). |
 | 4 | **Review** | The map and the item panel side by side (§4). |
@@ -257,7 +257,8 @@ Feedback buttons can send a whole conversation for training even after opting ou
 - **Set the materials checklist** and the submission settings.
 
 ### 6.2 Run the review
-- Create and revoke invitation links; the team delivers them through e-mail or WeChat.
+- Create and revoke invitation links, one per contributor at a time; the team delivers them through e-mail or WeChat.
+- Offer papers: assign a contributor their own paper, or mark a paper as open to all contributors. Opening a scored task to all lets every invited contributor see its items (P-060).
 - Follow progress and answer "Ask the team" questions.
 - Export each contributor's review (JSON and a readable bilingual summary) and a list of suggested rubric changes.
 - Receive submissions and verify their SHA-256.
@@ -290,7 +291,7 @@ Interface text contains no project material, so drafting it with any LLM leaks n
   - researchers-only (pilot reports; never shown to contributors);
   - contributor-submitted (packages, answers, messages).
 - **Access controls:**
-  - invitation credentials are random, time-limited, revocable, stored hashed, and never logged;
+  - invitation credentials are random, time-limited (expiry stops new sign-ins), revocable (revocation also ends open sessions), stored hashed, and never logged;
   - every request is authorized on the server;
   - logs record actions and IDs, never text or file contents.
 
@@ -308,7 +309,7 @@ Five JSON Schemas in [`schemas/contributor-interface/`](../../schemas/contributo
 
 ## 9. Implementation
 
-See the [implementation plan](mvp-implementation-plan.md) v0.3:
+See the [implementation plan](mvp-implementation-plan.md) v0.4:
 - one Django application, server-rendered, with SQLite and encrypted storage;
 - the map and item panel rendered on the server with plain HTML and CSS;
 - resumable uploads for multi-gigabyte packages;

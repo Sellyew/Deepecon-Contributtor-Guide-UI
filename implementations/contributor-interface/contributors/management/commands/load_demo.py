@@ -8,7 +8,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from contributors.models import Assignment, Contributor, Invitation
+from contributors.models import Assignment, Contributor, issue_invitation
 from papers import importers
 
 ACTOR = "load_demo"
@@ -45,7 +45,8 @@ def load_examples():
 
 
 class Command(BaseCommand):
-    help = "Import the fictional empirical and theory examples, create three demo contributors, and print their invitation links. Stage 0 only."
+    help = ("Import the fictional empirical and theory examples, open both to all contributors, create three demo "
+            "contributors (two authors with their paper set, one invited expert who chooses), and print their links. Stage 0 only.")
 
     def add_arguments(self, parser):
         parser.add_argument("--no-invitations", action="store_true")
@@ -59,18 +60,25 @@ class Command(BaseCommand):
             for problem in refused.problems:
                 self.stderr.write(f"  - {problem}")
             raise CommandError("The examples could not be imported.")
+        for paper in papers.values():               # fictional examples: open to every demo contributor
+            paper.in_pool = True
+            paper.save(update_fields=["in_pool"])
         people = [
-            ("Demo author (empirical example)", "en", papers["empirical"], "author"),
-            ("示例作者（理论示例）", "zh-hans", papers["theory"], "author"),
-            ("Demo invited expert (empirical example)", "en", papers["empirical"], "invited_expert"),
+            ("Demo author (empirical example)", "en", papers["empirical"]),
+            ("示例作者（理论示例）", "zh-hans", papers["theory"]),
+            ("Demo invited expert (chooses a paper)", "en", None),
         ]
-        for name, lang, paper, relationship in people:
+        for name, lang, paper in people:
             contributor, _ = Contributor.objects.get_or_create(display_name=name, defaults={"preferred_language": lang})
-            assignment, _ = Assignment.objects.get_or_create(contributor=contributor, paper=paper,
-                                                             defaults={"relationship_to_paper": relationship})
+            if paper is not None:
+                assignment, _ = Assignment.objects.get_or_create(contributor=contributor, paper=paper,
+                                                                 defaults={"relationship_to_paper": "author"})
+                contributor.current_assignment = assignment
+                contributor.save(update_fields=["current_assignment"])
             if no_invitations:
-                self.stdout.write(f"{assignment}")
+                self.stdout.write(f"{contributor}")
                 continue
-            invitation, raw = Invitation.issue(assignment)
-            self.stdout.write(f"{name} -> {paper.paper_id}: {invitation.link(raw)}")
+            invitation, raw = issue_invitation(contributor, ACTOR)
+            opens = paper.paper_id if paper is not None else "(chooses a paper)"
+            self.stdout.write(f"{name} -> {opens}: {invitation.link(raw)}")
         self.stdout.write(self.style.SUCCESS("Demo loaded: fictional examples only. Links are shown only now."))

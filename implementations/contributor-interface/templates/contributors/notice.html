@@ -5,7 +5,11 @@
 <p class="paper-title">{{ paper.title }}</p>
 <section class="notice">
   <h2>{% translate "What this is" %}</h2>
+  {% if author %}
   <p>{% translate "The team has prepared items for a benchmark task built from your paper. The items are deliberate modifications made to build the task, not claims about your published paper. You review them: keep, change, reject, or mark as unsure, and you may propose others." %}</p>
+  {% else %}
+  <p>{% translate "The team has prepared items for a benchmark task built from this paper. The items are deliberate modifications made to build the task, not claims about the published paper. You review them: keep, change, reject, or mark as unsure, and you may propose others." %}</p>
+  {% endif %}
   <h2>{% translate "What is stored, and who sees it" %}</h2>
   <ul>
     <li>{% translate "Your decisions, comments, proposals, and uploaded files, with their dates." %}</li>
@@ -14,7 +18,11 @@
   </ul>
   <h2>{% translate "What happens to the finished task" %}</h2>
   <ul>
+    {% if author %}
     <li>{% translate "The finished task, built from your package, is used to evaluate AI models. It is sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it." %}</li>
+    {% else %}
+    <li>{% translate "The finished task, built from this paper's package and the reviews, is used to evaluate AI models. It is sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it." %}</li>
+    {% endif %}
     <li>{% translate "The task may later be published. Your reviews, comments, and messages are not published." %}</li>
   </ul>
   <h2>{% translate "What we ask of you" %}</h2>

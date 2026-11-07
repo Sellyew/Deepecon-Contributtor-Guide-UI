@@ -22,6 +22,11 @@ class Paper(models.Model):
     config_sha256 = models.CharField(max_length=64)
     publication_status = models.CharField(max_length=32, choices=PUBLICATION_CHOICES, default=SCORED)
     designated_on = models.DateField(null=True, blank=True, help_text="Date of the demo or development designation (Rule 8).")
+    in_pool = models.BooleanField(
+        default=False, verbose_name="open to all contributors",
+        help_text="Every invited contributor may choose this paper and then sees its items (D-044). "
+                  "Leave it off for a scored task unless any invited contributor may see its items; "
+                  "offer it to individual contributors through assignments instead.")
     imported_at = models.DateTimeField(auto_now=True)
 
     class Meta:

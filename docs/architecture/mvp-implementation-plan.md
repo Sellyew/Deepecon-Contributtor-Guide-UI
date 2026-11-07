@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | **Decided** v0.3 (approved by the research lead on 2026-11-07, D-043); milestone M1 started the same day ([implementation](../../implementations/contributor-interface/README.md)). v0.2 added configurable categories per field (D-025), the map-and-panel review screen, and runnable packages with data routes (D-027); interface languages are catalogues reviewed by the team, and item text is not translated (D-030). v0.3 stages the hosting (P-053): everything up to the demo runs on a team member's computer, and deployment to a server moves to its own milestone (M6), done only before the first outside contributor. On 2026-11-07 it was updated for the framework reset (D-038 to D-042): the gateway row, the record of whether a task is published, the per-item AI disclosure, and the exposure log. |
-| **Implements** | [MVP proposal v0.7](mvp-contributor-interface.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) |
+| **Status** | **Decided** v0.4 (2026-11-07). v0.3 was approved by the research lead on 2026-11-07 (D-043), and milestone M1 started the same day ([implementation](../../implementations/contributor-interface/README.md)). v0.4 applies the lead's decision of the same day (D-044): contributors choose one paper at a time from the papers the team offers, one personal link opens the chosen paper, only revocation ends a session, and the task build date is added in M2; the design details are Proposed (P-060). v0.2 added configurable categories per field (D-025), the map-and-panel review screen, and runnable packages with data routes (D-027); interface languages are catalogues reviewed by the team, and item text is not translated (D-030). v0.3 stages the hosting (P-053): everything up to the demo runs on a team member's computer, and deployment to a server moves to its own milestone (M6), done only before the first outside contributor. On 2026-11-07 it was updated for the framework reset (D-038 to D-042): the gateway row, the record of whether a task is published, the per-item AI disclosure, and the exposure log. |
+| **Implements** | [MVP proposal v0.8](mvp-contributor-interface.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) |
 | **Principles** | Lightweight; self-hosted; no model and no third-party service in the site (D-042); the team's existing formats are imported as they are. |
 
 ---
@@ -29,12 +29,15 @@
    - `import_rubric`: stores the team's rubric file as it is, keyed by version, and normalizes it through the configured categories (`validation/rubric_checks.py`). It refuses the import if any check fails.
    - `import_item_map`: validates the item map (nodes, edges, anchors, excerpts) against the rubric.
    - `import_candidate_package`: stores the agent-facing ZIP that contributors may download, and checks its SHA-256.
-2. **Invitations.**
+2. **Invitations and the paper choice** (D-044, P-060).
    - Tokens are generated with `secrets.token_urlsafe(32)` and stored as SHA-256 hashes, with an expiry and a revocation flag.
-   - The first visit sets a session.
+   - Each contributor has one personal link at a time; issuing a new one revokes the earlier ones.
+   - The first visit sets a session, which records the link used. Revoking the link ends the session; its expiry only stops new sign-ins.
+   - The link opens one paper, the contributor's current paper. The contributor chooses it from the papers the team offers them: their assignments (for an author, their own paper) and the papers the team marks as open to all contributors. A link created from an assignment opens that paper; otherwise the contributor first sees the list of papers, with citations only. They can change paper at any time, after a confirmation; the work on the earlier paper is kept. Every choice is recorded in the event log.
    - An optional passcode can be sent through a second channel (O-022).
    - Tokens never appear in logs: request logging records the path with the token removed.
 3. **Contributor views:**
+   - choosing a paper (the list and a confirmation);
    - notice and consent;
    - my paper;
    - overview;
@@ -45,7 +48,7 @@
    - guidance;
    - submission.
 
-   Every view checks the session's assignment against the requested paper and item, on the server.
+   Every view checks the requested paper and item against the contributor's current paper, on the server. Another paper offered to the contributor leads to the confirmation for switching to it; any other paper is refused.
 4. **Autosave API.** A JSON endpoint that writes one item review at a time. It uses an optimistic version number, so a concurrent edit returns a visible conflict rather than being silently overwritten. The page shows "saved" or "not saved" only after the server answers.
 5. **Uploads.**
    - Chunked uploads with resumption for packages of several gigabytes; the server computes SHA-256 and shows it to the contributor.
@@ -82,7 +85,7 @@ Controls marked *(Stage 1)* apply once the site runs on a server (M6). On the de
 | # | Milestone | Done when | Estimate [U] |
 |---|---|---|---|
 | M1 | Skeleton | Django project, models, importers for configuration, rubric, and item map (both example fields), administration pages, invitation tokens, and both languages; schemas 0.3.0 with the fields the AI use and integrity rules need (see the [schema README](../../schemas/contributor-interface/README.md)); runs with **synthetic** examples only | 1.5–2 engineer-weeks |
-| M2 | Selection | Overview; the map and item panel with the matrix toggle; layered cards; the four answers, reasons, and ticks; the per-item AI disclosure (D-039); proposals; "Ask the team"; autosave with conflicts; confirmation with versions; review export | 2–3 |
+| M2 | Selection | Overview; the map and item panel with the matrix toggle; layered cards; the four answers, reasons, and ticks; the per-item AI disclosure (D-039); proposals; "Ask the team"; autosave with conflicts; confirmation with versions; review export; each task's build date for the exposure log (Rule 10, D-044) | 2–3 |
 | M3 | Guidance and submission | Configurable checklist; guidance page; resumable upload with SHA-256 receipt; dataset declarations and routes; public-reference option; manifest export | 1–1.5 |
 | M4 | Languages and privacy pass | Reviewed Chinese catalogue; data quarantine and steward check; every control in §3 not marked Stage 1 tested on the demo computer | 0.75–1 |
 | M5 | Demo configuration | The demo paper (D-024) configured from the team's files, with categories and item map; a dry run by a team member as a contributor; fixes | 0.5–1.5 |
@@ -93,7 +96,7 @@ The estimate assumes a developer familiar with Django; it excludes the team's wo
 
 ## 5. Acceptance tests (from the team's plan, adapted)
 
-- A contributor's invitation opens their paper directly; there is no paper search and no questionnaire.
+- A contributor's link opens their current paper directly, or the list of the papers offered to them if they have none; changing paper keeps earlier work; there is no paper search and no questionnaire.
 - Items appear in the paper's configured categories: the V5 profile and the theory example both work. Fewer or more items work, and proposals never overwrite prepared items.
 - Selecting a marker on the map opens its item; moving to the next item moves the ring on the map; selecting a result highlights the items that affect it.
 - Locations and excerpts show the author's original file names; switching the interface language changes every interface string but no item text.

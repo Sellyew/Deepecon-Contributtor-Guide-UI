@@ -29,4 +29,5 @@
 </section>
 {% endif %}
 <p><a href="{% url 'contributors:notice' paper_id=paper.paper_id %}">{% translate "Review or change your choices on the notice" %}</a></p>
+<p><a href="{% url 'contributors:papers' %}">{% translate "Choose another paper" %}</a></p>
 {% endblock %}

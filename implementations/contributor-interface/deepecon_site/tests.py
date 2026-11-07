@@ -47,13 +47,19 @@ class HeaderAndAssetTests(PrivateStorageMixin, TestCase):
     def setUp(self):
         super().setUp()
         paper = import_example("empirical")
+        other = import_example("theory")
+        other.in_pool = True
+        other.save()
         contributor = Contributor.objects.create(display_name="Test (fictional)")
         self.assignment = Assignment.objects.create(contributor=contributor, paper=paper, relationship_to_paper="author")
-        _, token = Invitation.issue(self.assignment)
+        contributor.current_assignment = self.assignment
+        contributor.save()
+        _, token = Invitation.issue(contributor)
         self.client.get(f"/i/{token}/")
         self.client.post(reverse("contributors:notice", args=[paper.paper_id]), {"acknowledge_evaluation": "on", "team_ai_use": "no"})
         self.pages = ["/", reverse("contributors:notice", args=[paper.paper_id]),
-                      reverse("contributors:my_paper", args=[paper.paper_id]), "/i/not-a-valid-token-000000/"]
+                      reverse("contributors:my_paper", args=[paper.paper_id]), reverse("contributors:papers"),
+                      reverse("contributors:choose", args=[other.paper_id]), "/i/not-a-valid-token-000000/"]
 
     def test_security_headers(self):
         for url in self.pages:
