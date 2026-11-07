@@ -1,6 +1,6 @@
 # Evidence notes (Phase 1 discovery)
 
-Working research notes produced on 2026-11-05 by research agents under the lead collaborator's direction. Each note is **dated**, **labels every factual claim** with an evidence level, and separates what sources say from our assessment. They are working material, not polished deliverables: the synthesis lives in [Deliverable 1](../research-and-methodology-review.md) and the design documents.
+Working research notes produced by AI research agents (Claude subagents) under the direction of the lead collaborator, itself a Claude session; no human researcher took part unless a note says so. R1–R9 date from 2026-11-05; R10 (written by the lead collaborator directly) and R11 (by subagents) from 2026-11-06. Each note is **dated**, **labels every factual claim** with an evidence level, and separates what sources say from our assessment. They are working material, not polished deliverables: the synthesis lives in [Deliverable 1](../research-and-methodology-review.md) and the design documents.
 
 | Evidence level | Meaning |
 |---|---|

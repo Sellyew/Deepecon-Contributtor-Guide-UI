@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft v0.5 (2026-11-06). v0.3 recorded the research lead's answers (D-025 to D-028) and proposed the layered item card (§4.2) and the map-and-panel review screen (§4.1). v0.4 corrects the translation scope: the **interface** is bilingual and extensible, and item text, papers, and code are not translated (D-030). It adds the rule that answer-key material never goes to any API provider (D-031), and makes proposals for the pilot's restricted data (O-034, §5.4) and the data-sharing check (O-035, §5.5). **v0.5** records the task tiers (D-032), which narrow D-031 to held-out tasks while D-018 stays unchanged; records that the pilot paper is a demo with no contact with its authors (D-024, clarified), so §5.4 becomes the general route for contributors' restricted data; and proposes staged hosting: the demo on a team member's computer, then one small server before the first outside contributor (§9, P-053). |
+| **Status** | **Proposed** draft v0.6 (2026-11-07). v0.3 recorded the research lead's answers (D-025 to D-028) and proposed the layered item card (§4.2) and the map-and-panel review screen (§4.1). v0.4 corrects the translation scope: the **interface** is bilingual and extensible, and item text, papers, and code are not translated (D-030). It adds the rule that answer-key material never goes to any API provider (D-031), and makes proposals for the pilot's restricted data (O-034, §5.4) and the data-sharing check (O-035, §5.5). **v0.5** records the task tiers (D-032), which narrow D-031 to held-out tasks while D-018 stays unchanged; records that the pilot paper is a demo with no contact with its authors (D-024, clarified), so §5.4 becomes the general route for contributors' restricted data; and proposes staged hosting: the demo on a team member's computer, then one small server before the first outside contributor (§9, P-053). **v0.6** (2026-11-07) records that no local model will be deployed (D-033); proposes that contributors may use AI tools if what they submit is their own judgment in their own words (§5.6, P-055); and defers the D-032 clarification until the construction process is revised (O-037). |
 | **Requirements** | [Research lead's revision, 2026-11-06](../requirements/2026-11-06-research-lead-revision.md) (governs) · [team handover plan](../requirements/2026-11-05-team-handover-plan.md) · [example package V5 review](../requirements/2026-11-06-example-package-v5-review.md) |
 | **Companion documents** | [Implementation plan](mvp-implementation-plan.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) · [LLM use policy](llm-use-policy.md) |
 | **Supersedes** | The decision brief, Options A and B, the interview protocol, the pilot plan, and the cost model (kept as records) |
@@ -31,15 +31,16 @@ No step needs an AI model, and the site sends nothing to any AI provider (§7). 
 | D-027 | The team needs a **full runnable package**. | The guidance asks for a package a journal data editor would accept, with data or a route to run with data (§5). |
 | D-028 | Contributors may download the **agent-facing package**. | It is a download on the paper page. |
 | D-030 | The **interface** is bilingual (Chinese and English), with more languages possible later; interface text is translated with an LLM and reviewed by the team. (Clarifies an earlier misreading, D-029, that item text would be translated.) | Interface strings live in translation catalogues, and a language is added with a reviewed catalogue. Item text, papers, and code stay in their original language. |
-| D-031 | **Answer-key material is never sent to any API provider**; any LLM processing of it happens only on a locally deployed model. Narrowed by D-032 to held-out tasks. | Held-out material goes only to a local model; other answer-key material follows D-018 (no external AI unless the lead configures it). See the [LLM use policy](llm-use-policy.md). |
-| D-032 | **Task tiers:** development tasks (V5 is one) may be published with a canary; evaluation tasks keep answer keys unpublished; a few held-out tasks keep their answer keys and graders on project hardware, and closed models see only their agent-facing package, under a no-retention agreement (clarification pending). Each task records when its material first reached a provider or the public. D-018 is unchanged. | The site records each paper's tier, visible to administrators only. Every contributor is asked to keep the items confidential (§3 step 1, O-026); this is essential for evaluation and held-out tasks. |
+| D-031 | **Answer-key material is never sent to any API provider**; any LLM processing of it happens only on a locally deployed model. Narrowed by D-032 to held-out tasks. | Held-out material goes to no model (since D-033, no local model exists); other answer-key material follows D-018 (no external AI unless the lead configures it). See the [LLM use policy](llm-use-policy.md). |
+| D-032 | **Task tiers:** development tasks (V5 is one) may be published with a canary; evaluation tasks keep answer keys unpublished; a few held-out tasks keep their answer keys and graders on project hardware, and closed models see only their agent-facing package, under a no-retention agreement (clarification deferred, O-037). Each task records when its material first reached a provider or the public. D-018 is unchanged. | The site records each paper's tier, visible to administrators only. Every contributor is asked to keep the items confidential (§3 step 1, O-026); this is essential for evaluation and held-out tasks. |
 | D-024 (clarified) | The pilot paper is a **demo** for building and testing the interface; the team has no contact with its authors. | The demo paper is configured for dry runs by team members. It needs no data, because the site runs no code (§5.4). |
+| D-033 | **No locally deployed model** (2026-11-07). | Gateway Mode 1 is not planned; held-out material is processed by no model; contributors' own AI use is proposal P-055 (§5.6). |
 
 ## 3. The contributor's path
 
 | Step | Screen | Content |
 |---|---|---|
-| 1 | **Invitation and notice** | A personal link from the team, a choice of language, and a short notice: what is stored, who can see it, that the site sends nothing to any AI service; that the finished task, built from their package, will be used to evaluate AI models and may later be published (D-032), while their reviews, comments, and messages are not published; how to withdraw; and a request to keep the items confidential (they are answer-key material). |
+| 1 | **Invitation and notice** | A personal link from the team, a choice of language, and a short notice: what is stored, who can see it, that the site sends nothing to any AI service; that the finished task, built from their package, will be used to evaluate AI models and may later be published (D-032), while their reviews, comments, and messages are not published; how to withdraw; and a request to keep the items confidential (they are answer-key material), with the rules for using AI tools (§5.6). |
 | 2 | **My paper** | The citation, the task version, and a download of the agent-facing package (D-028). |
 | 3 | **Overview** | The purpose in one paragraph, and the statement that **the items are deliberate modifications made to build a benchmark task, not claims about the published paper**. One line per category, for example *conceptual error*, *missing analysis*, *technical error*, or *derivation error* for a theory paper. Planning targets, not quotas. An estimate of the time needed (about 2–3 minutes per item [U: to be measured]). |
 | 4 | **Review** | The map and the item panel side by side (§4). |
@@ -188,6 +189,57 @@ If an author uploads data that may not be shared with the project, by mistake or
 - **Delete.** A dataset that fails is deleted. The contributor is told why and offered route (a).
 - **Record.** Each check is logged with the dataset, its terms, and the decision.
 
+### 5.6 Using AI tools (P-055, proposed)
+
+Contributors may use AI tools, provided what they submit is their own judgment in their own words. The Guidance page shows the text below in the contributor's interface language.
+
+**Draft text (English)**
+
+> **Using AI tools**
+>
+> You may use AI tools such as ChatGPT or DeepSeek to help you understand code, check your reasoning, or improve your language. Please follow three rules.
+>
+> 1. **Your judgment, in your own words.** Everything you submit (each decision, reason, comment, and proposed error) should state your own judgment and be written, or rewritten, by you. Please do not paste AI output as it is.
+> 2. **Tell us when AI helped.** Tick "AI helped with this" and name the tool. This does not count against your contribution; it lets us describe the benchmark accurately.
+> 3. **Keep the items safe.** If we ask you to review a paper without AI tools, please do not put its items, or your comments on them, into any AI tool. Otherwise, if you use an AI tool with the items, choose a setting that does not use your conversations for training (see the list below), do not use the tool's feedback buttons, and never share the conversation publicly. Never put restricted or confidential data into any AI tool.
+>
+> **Why this matters**
+>
+> - The benchmark measures whether AI systems can find the mistakes that economists consider plausible and consequential. Your judgment is the standard the AI is measured against. If AI-written reasoning entered the tasks unchanged, the benchmark would partly measure agreement with another AI rather than with an economist.
+> - AI-written text has recognizable patterns. An AI being tested could use them to find the answers without doing the economics.
+> - Tasks shaped by one AI model can be easier or harder for models of the same family, which would make comparisons between AI systems unfair.
+> - The items are the benchmark's answers. An AI service that keeps or trains on what you paste could pass the answers to future models, which would then score well by memory rather than by reasoning.
+
+**Draft text (Chinese; machine-drafted by Claude, to be reviewed by the team under D-030)**
+
+> **使用 AI 工具**
+>
+> 您可以使用 ChatGPT、DeepSeek 等 AI 工具来帮助理解代码、检验推理或润色语言。请遵守以下三条规则。
+>
+> 1. **您的判断，您自己的表述。** 您提交的每项内容（每个决定、理由、评论和新提出的错误）都应表达您本人的判断，并由您亲自撰写或改写。请不要直接粘贴 AI 的输出。
+> 2. **请告诉我们 AI 何时提供了帮助。** 请勾选"AI 协助了此项"并注明所用工具。这不会影响对您贡献的评价，只是让我们能够如实描述这一基准。
+> 3. **保护好这些条目。** 如果我们请您在不使用 AI 工具的情况下审阅某篇论文，请不要将其中的条目或您对条目的评论输入任何 AI 工具。在其他情况下，如果您借助 AI 工具处理这些条目，请选择不会将您的对话用于训练的设置（见下方列表），不要使用工具的反馈按钮，也不要公开分享对话。任何情况下都不要将受限或保密数据输入任何 AI 工具。
+>
+> **为什么这很重要**
+>
+> - 这一基准衡量的是 AI 系统能否发现经济学家认为合理且有实质影响的错误。您的判断就是衡量 AI 的标准。如果 AI 撰写的推理原封不动地进入任务，基准衡量的就部分变成了与另一个 AI 的一致程度，而不是与经济学家的一致程度。
+> - AI 撰写的文字有可辨认的模式。接受测试的 AI 可能借助这些模式找到答案，而无需进行经济学推理。
+> - 由某个 AI 模型塑造的任务，对同一系列的模型可能更容易或更难，这会使不同 AI 系统之间的比较有失公平。
+> - 这些条目就是基准的答案。保留您所粘贴的内容或用其训练模型的 AI 服务，可能把答案传给未来的模型，使其靠记忆而非推理取得高分。
+
+**Settings list for the Guidance page** (dated 2026-11-07; providers change these, so re-check before each invitation round):
+
+| Tool | Setting that excludes training | Label |
+|---|---|---|
+| ChatGPT, personal plans | Turn off "Improve the model for everyone"; business and enterprise plans are not used for training by default | [S], [R11](../research/evidence/R11-llm-assistance-in-benchmark-construction.md) §5 |
+| Claude, consumer plans | Turn off model training in the privacy settings; commercial plans are not used for training | [P-page], R3 §6 |
+| Gemini app | Turn off Keep Activity | [S], R11 §5 |
+| DeepSeek app | Turn off "Improve the model for everyone" | [S], R11 §5 |
+
+Feedback buttons can send a whole conversation for training even after opting out (Anthropic states this for its consumer plans [P-page, R3 §6]; OpenAI reportedly does the same [S]).
+
+**For the team.** Which papers are reviewed without AI tools follows from their tier (evaluation and held-out tasks) and is not shown to contributors. Each use a contributor reports is entered in the exposure log. When D-032 is revisited (O-037), the team will decide whether AI use under no-training settings can also be allowed for evaluation-tier items.
+
 ## 6. Administrator functions (v1)
 
 ### 6.1 Configure a paper
@@ -223,7 +275,7 @@ Interface text contains no project material, so drafting it with any LLM leaks n
   - outbound traffic blocked.
 - **Model modes:**
   - Mode 0, Off: the site itself uses no model in v1;
-  - Mode 1, a local model, keeps data on project hardware;
+  - Mode 1, a local model, would keep data on project hardware; it is not planned (D-033);
   - Mode 2, an external API such as DeepSeek with the lead's key, sends data out of the project. It needs explicit configuration (D-018) and is **never** used for held-out tasks (D-031, D-032), contributor responses (proposed, P-035), or restricted data; it never carries an evaluation task's agent-facing package (D-032); any other use is logged with its provider, terms, and date;
   - the team's own use of LLMs outside the site follows the [LLM use policy](llm-use-policy.md).
 - **Data on the server.** Data are uploaded now (D-027), but only data the author may share. They go to the encrypted project server, never to any AI service, and are readable only by team members with the data role. Retention and deletion follow the contributor agreement and the data's terms. Restricted and confidential data are never uploaded (§5.1).
@@ -276,4 +328,5 @@ See the [implementation plan](mvp-implementation-plan.md) v0.3:
 | O-035 | Who checks that data included in an upload may be shared with the project? | §5.5: a named data steward, with uploads quarantined until checked |
 | O-021 | Hosting | §9: staged, a team member's computer for the demo, then one small server outside mainland China before the first outside contributor (P-053) |
 | O-036 | The first real contributor and paper | A possible contact the research lead named (the name is not recorded here); the paper's field sets its categories (D-025) |
+| O-037 | AI use in building tasks, then D-032's held-out and exposure wording | Revise the construction process for the team (P-054) and contributors (P-055) first, then revisit D-032 |
 | O-022, O-026 | Invitation delivery; confidentiality agreement | Unchanged; confidentiality is asked of every contributor and is essential for evaluation and held-out tasks (D-032) |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft v0.3 (2026-11-06). For review by the research lead; nothing is built until it is approved. v0.2 added configurable categories per field (D-025), the map-and-panel review screen, and runnable packages with data routes (D-027); interface languages are catalogues reviewed by the team, and item text is not translated (D-030). v0.3 stages the hosting (P-053): everything up to the demo runs on a team member's computer, and deployment to a server moves to its own milestone (M6), done only before the first outside contributor. It also records each paper's task tier (D-032). |
+| **Status** | **Proposed** draft v0.3 (2026-11-06). For review by the research lead; nothing is built until it is approved. v0.2 added configurable categories per field (D-025), the map-and-panel review screen, and runnable packages with data routes (D-027); interface languages are catalogues reviewed by the team, and item text is not translated (D-030). v0.3 stages the hosting (P-053): everything up to the demo runs on a team member's computer, and deployment to a server moves to its own milestone (M6), done only before the first outside contributor. It also records each paper's task tier (D-032). On 2026-11-07 the model-gateway row was updated for D-033 (no local model). |
 | **Implements** | [MVP proposal v0.5](mvp-contributor-interface.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) |
 | **Principles** | Lightweight; self-hosted; no model and no third-party service in the default configuration (D-018); the team's existing formats are imported as they are. |
 
@@ -20,7 +20,7 @@
 | Interface languages | Django's gettext catalogues (`en`, `zh-Hans`; a language is added as one more catalogue), drafted with an LLM and reviewed by the team; per-paper labels are localized in the paper configuration | Interface text contains no project material (D-030); item text is not translated |
 | Fonts | System font stacks (PingFang SC, Microsoft YaHei, Noto Sans CJK, then Latin fallbacks) | No web-font service |
 | Reverse proxy (Stage 1) | Caddy or nginx, with TLS | Uses the institution's certificate, or an ACME certificate if the lead accepts that external (non-AI) certificate authority (O-021) |
-| Model gateway | A module that refuses every call; v1 has no caller | Any later model use is configured by the research lead (D-018); held-out tasks only ever go to a local model (D-031, D-032); contributor responses likewise (proposed: P-035, LLM use policy §3) |
+| Model gateway | A module that refuses every call; v1 has no caller | Any later model use is configured by the research lead (D-018); no local model is deployed (D-033); held-out tasks go to no model (D-031, D-032, D-033), and contributor responses likewise (proposed: P-035, LLM use policy §3) |
 
 ## 2. Components
 
