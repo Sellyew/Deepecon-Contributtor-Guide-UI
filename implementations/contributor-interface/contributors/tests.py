@@ -395,6 +395,96 @@ class PaperChoiceTests(ContributorSiteTestCase):
         self.assertEqual(self.client.get(url("my_paper", self.empirical)).status_code, 404)
 
 
+class DangerZoneTests(ContributorSiteTestCase):
+    """D-045: the team moves a contributor's link only on their request, after GitHub-style confirmation."""
+
+    def setUp(self):
+        super().setUp()
+        self.empirical.in_pool = True
+        self.empirical.save()
+        self.team = get_user_model().objects.create_superuser("team", "team@example.org", "a-long-test-password")
+        self.team_client = Client()
+        self.team_client.force_login(self.team)
+        self.move_url = reverse("admin:contributors_contributor_move_link", args=[self.bo.pk])
+
+    def post(self, **data):
+        form = {"step": "3", "target": self.empirical.paper_id, "requested_on": "2026-11-07",
+                "request_channel": "email", "confirmation": self.bo.public_id}
+        form.update(data)
+        return self.team_client.post(self.move_url, form)
+
+    def test_the_contributor_page_shows_the_danger_zone(self):
+        page = self.team_client.get(reverse("admin:contributors_contributor_change", args=[self.bo.pk]))
+        self.assertContains(page, "Danger zone")
+        self.assertContains(page, self.move_url)
+
+    def test_the_steps_change_nothing_until_confirmed(self):
+        for step in ("1", "2", "3"):
+            page = self.team_client.get(self.move_url, {"step": step})
+            self.assertEqual(page.status_code, 200, step)
+        self.assertContains(self.team_client.get(self.move_url, {"step": "2"}), "I have read and understand these effects")
+        self.assertContains(self.team_client.get(self.move_url, {"step": "3"}), f"type “<code>{self.bo.public_id}</code>”")
+        self.bo.refresh_from_db()
+        self.assertEqual(self.bo.current_assignment, self.b_th)
+
+    def test_a_wrong_confirmation_moves_nothing(self):
+        for typed in ("", self.bo.public_id.upper(), self.bo.public_id + " ", self.alice.public_id):
+            response = self.post(confirmation=typed)
+            self.assertEqual(response.status_code, 200, typed)
+        self.assertContains(self.post(confirmation="nope"), f"Type {self.bo.public_id} exactly to confirm.")
+        self.bo.refresh_from_db()
+        self.assertEqual(self.bo.current_assignment, self.b_th)
+        self.assertFalse(EventLog.objects.filter(operation__endswith="_on_request").exists())
+
+    def test_moving_on_request_is_recorded(self):
+        _, token = Invitation.issue(self.bo)
+        self.open_link(token)
+        self.consent(self.theory)
+        self.assertRedirects(self.post(), reverse("admin:contributors_contributor_change", args=[self.bo.pk]))
+        self.bo.refresh_from_db()
+        self.assertEqual(self.bo.current_assignment.paper, self.empirical)
+        event = EventLog.objects.get(operation="link_moved_on_request")
+        self.assertEqual((event.actor, event.details["requested_on"], event.details["request_channel"],
+                          event.details["previous_assignment"]), ("team", "2026-11-07", "email", self.b_th.public_id))
+        # The contributor's open session follows at once; earlier work stays.
+        self.assertRedirects(self.client.get("/"), url("my_paper", self.empirical), target_status_code=302)
+        self.assertEqual(self.b_th.consents.count(), 1)
+
+    def test_rewind_sends_the_link_back_to_the_list(self):
+        self.post(target="rewind", request_channel="wechat")
+        self.bo.refresh_from_db()
+        self.assertIsNone(self.bo.current_assignment)
+        self.assertTrue(EventLog.objects.filter(operation="link_rewound_on_request").exists())
+        _, token = Invitation.issue(self.bo)
+        self.assertRedirects(self.open_link(token), reverse("contributors:papers"))
+
+    def test_only_papers_offered_to_the_contributor_are_targets(self):
+        self.empirical.in_pool = False
+        self.empirical.save()
+        self.assertEqual(self.post().status_code, 200)              # not a valid choice any more
+        self.bo.refresh_from_db()
+        self.assertEqual(self.bo.current_assignment, self.b_th)
+
+    def test_a_request_cannot_be_dated_in_the_future(self):
+        later = (timezone.localdate() + timedelta(days=2)).isoformat()
+        self.assertContains(self.post(requested_on=later), "cannot be in the future")
+
+    def test_staff_without_change_permission_cannot_move_links(self):
+        viewer = get_user_model().objects.create_user("viewer", "viewer@example.org", "a-long-test-password", is_staff=True)
+        viewer.user_permissions.set(Permission.objects.filter(codename="view_contributor"))
+        other = Client()
+        other.force_login(viewer)
+        with self.assertLogs("django.request", level="WARNING"):
+            self.assertEqual(other.get(self.move_url).status_code, 403)
+        with self.assertLogs("django.request", level="WARNING"):
+            other.post(self.move_url, {"step": "3", "target": self.empirical.paper_id, "requested_on": "2026-11-07",
+                                       "request_channel": "email", "confirmation": self.bo.public_id})
+        self.bo.refresh_from_db()
+        self.assertEqual(self.bo.current_assignment, self.b_th)
+        page = other.get(reverse("admin:contributors_contributor_change", args=[self.bo.pk]))
+        self.assertNotContains(page, "Danger zone")
+
+
 class CsrfTests(ContributorSiteTestCase):
     """The test client skips CSRF checks by default; a browser does not."""
 

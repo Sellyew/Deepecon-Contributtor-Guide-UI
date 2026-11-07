@@ -1,0 +1,51 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin_danger.css' %}">{% endblock %}
+{% block extrahead %}{{ block.super }}<script src="{% static 'admin_danger.js' %}" defer></script>{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> › <a href="{% url 'admin:contributors_contributor_changelist' %}">Contributors</a> › <a href="{{ change_url }}">{{ contributor }}</a> › Move or rewind the link</div>
+{% endblock %}
+{% block content_title %}{% endblock %}
+{% block content %}
+<div class="danger-dialog">
+  <h1>Move or rewind the link of <code>{{ contributor.public_id }}</code></h1>
+  <p class="danger-current">Their link now opens {% if current %}<code>{{ current.paper.paper_id }}</code>: {{ current.paper.title }}{% else %}the list of papers{% endif %}.</p>
+
+  {% if step == "1" %}
+  <p>The link stays on the paper the contributor chose until they change it. The team moves it only when the contributor asks (D-045); contributors can change paper themselves from the notice or “My paper”.</p>
+  <form method="get">
+    <input type="hidden" name="step" value="2">
+    <button type="submit" class="danger-button">I want to move or rewind this contributor's link</button>
+  </form>
+
+  {% elif step == "2" %}
+  <div class="danger-warning">
+    <p><strong>Please read this before you continue.</strong></p>
+    <ul>
+      <li>From the next page they load, their personal link opens the paper you choose, or the list of papers if you rewind.</li>
+      <li>If they are reading a paper's items now, that page changes under them.</li>
+      <li>Their work and consent on every paper are kept, and they can switch back themselves.</li>
+      <li>A paper they have not chosen before is added to their assignments as “chosen by the contributor”.</li>
+      <li>The move is recorded in the event log with your user name and the date and channel of their request.</li>
+    </ul>
+  </div>
+  <form method="get">
+    <input type="hidden" name="step" value="3">
+    <button type="submit" class="danger-button">I have read and understand these effects</button>
+  </form>
+
+  {% else %}
+  <form method="post" class="danger-form" data-confirm="{{ contributor.public_id }}">
+    {% csrf_token %}
+    <input type="hidden" name="step" value="3">
+    {{ form.non_field_errors }}
+    <p>{{ form.target.errors }}<label for="{{ form.target.id_for_label }}">{{ form.target.label }}</label><br>{{ form.target }}</p>
+    <p>{{ form.requested_on.errors }}<label for="{{ form.requested_on.id_for_label }}">{{ form.requested_on.label }}</label><br>{{ form.requested_on }}</p>
+    <p>{{ form.request_channel.errors }}<label for="{{ form.request_channel.id_for_label }}">{{ form.request_channel.label }}</label><br>{{ form.request_channel }}</p>
+    <p>{{ form.confirmation.errors }}<label for="{{ form.confirmation.id_for_label }}">To confirm, type “<code>{{ contributor.public_id }}</code>” in the box below</label><br>{{ form.confirmation }}</p>
+    <button type="submit" class="danger-button" id="danger-submit">Move or rewind this contributor's link</button>
+  </form>
+  {% endif %}
+  <p><a href="{{ change_url }}">Cancel</a></p>
+</div>
+{% endblock %}

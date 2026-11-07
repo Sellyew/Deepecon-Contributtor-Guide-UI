@@ -1,0 +1,18 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin_danger.css' %}">{% endblock %}
+{% block content %}{{ block.super }}
+{% if original and has_change_permission %}
+<section class="danger-zone" aria-labelledby="danger-zone-title">
+  <h2 id="danger-zone-title">Danger zone</h2>
+  <div class="danger-row">
+    <div>
+      <strong>Move or rewind this contributor's link</strong>
+      <p>Only when the contributor asks. Their link stays on the paper they chose until they change it (D-044, D-045).
+      {% if original.current %}It now opens <code>{{ original.current.paper.paper_id }}</code>.{% else %}It now opens the list of papers.{% endif %}</p>
+    </div>
+    <a class="danger-button" href="{% url 'admin:contributors_contributor_move_link' original.pk %}">Move or rewind this link…</a>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

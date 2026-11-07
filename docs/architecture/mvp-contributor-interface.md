@@ -259,6 +259,7 @@ Feedback buttons can send a whole conversation for training even after opting ou
 ### 6.2 Run the review
 - Create and revoke invitation links, one per contributor at a time; the team delivers them through e-mail or WeChat.
 - Offer papers: assign a paper to a contributor (for an author, their own), or mark a paper as open to all contributors. Opening a scored task to all lets every invited contributor see its items, and closing it again does not withdraw it from those who chose it (P-060).
+- Move or rewind a contributor's link only when they ask, through the danger zone on their page (D-045).
 - Follow progress and answer "Ask the team" questions.
 - Export each contributor's review (JSON and a readable bilingual summary) and a list of suggested rubric changes.
 - Receive submissions and verify their SHA-256.
@@ -291,7 +292,7 @@ Interface text contains no project material, so drafting it with any LLM leaks n
   - researchers-only (pilot reports; never shown to contributors);
   - contributor-submitted (packages, answers, messages).
 - **Access controls:**
-  - invitation credentials are random, time-limited (expiry stops new sign-ins), revocable (revocation also ends open sessions; otherwise a session ends after a year without use, P-060), stored hashed, and never logged;
+  - invitation credentials are random, time-limited (expiry stops new sign-ins), revocable (revocation also ends open sessions; otherwise a session ends after a year without use, D-045), stored hashed, and never logged;
   - every request is authorized on the server;
   - logs record actions and IDs, never text or file contents.
 

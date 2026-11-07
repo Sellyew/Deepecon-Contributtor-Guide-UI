@@ -6,9 +6,18 @@ the link stays on the paper a contributor chose until they change it (D-044). Cr
 from a contributor leaves the current paper as it is (a contributor with none chooses one).
 An assignment's contributor and paper cannot be changed once it exists, because consent and
 reviews belong to it; a mistake is corrected by creating a new assignment.
+
+The team moves a contributor's link only when the contributor asks (D-045). The contributor's
+page has a "danger zone" for this, with GitHub's confirmation steps for deleting a
+repository: what will happen, "I have read and understand these effects", then typing the
+contributor's ID. "Rewind" sends the link back to the start: the list of papers.
 """
+from django import forms
 from django.contrib import admin, messages
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
+from django.urls import path, reverse
 from django.utils import timezone
 
 from papers.models import log_event
@@ -39,11 +48,93 @@ class InviteActionMixin:
                 "link": invitation.link(raw), "expires_at": invitation.expires_at}
 
 
+REWIND = "rewind"
+
+
+class MoveLinkForm(forms.Form):
+    """Step 3 of moving a contributor's link: target, the contributor's request, typed confirmation."""
+
+    CHANNELS = [("email", "E-mail"), ("wechat", "WeChat"), ("in_person", "In person or by phone"), ("other", "Other")]
+    target = forms.ChoiceField(label="Where their link should go")
+    requested_on = forms.DateField(label="Date of the contributor's request", widget=forms.DateInput(attrs={"type": "date"}))
+    request_channel = forms.ChoiceField(label="How they asked", choices=CHANNELS)
+    confirmation = forms.CharField(label="Confirmation", max_length=64, strip=False)   # exact, as on GitHub
+
+    def __init__(self, *args, contributor, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.contributor = contributor
+        current = contributor.current()
+        choices = [(paper.paper_id, f"{paper.paper_id}: {paper.title}")
+                   for paper in contributor.choosable_papers().order_by("paper_id")
+                   if current is None or paper.pk != current.paper_id]
+        if current is not None:
+            choices.append((REWIND, "Rewind: no paper; their link opens the list of papers and they choose again"))
+        self.fields["target"].choices = choices
+
+    def clean_requested_on(self):
+        day = self.cleaned_data["requested_on"]
+        if day > timezone.localdate():
+            raise forms.ValidationError("The request cannot be in the future.")
+        return day
+
+    def clean_confirmation(self):
+        typed = self.cleaned_data["confirmation"]
+        if typed != self.contributor.public_id:
+            raise forms.ValidationError(f"Type {self.contributor.public_id} exactly to confirm.")
+        return typed
+
+
 @admin.register(Contributor)
 class ContributorAdmin(InviteActionMixin, admin.ModelAdmin):
     list_display = ("display_name", "public_id", "current_assignment", "preferred_language", "created_at")
     readonly_fields = ("public_id", "current_assignment", "created_at")
     actions = ["create_invitation"]
+    change_form_template = "admin/contributors/contributor_change_form.html"
+
+    def get_urls(self):
+        move = path("<int:pk>/move-link/", self.admin_site.admin_view(self.move_link_view),
+                    name="contributors_contributor_move_link")
+        return [move] + super().get_urls()
+
+    def move_link_view(self, request, pk):
+        """Moves a contributor's link on their request, in GitHub's three confirmation steps."""
+        contributor = get_object_or_404(Contributor, pk=pk)
+        if not self.has_change_permission(request, contributor):
+            raise PermissionDenied
+        step = request.POST.get("step") or request.GET.get("step") or "1"
+        form = None
+        if step == "3":
+            form = MoveLinkForm(request.POST or None, contributor=contributor)
+            if not form.fields["target"].choices:
+                messages.error(request, "This contributor has no other paper their link could open.")
+                return redirect("admin:contributors_contributor_change", contributor.pk)
+            if request.method == "POST" and form.is_valid():
+                self._move_link(request, contributor, form.cleaned_data)
+                return redirect("admin:contributors_contributor_change", contributor.pk)
+        current = contributor.current()
+        return TemplateResponse(request, "admin/contributors/move_link.html", {
+            **self.admin_site.each_context(request), "opts": self.model._meta, "original": contributor,
+            "title": f"Move or rewind the link of {contributor.public_id}", "contributor": contributor,
+            "current": current, "step": step if step in ("1", "2", "3") else "1", "form": form,
+            "change_url": reverse("admin:contributors_contributor_change", args=[contributor.pk]),
+        })
+
+    def _move_link(self, request, contributor, data):
+        actor = request.user.get_username()
+        previous = contributor.current()
+        details = {"contributor_id": contributor.public_id, "requested_on": data["requested_on"].isoformat(),
+                   "request_channel": data["request_channel"],
+                   "previous_assignment": previous.public_id if previous else None}
+        if data["target"] == REWIND:
+            contributor.current_assignment = None
+            contributor.save(update_fields=["current_assignment"])
+            log_event(actor, "link_rewound_on_request", previous or contributor, **details)
+            messages.success(request, f"Done: the link of {contributor.public_id} now opens the list of papers.")
+            return
+        paper = contributor.choosable_papers().get(paper_id=data["target"])
+        assignment, _, created = contributor.choose(paper)
+        log_event(actor, "link_moved_on_request", assignment, new_assignment=created, **details)
+        messages.success(request, f"Done: the link of {contributor.public_id} now opens {paper.paper_id}.")
 
     @admin.action(description="Create the personal link (shown once; earlier links are revoked)", permissions=["invite"])
     def create_invitation(self, request, queryset):

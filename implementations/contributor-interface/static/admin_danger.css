@@ -1,0 +1,12 @@
+/* The team's "danger zone" for moving a contributor's link (D-045), after GitHub's convention. */
+.danger-zone { margin: 2rem 0 1rem; border: 1px solid #cf222e; border-radius: 6px; max-width: 60rem; }
+.danger-zone h2 { margin: 0; padding: 0.6rem 1rem; color: #cf222e; background: transparent; font-size: 1rem; border-bottom: 1px solid #cf222e; }
+.danger-row { display: flex; gap: 1rem; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; flex-wrap: wrap; }
+.danger-row p { margin: 0.25rem 0 0; }
+.danger-button, a.danger-button:link, a.danger-button:visited { display: inline-block; padding: 0.45rem 0.9rem; border: 1px solid #cf222e;
+  border-radius: 6px; color: #cf222e; background: #fff; font-weight: 600; cursor: pointer; text-decoration: none; }
+.danger-button:hover, .danger-button:focus { color: #fff; background: #cf222e; }
+.danger-button:disabled { opacity: 0.5; cursor: not-allowed; color: #cf222e; background: #fff; }
+.danger-dialog { max-width: 44rem; }
+.danger-warning { border: 1px solid #d4a72c; background: #fff8c5; border-radius: 6px; padding: 0.5rem 1rem; margin: 1rem 0; color: #1f2328; }
+.danger-form input[type=text], .danger-form select, .danger-form input[type=date] { min-width: 20rem; max-width: 100%; }
