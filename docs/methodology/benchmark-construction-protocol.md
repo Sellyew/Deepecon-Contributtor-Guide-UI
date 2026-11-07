@@ -1,6 +1,6 @@
 # Deliverable 2 — Benchmark Construction Protocol
 
-> **Note (2026-11-06).** The contributor workflow changed: the team prepares candidate errors and contributors review them in a self-hosted interface, with no AI interview and no external AI by default ([revised requirements](../requirements/2026-11-06-research-lead-revision.md); [MVP proposal](../architecture/mvp-contributor-interface.md)). This document remains the team's internal methodology for turning confirmed candidates into verified tasks, to be aligned with the three verification rounds of the [team's plan](../requirements/2026-11-05-team-handover-plan.md). Passages that assume the AI interview, Options A and B, or Claude-based sessions are superseded.
+> **Note (2026-11-06).** The contributor workflow changed: the team prepares candidate errors and contributors review them in a self-hosted interface, with no AI interview; AI use follows the [AI use and integrity rules](../architecture/llm-use-policy.md) (2026-11-07) ([revised requirements](../requirements/2026-11-06-research-lead-revision.md); [MVP proposal](../architecture/mvp-contributor-interface.md)). This document remains the team's internal methodology for turning confirmed candidates into verified tasks, to be aligned with the three verification rounds of the [team's plan](../requirements/2026-11-05-team-handover-plan.md). Passages that assume the AI interview, Options A and B, or Claude-based sessions are superseded.
 
 | | |
 |---|---|
@@ -19,7 +19,7 @@
 4. **Grade outcomes; test procedures through outcomes** (*Good Benchmarks* #6, §7; brief §10B). Agents deliver results *and* the code that produces them; verifiers re-run that code on hidden data (VVP §5).
 5. **Distinguish validity layers** (D-013): computational (implementation fidelity), measurement, statistical, identification, and interpretation. Each failure mode has a primary layer and optional secondary layers; verifiability tiers (V1, V2a, V2b, V3, V4) are set per graded output, not by layer (VVP §9).
 6. **Candidates until independently validated** (D-010).
-7. **No leakage by construction** (D-009): four physically separated tiers; automated leakage scans; every AI provider that receives hidden-tier material is logged, and affected scores are reported separately (§8; D-035).
+7. **No leakage by construction** (D-009): four physically separated tiers; automated leakage scans; every AI provider that receives hidden-tier material is logged, and affected scores are reported separately (§8; P-057).
 8. **Blind first.** Outside economists solve the task from the agent tier alone (rubric SP-1); a port never serves as the reference's independent check (GT-1).
 
 **Terms.**
@@ -88,7 +88,7 @@ Each stage has gate lines taken from the rubric's *Who / when* column: **Gate** 
 | Software | Any for contributor-side work; task environments use open-source software (R or Python) unless a licensed track is created | Stata appears in 71.6% of packages [S, R8], so most tasks need an R or Python port, checked for numerical equivalence. A licensed Stata track has its own leakage problem (the evaluated agent could read the mounted licence file) and unclear terms for automated use [R8]. |
 | Design | Coverage across designs: difference-in-differences and event studies, IV, RD, randomized experiments, shift-share, synthetic control, panel fixed effects; structural work later | Breadth of capabilities |
 | Consequential decisions | At least one critical decision whose mis-handling is a known pitfall | Raw material for flawed variants |
-| Contamination | Note how famous the paper is. For **new tasks** (D-035), prefer Path B packages that are unpublished or published after the evaluated models' training cutoffs; record both dates | Perturbed data defeat memorized numbers, not memory of the paper (rubric LK-4) |
+| Contamination | Note how famous the paper is. For **new tasks** (P-057), prefer Path B packages that are unpublished or published after the evaluated models' training cutoffs; record both dates | Perturbed data defeat memorized numbers, not memory of the paper (rubric LK-4) |
 | Contributor | Ideally an original author (Path B) or an economist with deep knowledge of the paper | Tacit knowledge (brief §3.1) |
 
 **Gate:** EN-3. **Automatable:** metadata harvesting, package availability and licence checks, compute screening. **Human judgment:** whether the paper has consequential, teachable decisions; data route; contamination risk.
@@ -190,7 +190,7 @@ The release editor, with the benchmark reviewer, admits tasks to a release or to
 
 **Gate:** LK-1, LK-5.
 
-**Release policy:** answers of scored tasks stay unpublished until the task is retired; demo and development tasks may be published (D-035, 2026-11-07, which replaced the tiers of D-032).
+**Release policy:** answers of scored tasks stay unpublished until the task is retired; demo and development tasks may be published (P-057, 2026-11-07, which replaced the tiers of D-032).
 
 ## 5. Automation versus human judgment (summary)
 
@@ -220,18 +220,18 @@ The release editor, with the benchmark reviewer, admits tasks to a release or to
 
 ## 7. The "what makes a top-journal paper" objective (brief §3.4)
 
-Journal placement is not a ground-truth label (X-001). Instead, the interview elicits **why** specific decisions made the paper convincing (Stage 2), and each such decision is recorded as a `critical_decision` with its validity layer and rationale. Aggregated across contributions, these records form a **credibility-criteria catalogue**: explicit, citable statements such as "clusters at the level of treatment assignment," "addresses heterogeneous effects under staggered adoption," "reports pre-trend evidence together with its power." The catalogue is a research output in its own right and a source of future task designs. It is never used to predict journal rankings, and while a paper has held-out tasks it omits that paper's identifiers (§8).
+Journal placement is not a ground-truth label (X-001). Instead, the interview elicits **why** specific decisions made the paper convincing (Stage 2), and each such decision is recorded as a `critical_decision` with its validity layer and rationale. Aggregated across contributions, these records form a **credibility-criteria catalogue**: explicit, citable statements such as "clusters at the level of treatment assignment," "addresses heterogeneous effects under staggered adoption," "reports pre-trend evidence together with its power." The catalogue is a research output in its own right and a source of future task designs. It is never used to predict journal rankings, and while a paper has unpublished tasks it omits that paper's identifiers (§8).
 
 ## 8. Contamination, leakage, and exposure (summary)
 
 | Threat | Control |
 |---|---|
 | Published coefficients memorized or retrievable | No internet; perturbed or fully synthetic data; re-execution of agent code on answer-changing hidden variants with unseen bases (rubric LK-2; VVP §5.1) |
-| Paper or package recognized from the agent tier | Shared restructured presentation (Stage 4); recognition probe (LK-4); unpublished or post-cutoff packages for the held-out tier (Stage 0) |
+| Paper or package recognized from the agent tier | Shared restructured presentation (Stage 4); recognition probe (LK-4); unpublished or post-cutoff packages for new tasks (Stage 0; P-057) |
 | Flawed code compared against the public source package | Restructured or ported presented code; no internet; naturalness review (LK-3) |
-| Hidden-tier material reaching model providers (VVP §10) | Every AI service, trial, or evaluation run that receives hidden-tier material is logged with the kind of account and the date (LK-5). Work, business, or API accounts are preferred, and personal accounts are used with training off; this is practice, not a guarantee. Scores of models whose provider received a task's answer key before the evaluation are reported separately (D-035) |
+| Hidden-tier material reaching model providers (VVP §10) | Every AI service, trial, or evaluation run that receives hidden-tier material is logged with the kind of account and the date (LK-5). Work, business, or API accounts are preferred, and personal accounts are used with training off; this is practice, not a guarantee. Scores of models whose provider received a task's answer key before the evaluation are reported separately (P-057) |
 | Unpublished tasks worn down by evaluation | Every evaluation run through a provider's API is logged (D-038); new tasks are added over time; all tasks from one paper, twins included, share one publication status; catalogue without unpublished papers' identifiers (§7); disclosure embargo in contributor agreements |
-| Task materials entering training data | Canary string on published material; exposure log and separate reporting (D-035); new tasks over time |
+| Task materials entering training data | Canary string on published material; exposure log and separate reporting (P-057); new tasks over time |
 | Hidden material in agent-facing text | Physical tier separation; automated leakage scan (LK-1) |
 | Public submission channels | Private channels for any package containing hidden-tier material |
 

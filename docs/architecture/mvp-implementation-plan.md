@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft v0.3 (2026-11-06). For review by the research lead; nothing is built until it is approved. v0.2 added configurable categories per field (D-025), the map-and-panel review screen, and runnable packages with data routes (D-027); interface languages are catalogues reviewed by the team, and item text is not translated (D-030). v0.3 stages the hosting (P-053): everything up to the demo runs on a team member's computer, and deployment to a server moves to its own milestone (M6), done only before the first outside contributor. On 2026-11-07 it was updated for the framework reset (D-034 to D-038): the gateway row, the record of whether a task is published, the per-item AI disclosure, and the exposure log. |
-| **Implements** | [MVP proposal v0.5](mvp-contributor-interface.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) |
-| **Principles** | Lightweight; self-hosted; no model and no third-party service in the site (D-037); the team's existing formats are imported as they are. |
+| **Status** | **Proposed** draft v0.3 (2026-11-06). For review by the research lead; nothing is built until it is approved. v0.2 added configurable categories per field (D-025), the map-and-panel review screen, and runnable packages with data routes (D-027); interface languages are catalogues reviewed by the team, and item text is not translated (D-030). v0.3 stages the hosting (P-053): everything up to the demo runs on a team member's computer, and deployment to a server moves to its own milestone (M6), done only before the first outside contributor. On 2026-11-07 it was updated for the framework reset (P-056 to P-059 and D-038): the gateway row, the record of whether a task is published, the per-item AI disclosure, and the exposure log. |
+| **Implements** | [MVP proposal v0.7](mvp-contributor-interface.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) |
+| **Principles** | Lightweight; self-hosted; no model and no third-party service in the site (P-059); the team's existing formats are imported as they are. |
 
 ---
 
@@ -20,12 +20,12 @@
 | Interface languages | Django's gettext catalogues (`en`, `zh-Hans`; a language is added as one more catalogue), drafted with an LLM and reviewed by the team; per-paper labels are localized in the paper configuration | Interface text contains no project material (D-030); item text is not translated |
 | Fonts | System font stacks (PingFang SC, Microsoft YaHei, Noto Sans CJK, then Latin fallbacks) | No web-font service |
 | Reverse proxy (Stage 1) | Caddy or nginx, with TLS | Uses the institution's certificate, or an ACME certificate if the lead accepts that external (non-AI) certificate authority (O-021) |
-| Model gateway | A module that refuses every call; v1 has no caller | Any later AI feature in the site is configured by the research lead; it never receives restricted data, and contributors' material only with their consent (D-037). The project deploys no models (D-038) |
+| Model gateway | A module that refuses every call; v1 has no caller | Any later AI feature in the site is configured by the research lead; it never receives restricted data, and contributors' material only with their consent (P-059). The project deploys no models (D-038) |
 
 ## 2. Components
 
 1. **Importers** (administrator, command line and admin page):
-   - `import_paper_config`: validates `paper-config.json`, including the categories for the paper's field. The administrator records whether the task is published or unpublished, and keeps the task's exposure log: which AI providers received its answer-key material or package, when, and through what kind of account (D-035).
+   - `import_paper_config`: validates `paper-config.json`, including the categories for the paper's field. The administrator records whether the task is published or unpublished, and keeps the task's exposure log: which AI providers received its answer-key material or package, when, and through what kind of account (P-057).
    - `import_rubric`: stores the team's rubric file as it is, keyed by version, and normalizes it through the configured categories (`validation/rubric_checks.py`). It refuses the import if any check fails.
    - `import_item_map`: validates the item map (nodes, edges, anchors, excerpts) against the rubric.
    - `import_candidate_package`: stores the agent-facing ZIP that contributors may download, and checks its SHA-256.
@@ -81,8 +81,8 @@ Controls marked *(Stage 1)* apply once the site runs on a server (M6). On the de
 
 | # | Milestone | Done when | Estimate [U] |
 |---|---|---|---|
-| M1 | Skeleton | Django project, models, importers for configuration, rubric, and item map (both example fields), administration pages, invitation tokens, and both languages; runs with **synthetic** examples only | 1.5–2 engineer-weeks |
-| M2 | Selection | Overview; the map and item panel with the matrix toggle; layered cards; the four answers, reasons, and ticks; the per-item AI disclosure (D-034); proposals; "Ask the team"; autosave with conflicts; confirmation with versions; review export | 2–3 |
+| M1 | Skeleton | Django project, models, importers for configuration, rubric, and item map (both example fields), administration pages, invitation tokens, and both languages; schemas 0.3.0 with the fields the AI use and integrity rules need (see the [schema README](../../schemas/contributor-interface/README.md)); runs with **synthetic** examples only | 1.5–2 engineer-weeks |
+| M2 | Selection | Overview; the map and item panel with the matrix toggle; layered cards; the four answers, reasons, and ticks; the per-item AI disclosure (P-056); proposals; "Ask the team"; autosave with conflicts; confirmation with versions; review export | 2–3 |
 | M3 | Guidance and submission | Configurable checklist; guidance page; resumable upload with SHA-256 receipt; dataset declarations and routes; public-reference option; manifest export | 1–1.5 |
 | M4 | Languages and privacy pass | Reviewed Chinese catalogue; data quarantine and steward check; every control in §3 not marked Stage 1 tested on the demo computer | 0.75–1 |
 | M5 | Demo configuration | The demo paper (D-024) configured from the team's files, with categories and item map; a dry run by a team member as a contributor; fixes | 0.5–1.5 |

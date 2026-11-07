@@ -2,7 +2,7 @@
 
 An expert-driven benchmark for evaluating whether AI agents can perform rigorous economics research — empirical implementation, causal identification, econometric reasoning, and scientific judgment — built from the experience of economists who publish in leading journals.
 
-> **Project status (2026-11-06): MVP redirected.** The research lead set a new direction: a **lightweight, self-hosted, privacy-preserving, bilingual contributor interface**. Invited authors review the candidate errors the team prepared, select, reject, or supplement them (*Selection*), and follow clear instructions for submitting their replication materials (*Guidance*). There is no AI interview, no Claude Code-based system, and no project data sent to any external AI service by default. The contribution schema and implementation plan wait for the example contribution package. Nothing has been implemented. Recommendations stay *Proposed* until the research lead approves them in the [decision log](docs/decisions/decision-log.md).
+> **Project status (2026-11-07).** The MVP is a **lightweight, self-hosted, bilingual contributor interface**: invited authors review the candidate items the team prepared (*Selection*) and follow instructions for submitting a runnable replication package (*Guidance*). There is no AI interview and no Claude Code-based system. The site sends nothing to AI services; AI use in building tasks follows the [AI use and integrity rules](docs/architecture/llm-use-policy.md). Nothing has been implemented. Recommendations stay *Proposed* until the research lead approves them in the [decision log](docs/decisions/decision-log.md).
 
 ## The idea in one paragraph
 
@@ -13,7 +13,7 @@ From a published paper, the team prepares a validated **correct** replication an
 | If you want… | Read |
 |---|---|
 | The current proposal | [MVP contributor interface](docs/architecture/mvp-contributor-interface.md) |
-| The requirements that govern it | [Research lead's revision, 2026-11-06](docs/requirements/2026-11-06-research-lead-revision.md) and the [team's handover plan](docs/requirements/2026-11-05-team-handover-plan.md) |
+| What is in force now | The [decision log](docs/decisions/decision-log.md), which governs where it differs from the [research lead's revision of 2026-11-06](docs/requirements/2026-11-06-research-lead-revision.md) and the [team's handover plan](docs/requirements/2026-11-05-team-handover-plan.md) |
 | What has been decided, proposed, left open, rejected, or superseded | [Decision log](docs/decisions/decision-log.md) |
 | The original requirements | [Research lead's brief, 2026-11-05](docs/requirements/2026-11-05-research-lead-brief.md) |
 
@@ -21,8 +21,8 @@ From a published paper, the team prepares a validated **correct** replication an
 
 | Document | Status |
 |---|---|
-| [MVP contributor interface](docs/architecture/mvp-contributor-interface.md) (v0.4) and its [implementation plan](docs/architecture/mvp-implementation-plan.md) (v0.2) | **Current**, Proposed drafts; the research lead's answers of 2026-11-06 recorded (D-025 to D-029) |
-| [AI use and integrity rules](docs/architecture/llm-use-policy.md) | **Current**, Decided 2026-11-07 (D-034 to D-038): AI use in building tasks, privacy, unpublished answers, isolation, exposure logging |
+| [MVP contributor interface](docs/architecture/mvp-contributor-interface.md) (v0.7) and its [implementation plan](docs/architecture/mvp-implementation-plan.md) (v0.3) | **Current**, Proposed drafts |
+| [AI use and integrity rules](docs/architecture/llm-use-policy.md) | **Current**, Proposed 2026-11-07 and applied provisionally (P-056 to P-059; D-038 Decided): AI use in building tasks, privacy, unpublished answers, isolation, exposure logging |
 | [Example package V5: structural review](docs/requirements/2026-11-06-example-package-v5-review.md) | Reference (structure only; no rubric content) |
 | [Bilingual design](docs/architecture/bilingual-design.md) | Current (principles and glossary) |
 | [Verifier validation protocol](docs/methodology/verifier-validation-protocol.md), [task-quality rubric](docs/methodology/task-quality-rubric.md), [construction protocol](docs/methodology/benchmark-construction-protocol.md) | The team's internal methodology for turning confirmed candidates into tasks; interview-related passages superseded |
@@ -59,7 +59,6 @@ CLAUDE.md           project memory and working conventions
 
 - **Decision status:** every item is *Decided*, *Proposed*, *Open*, or *Rejected* ([decision log](docs/decisions/decision-log.md)). Proposals never become decisions silently.
 - **Evidence labels:** **[P-full]** primary source read in full · **[P-page]** primary abstract, landing page, or official documentation · **[S]** secondary · **[U]** unverified.
-- **Architecture neutrality:** Options A and B are developed to the same depth on the same assumptions.
 
 ## Running the checks
 
