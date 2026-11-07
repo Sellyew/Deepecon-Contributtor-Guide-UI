@@ -215,7 +215,7 @@ Each failure mode has a **primary** validity layer (of five) plus optional secon
 ## 10. Exposure of hidden material
 
 1. **Every AI service, trial, or evaluation run that receives hidden-tier material or the package** is logged with the provider, the kind of account, and the date (rubric LK-5). Work, business, or API accounts are preferred; personal accounts are used with training off. This lowers the chance of training but does not prevent exposure ([AI use and integrity rules](../architecture/llm-use-policy.md) §3).
-2. **Scored tasks.** Their answers stay unpublished until the task is retired. Scores of models whose provider received a task's answer key before the evaluation are reported separately, and new tasks are added over time (P-057). All models are evaluated through providers' APIs (D-038).
+2. **Scored tasks.** Their answers stay unpublished until the task is retired. Scores of models whose provider received a task's answer key before the evaluation are reported separately, and new tasks are added over time (D-040). All models are evaluated through providers' APIs (D-038).
 3. **Granularity.** All tasks and twins from one paper share one publication status.
 4. **Credibility-criteria catalogue.** While a paper has unpublished tasks, the catalogue is published without that paper's identifiers.
 5. **Contributor agreements** include a disclosure embargo.

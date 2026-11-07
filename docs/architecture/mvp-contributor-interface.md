@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** draft v0.7 (2026-11-07). v0.7 applies the research lead's framework reset of 2026-11-07: AI use by the team and by contributors follows the [AI use and integrity rules](llm-use-policy.md) (P-056 to P-059 and D-038), which replace the earlier tiers and exceptions. It also records the earlier decisions D-025 to D-030 and the demo paper (D-024). Earlier version notes are in git history. |
+| **Status** | **Proposed** draft v0.7 (2026-11-07). v0.7 applies the research lead's framework reset of 2026-11-07: AI use by the team and by contributors follows the [AI use and integrity rules](llm-use-policy.md) (D-038 to D-042), which replace the earlier tiers and exceptions. It also records the earlier decisions D-025 to D-030 and the demo paper (D-024). Earlier version notes are in git history. |
 | **Requirements** | [Research lead's revision, 2026-11-06](../requirements/2026-11-06-research-lead-revision.md) (background; the [decision log](../decisions/decision-log.md) governs) · [team handover plan](../requirements/2026-11-05-team-handover-plan.md) · [example package V5 review](../requirements/2026-11-06-example-package-v5-review.md) |
 | **Companion documents** | [Implementation plan](mvp-implementation-plan.md) · [contributor-interface schemas](../../schemas/contributor-interface/README.md) · [AI use and integrity rules](llm-use-policy.md) |
 | **Supersedes** | The decision brief, Options A and B, the interview protocol, the pilot plan, and the cost model (kept as records) |
@@ -19,7 +19,7 @@ Invited contributors (the paper's authors, or invited domain experts) use a smal
 No step needs an AI model, and the site sends nothing to any AI provider (§7). The interface text is translated by the team, from an LLM draft reviewed by people (§6.3). Item text, papers, and code are shown in their original language and are not translated (D-030).
 
 **Out of scope for v1.**
-- Ruled out by the research lead on 2026-11-06: an AI interview; AI generation of items on the site (the team may use AI outside the site to help draft candidates, P-056); Claude Code or other client software; paper discovery; complex onboarding.
+- Ruled out by the research lead on 2026-11-06: an AI interview; AI generation of items on the site (the team may use AI outside the site to help draft candidates, D-039); Claude Code or other client software; paper discovery; complex onboarding.
 - Deferred: code execution on the site; grading of agent submissions; real-time collaboration; dashboards; e-mail sent from the site.
 
 ## 2. Decisions and proposals that shape the design
@@ -32,17 +32,17 @@ No step needs an AI model, and the site sends nothing to any AI provider (§7). 
 | D-028 | Contributors may download the **agent-facing package**. | It is a download on the paper page. |
 | D-030 | The **interface** is bilingual (Chinese and English), with more languages possible later; interface text is translated with an LLM and reviewed by the team. (Clarifies an earlier misreading, D-029, that item text would be translated.) | Interface strings live in translation catalogues, and a language is added with a reviewed catalogue. Item text, papers, and code stay in their original language. |
 | D-024 (clarified) | The pilot paper is a **demo** for building and testing the interface; the team has no contact with its authors. | The demo paper is configured for dry runs by team members. It needs no data, because the site runs no code (§5.4). |
-| P-056 | *Proposed, applied provisionally:* **AI may help build tasks; experts decide** (2026-11-07). People write or rewrite what they submit and what the agent sees; each item records its origin. | The review records, per item, whether AI drafted it or helped review it (§5.6). |
-| P-057 | *Proposed, applied provisionally:* **Answers of scored tasks stay unpublished; exposure is logged and reported** (2026-11-07). | The finished task may be published once it is retired, or if the research lead designated it a demo or development task before any evaluation run (§3 step 1). The team keeps an exposure log per task. |
-| P-058 | *Proposed, applied provisionally:* **Evaluation isolation** (2026-11-07). | Not part of the site; it governs how tasks are run. |
-| P-059 | *Proposed, applied provisionally:* **Privacy and consent:** licensed and restricted data never go into AI services; the site sends nothing to AI services; contributors' material goes to AI services only with consent (2026-11-07). | §7. |
+| D-039 | **AI may help build tasks; experts decide** (2026-11-07). People write or rewrite what they submit and what the agent sees; each item records its origin. | The review records, per item, whether AI drafted it or helped review it (§5.6). |
+| D-040 | **Answers of scored tasks stay unpublished; exposure is logged and reported** (2026-11-07). | The finished task may be published once it is retired, or if the research lead designated it a demo or development task before any evaluation run (§3 step 1). The team keeps an exposure log per task. |
+| D-041 | **Evaluation isolation** (2026-11-07). | Not part of the site; it governs how tasks are run. |
+| D-042 | **Privacy and consent:** licensed and restricted data never go into AI services; the site sends nothing to AI services; contributors' material goes to AI services only with consent (2026-11-07). | §7. |
 | D-038 | **Models, including open-weight ones, are used and evaluated through APIs;** the project deploys none (2026-11-07). | No model runs in the site in v1. |
 
 ## 3. The contributor's path
 
 | Step | Screen | Content |
 |---|---|---|
-| 1 | **Invitation and notice** | A personal link from the team, a choice of language, and a short notice: what is stored, who can see it, that the site sends nothing to any AI service; that the finished task, built from their package, will be sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it (D-038), and may later be published (P-057), while their reviews, comments, and messages are not published; a yes/no choice, recorded with its date and changeable later, on whether the team may use AI services with their unpublished materials and responses (P-059); how to withdraw; and a request to keep the items confidential (they are answer-key material), with the rules for using AI tools (§5.6). |
+| 1 | **Invitation and notice** | A personal link from the team, a choice of language, and a short notice: what is stored, who can see it, that the site sends nothing to any AI service; that the finished task, built from their package, will be sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it (D-038), and may later be published (D-040), while their reviews, comments, and messages are not published; a yes/no choice, recorded with its date and changeable later, on whether the team may use AI services with their unpublished materials and responses (D-042); how to withdraw; and a request to keep the items confidential (they are answer-key material), with the rules for using AI tools (§5.6). |
 | 2 | **My paper** | The citation, the task version, and a download of the agent-facing package (D-028). |
 | 3 | **Overview** | The purpose in one paragraph, and the statement that **the items are deliberate modifications made to build a benchmark task, not claims about the published paper**. One line per category, for example *conceptual error*, *missing analysis*, *technical error*, or *derivation error* for a theory paper. Planning targets, not quotas. An estimate of the time needed (about 2–3 minutes per item [U: to be measured]). |
 | 4 | **Review** | The map and the item panel side by side (§4). |
@@ -189,9 +189,9 @@ If an author uploads data that may not be shared with the project, by mistake or
 - **Quarantine.** Uploads that include data stay encrypted and unopened until a named team member, the **data steward**, has checked each dataset's declared terms against its source.
 - **Clear.** A dataset that passes the check is released to the team.
 - **Delete.** A dataset that fails is deleted. The contributor is told why and offered route (a).
-- **Record.** Each check is logged with the dataset, its terms, the decision, and whether the terms allow the data to reach AI services, including through an evaluated agent (P-059).
+- **Record.** Each check is logged with the dataset, its terms, the decision, and whether the terms allow the data to reach AI services, including through an evaluated agent (D-042).
 
-### 5.6 Using AI tools (P-056, P-057, P-059)
+### 5.6 Using AI tools (D-039, D-040, D-042)
 
 Contributors may use AI tools while they review the items and prepare their materials. The Guidance page shows the text below in the contributor's interface language.
 
@@ -245,8 +245,8 @@ Contributors may use AI tools while they review the items and prepare their mate
 Feedback buttons can send a whole conversation for training even after opting out: Anthropic states this for its consumer plans [P-page, R3 §6]; whether OpenAI and other providers do the same is unverified [U].
 
 **For the team.**
-- Each use a contributor reports goes into the task's exposure log (P-057).
-- Allowing AI tools gives up one safeguard: reviewers who work without AI keep the expert check independent ([R11](../research/evidence/R11-llm-assistance-in-benchmark-construction.md) §4). Rewriting in one's own words does not prevent anchoring. In one study, 77% of analysts repeated an AI agent's argument and 15% credited it ([R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md) §1). The per-item disclosure is therefore used to report AI-assisted and unassisted validations separately (P-056), and an item both drafted and reviewed with AI help is checked again by a second person without AI (Rule 5).
+- Each use a contributor reports goes into the task's exposure log (D-040).
+- Allowing AI tools gives up one safeguard: reviewers who work without AI keep the expert check independent ([R11](../research/evidence/R11-llm-assistance-in-benchmark-construction.md) §4). Rewriting in one's own words does not prevent anchoring. In one study, 77% of analysts repeated an AI agent's argument and 15% credited it ([R7](../research/evidence/R7-expert-elicitation-and-ai-interviews.md) §1). The per-item disclosure is therefore used to report AI-assisted and unassisted validations separately (D-039), and an item both drafted and reviewed with AI help is checked again by a second person without AI (Rule 5).
 
 ## 6. Administrator functions (v1)
 
@@ -271,7 +271,7 @@ All interface text (buttons, notices, the overview, category meanings, the guida
 2. **Review.** A team member reviews and corrects it.
 3. **Ship.** The reviewed catalogue is committed with the code.
 
-Interface text contains no project material, so drafting it with any LLM leaks nothing. Per-paper interface text, such as a category's one-line meaning and the checklist entries, goes through the same draft-and-review step. Because these entries describe categories, not planted errors, they may be drafted with any AI service (P-056). **Item text is not translated.**
+Interface text contains no project material, so drafting it with any LLM leaks nothing. Per-paper interface text, such as a category's one-line meaning and the checklist entries, goes through the same draft-and-review step. Because these entries describe categories, not planted errors, they may be drafted with any AI service (D-039). **Item text is not translated.**
 
 **Adding a language** means adding one catalogue and the per-paper labels, then reviewing both; no code changes.
 
@@ -281,8 +281,8 @@ Interface text contains no project material, so drafting it with any LLM leaks n
   - the contributor's browser and the project server only;
   - no analytics, web fonts, content delivery networks, or embedded third-party content;
   - outbound traffic blocked.
-- **AI in the site:** none in v1 (P-059). A model gateway refuses every call. An AI feature can be added later only if the research lead configures it; it never receives restricted data, and contributors' material only with their consent.
-- **AI outside the site:** the team's and contributors' AI use follows the [AI use and integrity rules](llm-use-policy.md) (P-056 to P-059 and D-038).
+- **AI in the site:** none in v1 (D-042). A model gateway refuses every call. An AI feature can be added later only if the research lead configures it; it never receives restricted data, and contributors' material only with their consent.
+- **AI outside the site:** the team's and contributors' AI use follows the [AI use and integrity rules](llm-use-policy.md) (D-038 to D-042).
 - **Data on the server.** Data are uploaded now (D-027), but only data the author may share. They go to the encrypted project server, never to any AI service, and are readable only by team members with the data role. Retention and deletion follow the contributor agreement and the data's terms. Restricted and confidential data are never uploaded (§5.1).
 - **Storage tiers:**
   - agent-facing (the candidate package);

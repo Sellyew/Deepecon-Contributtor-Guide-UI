@@ -27,7 +27,7 @@
 
 ## Planned for 0.3.0 (2026-11-07)
 
-Fields that the [AI use and integrity rules](../../docs/architecture/llm-use-policy.md) (P-056, P-057, P-059; Proposed) need. The draft schemas do not hold them yet; they are added in milestone M1 of the [implementation plan](../../docs/architecture/mvp-implementation-plan.md), with an example and a test each.
+Fields that the [AI use and integrity rules](../../docs/architecture/llm-use-policy.md) (D-039, D-040, D-042; Decided 2026-11-07) need. The draft schemas do not hold them yet; they are added in milestone M1 of the [implementation plan](../../docs/architecture/mvp-implementation-plan.md), with an example and a test each.
 - **Contributor review:** per item and per proposal, `ai_help` (used; tool; account kind: work, personal, API, or unknown; whether the items or the package were entered). At the top level, `consent` (whether the team may use AI services with the contributor's unpublished materials and responses; acknowledgement that evaluation sends the finished task through AI companies' APIs; date recorded).
 - **Item map:** per item, `origin` (drafted by the team, the contributor, or an AI service; model family; whether AI helped review it).
 - **Paper configuration:** `publication_status` (scored and unpublished, or demo or development and publishable; designation date).

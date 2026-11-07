@@ -22,7 +22,7 @@ From a published paper, the team prepares a validated **correct** replication an
 | Document | Status |
 |---|---|
 | [MVP contributor interface](docs/architecture/mvp-contributor-interface.md) (v0.7) and its [implementation plan](docs/architecture/mvp-implementation-plan.md) (v0.3) | **Current**, Proposed drafts |
-| [AI use and integrity rules](docs/architecture/llm-use-policy.md) | **Current**, Proposed 2026-11-07 and applied provisionally (P-056 to P-059; D-038 Decided): AI use in building tasks, privacy, unpublished answers, isolation, exposure logging |
+| [AI use and integrity rules](docs/architecture/llm-use-policy.md) | **Current**, Decided 2026-11-07 (D-038 to D-042): AI use in building tasks, privacy, unpublished answers, isolation, exposure logging |
 | [Example package V5: structural review](docs/requirements/2026-11-06-example-package-v5-review.md) | Reference (structure only; no rubric content) |
 | [Bilingual design](docs/architecture/bilingual-design.md) | Current (principles and glossary) |
 | [Verifier validation protocol](docs/methodology/verifier-validation-protocol.md), [task-quality rubric](docs/methodology/task-quality-rubric.md), [construction protocol](docs/methodology/benchmark-construction-protocol.md) | The team's internal methodology for turning confirmed candidates into tasks; interview-related passages superseded |

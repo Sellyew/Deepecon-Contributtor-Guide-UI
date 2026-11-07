@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **What this is** | A faithful English summary of the research team's student handover package *DeepEcon 专家交互智能体 — 学生执行交接包* (dated 2026-11-05; "task and literature configuration" version), supplied by the research lead on 2026-11-06 with the [revised requirements](2026-11-06-research-lead-revision.md). The package has three files: a main plan (Word), a development task list (`开发任务清单.md`), and a README. |
-| **Status** | Reference requirements from the research team. Where this plan differs from later decisions, the [decision log](../decisions/decision-log.md) governs (for example, the contributor site makes no model calls, P-059). |
+| **Status** | Reference requirements from the research team. Where this plan differs from later decisions, the [decision log](../decisions/decision-log.md) governs (for example, the contributor site makes no model calls, D-042). |
 | **Omitted** | Personal names of the invited experts (recorded here by role only). The original files are not committed to this repository. |
 
 ---
