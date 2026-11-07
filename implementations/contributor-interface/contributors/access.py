@@ -1,44 +1,53 @@
 """Session-based access for contributors (plan §2.3).
 
 A contributor signs in only by opening an invitation link; there are no passwords and no
-paper search. Every view checks the session's assignment against the requested paper on the
-server, and answers 404 for papers the contributor is not assigned to, so guessed or copied
-URLs reveal nothing.
+paper search. The session holds the invitation that was used, and every request checks it
+again: once the team revokes the link, or it expires, the session ends. A session reaches
+only that invitation's assignment. Every view checks the requested paper against it on the
+server and answers 404 for any other paper, so guessed or copied URLs reveal nothing.
 """
 from functools import wraps
 
 from django.http import Http404
 from django.shortcuts import render
 
-from .models import Assignment, Contributor
+from .models import Invitation
 
-SESSION_KEY = "deepecon_contributor_id"
+SESSION_KEY = "deepecon_invitation_id"
 
 
-def current_contributor(request):
+def current_invitation(request):
+    """The session's invitation if it is still active; otherwise ends the session."""
     pk = request.session.get(SESSION_KEY)
-    return Contributor.objects.filter(pk=pk).first() if pk else None
+    if not pk:
+        return None
+    invitation = (Invitation.objects.select_related("assignment__contributor", "assignment__paper")
+                  .filter(pk=pk).first())
+    if invitation is None or not invitation.is_active:
+        request.session.flush()
+        return None
+    return invitation
 
 
-def sign_in(request, contributor):
+def sign_in(request, invitation):
     request.session.cycle_key()           # a new session key on every invitation use
-    request.session[SESSION_KEY] = contributor.pk
+    request.session[SESSION_KEY] = invitation.pk
 
 
 def contributor_required(view):
     @wraps(view)
     def wrapper(request, *args, **kwargs):
-        contributor = current_contributor(request)
-        if contributor is None:
+        invitation = current_invitation(request)
+        if invitation is None:
             return render(request, "contributors/not_signed_in.html", status=403)
-        request.contributor = contributor
+        request.invitation = invitation
+        request.contributor = invitation.assignment.contributor
         return view(request, *args, **kwargs)
     return wrapper
 
 
 def assignment_for(request, paper_id):
-    assignment = (Assignment.objects.select_related("paper", "contributor")
-                  .filter(contributor=request.contributor, paper__paper_id=paper_id).first())
-    if assignment is None:
+    assignment = request.invitation.assignment
+    if assignment.paper.paper_id != paper_id:
         raise Http404("No such paper.")
     return assignment

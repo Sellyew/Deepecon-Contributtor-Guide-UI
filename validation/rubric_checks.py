@@ -18,6 +18,10 @@ text (category labels, checklist entries, node labels) is localized.
 Problem messages contain category IDs, item IDs, node IDs and field names only, never item
 text. Standard library only.
 """
+import re
+
+# Item IDs as the item-map and contributor-review schemas accept them.
+ITEM_ID = re.compile(r"[A-Za-z0-9_.-]{1,16}")
 
 ROLE_FROM_MAP = ("summary", "change", "affected_results", "consequence")
 
@@ -38,18 +42,26 @@ def normalize(rubric, config):
             continue
         roles = cat["field_roles"]
         for raw in arr:
+            if not isinstance(raw, dict):
+                problems.append(f"category {cat['id']}: an item is not an object")
+                continue
             iid = raw.get("id")
             if not iid:
                 problems.append(f"category {cat['id']}: an item has no id")
+                continue
+            if not isinstance(iid, str) or not ITEM_ID.fullmatch(iid):
+                problems.append(f"category {cat['id']}: item id {iid!r} must be 1-16 letters, digits, '.', '_' or '-'")
                 continue
             item = {"id": iid, "category": cat["id"], "raw": raw}
             if roles["title"] not in raw:
                 problems.append(f"{cat['id']} {iid}: missing title field '{roles['title']}'")
             item["title"] = raw.get(roles["title"])
             if "points" in roles:
-                if roles["points"] not in raw:
-                    problems.append(f"{cat['id']} {iid}: missing points field '{roles['points']}'")
-                item["points"] = raw.get(roles["points"])
+                pts = raw.get(roles["points"])
+                if isinstance(pts, bool) or not isinstance(pts, (int, float)):
+                    problems.append(f"{cat['id']} {iid}: points field '{roles['points']}' is missing or not a number")
+                    pts = None
+                item["points"] = pts
             for role in ("locations", "description", "acceptable_answer"):
                 fields = roles.get(role, [])
                 present = [f for f in fields if f in raw]
@@ -65,16 +77,15 @@ def normalize(rubric, config):
 def check_rubric(rubric, config):
     items, problems = normalize(rubric, config)
     seen = set()
-    total, have_points = 0, True
+    # The sum is checked only when every category declares a points field.
+    total, have_points = 0, all("points" in c["field_roles"] for c in config["categories"])
     for it in items:
         cat, iid, raw = it["category"], it["id"], it["raw"]
         if iid in seen:
             problems.append(f"duplicate item id {iid}")
         seen.add(iid)
         pts = it.get("points")
-        if pts is None:
-            have_points = False
-        else:
+        if pts is not None:
             total += pts
         scores = raw.get("allowed_scores")
         if scores and pts is not None:

@@ -113,7 +113,9 @@
       "minLength": 1
     },
     "candidate_version": {
-      "type": "string"
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$",
+      "description": "Part of a file name in private storage: letters, digits, '.', '_' and '-' only."
     },
     "candidate_package_sha256": {
       "type": "string",

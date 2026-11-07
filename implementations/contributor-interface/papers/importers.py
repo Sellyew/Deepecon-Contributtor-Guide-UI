@@ -9,6 +9,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 import shutil
 import tempfile
 import zipfile
@@ -21,6 +22,10 @@ from django.db import transaction
 from jsonschema import Draft202012Validator, FormatChecker
 
 from .models import CandidatePackage, Item, ItemMap, Paper, RubricVersion, log_event
+
+
+# A candidate version becomes part of a file name in private storage; nothing else is allowed.
+SAFE_VERSION = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}")
 
 
 class ImportRefused(Exception):
@@ -70,13 +75,22 @@ def _load(content):
 def import_paper_config(content, actor):
     data, sha = _load(content)
     _validate("paper-config", data)
+    groups = ([c["id"] for c in data["categories"]], [c["source_array"] for c in data["categories"]],
+              [m["id"] for m in data.get("materials_checklist", [])])
+    duplicates = sorted({x for group in groups for x in group if group.count(x) > 1})
+    if duplicates:
+        raise ImportRefused([f"duplicate category, source array, or checklist id: {', '.join(duplicates)}"])
+    version = data.get("candidate_version")
+    if version is not None and not SAFE_VERSION.fullmatch(version):
+        raise ImportRefused(["candidate_version may contain only letters, digits, '.', '_' and '-'"])
     status = data.get("publication_status", {"status": Paper.SCORED})
-    existing = Paper.objects.filter(paper_id=data["paper_id"]).first()
-    if (existing and existing.publication_status == Paper.SCORED and status["status"] == Paper.DEMO
-            and existing.exposures.filter(route="evaluation_run").exists()):
-        # Rule 8: a scored task is not redesignated after any evaluation run.
-        raise ImportRefused([f"{data['paper_id']}: a scored task with evaluation runs cannot be redesignated as demo or development"])
     designated = status.get("designated_on")
+    new_date = date.fromisoformat(designated) if designated else None
+    existing = Paper.objects.filter(paper_id=data["paper_id"]).first()
+    if (existing and existing.exposures.filter(route="evaluation_run").exists()
+            and (status["status"], new_date) != (existing.publication_status, existing.designated_on)):
+        # Rule 8: the designation is fixed before any evaluation run and does not change afterwards.
+        raise ImportRefused([f"{data['paper_id']}: the publication status and its designation date cannot change after an evaluation run (Rule 8)"])
     paper, created = Paper.objects.update_or_create(
         paper_id=data["paper_id"],
         defaults={
@@ -85,12 +99,36 @@ def import_paper_config(content, actor):
             "config": data,
             "config_sha256": sha,
             "publication_status": status["status"],
-            "designated_on": date.fromisoformat(designated) if designated else None,
+            "designated_on": new_date,
         },
     )
+    _recheck_stored_rubric(paper, data)
     log_event(actor, "import_paper_config", paper, sha256=sha, created=created,
               categories=[c["id"] for c in data["categories"]], publication_status=status["status"])
     return paper
+
+
+def _recheck_stored_rubric(paper, config):
+    """A changed configuration must still fit the rubric and item map already imported for it."""
+    rubric = paper.rubrics.filter(version=config["rubric_version"]).first()
+    if rubric is None:
+        return
+    rc = rubric_checks()
+    problems = rc.check_rubric(rubric.raw, config)
+    items, _ = rc.normalize(rubric.raw, config)
+    item_map = rubric.item_maps.first()
+    if item_map is not None:
+        problems += rc.check_item_map(item_map.raw, items)
+    stored = {row.item_id: row for row in rubric.items.all()}
+    if {it["id"] for it in items} != set(stored):
+        problems.append(f"the categories select different items from rubric {rubric.version}; import the rubric under a new version")
+    if problems:
+        raise ImportRefused(problems)
+    for i, it in enumerate(items):
+        row = stored[it["id"]]
+        row.category, row.position = it["category"], i
+        row.normalized = {k: v for k, v in it.items() if k != "raw"}
+        row.save(update_fields=["category", "position", "normalized"])
 
 
 @transaction.atomic
@@ -102,10 +140,12 @@ def import_rubric(paper, content, actor):
     problems = rc.check_rubric(data, paper.config)          # includes the normalization problems
     if problems:
         raise ImportRefused(problems)
-    rubric, _ = RubricVersion.objects.update_or_create(
-        paper=paper, version=data["version"], defaults={"raw": data, "sha256": sha}
-    )
-    rubric.items.all().delete()
+    existing = paper.rubrics.filter(version=data["version"]).first()
+    if existing and existing.sha256 == sha:
+        return existing                     # the same file again: items and their origins are kept
+    if existing:
+        raise ImportRefused([f"rubric version {data['version']} is already imported with different content; import it under a new version"])
+    rubric = RubricVersion.objects.create(paper=paper, version=data["version"], raw=data, sha256=sha)
     Item.objects.bulk_create([
         Item(rubric=rubric, item_id=it["id"], category=it["category"], position=i,
              normalized={k: v for k, v in it.items() if k != "raw"})
@@ -146,6 +186,9 @@ def import_candidate_package(paper, source, actor, candidate_version=None):
     `source` is a path or a binary file object. Nothing in the package is executed; it is
     opened only to confirm that it is a ZIP archive.
     """
+    version = candidate_version or paper.config.get("candidate_version") or "unversioned"
+    if not SAFE_VERSION.fullmatch(version):
+        raise ImportRefused(["the candidate version may contain only letters, digits, '.', '_' and '-'"])
     root = Path(settings.PRIVATE_STORAGE_ROOT)
     incoming = root / "incoming"
     incoming.mkdir(parents=True, exist_ok=True)
@@ -166,15 +209,18 @@ def import_candidate_package(paper, source, actor, candidate_version=None):
         sha = digest.hexdigest()
         expected = paper.config.get("candidate_package_sha256")
         problems = []
-        if expected and expected != sha:
+        if not expected:
+            problems.append("the paper configuration has no candidate_package_sha256 to check the package against")
+        elif expected != sha:
             problems.append("the package's SHA-256 differs from candidate_package_sha256 in the paper configuration")
         if not zipfile.is_zipfile(tmp):
             problems.append("the package is not a ZIP archive")
         if problems:
             raise ImportRefused(problems)
-        version = candidate_version or paper.config.get("candidate_version") or "unversioned"
         rel = Path("papers") / paper.paper_id / "candidate" / f"{version}-{sha[:12]}.zip"
         final = root / rel
+        if not final.resolve().is_relative_to(root.resolve()):
+            raise ImportRefused(["the package would be stored outside private storage"])
         final.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(tmp, final)
         tmp = None

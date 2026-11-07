@@ -3,9 +3,12 @@ import hashlib
 import io
 import re
 from datetime import timedelta
+from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
+from django.contrib.staticfiles import finders
 from django.contrib.sessions.models import Session
 from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
@@ -54,7 +57,7 @@ class InvitationTests(ContributorSiteTestCase):
         response = self.open_link(self.alice_token)
         self.assertRedirects(response, reverse("contributors:notice", args=[self.empirical.paper_id]))
         self.assertNotIn(self.alice_token, response["Location"])
-        self.assertEqual(self.client.session[SESSION_KEY], self.alice.pk)
+        self.assertEqual(self.client.session[SESSION_KEY], Invitation.find_active(self.alice_token).pk)
         self.assertEqual(response["Referrer-Policy"], "no-referrer")
 
     def test_each_use_starts_a_new_session(self):
@@ -81,6 +84,42 @@ class InvitationTests(ContributorSiteTestCase):
         self.open_link(self.bo_token)
         self.assertEqual(self.client.cookies[settings.LANGUAGE_COOKIE_NAME].value, "zh-hans")
 
+    def test_the_contributors_own_language_choice_survives_reopening_the_link(self):
+        self.open_link(self.bo_token)
+        self.client.post(reverse("set_language"), {"language": "en", "next": "/"})
+        self.open_link(self.bo_token)
+        self.assertEqual(self.client.cookies[settings.LANGUAGE_COOKIE_NAME].value, "en")
+
+    def _signed_in_with_consent(self):
+        self.open_link(self.alice_token)
+        self.consent(self.empirical)
+        self.assertEqual(self.client.get(reverse("contributors:my_paper", args=[self.empirical.paper_id])).status_code, 200)
+
+    def _assert_session_ended(self):
+        urls = ["/", *(reverse(f"contributors:{name}", args=[self.empirical.paper_id]) for name in ("notice", "my_paper", "package"))]
+        for url in urls:
+            self.assertEqual(self.client.get(url).status_code, 403, url)
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+    def test_revoking_a_link_ends_sessions_already_opened_with_it(self):
+        self._signed_in_with_consent()
+        Invitation.objects.filter(assignment=self.a_emp).update(revoked_at=timezone.now())
+        self._assert_session_ended()
+
+    def test_an_expired_link_ends_sessions_already_opened_with_it(self):
+        self._signed_in_with_consent()
+        Invitation.objects.filter(assignment=self.a_emp).update(expires_at=timezone.now() - timedelta(seconds=1))
+        self._assert_session_ended()
+
+    def test_a_link_reaches_only_its_own_assignment(self):
+        a_th = Assignment.objects.create(contributor=self.alice, paper=self.theory, relationship_to_paper="invited_expert")
+        self.open_link(self.alice_token)
+        self.assertEqual(self.client.get(reverse("contributors:notice", args=[self.theory.paper_id])).status_code, 404)
+        _, theory_token = Invitation.issue(a_th)
+        self.open_link(theory_token)
+        self.assertEqual(self.client.get(reverse("contributors:notice", args=[self.theory.paper_id])).status_code, 200)
+        self.assertEqual(self.client.get(reverse("contributors:notice", args=[self.empirical.paper_id])).status_code, 404)
+
     def test_create_invitation_command_prints_the_link_once(self):
         out = io.StringIO()
         call_command("create_invitation", self.a_emp.public_id, "--days", "3", stdout=out)
@@ -100,6 +139,18 @@ class InvitationTests(ContributorSiteTestCase):
         self.assertIn("no-store", response["Cache-Control"])
         for session in Session.objects.all():
             self.assertNotIn(token, str(session.get_decoded()))
+
+    def test_view_only_staff_can_neither_invite_nor_revoke(self):
+        viewer = get_user_model().objects.create_user("viewer", "viewer@example.org", "a-long-test-password", is_staff=True)
+        viewer.user_permissions.set(Permission.objects.filter(codename__in=["view_assignment", "view_invitation"]))
+        self.client.force_login(viewer)
+        before = Invitation.objects.count()
+        self.client.post(reverse("admin:contributors_assignment_changelist"),
+                         {"action": "create_invitation", "_selected_action": [self.a_emp.pk]})
+        self.assertEqual(Invitation.objects.count(), before)
+        self.client.post(reverse("admin:contributors_invitation_changelist"),
+                         {"action": "revoke", "_selected_action": list(Invitation.objects.values_list("pk", flat=True))})
+        self.assertFalse(Invitation.objects.filter(revoked_at__isnull=False).exists())
 
     @override_settings(STAGE="1")
     def test_demo_loader_is_refused_outside_stage_0(self):
@@ -193,10 +244,26 @@ class AuthorizationTests(ContributorSiteTestCase):
         page = self.client.get(reverse("contributors:my_paper", args=[self.empirical.paper_id]))
         self.assertNotContains(page, url)
 
+    def test_package_shown_when_the_configuration_omits_visibility(self):
+        self.empirical.config = {k: v for k, v in self.empirical.config.items()
+                                 if k != "candidate_package_visible_to_contributors"}
+        self.empirical.save()
+        self.open_link(self.alice_token)
+        self.consent(self.empirical)
+        url = reverse("contributors:package", args=[self.empirical.paper_id])
+        self.assertContains(self.client.get(reverse("contributors:my_paper", args=[self.empirical.paper_id])), url)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response.close()
+
     def test_package_file_is_not_reachable_as_a_static_file(self):
-        relative = self.empirical.current_package().storage_name
-        self.assertEqual(self.client.get(f"/static/{relative}").status_code, 404)
-        self.assertTrue(package_path(self.empirical.current_package()).is_file())
+        package = self.empirical.current_package()
+        stored = package_path(package).resolve()
+        self.assertTrue(stored.is_file())
+        self.assertIsNone(finders.find(package.storage_name))
+        self.assertTrue(stored.is_relative_to(Path(settings.PRIVATE_STORAGE_ROOT).resolve()))
+        for static_dir in [settings.STATIC_ROOT, *settings.STATICFILES_DIRS]:
+            self.assertFalse(stored.is_relative_to(Path(static_dir).resolve()), static_dir)
 
 
 class MyPaperTests(ContributorSiteTestCase):

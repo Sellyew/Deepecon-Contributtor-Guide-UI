@@ -11,12 +11,13 @@ One Django application (Django 5.2, a long-term-support release) for the [MVP co
 | Settings for both stages: Stage 0 (the demo computer, loopback only) and Stage 1 (a server, M6). All state lives in one data folder | `deepecon_site/settings.py` |
 | Security headers (`default-src 'self'`, no referrer, no caching), log redaction of invitation tokens, and the model gateway that refuses every call | `deepecon_site/middleware.py`, `logging_filters.py`, `gateway.py` |
 | Models: papers, rubric versions, items, item maps, candidate packages, the exposure log (Rule 10), and the event log | `papers/models.py` |
-| Importers for the paper configuration, rubric, item map, and candidate package, each checked against the [schemas](../../schemas/contributor-interface/README.md) and [`validation/rubric_checks.py`](../../validation/rubric_checks.py) and refused if any check fails. Available as commands and as an administration page | `papers/importers.py`, `papers/management/commands/`, `papers/admin.py` |
-| Invitations: random tokens stored only as SHA-256 hashes, with expiry and revocation. A link is shown once, never stored or logged | `contributors/models.py`, `contributors/admin.py`, `create_invitation` |
-| Contributor pages: invitation landing, notice and consent (dated and changeable), "My paper", and the package download. Every page checks the assignment on the server | `contributors/views.py`, `templates/contributors/` |
+| Importers for the paper configuration, rubric, item map, and candidate package, each checked against the [schemas](../../schemas/contributor-interface/README.md) and [`validation/rubric_checks.py`](../../validation/rubric_checks.py) and refused if any check fails. A rubric version, once imported, is never overwritten; a changed configuration is checked again against the stored rubric and item map; a package is accepted only against the SHA-256 in the configuration. After an evaluation run, a task's publication status and designation date cannot change (Rule 8). Available as commands and as an administration page, which needs the permission to change papers | `papers/importers.py`, `papers/management/commands/`, `papers/admin.py` |
+| Invitations: random tokens stored only as SHA-256 hashes, with expiry and revocation. A link is shown once, never stored or logged. The session remembers the invitation and checks it on every request, so revoking a link, or its expiry, ends sessions already opened with it. Creating and revoking links need their own admin permissions | `contributors/models.py`, `contributors/access.py`, `contributors/admin.py`, `create_invitation` |
+| Contributor pages: invitation landing, notice and consent (dated and changeable), "My paper", and the package download. A link reaches only its own assignment, and every page checks it on the server | `contributors/views.py`, `templates/contributors/` |
 | Interface languages: English and Simplified Chinese. The Chinese catalogue is **machine-drafted by Claude and awaits the team's review** (M4) | `locale/zh_Hans/LC_MESSAGES/django.po` |
 | Demo loader: the fictional empirical and theory examples, synthetic packages, and three demo contributors | `contributors/management/commands/load_demo.py` |
-| Tests: importers, invitations, consent, access to other papers, language switching, security headers, external assets, the gateway, network imports, and log redaction | `*/tests.py` |
+| Exposure log (Rule 10): entries are added and viewed, never edited or deleted; the recorder's name comes from the account, and an evaluation run needs the pinned model version and its release date | `papers/models.py`, `papers/admin.py` |
+| Tests (68): importers, invitations and revocation, consent, access to other papers, admin permissions, language switching, security headers, external assets, private storage, the gateway, network imports, and log redaction | `*/tests.py` |
 
 ## Run the demo (Stage 0)
 
@@ -46,7 +47,7 @@ python3 -m venv .venv
 .venv/bin/python manage.py createsuperuser
 ```
 
-At Stage 0 the server refuses to listen on any address other than the loopback address. The data folder is `data/` unless `DEEPECON_DATA_DIR` says otherwise. Keep it on an encrypted disk.
+At Stage 0 the server refuses to listen on any address other than the loopback address. The data folder is `data/` unless `DEEPECON_DATA_DIR` says otherwise. Keep it on an encrypted disk. A contributor with two assignments gets one link for each.
 
 ## Import a paper
 

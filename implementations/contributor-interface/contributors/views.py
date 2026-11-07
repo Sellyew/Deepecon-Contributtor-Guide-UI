@@ -14,7 +14,7 @@ from django.views.decorators.http import require_GET, require_http_methods
 from papers.importers import package_path, rubric_checks
 from papers.models import log_event
 
-from .access import assignment_for, contributor_required, current_contributor, sign_in
+from .access import assignment_for, contributor_required, current_invitation, sign_in
 from .models import Consent, Invitation
 
 
@@ -32,6 +32,11 @@ class NoticeForm(forms.Form):
     )
 
 
+def _package_visible(paper):
+    # The schema's default is true: contributors may see the agent-facing package (D-028).
+    return paper.config.get("candidate_package_visible_to_contributors", True)
+
+
 def _interface_tag():
     """The current interface language as a configuration language tag (zh-hans -> zh-Hans)."""
     code = translation.get_language() or settings.LANGUAGE_CODE
@@ -40,13 +45,10 @@ def _interface_tag():
 
 @require_GET
 def home(request):
-    contributor = current_contributor(request)
-    if contributor is None:
+    invitation = current_invitation(request)
+    if invitation is None:
         return render(request, "contributors/not_signed_in.html", status=403)
-    first = contributor.assignments.select_related("paper").order_by("created_at").first()
-    if first is None:
-        return render(request, "contributors/not_signed_in.html", status=403)
-    return redirect("contributors:my_paper", paper_id=first.paper.paper_id)
+    return redirect("contributors:my_paper", paper_id=invitation.assignment.paper.paper_id)
 
 
 @require_GET
@@ -59,12 +61,14 @@ def invitation_landing(request, token):
     invitation.last_used_at = now
     invitation.save(update_fields=["first_used_at", "last_used_at"])
     assignment = invitation.assignment
-    sign_in(request, assignment.contributor)
+    sign_in(request, invitation)
     log_event(assignment.public_id, "invitation_used", invitation.assignment, invitation_id=invitation.pk)
     response = redirect("contributors:notice", paper_id=assignment.paper.paper_id)   # the token never appears again
-    response.set_cookie(settings.LANGUAGE_COOKIE_NAME, assignment.contributor.preferred_language,
-                        max_age=settings.SESSION_COOKIE_AGE, samesite=settings.LANGUAGE_COOKIE_SAMESITE,
-                        secure=settings.LANGUAGE_COOKIE_SECURE, httponly=settings.LANGUAGE_COOKIE_HTTPONLY)
+    if settings.LANGUAGE_COOKIE_NAME not in request.COOKIES:
+        # The team's preset applies at the first visit only; afterwards the contributor's own choice stays.
+        response.set_cookie(settings.LANGUAGE_COOKIE_NAME, assignment.contributor.preferred_language,
+                            max_age=settings.LANGUAGE_COOKIE_AGE, samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+                            secure=settings.LANGUAGE_COOKIE_SECURE, httponly=settings.LANGUAGE_COOKIE_HTTPONLY)
     return response
 
 
@@ -109,7 +113,7 @@ def my_paper(request, paper_id):
          "count": counts.get(c["id"], 0)}
         for c in paper.config["categories"]
     ]
-    package = paper.current_package() if paper.config.get("candidate_package_visible_to_contributors") else None
+    package = paper.current_package() if _package_visible(paper) else None
     return render(request, "contributors/my_paper.html", {
         "assignment": assignment, "paper": paper, "citation": paper.config["citation"],
         "task_version": paper.config["task_version"], "categories": categories, "package": package,
@@ -123,7 +127,7 @@ def package_download(request, paper_id):
     paper = assignment.paper
     package = paper.current_package()
     if (assignment.latest_consent() is None or package is None
-            or not paper.config.get("candidate_package_visible_to_contributors")):
+            or not _package_visible(paper)):
         raise Http404("No package.")
     log_event(assignment.public_id, "package_downloaded", package, sha256=package.sha256)
     return FileResponse(open(package_path(package), "rb"), as_attachment=True,

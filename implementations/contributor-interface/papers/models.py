@@ -3,6 +3,7 @@
 The team's files are stored as they are (P-041) and normalized through the paper's
 configured categories (D-025). Nothing here is sent to any AI service (D-042).
 """
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -33,7 +34,9 @@ class Paper(models.Model):
         return self.rubrics.filter(version=self.config.get("rubric_version")).first()
 
     def current_package(self):
-        return self.packages.filter(candidate_version=self.config.get("candidate_version", "")).first()
+        # Only the package whose hash the current configuration names (the importer's own rules).
+        return self.packages.filter(candidate_version=self.config.get("candidate_version") or "unversioned",
+                                    sha256=self.config.get("candidate_package_sha256", "")).first()
 
 
 class RubricVersion(models.Model):
@@ -48,7 +51,7 @@ class RubricVersion(models.Model):
         ordering = ["paper", "version"]
 
     def __str__(self):
-        return f"{self.paper_id} {self.version}"
+        return f"{self.paper.paper_id} {self.version}"
 
 
 class Item(models.Model):
@@ -97,7 +100,7 @@ class CandidatePackage(models.Model):
         unique_together = [("paper", "candidate_version")]
 
     def __str__(self):
-        return f"{self.paper_id} {self.candidate_version}"
+        return f"{self.paper.paper_id} {self.candidate_version}"
 
 
 class ExposureLogEntry(models.Model):
@@ -137,7 +140,11 @@ class ExposureLogEntry(models.Model):
         verbose_name_plural = "exposure log"
 
     def __str__(self):
-        return f"{self.paper_id} {self.occurred_on} {self.developer} ({self.material})"
+        return f"{self.paper.paper_id} {self.occurred_on} {self.developer} ({self.material})"
+
+    def clean(self):
+        if self.route == "evaluation_run" and (not self.model_version or not self.model_release_date):
+            raise ValidationError("An evaluation run needs the pinned model version and its release date (Rule 10).")
 
 
 class EventLog(models.Model):

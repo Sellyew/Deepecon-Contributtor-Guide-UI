@@ -1,11 +1,12 @@
 """Team administration for papers and their records (plan §2.1, §2.7)."""
 from django import forms
 from django.contrib import admin, messages
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
 from django.urls import path
 
 from . import importers
-from .models import CandidatePackage, EventLog, ExposureLogEntry, Item, ItemMap, Paper, RubricVersion
+from .models import CandidatePackage, EventLog, ExposureLogEntry, Item, ItemMap, Paper, RubricVersion, log_event
 
 
 class ImportForm(forms.Form):
@@ -48,6 +49,8 @@ class PaperAdmin(admin.ModelAdmin):
         return [path("import/", self.admin_site.admin_view(self.import_view), name="papers_import")] + super().get_urls()
 
     def import_view(self, request):
+        if not self.has_change_permission(request):
+            raise PermissionDenied          # being staff is not enough to import or overwrite files
         form = ImportForm(request.POST or None, request.FILES or None)
         if request.method == "POST" and form.is_valid():
             kind, paper, upload = form.cleaned_data["kind"], form.cleaned_data["paper"], form.cleaned_data["file"]
@@ -96,9 +99,21 @@ class CandidatePackageAdmin(ReadOnlyAdmin):
 class ExposureLogEntryAdmin(admin.ModelAdmin):
     list_display = ("paper", "occurred_on", "material", "route", "developer", "api_host", "account_kind", "model_version", "model_release_date")
     list_filter = ("paper", "material", "route", "developer")
+    readonly_fields = ("recorded_by", "recorded_at")
+
+    # The log is append-only (Rule 10): entries are added and viewed, never edited or deleted;
+    # corrections are new entries with a note.
+    def has_change_permission(self, request, obj=None):
+        return False
 
     def has_delete_permission(self, request, obj=None):
-        return False        # the log is append-only; corrections are new entries with a note
+        return False
+
+    def save_model(self, request, obj, form, change):
+        obj.recorded_by = request.user.get_username()
+        super().save_model(request, obj, form, change)
+        log_event(obj.recorded_by, "exposure_recorded", obj.paper, exposure_id=obj.pk, route=obj.route,
+                  occurred_on=obj.occurred_on.isoformat())
 
 
 @admin.register(EventLog)

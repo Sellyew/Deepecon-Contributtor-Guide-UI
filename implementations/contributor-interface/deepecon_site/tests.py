@@ -1,10 +1,12 @@
 """Site-wide privacy and security controls (plan §3)."""
+import ast
+import io
 import logging
 import re
 from pathlib import Path
 
 from django.conf import settings
-from django.test import SimpleTestCase, TestCase
+from django.test import Client, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from contributors.models import Assignment, Contributor, Invitation
@@ -13,10 +15,32 @@ from deepecon_site.logging_filters import RedactInvitationTokens
 from deepecon_site.testing import PrivateStorageMixin, import_example
 
 EXTERNAL = re.compile(r"""(?:src|href|action)\s*=\s*["']\s*(?:https?:)?//""", re.I)
-NETWORK_IMPORTS = re.compile(
-    r"^\s*(?:import|from)\s+(requests|httpx|aiohttp|urllib3|socket|smtplib|ftplib|http\.client|urllib\.request|openai|anthropic)\b",
-    re.M,
-)
+NETWORK_MODULES = {"socket", "ssl", "http.client", "urllib.request", "urllib3", "requests", "httpx", "aiohttp",
+                   "smtplib", "ftplib", "django.core.mail", "openai", "anthropic"}
+
+
+def imported_names(source):
+    """Every module name a source file imports, including `from x import y` as x.y."""
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            yield from (a.name for a in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module and not node.level:
+            yield node.module
+            yield from (f"{node.module}.{a.name}" for a in node.names)
+
+
+def opens_network(source):
+    return any(n == m or n.startswith(m + ".") for n in imported_names(source) for m in NETWORK_MODULES)
+
+
+def project_modules():
+    """The site's own code, and the rubric checks it runs; not the virtual environment."""
+    root = Path(settings.BASE_DIR)
+    paths = [root / "manage.py", Path(settings.VALIDATION_DIR) / "rubric_checks.py"]
+    for app in ("deepecon_site", "papers", "contributors"):
+        paths += [p for p in (root / app).rglob("*.py")
+                  if "migrations" not in p.parts and p.name not in ("tests.py", "testing.py")]
+    return paths
 
 
 class HeaderAndAssetTests(PrivateStorageMixin, TestCase):
@@ -58,14 +82,14 @@ class GatewayTests(SimpleTestCase):
             gateway.call_model("any prompt", model="any")
 
     def test_no_module_opens_network_connections(self):
-        root = Path(settings.BASE_DIR)
-        offenders = []
-        for path in root.rglob("*.py"):
-            if "migrations" in path.parts or path.name in ("tests.py", "testing.py") or "data" in path.relative_to(root).parts:
-                continue
-            if NETWORK_IMPORTS.search(path.read_text(encoding="utf-8")):
-                offenders.append(str(path.relative_to(root)))
+        offenders = [str(p) for p in project_modules() if opens_network(p.read_text(encoding="utf-8"))]
         self.assertEqual(offenders, [])
+
+    def test_the_scan_catches_every_import_form(self):
+        for source in ("import socket", "import os, socket", "from urllib import request", "from http import client",
+                       "import urllib.request as r", "from django.core.mail import send_mail", "import anthropic"):
+            self.assertTrue(opens_network(source), source)
+        self.assertFalse(opens_network("import json\nfrom pathlib import Path\nfrom . import socket"))
 
 
 class LoggingTests(TestCase):
@@ -76,12 +100,43 @@ class LoggingTests(TestCase):
         self.assertNotIn("SECRETTOKEN123", record.getMessage())
         self.assertIn("/i/[redacted]", record.getMessage())
 
+    def test_server_log_is_redacted(self):
+        with self.assertLogs("django.server", level="INFO") as captured:
+            logging.getLogger("django.server").info('"%s" %s %s', "GET /i/SECRETTOKEN123/ HTTP/1.1", "302", "0")
+        self.assertNotIn("SECRETTOKEN123", "\n".join(captured.output))
+
+    @override_settings(DEBUG=True)
+    def test_csrf_log_never_contains_tokens(self):
+        # django.security.csrf logs request paths; the filter on the console handler must catch them.
+        token = "RAWSECRETTOKEN0123456789abcdefXYZ"
+        handlers = [h for h in logging.getLogger("django").handlers if isinstance(h, logging.StreamHandler)]
+        self.assertTrue(handlers)
+        stream = io.StringIO()
+        old = [h.setStream(stream) for h in handlers]
+        try:
+            Client(enforce_csrf_checks=True).post(f"/i/{token}/")
+        finally:
+            for handler, previous in zip(handlers, old):
+                handler.setStream(previous)
+        self.assertIn("/i/[redacted]", stream.getvalue())
+        self.assertNotIn(token, stream.getvalue())
+
     def test_request_logs_never_contain_tokens(self):
         token = "AnInvalidTokenThatMustNotBeLogged123"
         with self.assertLogs("django.request", level="WARNING") as captured:
             self.client.get(f"/i/{token}/")
         self.assertTrue(captured.output)
         self.assertNotIn(token, "\n".join(captured.output))
+
+
+class PrivateStorageSettingsTests(SimpleTestCase):
+    """The real setting, not the temporary one the other tests use."""
+
+    def test_private_storage_is_outside_every_static_folder(self):
+        private = Path(settings.PRIVATE_STORAGE_ROOT).resolve()
+        for public in (Path(settings.STATIC_ROOT), *map(Path, settings.STATICFILES_DIRS)):
+            public = public.resolve()
+            self.assertFalse(private.is_relative_to(public) or public.is_relative_to(private), public)
 
 
 class DatabaseSettingsTests(SimpleTestCase):

@@ -136,6 +136,7 @@ CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = LANGUAGE_COOKIE_SECURE = STAGE == "1"
 LANGUAGE_COOKIE_HTTPONLY = True
 LANGUAGE_COOKIE_SAMESITE = "Lax"
+LANGUAGE_COOKIE_AGE = SESSION_COOKIE_AGE      # the contributor's own choice of language lasts
 
 # Security headers. The Content-Security-Policy is added by SecurityHeadersMiddleware.
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -157,13 +158,16 @@ SITE_BASE_URL = os.environ.get("DEEPECON_SITE_BASE_URL", "http://127.0.0.1:8000"
 # Version of the notice text that contributors acknowledge (MVP §3 step 1; D-042).
 NOTICE_VERSION = "2026-11-07"
 
-# Request logs record paths with invitation tokens removed (plan §3).
+# Logs record paths with invitation tokens removed (plan §3). The filter sits on the handler, so
+# it covers every logger that writes to it, including django.security.csrf; the logger-level
+# filters keep django.server and django.request redacted for any other handler too.
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "filters": {"redact_tokens": {"()": "deepecon_site.logging_filters.RedactInvitationTokens"}},
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "filters": ["redact_tokens"]}},
     "loggers": {
+        "django": {"handlers": ["console"], "level": "INFO", "propagate": False},
         "django.server": {"handlers": ["console"], "level": "INFO", "filters": ["redact_tokens"], "propagate": False},
         "django.request": {"handlers": ["console"], "level": "WARNING", "filters": ["redact_tokens"], "propagate": False},
     },

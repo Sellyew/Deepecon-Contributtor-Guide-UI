@@ -21,7 +21,10 @@ class AssignmentAdmin(admin.ModelAdmin):
     readonly_fields = ("public_id", "created_at")
     actions = ["create_invitation"]
 
-    @admin.action(description="Create an invitation link (shown once)")
+    def has_invite_permission(self, request):
+        return request.user.has_perm("contributors.add_invitation")
+
+    @admin.action(description="Create an invitation link (shown once)", permissions=["invite"])
     def create_invitation(self, request, queryset):
         # The links are rendered in this response only: they are never stored in messages,
         # sessions, or logs, and the response is not cached (Cache-Control: no-store).
@@ -44,7 +47,7 @@ class InvitationAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False        # use the action on assignments, so the token is generated and shown once
 
-    @admin.action(description="Revoke the selected invitations")
+    @admin.action(description="Revoke the selected invitations", permissions=["change"])
     def revoke(self, request, queryset):
         now = timezone.now()
         for invitation in queryset.filter(revoked_at__isnull=True):
