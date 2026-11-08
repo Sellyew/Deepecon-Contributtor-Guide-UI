@@ -6,7 +6,8 @@ from django.shortcuts import redirect, render
 from django.urls import path
 
 from . import importers
-from .models import CandidatePackage, EventLog, ExposureLogEntry, Item, ItemMap, Paper, RubricVersion, log_event
+from .models import (OPEN_TO_ALL_RULE, CandidatePackage, EventLog, ExposureLogEntry, Item, ItemMap, Paper,
+                     RubricVersion, log_event)
 
 
 class ImportForm(forms.Form):
@@ -36,8 +37,20 @@ class ReadOnlyAdmin(admin.ModelAdmin):
         return False
 
 
+class PaperAdminForm(forms.ModelForm):
+    class Meta:
+        model = Paper
+        fields = ["in_pool"]
+
+    def clean_in_pool(self):
+        if self.cleaned_data["in_pool"] and self.instance.publication_status != Paper.DEMO:
+            raise forms.ValidationError(OPEN_TO_ALL_RULE)
+        return self.cleaned_data["in_pool"]
+
+
 @admin.register(Paper)
 class PaperAdmin(admin.ModelAdmin):
+    form = PaperAdminForm
     list_display = ("paper_id", "title", "field", "publication_status", "designated_on", "in_pool", "imported_at")
     list_filter = ("in_pool", "publication_status")
     # Everything comes from the imported configuration except whether the paper is open to all

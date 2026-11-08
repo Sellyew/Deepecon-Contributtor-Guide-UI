@@ -50,6 +50,13 @@ class ContributorSiteTestCase(PrivateStorageMixin, TestCase):
     def open_link(self, token, client=None):
         return (client or self.client).get(f"/i/{token}/")
 
+    def open_to_all(self, *papers):
+        """Only demo or development papers can be open to all (D-047), so designate them first."""
+        for paper in papers:
+            paper.publication_status = Paper.DEMO
+            paper.in_pool = True
+            paper.save()
+
     def consent(self, paper, team_ai_use="no"):
         return self.client.post(url("notice", paper), {"acknowledge_evaluation": "on", "team_ai_use": team_ai_use})
 
@@ -234,10 +241,12 @@ class InvitationTests(ContributorSiteTestCase):
         self.assertEqual(demo.count(), 3)
         for contributor in demo:
             self.assertEqual(contributor.invitations.filter(revoked_at__isnull=True).count(), 1, contributor)
-        self.assertEqual(set(Paper.objects.filter(in_pool=True).values_list("paper_id", flat=True)),
-                         {self.empirical.paper_id, self.theory.paper_id})
+        # Only the demo paper is open to all; the scored example is offered by invitation (D-047).
+        self.assertEqual(set(Paper.objects.filter(in_pool=True).values_list("paper_id", flat=True)), {self.theory.paper_id})
         expert = Contributor.objects.get(display_name__startswith="Demo invited expert")
         self.assertIsNone(expert.current_assignment)
+        self.assertEqual(set(expert.choosable_papers().values_list("paper_id", flat=True)),
+                         {self.empirical.paper_id, self.theory.paper_id})
 
     def test_view_only_staff_can_neither_invite_nor_revoke(self):
         viewer = get_user_model().objects.create_user("viewer", "viewer@example.org", "a-long-test-password", is_staff=True)
@@ -269,9 +278,7 @@ class PaperChoiceTests(ContributorSiteTestCase):
         _, self.carol_token = Invitation.issue(self.carol)
 
     def open_pool(self, *papers):
-        for paper in papers:
-            paper.in_pool = True
-            paper.save()
+        self.open_to_all(*papers)
 
     def choose(self, paper, client=None):
         return (client or self.client).post(url("choose", paper))
@@ -400,8 +407,7 @@ class DangerZoneTests(ContributorSiteTestCase):
 
     def setUp(self):
         super().setUp()
-        self.empirical.in_pool = True
-        self.empirical.save()
+        self.open_to_all(self.empirical)
         self.team = get_user_model().objects.create_superuser("team", "team@example.org", "a-long-test-password")
         self.team_client = Client()
         self.team_client.force_login(self.team)

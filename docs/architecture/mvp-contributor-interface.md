@@ -258,7 +258,7 @@ Feedback buttons can send a whole conversation for training even after opting ou
 
 ### 6.2 Run the review
 - Create and revoke invitation links, one per contributor at a time; the team delivers them through e-mail or WeChat.
-- Offer papers: assign a paper to a contributor (for an author, their own), or mark a paper as open to all contributors. Opening a scored task to all lets every invited contributor see its items, and closing it again does not withdraw it from those who chose it (P-060).
+- Offer papers: assign a paper to a contributor (for an author, their own), or mark a demo or development paper as open to all contributors. Scored papers are offered by invitation only (D-047); closing a paper to all does not withdraw it from those who chose it (P-060).
 - Move or rewind a contributor's link only when they ask, through the danger zone on their page (D-045).
 - Follow progress and answer "Ask the team" questions.
 - Export each contributor's review (JSON and a readable bilingual summary) and a list of suggested rubric changes.

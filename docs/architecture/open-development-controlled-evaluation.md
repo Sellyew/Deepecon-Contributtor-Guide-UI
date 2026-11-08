@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** v0.1 (2026-11-07), drafted by Claude at the research lead's request. The three principles are the lead's (D-046); everything else here is a recommendation (P-062) until the lead approves it. |
+| **Status** | **Proposed** v0.2 (2026-11-08), drafted by Claude at the research lead's request. The three principles are the lead's (D-046). The lead settled the first version's choices on 2026-11-08 (D-047): only demo papers are public, access is by invitation, and the evaluation manifest's hash is published; §4, §5, §6, and §9 now say so. The rest is a recommendation (P-062) until the lead approves it. |
 | **Replaces** | P-061 (scored tasks only by assignment), withdrawn |
 | **Builds on** | D-038 to D-045; the [AI use and integrity rules](llm-use-policy.md); the [construction protocol](../methodology/benchmark-construction-protocol.md) Stage 8; the [verifier validation protocol](../methodology/verifier-validation-protocol.md) §8; evidence notes [R10](../research/evidence/R10-contamination-and-evaluation-isolation.md), [R12](../research/evidence/R12-human-access-to-unreleased-answers.md), [R13](../research/evidence/R13-release-and-evaluation-practice.md) |
 | **Scope** | The long-term shape that M2 and later milestones should fit. It adds one small step to the contributor site (§4); everything about official evaluation comes after the MVP |
@@ -62,18 +62,22 @@ contribute ──► validate ──► admit to a batch ──► draw (per pap
 
 ## 4. Discovery and access on the site (the only change to the MVP)
 
-The pool already exists (D-044, P-060). Two changes:
+**First version (D-047): invitation only.** Scored papers are offered by assignment; only demo or development papers can be "open to all contributors", which the site now enforces. The listing and request step below come in a future version.
+
+The pool already exists (D-044, P-060). In that future version, two changes:
 
 1. **"Open to all contributors" becomes "Listed in the pool".** A listed paper shows its citation, its set (development, or evaluation with access on request), and a short note of the contributions it needs (for example, "author review", "expert review", "replication package"), taken from an optional field in the paper configuration.
 2. **Choosing depends on the set.**
    - **Development paper:** "Choose this paper" works as now.
    - **Evaluation paper:** the button reads "Ask to work on this paper". It records a request; the contributor sees only the citation until the team authorizes. The team authorizes in the administration pages (one action, logged), and the paper then works like any other assigned paper.
 
-*Implementation:* one field on Assignment (requested or authorized; everything the team creates is authorized), one admin action, one page state, and the access check that already exists. About half a day, at the start of M2. The current internal values `scored` and `demo_or_development` can stay, with new labels on screen; renaming them can wait for the next schema version.
+*Implementation, when it comes:* one field on Assignment (requested or authorized; everything the team creates is authorized), one admin action, one page state, and the access check that already exists. About half a day. The current internal values `scored` and `demo_or_development` can stay, with new labels on screen; renaming them can wait for the next schema version.
 
 **Public discovery** (a read-only page of listed papers for economists without an invitation, with a way to ask for one) belongs after the server exists (M6). The site stays invitation-only until then.
 
 ## 5. Which validated papers become development and which evaluation
+
+**First version (D-047):** the development set is the demo papers only (D-024, V5, and the fictional examples); every invited contributor's paper stays private, in the evaluation set. Authors may choose public release in a future version. The steps below apply once the lead sets a development share above zero.
 
 1. **Same bar for both.** The draw happens after validation, so every paper passes the same review (construction protocol Stage 7, including the blind independent reviewer, rubric PR-2).
 2. **Pre-stated exceptions go to development before the draw:** demo papers (D-024, V5); papers whose planted errors or solutions are already public; and any paper whose author asks for public release. These are decided without looking at model results.
@@ -90,7 +94,7 @@ The pool already exists (D-044, P-060). Two changes:
 | Test isolation | D-041 (Rule 9) | Nothing |
 | Exposure tracking | D-040 (Rule 10): exposure log, pinned model versions and release dates, separate reporting | The task build date (M2, D-044) |
 | Fixed evaluation conditions | VVP §8: at least five trials, confidence intervals by bootstrap over tasks | A protocol per evaluation version, enforced by the harness rather than by prose, as Terminal-Bench does: pinned harness, instruction, tools, network allowlist (the model's API only), time and cost limits, trials, sampling settings, judge model if any. Every model in a comparison runs under the same protocol |
-| Versioned task sets | Construction protocol Stage 8: each release is frozen; withdrawals take effect at the next version | A manifest per evaluation version (task IDs and SHA-256 of each instruction, package, verifier and rubric), with the version's protocol. *Optional:* publish the manifest's hash before the first official run, so anyone can later check that the set was not changed after seeing results. No major benchmark does this yet (R13); it costs one line in a release note |
+| Versioned task sets | Construction protocol Stage 8: each release is frozen; withdrawals take effect at the next version | A manifest per evaluation version (task IDs and SHA-256 of each instruction, package, verifier and rubric), with the version's protocol. **The manifest's hash is published before the first official run (D-047)**, so anyone can later check that the set was not changed after seeing results. No major benchmark does this yet (R13); it costs one line in a release note |
 | Who runs | — | Only the team runs official evaluations, through providers' APIs (D-038). Self-reported runs on the evaluation set do not count |
 | Defects found after results | — | A defect (wrong verifier, ambiguous instruction) is judged by a reviewer without seeing per-model results where possible, recorded, and the task is removed for all models in a dated erratum; the fix enters the next version. Terminal-Bench's rule fits: a fix that changes only grading regrades the saved runs; one that changes what the agent sees means re-running |
 
@@ -101,6 +105,12 @@ The pool already exists (D-044, P-060). Two changes:
 - **Headline scores** for a new model use tasks never sent to its developer (Rule 10's "clean" tasks), which in practice means the newest batches. This is close to Scale's rule of featuring a model only the first time its developer meets a set (R13). Full-set scores are reported beside them with exposure labels, counts, and confidence intervals.
 - **Comparisons are within one version and one protocol.** A model whose API has been withdrawn cannot be re-run; it is reported on the versions it was run on, never imputed.
 - **Retirement rule, fixed in advance:** an evaluation paper retires when its answers become public, or after a set number of versions. The research lead chooses the number.
+- **What others do about retirement** (R10, R12, R13): there is no common period.
+  - *Protected sets are kept for years* and retired with a new version or generation, usually **without** being published. ARC-AGI-1's private set was reportedly unchanged from 2020 to 2024, and ARC-AGI-2's last competition year is reportedly 2026 [S]. HLE and FrontierMath keep their private sets and revise them [S]. METR extends its private suite by versions [S].
+  - *Scale* features a model only the first time its developer meets a set [S], so each set counts once per developer.
+  - *Continuous benchmarks rotate quickly or not at all.* LiveBench withholds its newest questions for about a month [S] and, by one report, turns its set over about every six months [S]. LiveCodeBench and SWE-rebench retire nothing; they score a model only on items newer than its training cutoff.
+  - Only LiveBench and ARC's public sets show protected items later becoming public; Terminal-Bench's retired tasks were public all along.
+- **Recommendation** *(proposal)*: each official run sends a paper's tasks to the evaluated developers, so a paper gives clean comparisons mainly in its first version. Keep an evaluation paper for **two versions** (fresh, then for continuity with exposure labels), then retire it; a retired paper joins the development set unless its author asked to keep it private. Retire at once if its answers become public. Nothing is needed before the first evaluation version (milestone E1).
 
 ## 8. What changes in the existing decisions and plan
 
@@ -118,6 +128,8 @@ The pool already exists (D-044, P-060). Two changes:
 **Unchanged:** AI-assisted contribution with disclosure and expert validation (D-039); privacy and consent (D-042); evaluation of all models through APIs and no local deployment (D-038); isolation (D-041); one link and one paper at a time (D-044, D-045); the deferred held-out tier (O-038). There are no task tiers with different AI rules.
 
 ## 9. Trade-offs and choices for the research lead
+
+*Answered on 2026-11-08 (D-047): 1 (only demo papers in the first version), 2 (authors' choice in a future version; invited contributors' papers private for now), 4 (invitation first; request and authorization later), and the published manifest hash. Item 3 is answered from practice in §7, with a recommendation.*
 
 1. **The share of development papers.** More development papers make DeepEcon more useful for building systems; fewer evaluation papers widen the confidence intervals (Rule 10's illustration: about ±25 percentage points with 30 tasks a side). Early on, with few papers, a small development share (or only the demo papers) may be wise.
 2. **Authors' choice.** Letting an author send their paper to the public set before the draw respects authors and is harmless to validity, since it happens before any results; letting them keep it out of the public set is equally harmless. Either way it must be decided before the draw.

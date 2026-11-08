@@ -320,10 +320,36 @@ class AdminPermissionTests(PrivateStorageMixin, TestCase):
         self.paper.refresh_from_db()
         self.assertNotEqual(self.paper.title, "Overwritten")
 
+    def test_only_development_papers_can_be_open_to_all(self):
+        # D-047: scored papers are offered by invitation; the admin explains, the database enforces.
+        team = get_user_model().objects.create_superuser("team", "team@example.org", "a-long-test-password")
+        self.client.force_login(team)
+        self.assertEqual(self.paper.publication_status, Paper.SCORED)
+        response = self.client.post(reverse("admin:papers_paper_change", args=[self.paper.pk]), {"in_pool": "on"})
+        self.assertContains(response, "Only demo or development papers can be open to all contributors")
+        self.paper.refresh_from_db()
+        self.assertFalse(self.paper.in_pool)
+        self.assertFalse(EventLog.objects.filter(operation="pool_changed").exists())
+        from django.db import IntegrityError, transaction
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Paper.objects.filter(pk=self.paper.pk).update(in_pool=True)
+
+    def test_an_open_paper_cannot_be_reimported_as_scored(self):
+        theory = import_example("theory")
+        theory.in_pool = True
+        theory.save()
+        config = dict(theory.config, publication_status={"status": "scored"})
+        with self.assertRaises(importers.ImportRefused) as refused:
+            importers.import_paper_config(json.dumps(config).encode(), "test")
+        self.assertTrue(any("switch that off" in p for p in refused.exception.problems))
+        theory.refresh_from_db()
+        self.assertEqual(theory.publication_status, Paper.DEMO)
+
     def test_opening_a_paper_to_all_is_logged_and_closing_it_warns(self):
         from contributors.models import Contributor
         team = get_user_model().objects.create_superuser("team", "team@example.org", "a-long-test-password")
         self.client.force_login(team)
+        Paper.objects.filter(pk=self.paper.pk).update(publication_status=Paper.DEMO, designated_on=date(2026, 11, 8))
         change = reverse("admin:papers_paper_change", args=[self.paper.pk])
         self.assertEqual(self.client.post(change, {"in_pool": "on"}).status_code, 302)
         self.paper.refresh_from_db()

@@ -91,6 +91,8 @@ def import_paper_config(content, actor):
             and (status["status"], new_date) != (existing.publication_status, existing.designated_on)):
         # Rule 8: the designation is fixed before any evaluation run and does not change afterwards.
         raise ImportRefused([f"{data['paper_id']}: the publication status and its designation date cannot change after an evaluation run (Rule 8)"])
+    if existing and existing.in_pool and status["status"] != Paper.DEMO:
+        raise ImportRefused([f"{data['paper_id']} is open to all contributors; switch that off before making it a scored paper (D-047)"])
     paper, created = Paper.objects.update_or_create(
         paper_id=data["paper_id"],
         defaults={

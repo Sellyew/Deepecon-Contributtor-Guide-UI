@@ -7,6 +7,14 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 
+OPEN_TO_ALL_HELP = (
+    "Every invited contributor may choose this paper and then sees its items (D-044). Only demo or development "
+    "papers can be open to all; scored papers are offered by invitation, through assignments (D-047). Switching "
+    "it off stops new choices only: contributors who already chose the paper keep it (see Assignments, 'Chosen by "
+    "the contributor'); to withdraw access, delete those assignments.")
+OPEN_TO_ALL_RULE = "Only demo or development papers can be open to all contributors; offer a scored paper by assigning it (D-047)."
+
+
 class Paper(models.Model):
     SCORED = "scored"
     DEMO = "demo_or_development"
@@ -24,15 +32,15 @@ class Paper(models.Model):
     designated_on = models.DateField(null=True, blank=True, help_text="Date of the demo or development designation (Rule 8).")
     in_pool = models.BooleanField(
         default=False, verbose_name="open to all contributors",
-        help_text="Every invited contributor may choose this paper and then sees its items (D-044). "
-                  "Leave it off for a scored task unless any invited contributor may see its items; "
-                  "offer it to individual contributors through assignments instead. Switching it off "
-                  "stops new choices only: contributors who already chose the paper keep it (see "
-                  "Assignments, 'Chosen by the contributor'); to withdraw access, delete those assignments.")
+        help_text=OPEN_TO_ALL_HELP)
     imported_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["paper_id"]
+        constraints = [
+            models.CheckConstraint(condition=models.Q(in_pool=False) | models.Q(publication_status="demo_or_development"),
+                                   name="only_development_papers_open_to_all", violation_error_message=OPEN_TO_ALL_RULE),
+        ]
 
     def __str__(self):
         return self.paper_id
