@@ -24,5 +24,6 @@ Working research notes produced by AI research agents (Claude subagents) under t
 | [R11](R11-llm-assistance-in-benchmark-construction.md) | LLM assistance in benchmark construction: Terminal-Bench family rules, practice in 20 other benchmarks, exposure and measurement risks, provider data-use defaults (2026-11-06) |
 | [R12](R12-human-access-to-unreleased-answers.md) | Who may see a task's unreleased answers: Terminal-Bench's public development, held-out sets and their custodians, cross-review by assignment, confidentiality terms (2026-11-07) |
 | [R13](R13-release-and-evaluation-practice.md) | How benchmarks release, refresh, and officially evaluate tasks: versioning, errata, maintainer-run evaluation, fixed conditions, selection after results (2026-11-07) |
+| [R14](R14-contamination-in-practice.md) | How much task exposure matters in practice: measured contamination effects, lab practice, API data terms, and why DeepEcon differs from Terminal-Bench-Science (2026-11-08) |
 
 **Environment limits that shaped these notes.** arxiv.org, github.com (web and API), docs.github.com, and several vendor sites were outside the cloud environment's allowed network domains. Papers on arXiv were therefore often verified only through search-engine snippets ([S]) or alternative hosts. *Good Benchmarks* was read in full from a PDF supplied by the research lead.

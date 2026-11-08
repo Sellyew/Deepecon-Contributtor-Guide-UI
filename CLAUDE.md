@@ -57,7 +57,7 @@ An expert-driven benchmark that tests whether AI agents can do rigorous economic
 
 ## Before researching anything again
 
-Read the dated evidence notes in [`docs/research/evidence/`](docs/research/evidence/) (R1–R9, 2026-11-05; R10 and R11, 2026-11-06; R12 and R13, 2026-11-07) first; they record what was verified, at which evidence level, and what could not be accessed. Re-verify only what is stale or marked [S]/[U]. Prices, plan terms, and policies change: re-check them before any public use.
+Read the dated evidence notes in [`docs/research/evidence/`](docs/research/evidence/) (R1–R9, 2026-11-05; R10 and R11, 2026-11-06; R12 and R13, 2026-11-07; R14, 2026-11-08) first; they record what was verified, at which evidence level, and what could not be accessed. Re-verify only what is stale or marked [S]/[U]. Prices, plan terms, and policies change: re-check them before any public use.
 
 ## Environment notes (cloud sessions)
 
