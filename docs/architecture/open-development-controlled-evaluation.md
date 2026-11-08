@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | **Proposed** v0.2 (2026-11-08), drafted by Claude at the research lead's request. The three principles are the lead's (D-046). The lead settled the first version's choices on 2026-11-08 (D-047): only demo papers are public, access is by invitation, and the evaluation manifest's hash is published; §4, §5, §6, and §9 now say so. The rest is a recommendation (P-062) until the lead approves it. |
+| **Status** | **Proposed** v0.3 (2026-11-08; §7 revised the same day), drafted by Claude at the research lead's request. The three principles are the lead's (D-046). The lead settled the first version's choices on 2026-11-08 (D-047): only demo papers are public, access is by invitation, and the evaluation manifest's hash is published; §4, §5, §6, and §9 now say so. The rest is a recommendation (P-062) until the lead approves it. |
 | **Replaces** | P-061 (scored tasks only by assignment), withdrawn |
 | **Builds on** | D-038 to D-045; the [AI use and integrity rules](llm-use-policy.md); the [construction protocol](../methodology/benchmark-construction-protocol.md) Stage 8; the [verifier validation protocol](../methodology/verifier-validation-protocol.md) §8; evidence notes [R10](../research/evidence/R10-contamination-and-evaluation-isolation.md), [R12](../research/evidence/R12-human-access-to-unreleased-answers.md), [R13](../research/evidence/R13-release-and-evaluation-practice.md) |
 | **Scope** | The long-term shape that M2 and later milestones should fit. It adds one small step to the contributor site (§4); everything about official evaluation comes after the MVP |
@@ -15,7 +15,7 @@
 
 - **One workflow, two sets.** Every task goes through the same contribution, AI-use rules, and expert validation. After validation, each **paper** is drawn into either the **development set** (published with solutions and grading tools) or the **evaluation set** (answer keys and grading materials unpublished). The draw is random within each admitted batch, recorded, and made before any official run.
 - **Discovery is separate from access.** Every listed paper shows its citation and what contributions it needs. Development papers can be opened by any invited contributor. Evaluation papers need the team's authorization: a contributor asks, the team grants.
-- **Official scores come from frozen, versioned evaluation sets run by the team** under a fixed protocol, with exposure tracked per task. New tasks enter in the next version; retired evaluation tasks move to the development set.
+- **Official scores come from frozen, versioned evaluation sets run by the team** under a fixed protocol, with exposure tracked per task. New tasks enter in the next version; evaluation papers stay for as long as they are informative and retire only on events (§7).
 - **What already exists covers most of this.** D-040 already separates scored from development tasks and fixes the designation before any evaluation run; the methodology already freezes releases, requires a blind independent reviewer, and forbids tuning tasks to models. The changes are mostly wording, the draw, and one access step on the site.
 
 ## 2. What other benchmarks do
@@ -56,7 +56,7 @@ contribute ──► validate ──► admit to a batch ──► draw (per pap
 | Who sees task materials while building | Any invited contributor who chooses the paper | Authors and contributors the team authorizes |
 | Who runs it | Anyone | The team, under the version's fixed protocol |
 | Contributor AI use | D-039, D-042, identical for both | Same; exposure is logged (Rule 10) |
-| Leaves the set | Never | Retired at a version change (§7) |
+| Leaves the set | Never | Only when an event retires it (§7) |
 
 **The unit is the paper, not the task.** All tasks from one paper go to the same set. A published development task reveals the paper's correct implementation, which would make an evaluation task from the same paper easier to solve by comparison.
 
@@ -100,17 +100,23 @@ The pool already exists (D-044, P-060). In that future version, two changes:
 
 ## 7. Continuous updates and official comparisons
 
-- **Every official run exposes the evaluation set to the evaluated developer.** Through APIs (D-038) there is no fully private evaluation, so a model released after a run may have been trained on that run's material. Fresh tasks are therefore the core of credible comparison, not an extra.
-- **Versions.** The evaluation set is released as numbered versions (for example `eval-2027.1`). Each version adds a batch of fresh papers and retires some older ones, which move to the development set and are published. The cadence should be one the team can keep: two continuous benchmarks fell behind their stated schedules (R13).
-- **Headline scores** for a new model use tasks never sent to its developer (Rule 10's "clean" tasks), which in practice means the newest batches. This is close to Scale's rule of featuring a model only the first time its developer meets a set (R13). Full-set scores are reported beside them with exposure labels, counts, and confidence intervals.
-- **Comparisons are within one version and one protocol.** A model whose API has been withdrawn cannot be re-run; it is reported on the versions it was run on, never imputed.
-- **Retirement rule, fixed in advance:** an evaluation paper retires when its answers become public, or after a set number of versions. The research lead chooses the number.
-- **What others do about retirement** (R10, R12, R13): there is no common period.
-  - *Protected sets are kept for years* and retired with a new version or generation, usually **without** being published. ARC-AGI-1's private set was reportedly unchanged from 2020 to 2024, and ARC-AGI-2's last competition year is reportedly 2026 [S]. HLE and FrontierMath keep their private sets and revise them [S]. METR extends its private suite by versions [S].
-  - *Scale* features a model only the first time its developer meets a set [S], so each set counts once per developer.
-  - *Continuous benchmarks rotate quickly or not at all.* LiveBench withholds its newest questions for about a month [S] and, by one report, turns its set over about every six months [S]. LiveCodeBench and SWE-rebench retire nothing; they score a model only on items newer than its training cutoff.
-  - Only LiveBench and ARC's public sets show protected items later becoming public; Terminal-Bench's retired tasks were public all along.
-- **Recommendation** *(proposal)*: each official run sends a paper's tasks to the evaluated developers, so a paper gives clean comparisons mainly in its first version. Keep an evaluation paper for **two versions** (fresh, then for continuity with exposure labels), then retire it; a retired paper joins the development set unless its author asked to keep it private. Retire at once if its answers become public. Nothing is needed before the first evaluation version (milestone E1).
+*Revised 2026-11-08 after the research lead asked why evaluation tasks should not be kept longer. The earlier recommendation, retiring each paper after two versions, followed benchmarks that harvest items cheaply; it does not suit DeepEcon.*
+
+- **Keep evaluation papers for as long as they stay informative.** Expert-built benchmarks keep their protected sets for years: ARC-AGI-1's private set reportedly from 2020 to 2024, and HLE, FrontierMath, and METR keep and revise theirs [S] (R10, R13). Fast rotation belongs to benchmarks that harvest new items cheaply from contests or GitHub (LiveBench, LiveCodeBench, SWE-rebench). DeepEcon's tasks take expert time and its papers appear slowly, so retiring them early would waste the scarcest input.
+- **Retirement is triggered by events, not by age:**
+  - its answers become public: at once (D-040);
+  - a defect that cannot be repaired: at the next version;
+  - a new generation of the evaluation set replaces the old one, when enough new papers exist, as ARC moved from ARC-AGI-1 to ARC-AGI-2. The research lead decides when.
+
+  A retired paper joins the development set unless its author asked to keep it private.
+- **Age is not the real limit; exposure is.** Rule 10 reports a model's scores separately on tasks whose material reached that model's **developer** before the model's release. A task run through a developer's own API is exposed for that developer's later models however long it is kept. Two ways to keep long-lived tasks clean, without changing the rule:
+  - **Run open-weight models through third-party API hosts.** The host receives the task; the model's developer does not, so the task stays clean for the developer's later models. This fits D-038 (models through APIs, no self-deployment). *(assessment)*
+  - **Run closed models through cloud platforms whose terms keep customer traffic from the model's developer**, if such terms exist and hold. This is unverified [U] and must be checked per platform and dated before the first official run (O-039). It rests on the host's terms, but it removes the developer, which is the party Rule 10 is about.
+
+  Where a developer does receive the tasks through its own API, scores are reported separately, as agreed.
+- **A measurable check, not a promise.** Track the gap between scores on exposed and never-exposed tasks, as ARC tracks the gap between its public and semi-private sets [S]. With few tasks it detects only large effects (Rule 10's illustration: about ±25 percentage points with 30 tasks a side), so it is a warning signal, not proof of cleanliness.
+- **Versions.** The evaluation set is released as numbered versions (for example `eval-2027.1`). A version adds the papers validated since the last one; older papers stay unless an event retires them. The cadence follows the supply of validated papers, not a calendar.
+- **Comparisons are within one version and one protocol,** using the tasks clean for every model compared (D-040), with full-set scores and exposure labels beside them. A model whose API has been withdrawn is reported on the versions it was run on, never imputed.
 
 ## 8. What changes in the existing decisions and plan
 
@@ -129,10 +135,10 @@ The pool already exists (D-044, P-060). In that future version, two changes:
 
 ## 9. Trade-offs and choices for the research lead
 
-*Answered on 2026-11-08 (D-047): 1 (only demo papers in the first version), 2 (authors' choice in a future version; invited contributors' papers private for now), 4 (invitation first; request and authorization later), and the published manifest hash. Item 3 is answered from practice in §7, with a recommendation.*
+*Answered on 2026-11-08 (D-047): 1 (only demo papers in the first version), 2 (authors' choice in a future version; invited contributors' papers private for now), 4 (invitation first; request and authorization later), and the published manifest hash. Item 3 is answered from practice in §7; the recommendation was revised on 2026-11-08 to keep evaluation papers until an event retires them.*
 
 1. **The share of development papers.** More development papers make DeepEcon more useful for building systems; fewer evaluation papers widen the confidence intervals (Rule 10's illustration: about ±25 percentage points with 30 tasks a side). Early on, with few papers, a small development share (or only the demo papers) may be wise.
 2. **Authors' choice.** Letting an author send their paper to the public set before the draw respects authors and is harmless to validity, since it happens before any results; letting them keep it out of the public set is equally harmless. Either way it must be decided before the draw.
 3. **Evaluation papers and contributors' AI use.** With one rule set for everyone, a contributor's AI use on an evaluation paper exposes its items to that provider; it is logged and reported, as already agreed. The alternative, different rules for evaluation papers, is what the lead asked to avoid.
-4. **Retirement period**, the number of versions after which an evaluation paper is published.
+4. **Retirement:** events rather than a fixed period (§7, revised 2026-11-08); the lead decides when a new generation replaces the evaluation set.
 5. **Authorization workload.** Each request to work on an evaluation paper needs a team decision; with few contributors this is small.
