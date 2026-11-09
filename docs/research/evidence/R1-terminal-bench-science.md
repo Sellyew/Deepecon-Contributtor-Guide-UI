@@ -11,6 +11,9 @@
 
 Citation shorthand: `TBS:<path>` = file in the TBS clone at the commit above; `Harbor:<path>` = file in the Harbor clone; `GB §n` = Bercovich (2026), section n. Full URLs are in §13.
 
+
+*Addendum 2026-11-09: TBS has changed since this clone (90 tasks, new trial-analysis and cheat-analysis rubrics, hints deleted before merge, own copies out of red-team scope); see [R15](R15-lessons-from-terminal-bench-science.md) §5 and [R12](R12-human-access-to-unreleased-answers.md).*
+
 ---
 
 ## Summary (10 bullets)
