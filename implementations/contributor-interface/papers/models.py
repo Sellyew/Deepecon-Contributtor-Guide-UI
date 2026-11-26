@@ -3,6 +3,7 @@
 The team's files are stored as they are (P-041) and normalized through the paper's
 configured categories (D-025). Nothing here is sent to any AI service (D-042).
 """
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -33,6 +34,13 @@ class Paper(models.Model):
     in_pool = models.BooleanField(
         default=False, verbose_name="open to all contributors",
         help_text=OPEN_TO_ALL_HELP)
+    built_on = models.DateField(
+        null=True, blank=True, verbose_name="task build date",
+        help_text="When the task built from this paper was built, for dating exposure against model releases "
+                  "(Rule 10, D-044). Required before a review is frozen.")
+    team_owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="owned_papers",
+        help_text="The team member who answers this paper's questions and drives its review (D-049). Optional.")
     imported_at = models.DateTimeField(auto_now=True)
 
     class Meta:

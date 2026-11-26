@@ -12,9 +12,12 @@ page has a "danger zone" for this, with GitHub's confirmation steps for deleting
 repository: what will happen, "I have read and understand these effects", then typing the
 contributor's ID. "Rewind" sends the link back to the start: the list of papers.
 """
+import json
+
 from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
@@ -22,7 +25,9 @@ from django.utils import timezone
 
 from papers.models import log_event
 
-from .models import Assignment, Consent, Contributor, Invitation, issue_invitation, set_first_paper
+from . import review as selection
+from .models import (Assignment, Confirmation, Consent, Contributor, Invitation, ItemReview, Proposal, Question,
+                     issue_invitation, set_first_paper)
 
 
 class InviteActionMixin:
@@ -143,10 +148,51 @@ class ContributorAdmin(InviteActionMixin, admin.ModelAdmin):
 
 @admin.register(Assignment)
 class AssignmentAdmin(InviteActionMixin, admin.ModelAdmin):
-    list_display = ("public_id", "contributor", "paper", "relationship_to_paper", "added_by", "created_at")
+    list_display = ("public_id", "contributor", "paper", "relationship_to_paper", "added_by", "progress", "frozen_at", "created_at")
     list_filter = ("paper", "relationship_to_paper", "added_by")
-    readonly_fields = ("public_id", "added_by", "created_at")
-    actions = ["create_invitation"]
+    readonly_fields = ("public_id", "added_by", "created_at", "frozen_at", "frozen_by")
+    actions = ["create_invitation", "freeze", "unfreeze", "export_review"]
+
+    @admin.display(description="Reviewed")
+    def progress(self, obj):
+        p = selection.progress(obj)
+        return f"{p['reviewed']} of {p['total']}"
+
+    @admin.action(description="Freeze the selected reviews (contributors can no longer change them)", permissions=["change"])
+    def freeze(self, request, queryset):
+        for assignment in queryset.select_related("paper", "contributor"):
+            if assignment.is_frozen:
+                continue
+            blocking, warnings = selection.freeze_problems(assignment)
+            if blocking:
+                self.message_user(request, f"{assignment.public_id} not frozen: {'; '.join(blocking)}.", messages.ERROR)
+                continue
+            assignment.frozen_at, assignment.frozen_by = timezone.now(), request.user.get_username()
+            assignment.save(update_fields=["frozen_at", "frozen_by"])
+            log_event(request.user.get_username(), "review_frozen", assignment, warnings=warnings)
+            note = f" Note: {'; '.join(warnings)}." if warnings else ""
+            self.message_user(request, f"{assignment.public_id} frozen.{note}", messages.WARNING if warnings else messages.SUCCESS)
+
+    @admin.action(description="Unfreeze the selected reviews", permissions=["change"])
+    def unfreeze(self, request, queryset):
+        for assignment in queryset.filter(frozen_at__isnull=False):
+            assignment.frozen_at, assignment.frozen_by = None, ""
+            assignment.save(update_fields=["frozen_at", "frozen_by"])
+            log_event(request.user.get_username(), "review_unfrozen", assignment)
+            self.message_user(request, f"{assignment.public_id} unfrozen; the contributor can edit again.", messages.SUCCESS)
+
+    @admin.action(description="Export the selected review as JSON (contributor-review schema)", permissions=["view"])
+    def export_review(self, request, queryset):
+        if queryset.count() != 1:
+            self.message_user(request, "Export one review at a time.", messages.ERROR)
+            return None
+        assignment = queryset.select_related("paper", "contributor").get()
+        data = selection.export(assignment)
+        log_event(request.user.get_username(), "review_exported", assignment,
+                  reviews=len(data["reviews"]), proposals=len(data["proposals"]))
+        response = HttpResponse(json.dumps(data, ensure_ascii=False, indent=2), content_type="application/json; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="{assignment.paper.paper_id}-{assignment.public_id}-review.json"'
+        return response
 
     def get_readonly_fields(self, request, obj=None):
         # Consent (and, from M2, reviews) belong to the assignment: they never move to another
@@ -196,3 +242,76 @@ class ConsentAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+class ReadOnlyRecordAdmin(admin.ModelAdmin):
+    """Contributors' own records: the team reads them here and exports them; it does not edit them."""
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(ItemReview)
+class ItemReviewAdmin(ReadOnlyRecordAdmin):
+    list_display = ("assignment", "item", "verdict", "ai_used", "version", "updated_at")
+    list_filter = ("assignment__paper", "verdict", "ai_used")
+
+
+@admin.register(Proposal)
+class ProposalAdmin(ReadOnlyRecordAdmin):
+    list_display = ("public_id", "assignment", "category", "ai_used", "created_at")
+    list_filter = ("assignment__paper", "category")
+
+
+@admin.register(Confirmation)
+class ConfirmationAdmin(ReadOnlyRecordAdmin):
+    list_display = ("assignment", "version", "confirmed_at", "content_sha256")
+
+
+class QuestionAnswerForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = ["answer"]
+        widgets = {"answer": forms.Textarea(attrs={"rows": 6})}
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    """'Ask the team' queue (D-049): unanswered first, oldest first, with each question's age and owner."""
+
+    form = QuestionAnswerForm
+    list_display = ("public_id", "paper", "item", "age", "answered", "owner", "created_at")
+    list_filter = ("assignment__paper", "assignment__paper__team_owner", ("answered_at", admin.EmptyFieldListFilter))
+    readonly_fields = ("public_id", "assignment", "item", "text", "created_at", "answered_at", "answered_by")
+    fields = ("public_id", "assignment", "item", "created_at", "text", "answer", "answered_at", "answered_by")
+
+    def has_add_permission(self, request):
+        return False
+
+    @admin.display(description="Paper")
+    def paper(self, obj):
+        return obj.assignment.paper.paper_id
+
+    @admin.display(description="Owner")
+    def owner(self, obj):
+        return obj.assignment.paper.team_owner or "—"
+
+    @admin.display(boolean=True, description="Answered")
+    def answered(self, obj):
+        return obj.answered_at is not None
+
+    @admin.display(description="Waiting")
+    def age(self, obj):
+        if obj.answered_at:
+            return "—"
+        days = (timezone.now() - obj.created_at).days
+        return "today" if days == 0 else f"{days} day(s)"
+
+    def save_model(self, request, obj, form, change):
+        if "answer" in form.changed_data and obj.answer.strip():
+            obj.answered_at, obj.answered_by = timezone.now(), request.user.get_username()
+        super().save_model(request, obj, form, change)
+        log_event(request.user.get_username(), "question_answered", obj.assignment, question_id=obj.public_id)
