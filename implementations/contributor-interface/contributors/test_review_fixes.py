@@ -408,15 +408,23 @@ class TeamPages(SelectionTestCase):
         self.assertContains(page, "Cannot delete")
         self.assertTrue(Assignment.objects.filter(pk=self.a_emp.pk).exists())
 
-    def test_freezing_records_what_was_frozen_and_warns_about_later_changes(self):
+    def test_a_review_is_frozen_only_as_a_version_the_contributor_confirmed(self):
+        # D-050: answers changed after the last confirmed version block the freeze.
         self.make_freezable()
         selection.save_review(self.a_emp, self.first_items()[0], {"verdict": "reject"}, 1)   # after version 1
         response = self.client.post(self.changelist, {"action": "freeze", "_selected_action": [self.a_emp.pk]}, follow=True)
         self.assertContains(response, "changed after version 1 was confirmed")
+        self.a_emp.refresh_from_db()
+        self.assertFalse(self.a_emp.is_frozen)
+        self.assertFalse(EventLog.objects.filter(operation="review_frozen").exists())
+        # Once the contributor confirms again, the freeze goes through and logs the matching version.
+        selection.confirm(self.a_emp)
+        self.client.post(self.changelist, {"action": "freeze", "_selected_action": [self.a_emp.pk]}, follow=True)
+        self.a_emp.refresh_from_db()
+        self.assertTrue(self.a_emp.is_frozen)
         event = EventLog.objects.get(operation="review_frozen")
-        self.assertEqual(event.details["confirmation_version"], 1)
-        self.assertFalse(event.details["matches_confirmation"])
-        self.assertEqual(event.details["content_sha256"], selection.content_sha256(selection.snapshot(self.a_emp)))
+        self.assertEqual((event.details["confirmation_version"], event.details["matches_confirmation"]), (2, True))
+        self.assertEqual(event.details["content_sha256"], self.a_emp.confirmations.get(version=2).content_sha256)
 
     def test_the_export_needs_permission_to_view_the_contributors_records(self):
         viewer = get_user_model().objects.create_user("viewer", "v@example.org", "a-long-test-password", is_staff=True)

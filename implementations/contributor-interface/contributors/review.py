@@ -298,7 +298,9 @@ def export(assignment):
 
 
 def freeze_problems(assignment):
-    """(blocking, warnings) before the team freezes a review (D-049)."""
+    """(blocking, warnings) before the team freezes a review. Blocking: no build date or an item
+    without provenance (D-049), and answers that do not match a version the contributor confirmed
+    (D-050), so every frozen review is one the contributor confirmed (MVP §5.4)."""
     paper = assignment.paper
     blocking, warnings = [], []
     if paper.built_on is None:
@@ -311,9 +313,10 @@ def freeze_problems(assignment):
         warnings.append(f"{prog['total'] - prog['reviewed']} of {prog['total']} items are not answered")
     record = freeze_record(assignment)
     if record["confirmation_version"] is None:
-        warnings.append("the contributor has not confirmed a version")
+        blocking.append("the contributor has not confirmed a version (D-050)")
     elif not record["matches_confirmation"]:
-        warnings.append(f"the answers changed after version {record['confirmation_version']} was confirmed")
+        blocking.append(f"the answers changed after version {record['confirmation_version']} was confirmed; "
+                        "ask the contributor to confirm again (D-050)")
     earlier = assignment.reviews.exclude(item__rubric=paper.current_rubric()).count()
     if earlier:
         warnings.append(f"{earlier} answer(s) belong to an earlier rubric version and are not in the export")

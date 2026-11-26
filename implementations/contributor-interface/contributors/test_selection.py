@@ -116,6 +116,11 @@ class FreezeAndAdminTests(SelectionTestCase):
         self.assertFalse(self.a_emp.is_frozen)
         self.make_freezable()
         response = self.act("freeze")
+        self.assertContains(response, "has not confirmed a version")    # D-050: no confirmed version, no freeze
+        self.a_emp.refresh_from_db()
+        self.assertFalse(self.a_emp.is_frozen)
+        selection.confirm(self.a_emp)
+        response = self.act("freeze")
         self.assertContains(response, "not answered")                   # a warning, not a block
         self.a_emp.refresh_from_db()
         self.assertTrue(self.a_emp.is_frozen)
