@@ -244,6 +244,12 @@ def test_submission_requires_a_runnable_description_and_data_routes():
     theory["datasets"] = []
     del theory["declarations"]["permission_to_share_included_data"]
     assert valid("submission-manifest", theory)
+    later = copy.deepcopy(base)                           # 0.3.0: undecided datasets and AI help with the README
+    later["datasets"].append({"name": "Fictional survey", "availability": "not_decided"})
+    later["ai_help"] = {"used": True, "tool": "a chat assistant", "entered_items_or_package": False}
+    assert valid("submission-manifest", later)
+    later["ai_help"] = {"used": True}
+    assert not valid("submission-manifest", later)        # used AI: tool and entry must be stated
 
 
 def test_ai_help_and_consent_fields():

@@ -12,4 +12,5 @@ urlpatterns = [
     path("papers/<slug:paper_id>/submit/uploads/<str:upload_id>/", views.upload_status, name="upload_status"),
     path("papers/<slug:paper_id>/submit/uploads/<str:upload_id>/chunk/", views.upload_chunk, name="upload_chunk"),
     path("papers/<slug:paper_id>/submit/uploads/<str:upload_id>/remove/", views.upload_remove, name="upload_remove"),
+    path("papers/<slug:paper_id>/submit/uploads/<str:upload_id>/include/", views.upload_include, name="upload_include"),
 ]

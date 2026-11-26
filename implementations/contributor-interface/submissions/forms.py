@@ -2,6 +2,8 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from contributors.forms import AIHelpMixin
+
 BLANK = [("", "—")]
 CHANNELS = [("upload", _("Upload a ZIP file here")),
             ("public_reference", _("The package is public: give its reference (and upload only what is missing)")),
@@ -12,7 +14,8 @@ RUN_TIMES = [("<10 minutes", _("less than 10 minutes")), ("10-60 minutes", _("10
              ("1-3 days", _("1–3 days")), ("3-14 days", _("3–14 days")), (">14 days", _("more than 14 days"))]
 AVAILABILITY = [("included", _("Included in my upload")), ("public_elsewhere", _("Public elsewhere")),
                 ("restricted_not_included", _("Restricted: not included")),
-                ("confidential_not_included", _("Confidential: not included"))]
+                ("confidential_not_included", _("Confidential: not included")),
+                ("not_decided", _("Not yet decided"))]
 ROUTES = [("author_runs_and_returns_outputs", _("I or my RA run the team's versions and return the outputs (no data)")),
           ("team_applies_for_access", _("The team applies to the provider for access")),
           ("secure_environment", _("A secure environment where authorized team members run it")),
@@ -31,7 +34,7 @@ def tri_initial(value):
     return {True: "yes", False: "no"}.get(value, "")
 
 
-class SubmissionForm(forms.Form):
+class SubmissionForm(AIHelpMixin):
     channel = forms.ChoiceField(required=False, widget=forms.RadioSelect, label=_("How the materials reach us"))
     pub_repository = forms.CharField(required=False, max_length=200, label=_("Repository (for example openICPSR, Dataverse, Zenodo)"))
     pub_identifier = forms.CharField(required=False, max_length=200, label=_("Identifier"))
@@ -58,13 +61,17 @@ class SubmissionForm(forms.Form):
     def __init__(self, *args, channels=(), **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["channel"].choices = [c for c in CHANNELS if c[0] in channels]
+        self.fields["ai_used"].label = _("AI helped with what I wrote here (for example, README text or notes)")
+
+    def clean(self):
+        return self.clean_ai(super().clean())
 
     def clean_software(self):
         rows = []
         for line in self.cleaned_data["software"].splitlines():
             if not line.strip():
                 continue
-            name, sep, version = line.rpartition(",")
+            name, sep, version = line.replace("，", ",").rpartition(",")       # a full-width comma works too
             if not sep or not name.strip() or not version.strip():
                 raise forms.ValidationError(_("Write each line as name, version (for example: Stata, 18)."))
             rows.append({"name": name.strip()[:200], "version": version.strip()[:100]})
@@ -87,7 +94,8 @@ class DatasetForm(forms.Form):
     terms = forms.CharField(required=False, max_length=500, label=_("Licence or terms of use"))
     availability = forms.ChoiceField(choices=BLANK + AVAILABILITY, label=_("Availability"))
     where = forms.CharField(required=False, max_length=500, label=_("Where it is (URL, DOI, or provider)"))
-    access_route = forms.ChoiceField(required=False, choices=BLANK + ROUTES, label=_("How the team can still run the code"))
+    access_route = forms.ChoiceField(required=False, choices=BLANK + ROUTES,
+                                     label=_("How the team can still run the code (only for restricted or confidential data)"))
     notes = forms.CharField(required=False, max_length=TEXT, widget=forms.Textarea(attrs={"rows": 2}), label=_("Notes"))
 
     def clean(self):
@@ -121,6 +129,13 @@ class ChecklistForm(forms.Form):
             self.entries.append({"entry": entry, "status": f"status_{entry['id']}", "note": f"note_{entry['id']}",
                                  "help": localize(entry["help"], language) if entry.get("help") else "",
                                  "requirement": entry.get("requirement")})
+
+    def clean(self):
+        data = super().clean()
+        for e in self.entries:
+            if (data.get(e["note"]) or "").strip() and not data.get(e["status"]):
+                self.add_error(e["status"], _("Choose a status for this note."))
+        return data
 
     def answers(self):
         return {e["entry"]["id"]: (self.cleaned_data.get(e["status"]) or "", (self.cleaned_data.get(e["note"]) or "").strip())

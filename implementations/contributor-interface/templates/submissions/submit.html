@@ -5,7 +5,7 @@
 {% block content %}
 <p><a href="{% url 'contributors:my_paper' paper_id=paper.paper_id %}">{{ paper.title }}</a> · <a href="{% url 'submissions:guidance' paper_id=paper.paper_id %}">{% translate "Materials guidance" %}</a></p>
 <h1>{% translate "Submit your materials" %}</h1>
-<p>{% translate "Your answers are saved as a draft until you submit. Each submission is a numbered version; you can change your answers and submit again." %}</p>
+<p>{% translate "Your answers are saved as a draft, which the team can see. Submitting tells the team that your materials are complete and creates a numbered version; you can change your answers and submit again." %}</p>
 
 {% if versions %}
 <section class="receipts">
@@ -23,26 +23,36 @@
 {% if "upload" in channels %}
 <section class="uploads">
   <h2>{% translate "Your uploads" %}</h2>
-  {% if uploads %}
   <div class="table-wrap">
   <table class="summary-table">
     <thead><tr><th scope="col">{% translate "File" %}</th><th scope="col">{% translate "Size" %}</th><th scope="col">{% translate "Status" %}</th><th scope="col">SHA-256</th><th scope="col"></th></tr></thead>
     <tbody>
     {% for u in uploads %}
-    <tr>
-      <td>{{ u.original_name }}{% if u.status == "received" %}<br><span class="note">{% blocktranslate count counter=u.entries|length %}{{ counter }} file inside{% plural %}{{ counter }} files inside{% endblocktranslate %}</span>{% endif %}</td>
+    <tr class="upload-row">
+      <td>{{ u.original_name }}{% if u.status == "received" %}<br><span class="note">{% if u.entries_truncated %}{% blocktranslate count counter=u.entry_count %}{{ counter }} file inside (not all listed){% plural %}{{ counter }} files inside (not all listed){% endblocktranslate %}{% else %}{% blocktranslate count counter=u.entry_count %}{{ counter }} file inside{% plural %}{{ counter }} files inside{% endblocktranslate %}{% endif %}</span>{% endif %}</td>
       <td>{{ u.size_bytes|filesizeformat }}</td>
-      <td>{% if u.status == "received" %}{% translate "Received" %}{% elif u.status == "checking" %}{% translate "Being checked" %}{% else %}{% blocktranslate with done=u.received_bytes|filesizeformat %}Unfinished: {{ done }} received. Choose the same file again to continue.{% endblocktranslate %}{% endif %}</td>
+      <td>{% if u.status == "received" %}{% if u.included %}{% translate "Received; part of your next submission" %}{% else %}{% translate "Received; left out of your next submission" %}{% endif %}{% elif u.status == "checking" %}{% if u.stale %}{% translate "The check did not finish. Remove the file and upload it again." %}{% else %}{% translate "Being checked" %}{% endif %}{% else %}{% blocktranslate with done=u.received_bytes|filesizeformat %}Unfinished: {{ done }} received. Choose the same file again to continue.{% endblocktranslate %}{% endif %}</td>
       <td><span class="hash">{{ u.sha256|default:"—" }}</span></td>
-      <td>{% if not u.versions.all and u.status != "checking" %}<form method="post" action="{% url 'submissions:upload_remove' paper_id=paper.paper_id upload_id=u.public_id %}">{% csrf_token %}<button type="submit" class="danger">{% translate "Remove" %}</button></form>{% endif %}</td>
+      <td>
+        {% if u.status == "received" %}
+        <form method="post" action="{% url 'submissions:upload_include' paper_id=paper.paper_id upload_id=u.public_id %}">{% csrf_token %}
+          <input type="hidden" name="include" value="{% if u.included %}0{% else %}1{% endif %}">
+          <button type="submit">{% if u.included %}{% translate "Leave out" %}{% else %}{% translate "Include" %}{% endif %}<span class="visually-hidden"> {{ u.original_name }}</span></button></form>
+        {% endif %}
+        {% if not u.versions.all and u.status != "checking" or not u.versions.all and u.stale %}
+        <details class="confirm-remove"><summary>{% translate "Remove…" %}<span class="visually-hidden"> {{ u.original_name }}</span></summary>
+          <form method="post" action="{% url 'submissions:upload_remove' paper_id=paper.paper_id upload_id=u.public_id %}">{% csrf_token %}
+            <button type="submit" class="danger">{% blocktranslate with name=u.original_name %}Delete {{ name }} from the site{% endblocktranslate %}</button></form>
+        </details>
+        {% endif %}
+      </td>
     </tr>
+    {% empty %}
+    <tr id="no-upload-row"><td colspan="5" class="note">{% translate "No upload yet." %}</td></tr>
     {% endfor %}
     </tbody>
   </table>
   </div>
-  {% else %}
-  <p class="note">{% translate "No upload yet." %}</p>
-  {% endif %}
   <form method="post" enctype="multipart/form-data" id="upload-form" class="upload-form"
         action="{% url 'submissions:upload_plain' paper_id=paper.paper_id %}"
         data-start="{% url 'submissions:upload_start' paper_id=paper.paper_id %}"
@@ -52,14 +62,19 @@
         data-checking="{% translate 'Received; computing its SHA-256…' %}"
         data-done="{% translate 'Received. SHA-256:' %}"
         data-paused="{% translate 'Paused: the connection was lost. Choose the same file again to continue where it stopped.' %}"
-        data-failed="{% translate 'Not received:' %}">
+        data-failed="{% translate 'Not received:' %}"
+        data-session="{% translate 'Not received: your session has ended. Open your personal link again, then choose the same file to continue.' %}"
+        data-server="{% translate 'Not received: the site could not take the file. Please try again later, or tell the team.' %}"
+        data-new-row="{% translate 'Received; part of your next submission' %}">
     {% csrf_token %}
     <p><label for="id_package">{% blocktranslate with size=max_upload|filesizeformat %}Choose your ZIP file (up to {{ size }}){% endblocktranslate %}</label><br>
       <input type="file" name="package" id="id_package" accept=".zip,application/zip">
       <button type="submit">{% translate "Upload" %}</button></p>
-    <p><progress id="upload-progress" max="100" value="0" hidden></progress> <span id="upload-status" class="save-status" aria-live="polite"></span></p>
+    <p><progress id="upload-progress" max="100" value="0" hidden aria-label="{% translate 'Upload progress' %}"></progress> <span id="upload-status" class="save-status" aria-live="polite"></span></p>
   </form>
   <p class="hint">{% translate "To compare the SHA-256 with your own copy: on macOS or Linux, run shasum -a 256 followed by the file name; on Windows, run certutil -hashfile followed by the file name and SHA256." %}</p>
+  <p class="hint">{% blocktranslate count days=unfinished_days %}An unfinished upload is kept for {{ days }} day after its last progress, then deleted.{% plural %}An unfinished upload is kept for {{ days }} days after its last progress, then deleted.{% endblocktranslate %}
+    {% translate "A file you replace can be left out of your next submission; earlier submitted versions keep it." %}</p>
 </section>
 {% endif %}
 
@@ -68,7 +83,8 @@
   {{ form.non_field_errors }}
   <section>
     <h2>{% translate "How the materials reach us" %}</h2>
-    {{ form.channel.errors }}{{ form.channel }}
+    <fieldset class="channel"><legend class="visually-hidden">{% translate "How the materials reach us" %}</legend>
+    {{ form.channel.errors }}{{ form.channel }}</fieldset>
     {% if "public_reference" in channels %}
     <fieldset class="public-reference"><legend>{% translate "The public package" %}</legend>
       {% for field in form %}{% if field.name == "pub_repository" or field.name == "pub_identifier" or field.name == "pub_version" or field.name == "pub_url" or field.name == "pub_doi" %}
@@ -94,7 +110,7 @@
     {% for d in datasets %}
     <fieldset class="dataset"><legend>{% blocktranslate with n=forloop.counter %}Dataset {{ n }}{% endblocktranslate %}</legend>
       {% for field in d %}{% if field.name != "DELETE" %}<p>{{ field.errors }}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</p>{% endif %}{% endfor %}
-      {% if d.initial %}<p><label>{{ d.DELETE }} {% translate "Remove this dataset" %}</label></p>{% endif %}
+      {% if forloop.counter0 < datasets.initial_form_count %}<p><label>{{ d.DELETE }} {% translate "Remove this dataset" %}</label></p>{% endif %}
     </fieldset>
     {% endfor %}
   </section>
@@ -109,6 +125,18 @@
         <label for="{{ e.note_field.id_for_label }}">{% translate "Note" %}</label> {{ e.note_field }}</p>
     </fieldset>
     {% endfor %}
+  </section>
+
+  <section>
+    <h2>{% translate "AI help" %}</h2>
+    <fieldset class="ai-help"><legend class="visually-hidden">{% translate "AI help" %}</legend>
+      <label>{{ form.ai_used }} {{ form.ai_used.label }}</label>
+      <span class="ai-details">
+        {{ form.ai_tool.errors }}<label>{{ form.ai_tool.label }} {{ form.ai_tool }}</label>
+        <label>{{ form.ai_account_kind.label }} {{ form.ai_account_kind }}</label>
+        <label>{{ form.ai_entered_items }} {{ form.ai_entered_items.label }}</label>
+      </span>
+    </fieldset>
   </section>
 
   <section>

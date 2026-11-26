@@ -56,10 +56,23 @@ class SubmissionAdmin(ReadOnly):
 
 @admin.register(Upload)
 class UploadAdmin(ReadOnly):
-    list_display = ("public_id", "assignment", "original_name", "size_bytes", "status", "sha256", "completed_at")
-    list_filter = ("assignment__paper", "status")
-    exclude = ("entries", "storage_name")
+    list_display = ("public_id", "assignment", "original_name", "size_bytes", "status", "included", "sha256", "completed_at")
+    list_filter = ("assignment__paper", "status", "included")
+    exclude = ("entries", "storage_name", "head_sha256", "client_modified")
     readonly_fields = ("listing",)
+    actions = ["check_again"]
+
+    def has_recheck_permission(self, request):
+        return request.user.has_perm("submissions.change_upload")
+
+    @admin.action(description="Check again (for a check that did not finish, e.g. after a restart)", permissions=["recheck"])
+    def check_again(self, request, queryset):
+        from . import storage
+        for upload in queryset.filter(status=Upload.CHECKING):
+            done = storage.recheck(upload)
+            log_event(request.user.get_username(), "upload_checked_again", upload.assignment,
+                      upload_id=upload.public_id, status=done.status)
+            self.message_user(request, f"{upload.public_id}: {done.get_status_display()}.", messages.INFO)
 
     @admin.display(description="Files in the archive (names and sizes only; nothing is extracted)")
     def listing(self, obj):

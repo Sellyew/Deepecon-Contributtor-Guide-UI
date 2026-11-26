@@ -18,15 +18,17 @@ import secrets
 from django.conf import settings
 from django.db import models
 
-from contributors.models import Assignment
+from contributors.models import AIHelpFields, Assignment
 
 
 def upload_public_id():
     return f"u-{secrets.token_hex(6)}"
 
 
-class Submission(models.Model):
-    """The contributor's current answers about their materials; a draft until submitted."""
+class Submission(AIHelpFields):
+    """The contributor's current answers about their materials; a draft until submitted. The team
+    can read drafts; submitting tells it that the materials are complete and creates a version.
+    The AI disclosure covers what the contributor wrote here, such as README text (D-039)."""
 
     CHANNELS = [("upload", "Upload"), ("public_reference", "Public reference"), ("other_agreed", "Another agreed channel")]
     RUN_TIMES = [(band, band) for band in ("<10 minutes", "10-60 minutes", "1-2 hours", "2-8 hours", "8-24 hours",
@@ -73,7 +75,8 @@ class ChecklistAnswer(models.Model):
 class DatasetDeclaration(models.Model):
     AVAILABILITY = [("included", "Included in the upload"), ("public_elsewhere", "Public elsewhere"),
                     ("restricted_not_included", "Restricted, not included"),
-                    ("confidential_not_included", "Confidential, not included")]
+                    ("confidential_not_included", "Confidential, not included"),
+                    ("not_decided", "Not yet decided")]
     ROUTES = [("author_runs_and_returns_outputs", "The author or their RA runs the team's versions and returns outputs"),
               ("team_applies_for_access", "The team applies for access"),
               ("secure_environment", "A secure environment"),
@@ -118,7 +121,15 @@ class Upload(models.Model):
     storage_name = models.CharField(max_length=300)
     entries = models.JSONField(default=list, blank=True, help_text="[[name, size], ...] read from the archive's directory")
     entries_truncated = models.BooleanField(default=False)
+    entry_count = models.PositiveIntegerField(default=0, help_text="Files in the archive, from its directory.")
+    client_modified = models.BigIntegerField(null=True, blank=True, help_text="The file's last-modified time in the "
+                                             "contributor's browser; a resume must match it, as well as name and size.")
+    head_sha256 = models.CharField(max_length=64, blank=True, help_text="SHA-256 of the file's first MiB, from the browser.")
+    included = models.BooleanField(default=True, help_text="Part of the next submitted version. The contributor can leave "
+                                   "out an archive they replaced; earlier versions keep it.")
+    checking_since = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

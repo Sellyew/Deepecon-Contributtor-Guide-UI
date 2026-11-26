@@ -229,6 +229,9 @@ msgstr "受限：未包含"
 msgid "Confidential: not included"
 msgstr "保密：未包含"
 
+msgid "Not yet decided"
+msgstr "尚未决定"
+
 msgid "I or my RA run the team's versions and return the outputs (no data)"
 msgstr "由我或我的研究助理运行团队的各个版本并返回输出（不含数据）"
 
@@ -310,6 +313,9 @@ msgstr "我确认我发送的材料中不包含任何受限或保密的内容。
 msgid "I confirm that I may share the data I include with the project."
 msgstr "我确认我有权与本项目共享我所包含的数据。"
 
+msgid "AI helped with what I wrote here (for example, README text or notes)"
+msgstr "AI 协助了我在此撰写的内容（例如 README 文字或备注）"
+
 msgid "Write each line as name, version (for example: Stata, 18)."
 msgstr "请按“名称, 版本”的格式填写每一行（例如：Stata, 18）。"
 
@@ -328,8 +334,8 @@ msgstr "可得性"
 msgid "Where it is (URL, DOI, or provider)"
 msgstr "所在位置（网址、DOI 或提供方）"
 
-msgid "How the team can still run the code"
-msgstr "团队如何仍能运行代码"
+msgid "How the team can still run the code (only for restricted or confidential data)"
+msgstr "团队如何仍能运行代码（仅适用于受限或保密的数据）"
 
 msgid "Notes"
 msgstr "备注"
@@ -342,6 +348,9 @@ msgstr "请说明公开数据所在的位置。"
 
 msgid "Note"
 msgstr "备注"
+
+msgid "Choose a status for this note."
+msgstr "请为这条备注选择一个状态。"
 
 msgid "Choose how the materials reach us."
 msgstr "请选择材料送达我们的方式。"
@@ -397,6 +406,18 @@ msgstr "此文件属于一个已提交的版本，将由团队保留。"
 msgid "This file is still being checked. Please wait a moment."
 msgstr "此文件仍在核验中，请稍候。"
 
+msgid "Your uploads for this paper would exceed %(limit)s in total. Please remove an upload you no longer need, or ask the team."
+msgstr "您为这篇论文上传的文件总量将超过 %(limit)s。请删除一个不再需要的上传，或联系团队。"
+
+msgid "The site has no room for this file right now. Please tell the team; nothing you sent is lost."
+msgstr "网站目前没有空间存放此文件。请告知团队；您已发送的内容不会丢失。"
+
+msgid "The file could not be checked, so it was not kept. Please upload it again."
+msgstr "此文件无法核验，因此未被保存。请重新上传。"
+
+msgid "Only a received file can be included or left out."
+msgstr "只有已收到的文件才能被纳入或排除。"
+
 msgid "The upload could not continue. Please try again."
 msgstr "上传无法继续，请重试。"
 
@@ -406,8 +427,8 @@ msgstr "在您打开此页面之后，这些回答已在另一个标签页中被
 msgid "Submitted: version %(n)s. Thank you. You can still change your answers and submit again."
 msgstr "已提交：第 %(n)s 版。谢谢。您仍可修改回答并再次提交。"
 
-msgid "Saved. Nothing is sent to the team until you submit."
-msgstr "已保存。在您提交之前，不会向团队发送任何内容。"
+msgid "Saved as a draft. Submit when everything is ready."
+msgstr "已保存为草稿。一切就绪后请提交。"
 
 msgid "required"
 msgstr "必填"
@@ -426,6 +447,12 @@ msgstr "已收到 %(name)s。SHA-256：%(sha)s"
 
 msgid "Removed %(name)s."
 msgstr "已删除 %(name)s。"
+
+msgid "%(name)s will be part of your next submission."
+msgstr "%(name)s 将包含在您的下一次提交中。"
+
+msgid "%(name)s is left out of your next submission; earlier versions keep it."
+msgstr "%(name)s 不会包含在您的下一次提交中；之前的版本仍保留它。"
 
 msgid "DeepEcon contributor site"
 msgstr "DeepEcon 贡献者网站"
@@ -900,11 +927,8 @@ msgstr "受限或保密"
 msgid "Never upload it. Choose a route: you or your RA run our versions where the data are and return only the outputs; we apply to the provider for access; a secure environment where authorized team members run it; or a fully synthetic substitute built from the codebook (then we check only that the code runs)."
 msgstr "切勿上传。请选择一种途径：由您或您的研究助理在数据所在之处运行我们的各个版本，只返回输出；由我们向数据提供方申请访问权限；在安全环境中由获得授权的团队成员运行；或者使用根据编码手册构建的完全合成的替代数据（此时我们只检查代码能否运行）。"
 
-msgid "Not yet decided"
-msgstr "尚未决定"
-
-msgid "Record it as to be decided; we will follow up with you."
-msgstr "请记为“待定”；我们会与您跟进。"
+msgid "Choose “Not yet decided” as its availability; we will follow up with you."
+msgstr "请将其可得性选为“尚未决定”；我们会与您跟进。"
 
 msgid "If you include data, you confirm that you may share them with the project. A team member checks each dataset's terms before anyone opens it."
 msgstr "如果您包含数据，即表示您确认有权与本项目共享这些数据。在任何人打开数据之前，会由一名团队成员核查每个数据集的条款。"
@@ -942,6 +966,9 @@ msgstr "如有 AI 协助，请告诉我们。"
 msgid "Tick “AI helped with this”, name the tool and the type of account (work or personal), and say whether you entered the items or the task package."
 msgstr "请勾选“AI 协助了此项”，注明所用工具和账户类型（工作账户或个人账户），并说明是否输入了条目或任务包。"
 
+msgid "On the Submit page the same question covers what you write there, such as README text."
+msgstr "在提交页面上，同样的问题适用于您在那里撰写的内容，例如 README 文字。"
+
 msgid "Never put restricted, confidential, or licensed data into any AI tool."
 msgstr "任何情况下都不要将受限、保密或受许可限制的数据输入任何 AI 工具。"
 
@@ -963,8 +990,8 @@ msgstr "由某个 AI 模型塑造的任务，对同一系列的模型可能更�
 msgid "The items are the benchmark's answers. If an AI company trains on them, its future models could score well by memory rather than by reasoning. We cannot rule this out entirely, so we record which companies have seen which items and report those results separately."
 msgstr "这些条目就是本评测基准的标准答案。如果某家 AI 公司用它们训练模型，其未来的模型就可能靠记忆而非推理取得高分。我们无法完全排除这种可能，因此会记录哪些公司接触过哪些条目，并单独报告相应的结果。"
 
-msgid "Your answers are saved as a draft until you submit. Each submission is a numbered version; you can change your answers and submit again."
-msgstr "在您提交之前，您的回答会保存为草稿。每次提交都是一个编号的版本；您可以修改回答并再次提交。"
+msgid "Your answers are saved as a draft, which the team can see. Submitting tells the team that your materials are complete and creates a numbered version; you can change your answers and submit again."
+msgstr "您的回答会保存为草稿，团队可以看到。提交即告知团队您的材料已完整，并生成一个编号的版本；您可以修改回答并再次提交。"
 
 msgid "Submitted versions"
 msgstr "已提交的版本"
@@ -993,12 +1020,22 @@ msgstr "大小"
 msgid "Status"
 msgstr "状态"
 
+msgid "%(counter)s file inside (not all listed)"
+msgid_plural "%(counter)s files inside (not all listed)"
+msgstr[0] "内含 %(counter)s 个文件（未全部列出）"
+
 msgid "%(counter)s file inside"
 msgid_plural "%(counter)s files inside"
 msgstr[0] "内含 %(counter)s 个文件"
 
-msgid "Received"
-msgstr "已收到"
+msgid "Received; part of your next submission"
+msgstr "已收到；将包含在下一次提交中"
+
+msgid "Received; left out of your next submission"
+msgstr "已收到；不包含在下一次提交中"
+
+msgid "The check did not finish. Remove the file and upload it again."
+msgstr "核验未能完成。请删除此文件并重新上传。"
 
 msgid "Being checked"
 msgstr "正在核验"
@@ -1006,8 +1043,17 @@ msgstr "正在核验"
 msgid "Unfinished: %(done)s received. Choose the same file again to continue."
 msgstr "未完成：已收到 %(done)s。请再次选择同一个文件以继续。"
 
-msgid "Remove"
-msgstr "删除"
+msgid "Leave out"
+msgstr "排除"
+
+msgid "Include"
+msgstr "纳入"
+
+msgid "Remove…"
+msgstr "删除…"
+
+msgid "Delete %(name)s from the site"
+msgstr "从网站删除 %(name)s"
 
 msgid "No upload yet."
 msgstr "尚无上传。"
@@ -1027,14 +1073,30 @@ msgstr "已暂停：连接中断。请再次选择同一个文件，从中断处
 msgid "Not received:"
 msgstr "未收到："
 
+msgid "Not received: your session has ended. Open your personal link again, then choose the same file to continue."
+msgstr "未收到：您的会话已结束。请重新打开您的个人链接，然后选择同一个文件继续。"
+
+msgid "Not received: the site could not take the file. Please try again later, or tell the team."
+msgstr "未收到：网站无法接收此文件。请稍后重试，或告知团队。"
+
 msgid "Choose your ZIP file (up to %(size)s)"
 msgstr "选择您的 ZIP 文件（最大 %(size)s）"
 
 msgid "Upload"
 msgstr "上传"
 
+msgid "Upload progress"
+msgstr "上传进度"
+
 msgid "To compare the SHA-256 with your own copy: on macOS or Linux, run shasum -a 256 followed by the file name; on Windows, run certutil -hashfile followed by the file name and SHA256."
 msgstr "如需与您自己的副本核对 SHA-256：在 macOS 或 Linux 上运行 shasum -a 256 加文件名；在 Windows 上运行 certutil -hashfile 加文件名和 SHA256。"
+
+msgid "An unfinished upload is kept for %(days)s day after its last progress, then deleted."
+msgid_plural "An unfinished upload is kept for %(days)s days after its last progress, then deleted."
+msgstr[0] "未完成的上传在最后一次进展后保留 %(days)s 天，然后删除。"
+
+msgid "A file you replace can be left out of your next submission; earlier submitted versions keep it."
+msgstr "被您替换的文件可以不包含在下一次提交中；之前提交的版本仍保留它。"
 
 msgid "The public package"
 msgstr "公开的材料包"
@@ -1056,6 +1118,9 @@ msgstr "删除此数据集"
 
 msgid "Checklist"
 msgstr "清单"
+
+msgid "AI help"
+msgstr "AI 协助"
 
 msgid "Declarations"
 msgstr "声明"

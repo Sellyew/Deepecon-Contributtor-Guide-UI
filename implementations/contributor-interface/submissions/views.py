@@ -3,10 +3,13 @@
 Every screen works without JavaScript: the upload form then posts the whole file at once.
 static/upload.js sends it in chunks instead, so an interrupted upload resumes where it stopped.
 """
+import re
+
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.http import Http404, JsonResponse
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import filesizeformat
 from django.utils.translation import gettext as _
@@ -17,6 +20,7 @@ from contributors.selection_views import _assignment_with_consent, _language
 from papers.importers import rubric_checks
 from . import manifest
 from . import storage
+from .handlers import LimitedPrivateUploadHandler
 from .forms import ChecklistForm, DatasetFormSet, SubmissionForm, software_text, tri_initial
 from .models import ChecklistAnswer, DatasetDeclaration, Submission, Upload, accepted_channels, max_upload_bytes, runnable_required
 
@@ -31,9 +35,13 @@ def refusal_text(code, params):
         "resume_with_script": _("An unfinished upload of this file exists. Finish it with the upload button (with JavaScript on), or remove it."),
         "in_a_version": _("This file belongs to a submitted version and stays with the team."),
         "checking": _("This file is still being checked. Please wait a moment."),
+        "over_budget": _("Your uploads for this paper would exceed %(limit)s in total. Please remove an upload you no longer need, or ask the team."),
+        "disk_full": _("The site has no room for this file right now. Please tell the team; nothing you sent is lost."),
+        "check_failed": _("The file could not be checked, so it was not kept. Please upload it again."),
+        "not_received": _("Only a received file can be included or left out."),
     }
     text = texts.get(code, _("The upload could not continue. Please try again."))
-    if code == "too_large":
+    if code in ("too_large", "over_budget"):
         text = text % {"limit": filesizeformat(params.get("limit", 0))}
     return text
 
@@ -46,7 +54,8 @@ def _upload_json(upload):
     if upload.status == Upload.REFUSED:
         out["message"] = refusal_text(upload.refusal, {})
     if upload.status == Upload.RECEIVED:
-        out["files"] = len(upload.entries)
+        out.update(files=upload.entry_count)
+    out["name"] = upload.original_name
     return out
 
 
@@ -72,6 +81,8 @@ def _initial(sub, paper):
                                           "other_channel_note", "master_script", "readme", "run_time", "hardware_note",
                                           "no_restricted_included", "permission_to_share")}
     data["software"] = software_text(sub.software)
+    data.update(ai_used=sub.ai_used, ai_tool=sub.ai_tool, ai_account_kind=sub.ai_account_kind,
+                ai_entered_items=bool(sub.ai_entered_items))
     for field in ("dependencies_included", "author_run_log_included", "expected_outputs_included"):
         data[field] = tri_initial(getattr(sub, field))
     data["version"] = sub.version
@@ -94,12 +105,13 @@ def submit(request, paper_id):
     channels = accepted_channels(paper)
     entries = manifest.checklist(paper)
     answers = {a.checklist_id: a for a in sub.checklist.all()}
+    runnable = runnable_required(paper)          # the datasets section exists only for a runnable package
     problems = []
     if request.method == "POST":
         form = SubmissionForm(request.POST, channels=channels)
         checklist_form = ChecklistForm(request.POST, entries=entries, language=_language(), localize=rc.localize)
-        datasets = DatasetFormSet(request.POST, prefix="datasets")
-        if form.is_valid() and checklist_form.is_valid() and datasets.is_valid():
+        datasets = DatasetFormSet(request.POST, prefix="datasets") if runnable else None
+        if form.is_valid() and checklist_form.is_valid() and (datasets is None or datasets.is_valid()):
             with transaction.atomic():
                 current = Submission.objects.select_for_update().get(pk=sub.pk)
                 if form.cleaned_data["version"] != current.version:
@@ -113,9 +125,10 @@ def submit(request, paper_id):
                 for checklist_id, (status, note) in checklist_form.answers().items():
                     ChecklistAnswer.objects.update_or_create(submission=current, checklist_id=checklist_id,
                                                              defaults={"status": status, "note": note})
-                current.datasets.all().delete()
                 position = 0
-                for row in datasets.cleaned_data:
+                if datasets is not None:
+                    current.datasets.all().delete()
+                for row in (datasets.cleaned_data if datasets is not None else []):
                     if not row or row.get("DELETE"):
                         continue
                     DatasetDeclaration.objects.create(
@@ -130,22 +143,25 @@ def submit(request, paper_id):
                                      % {"n": version.version})
                     return redirect("submissions:submit", paper_id=paper_id)
             else:
-                messages.success(request, _("Saved. Nothing is sent to the team until you submit."))
+                messages.success(request, _("Saved as a draft. Submit when everything is ready."))
                 return redirect("submissions:submit", paper_id=paper_id)
             sub.refresh_from_db()
             form = SubmissionForm(initial=_initial(sub, paper), channels=channels)
             checklist_form = _checklist_form(sub, entries, rc)
-            datasets = _dataset_formset(sub)
+            datasets = _dataset_formset(sub) if runnable else None
     else:
         form = SubmissionForm(initial=_initial(sub, paper), channels=channels)
         checklist_form = _checklist_form(sub, entries, rc, answers)
-        datasets = _dataset_formset(sub)
+        datasets = _dataset_formset(sub) if runnable else None
     uploads = list(assignment.uploads.exclude(status=Upload.REFUSED).prefetch_related("versions"))
+    for u in uploads:
+        u.stale = storage.is_stale(u)
     return render(request, "submissions/submit.html", {
         "assignment": assignment, "paper": paper, "form": form, "checklist": checklist_form.bound_entries(),
         "checklist_errors": checklist_form.errors, "datasets": datasets, "problems": problems, "uploads": uploads,
-        "versions": assignment.submission_versions.order_by("-version"), "runnable": runnable_required(paper),
+        "versions": assignment.submission_versions.order_by("-version"), "runnable": runnable,
         "channels": channels, "max_upload": max_upload_bytes(paper), "chunk_bytes": settings.UPLOAD_CHUNK_BYTES,
+        "unfinished_days": settings.UPLOAD_UNFINISHED_DAYS,
         "requirement_labels": {"required": _("required"), "confirm_existing": _("confirm if already in your public package"),
                                "optional": _("optional")}})
 
@@ -194,7 +210,15 @@ def upload_start(request, paper_id):
     except ValueError:
         size = None
     try:
-        upload = storage.start(assignment, request.POST.get("name", ""), size)
+        modified = int(request.POST.get("modified", ""))
+    except ValueError:
+        modified = None
+    head = request.POST.get("head", "")
+    head = head if re.fullmatch(r"[0-9a-f]{64}", head) else ""
+    if modified is None:
+        modified = -1        # the script always sends it; a value keeps the plain form's refusal apart
+    try:
+        upload = storage.start(assignment, request.POST.get("name", ""), size, client_modified=modified, head_sha256=head)
     except storage.UploadRefused as exc:
         return _refused(exc)
     return JsonResponse(_upload_json(upload), status=201)
@@ -231,13 +255,25 @@ def upload_chunk(request, paper_id, upload_id):
     return JsonResponse(_upload_json(upload))
 
 
+@csrf_exempt                    # the CSRF check runs in _upload_plain, after the size-limited handler is set
 @require_POST
 @contributor_required
 def upload_plain(request, paper_id):
     assignment, gate = _upload_gate(request, paper_id)
     if gate:
         return gate
+    limit = max_upload_bytes(assignment.paper)
+    handler = LimitedPrivateUploadHandler(request, limit=limit)
+    request.upload_handlers = [handler]       # before anything reads the body
+    return _upload_plain(request, paper_id, assignment, handler, limit)
+
+
+@csrf_protect
+def _upload_plain(request, paper_id, assignment, handler, limit):
     uploaded = request.FILES.get("package")
+    if handler.too_large:
+        messages.error(request, refusal_text("too_large", {"limit": limit}))
+        return redirect("submissions:submit", paper_id=paper_id)
     if uploaded is None:
         messages.error(request, _("Please choose a file first."))
         return redirect("submissions:submit", paper_id=paper_id)
@@ -256,7 +292,8 @@ def upload_plain(request, paper_id):
 @require_POST
 @contributor_required
 def upload_remove(request, paper_id, upload_id):
-    assignment, gate = _upload_gate(request, paper_id)
+    # Not limited to papers that accept uploads: an upload left from before a change can still be removed.
+    assignment, gate = _assignment_with_consent(request, paper_id)
     if gate:
         return gate
     upload = _own_upload(assignment, upload_id)
@@ -266,4 +303,24 @@ def upload_remove(request, paper_id, upload_id):
         messages.error(request, refusal_text(exc.code, exc.params))
     else:
         messages.success(request, _("Removed %(name)s.") % {"name": upload.original_name})
+    return redirect("submissions:submit", paper_id=paper_id)
+
+
+@require_POST
+@contributor_required
+def upload_include(request, paper_id, upload_id):
+    """Leave a received archive out of later versions (e.g. one that was replaced), or include it again."""
+    assignment, gate = _assignment_with_consent(request, paper_id)
+    if gate:
+        return gate
+    upload = _own_upload(assignment, upload_id)
+    include = request.POST.get("include") == "1"
+    try:
+        storage.set_included(upload, include, assignment.public_id)
+    except storage.UploadRefused as exc:
+        messages.error(request, refusal_text(exc.code, exc.params))
+    else:
+        messages.success(request, (_("%(name)s will be part of your next submission.") if include else
+                                   _("%(name)s is left out of your next submission; earlier versions keep it."))
+                         % {"name": upload.original_name})
     return redirect("submissions:submit", paper_id=paper_id)

@@ -25,7 +25,8 @@ def checklist(paper):
 
 
 def received_uploads(assignment):
-    return list(assignment.uploads.filter(status=Upload.RECEIVED).order_by("created_at", "pk"))
+    """The archives the next version holds: received, and not left out by the contributor."""
+    return list(assignment.uploads.filter(status=Upload.RECEIVED, included=True).order_by("created_at", "pk"))
 
 
 def _iso(moment):
@@ -48,6 +49,7 @@ def build(assignment, submitted_version=None):
              **({"note": answers[c["id"]].note.strip()} if answers[c["id"]].note.strip() else {})}
             for c in checklist(paper) if c["id"] in answers and answers[c["id"]].status],
         "declarations": {"no_restricted_or_confidential_data_included": sub.no_restricted_included},
+        "ai_help": sub.ai_help(),
         "created_at": _iso(timezone.now()),
     }
     if sub.permission_to_share:
@@ -101,7 +103,7 @@ def problems(assignment):
         out.append(_("Give the public package's repository, identifier, and version."))
     elif sub.channel == "other_agreed" and not sub.other_channel_note.strip():
         out.append(_("Say which channel you agreed with the team."))
-    if assignment.uploads.filter(status__in=[Upload.RECEIVING, Upload.CHECKING]).exists():
+    if "upload" in channels and assignment.uploads.filter(status__in=[Upload.RECEIVING, Upload.CHECKING]).exists():
         out.append(_("An upload is not finished. Finish it, or remove it."))
     if runnable_required(paper):
         if not sub.master_script.strip() or not sub.readme.strip() or not sub.software:

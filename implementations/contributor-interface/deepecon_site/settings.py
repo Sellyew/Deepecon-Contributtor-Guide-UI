@@ -35,6 +35,14 @@ UPLOAD_CHUNK_BYTES = 8 * 1024 * 1024
 DEFAULT_MAX_UPLOAD_BYTES = 20 * 1024 ** 3
 MAX_UPLOADS_PER_ASSIGNMENT = 20
 UPLOAD_LIST_LIMIT = 20000       # entries read from an archive's directory (names and sizes only)
+UPLOAD_DIRECTORY_MAX_BYTES = 16 * 1024 * 1024   # a larger directory is not listed (its file count still is)
+UPLOAD_BUDGET_FACTOR = 3        # all of an assignment's archives together: at most 3 x the per-archive limit
+UPLOAD_DISK_RESERVE_BYTES = 2 * 1024 ** 3        # free space kept for the database and everything else
+UPLOAD_UNFINISHED_DAYS = 30     # an unfinished upload untouched this long is deleted (manage.py expire_uploads)
+UPLOAD_CHECK_STALE_SECONDS = 600                 # a check that has not finished by then can be removed or redone
+# Uploads posted without JavaScript are received into private storage, never the system's temporary
+# folder (submissions/handlers.py), and stop being stored once they pass the paper's size limit.
+UPLOAD_INCOMING_DIR = PRIVATE_STORAGE_ROOT / "incoming"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 

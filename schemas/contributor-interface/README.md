@@ -30,6 +30,8 @@
 - `package` (master script, README, software) is no longer required by the schema: a theory paper whose checklist asks for LaTeX sources has none. The site requires it whenever the paper configuration asks for a runnable package (`submission.runnable_package_required`).
 - `files` lists the uploaded archives with their size and SHA-256; the site lists their contents by name and size only and never extracts or runs them.
 - `submitted_version`: each submission is a numbered version.
+- `ai_help` (optional): the contributor's report of AI help with what they wrote for the submission, as for item answers (D-039).
+- A dataset's `availability` may be `not_decided`, the MVP's "not yet decided" case (§5.1); the team follows up.
 
 ## Changes in 0.3.0 (2026-11-07)
 
