@@ -27,7 +27,8 @@
     session: d.session || "Not saved: your session has ended. Copy your text, then open your personal link again.",
     server: d.server || "Not saved: the site could not save this answer. Copy your text, then reload the page.",
     needsAnswer: d.needsAnswer || "Not saved yet: choose an answer, and your notes are saved with it.",
-    refreshing: d.refreshing || "Loading your latest saved answer…"
+    refreshing: d.refreshing || "Loading your latest saved answer…",
+    late: d.late || "Not saved: your earlier save arrived after this page was loaded. Copy your text, then reload the page."
   };
   var timer = null;       // a scheduled autosave
   var inflight = null;    // the promise of the save under way
@@ -39,15 +40,28 @@
   var partnerVersion = form.querySelector("input[name=partner_version]");
   var noteKey = "review-saving:" + window.location.pathname;
   var asked = false;      // the browser has asked whether to leave (beforeunload)
+  var lateSave = false;   // an earlier save arrived after this page was built
+  var watching = false;   // a save from the previous page may still arrive (see the end of this script)
+  // Paired items: a change of the pair's answer also raises the partner's version, so the
+  // partner's page gets a note too while such a change is being saved.
+  var variant = form.querySelector("select[name=variant_choice]");
+  var savedVariant = variant ? variant.value : null;
+  var partnerKey = form.dataset.partnerPath ? "review-saving:" + form.dataset.partnerPath : null;
 
   function readNote() {
     try { return JSON.parse(window.sessionStorage.getItem(noteKey) || "null"); } catch (err) { return null; }
   }
-  function writeNote(note) {
+  function writeNote(note, key) {
     try {
-      if (note) window.sessionStorage.setItem(noteKey, JSON.stringify(note));
-      else window.sessionStorage.removeItem(noteKey);
+      if (note) window.sessionStorage.setItem(key || noteKey, JSON.stringify(note));
+      else window.sessionStorage.removeItem(key || noteKey);
     } catch (err) { /* storage unavailable: the page still works, without this check */ }
+  }
+  function writeNotes(pendingMore) {
+    writeNote({ version: version.value, pending: !!pendingMore, at: Date.now() });
+    if (partnerKey && partnerVersion && variant && variant.value !== savedVariant) {
+      writeNote({ version: partnerVersion.value, pending: false, at: Date.now() }, partnerKey);
+    }
   }
 
   function show(text, problem) {
@@ -83,7 +97,7 @@
     var data = new FormData(form);
     data.set("save", "1");
     // A save that starts after the browser asked to leave may land after the next page is built.
-    if (asked) writeNote({ version: version.value, pending: false, at: Date.now() });
+    if (asked) writeNotes(false);
     return fetch(window.location.pathname, { method: "POST", body: data, credentials: "same-origin",
                                              headers: { "X-Requested-With": "fetch" }, keepalive: !!(keepalive || asked) });
   }
@@ -102,6 +116,7 @@
       if (r.status === 200 && body.ok) {
         version.value = body.version;
         if (partnerVersion && body.partner_version !== undefined) partnerVersion.value = body.partner_version;
+        if (variant) savedVariant = variant.value;
         show(labels.saved + " " + body.saved_at, false);
         return;
       }
@@ -113,7 +128,7 @@
       }
       failed = true; dirty = true;
       if (r.status === 409) {
-        show(labels.conflict, true);
+        show(lateSave || watching ? labels.late : labels.conflict, true);
       } else {
         showFieldErrors(body.errors);
         show(labels.invalid, true);
@@ -191,7 +206,7 @@
     asked = true;
     var queued = !!(inflight && (timer || dirty || pending));     // more to send after the save under way
     if ((timer || dirty) && verdict && verdict.value && !inflight && !failed) autosave(true);
-    if (inflight) writeNote({ version: version.value, pending: queued, at: Date.now() });
+    if (inflight) writeNotes(queued);
     if (inflight || dirty) { e.preventDefault(); e.returnValue = ""; }
   });
   // Switching tabs: save, since the page may not come back (phones discard background tabs).
@@ -219,13 +234,16 @@
   // Was this page built before a save from the previous page had arrived? If a note says a save
   // was under way (within the last 30 s) and this page may be older than it, lock the form, ask
   // the server for the item's version for about two seconds, and load the page again (a GET,
-  // never a resubmitted form) only if a newer version appears; otherwise unlock.
+  // never a resubmitted form) only if a newer version appears. Otherwise unlock, and keep asking
+  // every second until the note expires: if the save arrives late, load the page again when
+  // nothing is unsaved, or say what happened instead of reporting another tab.
   var note = readNote();
   if (note && (Date.now() - (note.at || 0) > 30000 || (Number(version.value) > Number(note.version) && !note.pending))) {
     writeNote(null);
     note = null;
   }
   if (note) {
+    watching = true;
     var mine = Number(version.value);
     var before = Array.prototype.map.call(form.elements, function (el) { return el.disabled; });
     leaving = true;                         // no saves from this page while it may be out of date
@@ -243,10 +261,31 @@
             return;
           }
           if (++polls < 8) { window.setTimeout(poll, 300); return; }
-          writeNote(null);                  // nothing newer arrived: this page is current
           Array.prototype.forEach.call(form.elements, function (el, i) { el.disabled = before[i]; });
           leaving = false;
           show("", false);
+          window.setTimeout(watch, 1000);
+        });
+    };
+    var watch = function () {
+      if (Date.now() - (note.at || 0) > 30000 || leaving) { writeNote(null); watching = false; return; }
+      if (inflight) { window.setTimeout(watch, 1000); return; }     // this page's own save: wait
+      fetch(window.location.pathname, { credentials: "same-origin", headers: { "X-Requested-With": "fetch" } })
+        .then(function (r) { return r.ok && (r.headers.get("Content-Type") || "").indexOf("application/json") === 0 ? r.json() : null; })
+        .catch(function () { return null; })
+        .then(function (body) {
+          if (body && !inflight && Number(body.version) > Number(version.value)) {
+            writeNote(null);
+            if (!dirty && !timer) {
+              leaving = true;
+              window.location.replace(window.location.pathname + window.location.search);
+            } else {
+              lateSave = true;
+              show(labels.late, true);
+            }
+            return;
+          }
+          window.setTimeout(watch, 1000);
         });
     };
     poll();

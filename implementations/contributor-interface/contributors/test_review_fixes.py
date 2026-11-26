@@ -210,6 +210,16 @@ class TheReviewForm(ScreenFixture):
         self.assertEqual(again.status_code, 409)
         self.assertEqual(self.a_emp.reviews.get(item__item_id="A").variant_choice, "second")
 
+    def test_browsers_do_not_restore_old_field_values_after_back(self):
+        # After Back or Forward the page is fetched again with the current version; restored field
+        # values from the history entry would then overwrite newer answers without a conflict.
+        self.pair("A", "M1")
+        page = self.client.get(self.url("A")).content.decode()
+        self.assertRegex(page, r'<form method="post" id="review-form" class="review-form" autocomplete="off"')
+        self.assertIn(f'data-partner-path="{self.url("M1")}"', page)
+        propose = self.client.get(reverse("contributors:propose", args=[self.pid])).content.decode()
+        self.assertIn('class="proposal-form" autocomplete="off"', propose)
+
     def test_paired_versions_keep_one_order_and_one_answer(self):
         self.pair("A", "M1")
         for item_id in ("A", "M1"):

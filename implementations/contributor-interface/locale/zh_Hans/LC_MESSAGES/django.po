@@ -552,6 +552,9 @@ msgstr "尚未保存：请选择一个回答，您的备注会随之一起保存
 msgid "Loading your latest saved answer…"
 msgstr "正在加载您最近保存的回答…"
 
+msgid "Not saved: your earlier save arrived after this page was loaded. Copy your text, then reload the page."
+msgstr "未保存：您之前的保存在此页面加载之后才完成。请先复制您的文字，然后重新加载页面。"
+
 msgid "Save"
 msgstr "保存"
 

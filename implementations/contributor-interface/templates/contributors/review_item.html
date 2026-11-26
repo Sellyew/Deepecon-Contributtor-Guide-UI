@@ -48,7 +48,9 @@
     {% include "contributors/_item_card.html" with it=item %}
     {% endif %}
 
-    <form method="post" id="review-form" class="review-form"
+    {# autocomplete="off": after Back or Forward the browser must not restore old field values under the page's fresh version. #}
+    <form method="post" id="review-form" class="review-form" autocomplete="off"{% if partner %}
+          data-partner-path="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=partner.id %}"{% endif %}
           data-saving="{% translate 'Saving…' %}" data-saved="{% translate 'Saved' %}"
           data-conflict="{% translate 'Not saved: this item was changed in another tab. Reload the page.' %}"
           data-offline="{% translate 'Not saved: no connection. Your text is still here; try again.' %}"
@@ -57,7 +59,8 @@
           data-session="{% translate 'Not saved: your session has ended. Copy your text, then open your personal link again.' %}"
           data-server="{% translate 'Not saved: the site could not save this answer. Copy your text, then reload the page.' %}"
           data-needs-answer="{% translate 'Not saved yet: choose an answer, and your notes are saved with it.' %}"
-          data-refreshing="{% translate 'Loading your latest saved answer…' %}">
+          data-refreshing="{% translate 'Loading your latest saved answer…' %}"
+          data-late="{% translate 'Not saved: your earlier save arrived after this page was loaded. Copy your text, then reload the page.' %}">
       {# Pressing Enter in a text field submits the form's first button: make it a plain save, never an answer. #}
       <button type="submit" name="save" value="1" class="visually-hidden" tabindex="-1" aria-hidden="true"{% if frozen %} disabled{% endif %}>{% translate "Save" %}</button>
       {% csrf_token %}

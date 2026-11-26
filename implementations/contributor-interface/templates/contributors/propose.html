@@ -5,7 +5,7 @@
 <h1>{% if editing %}{% translate "Edit your proposal" %}{% else %}{% translate "Propose an addition" %}{% endif %}</h1>
 <p>{% translate "Propose an error or a missing step that the team did not prepare: where it is, what would change, why it matters, and how to fix it." %}</p>
 {% if frozen %}<p class="note">{% translate "The team has frozen your review; it can no longer be changed." %}</p>{% else %}
-<form method="post" class="proposal-form">
+<form method="post" class="proposal-form" autocomplete="off">
   {% csrf_token %}{% if editing %}<input type="hidden" name="version" value="{{ editing.version }}">{% endif %}
   {{ form.non_field_errors }}
   {% for field in form %}{% if field.name|slice:":3" != "ai_" %}
