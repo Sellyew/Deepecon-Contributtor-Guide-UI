@@ -1,6 +1,6 @@
 # Contributor interface (implementation)
 
-**Status: milestone M2 (Selection) built on 2026-11-26**, after M1 (skeleton, 2026-11-07). The research lead approved the [implementation plan](../../docs/architecture/mvp-implementation-plan.md) (D-043) and started M2 with D-049. The site runs with the fictional examples only. Next is M3, guidance and uploads.
+**Status: milestone M3 (Guidance and submission) built on 2026-11-26**, after M1 (skeleton, 2026-11-07) and M2 (Selection, 2026-11-26). The research lead approved the [implementation plan](../../docs/architecture/mvp-implementation-plan.md) (D-043), started M2 with D-049 and M3 with D-050. The site runs with the fictional examples only. Next is M4: the reviewed Chinese catalogue, the data steward's check of uploaded data, and the remaining privacy controls.
 
 One Django application (Django 5.2, a long-term-support release) for the [MVP contributor interface](../../docs/architecture/mvp-contributor-interface.md). Pages are rendered on the server. It uses SQLite in WAL mode and private file storage, and loads nothing from other websites. It sends nothing to AI services: the model gateway refuses every call (D-042). It follows the [AI use and integrity rules](../../docs/architecture/llm-use-policy.md).
 
@@ -34,6 +34,17 @@ One Django application (Django 5.2, a long-term-support release) for the [MVP co
 | `check_papers` re-runs today's import checks on every stored paper and fails if one has a problem; `make_tripwire` writes the unpublished tripwire GUID to the data folder (mode 0600) and prints only its path ([canary rules](../../docs/methodology/canary.md)) | `papers/management/commands/` |
 | Chinese interface strings for M2, **machine-drafted by Claude and awaiting the team's review** | `locale/zh_Hans/LC_MESSAGES/django.po` |
 | Tests for the Selection rules, the export, freezing, the admin actions, `check_papers`, `make_tripwire`, and the contributor screens in both languages | `contributors/test_selection.py`, `papers/tests.py` |
+
+## What M3 adds
+
+| Part | Where |
+|---|---|
+| Guidance page per paper: the checklist configured for the paper (with the public package, if there is one, named so that the contributor confirms what it already holds), how to prepare the package, the four data routes, how to send it, and the rules for using AI tools (MVP §5) | `submissions/views.py`, `templates/submissions/guidance.html` |
+| Submit page: how the materials reach the team (upload, public reference, or another agreed channel, as the paper allows), the package (master script, README, software, run log, outputs, run time), one row per dataset with its availability and, for restricted or confidential data, the route by which the team can still run the code, the checklist coverage, and two declarations. Saving keeps a draft; submitting creates a numbered version holding the manifest and its SHA-256, after checking what is still missing | `submissions/forms.py`, `manifest.py`, `templates/submissions/submit.html` |
+| Uploads: ZIP archives sent in 8 MiB chunks that resume where they stopped (choose the same file again), up to 20 GiB unless the paper says otherwise. The receipt is the file's SHA-256, which the contributor can compare with their own copy. Archives are stored in private storage under generated names (mode 0600); only their list of file names and sizes is read, and nothing is extracted or run. Without JavaScript the form posts the whole file | `submissions/storage.py`, `static/upload.js` |
+| Team pages: submissions with their datasets and checklist, uploads (size, SHA-256, and the list of names and sizes; no download until the data steward's check in M4), and submitted versions with the receipt and verification actions and the manifest export (validated against `submission-manifest.schema.json` 0.3.0). The team neither edits nor deletes contributors' submissions; withdrawal deletes them, uploaded files included | `submissions/admin.py`, `contributors/admin.py` |
+| Chinese interface strings for M3, **machine-drafted by Claude and awaiting the team's review** (the rules for using AI tools follow the reviewed-draft text in MVP §5.6) | `locale/zh_Hans/LC_MESSAGES/django.po` |
+| Tests for guidance, chunked and resumed uploads, refusals, access by other contributors and papers, submissions by every channel, dataset routes, the theory paper, the manifest export, and withdrawal | `submissions/tests.py` |
 
 ## Run the demo (Stage 0)
 
@@ -137,7 +148,6 @@ Stage 1 is set by environment variables: `DEEPECON_STAGE=1`, `DEEPECON_SECRET_KE
 
 ## Not yet built
 
-- **M3:** guidance, uploads, and the submission manifest.
-- **M4:** the reviewed Chinese catalogue, the data quarantine, and the remaining §3 controls.
+- **M4:** the reviewed Chinese catalogue, the data steward's check before anyone opens uploaded data (and the team's download after it), and the remaining §3 controls.
 - **M5:** the demo paper.
 - **M6:** the server.
