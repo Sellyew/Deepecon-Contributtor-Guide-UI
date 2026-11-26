@@ -6,8 +6,9 @@
 // by a link, a shortcut, or another form on the page (language, "Ask the team"), pending changes
 // are saved first. On reload or closing, the save starts at once and the browser asks before
 // leaving while anything is unsaved. The question does not hold the next page's request until
-// the save has arrived, so a note in sessionStorage records the version the save started from:
-// a page built before the save arrived (its version is not newer) reloads itself, at most 3 times.
+// the save has arrived, so a short-lived note in sessionStorage says a save was under way. A page
+// that finds the note and may be out of date asks the server for the item's version for about
+// two seconds, locked, and loads itself again (a plain GET) only if a newer version appears.
 (function () {
   "use strict";
   var form = document.getElementById("review-form");
@@ -37,6 +38,7 @@
   var unloading = false;  // the page is going away (pagehide)
   var partnerVersion = form.querySelector("input[name=partner_version]");
   var noteKey = "review-saving:" + window.location.pathname;
+  var asked = false;      // the browser has asked whether to leave (beforeunload)
 
   function readNote() {
     try { return JSON.parse(window.sessionStorage.getItem(noteKey) || "null"); } catch (err) { return null; }
@@ -46,19 +48,6 @@
       if (note) window.sessionStorage.setItem(noteKey, JSON.stringify(note));
       else window.sessionStorage.removeItem(noteKey);
     } catch (err) { /* storage unavailable: the page still works, without this check */ }
-  }
-  // Was this page built before a save started on the previous page had arrived?
-  var note = readNote();
-  if (note) {
-    if (Number(version.value) > Number(note.version) || note.tries >= 3) {
-      writeNote(null);
-    } else {
-      writeNote({ version: note.version, tries: (note.tries || 0) + 1 });
-      leaving = true;                       // do not save from this out-of-date page, and lock it
-      Array.prototype.forEach.call(form.elements, function (el) { el.disabled = true; });
-      if (status) { status.textContent = labels.refreshing; }
-      window.setTimeout(function () { window.location.reload(); }, 700);
-    }
   }
 
   function show(text, problem) {
@@ -93,14 +82,17 @@
   function send(keepalive) {
     var data = new FormData(form);
     data.set("save", "1");
+    // A save that starts after the browser asked to leave may land after the next page is built.
+    if (asked) writeNote({ version: version.value, pending: false, at: Date.now() });
     return fetch(window.location.pathname, { method: "POST", body: data, credentials: "same-origin",
-                                             headers: { "X-Requested-With": "fetch" }, keepalive: !!keepalive });
+                                             headers: { "X-Requested-With": "fetch" }, keepalive: !!(keepalive || asked) });
   }
 
   function handle(r) {
     var type = r.headers.get("Content-Type") || "";
     if (type.indexOf("application/json") !== 0) {
       // Not an answer from the save itself: the session ended (403), or the site failed.
+      writeNote(null);                      // nothing was stored, so no page needs to wait for it
       failed = true; dirty = true;
       show(r.status === 403 ? labels.session : labels.server, true);
       return;
@@ -113,6 +105,7 @@
         show(labels.saved + " " + body.saved_at, false);
         return;
       }
+      writeNote(null);                      // refused: nothing was stored, so no page needs to wait for it
       if (r.status === 423) {             // frozen: nothing more can be saved, so do not hold the page
         dirty = false; pending = false;
         show(labels.frozen, true);
@@ -135,6 +128,8 @@
     if (!verdict || !verdict.value) { show(labels.needsAnswer, false); return Promise.resolve(); }
     dirty = false; failed = false;
     show(labels.saving, false);
+    // No writeNote(null) here: a page that is going away sees its keepalive save "fail" although
+    // the browser still delivers it, so only an answer from the server may remove the note.
     var request = send(keepalive).then(handle).catch(function () { failed = true; dirty = true; show(labels.offline, true); });
     inflight = request.then(function () {
       inflight = null;
@@ -189,12 +184,14 @@
   });
 
   // Reloading, closing, or the address bar: start the save now and ask before leaving while
-  // anything is unsaved. The question holds the navigation until the save has arrived, so the
-  // next page shows it (sending it later, on pagehide, would race the next page's request).
+  // anything is unsaved. The question does not hold the next page's request until the save has
+  // arrived; the note checked at the end of this script covers a page built too early.
   window.addEventListener("beforeunload", function (e) {
     if (leaving) return;
+    asked = true;
+    var queued = !!(inflight && (timer || dirty || pending));     // more to send after the save under way
     if ((timer || dirty) && verdict && verdict.value && !inflight && !failed) autosave(true);
-    if (inflight) writeNote({ version: version.value, tries: 0 });
+    if (inflight) writeNote({ version: version.value, pending: queued, at: Date.now() });
     if (inflight || dirty) { e.preventDefault(); e.returnValue = ""; }
   });
   // Switching tabs: save, since the page may not come back (phones discard background tabs).
@@ -218,4 +215,40 @@
     var button = form.querySelector('button[name=set_verdict][value="' + value + '"]');
     if (button && !button.disabled) { e.preventDefault(); button.click(); }
   });
+
+  // Was this page built before a save from the previous page had arrived? If a note says a save
+  // was under way (within the last 30 s) and this page may be older than it, lock the form, ask
+  // the server for the item's version for about two seconds, and load the page again (a GET,
+  // never a resubmitted form) only if a newer version appears; otherwise unlock.
+  var note = readNote();
+  if (note && (Date.now() - (note.at || 0) > 30000 || (Number(version.value) > Number(note.version) && !note.pending))) {
+    writeNote(null);
+    note = null;
+  }
+  if (note) {
+    var mine = Number(version.value);
+    var before = Array.prototype.map.call(form.elements, function (el) { return el.disabled; });
+    leaving = true;                         // no saves from this page while it may be out of date
+    Array.prototype.forEach.call(form.elements, function (el) { el.disabled = true; });
+    show(labels.refreshing, false);
+    var polls = 0;
+    var poll = function () {
+      fetch(window.location.pathname, { credentials: "same-origin", headers: { "X-Requested-With": "fetch" } })
+        .then(function (r) { return r.ok && (r.headers.get("Content-Type") || "").indexOf("application/json") === 0 ? r.json() : null; })
+        .catch(function () { return null; })
+        .then(function (body) {
+          if (body && Number(body.version) > mine) {
+            writeNote(null);
+            window.location.replace(window.location.pathname + window.location.search);
+            return;
+          }
+          if (++polls < 8) { window.setTimeout(poll, 300); return; }
+          writeNote(null);                  // nothing newer arrived: this page is current
+          Array.prototype.forEach.call(form.elements, function (el, i) { el.disabled = before[i]; });
+          leaving = false;
+          show("", false);
+        });
+    };
+    poll();
+  }
 })();

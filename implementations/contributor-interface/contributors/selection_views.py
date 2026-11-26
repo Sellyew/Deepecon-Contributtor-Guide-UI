@@ -86,6 +86,9 @@ def review_item(request, paper_id, item_id):
     partner = views.get(view.get("paired_with"))
     reviews = selection.reviews_by_item(assignment)
     review = reviews.get(item_id)
+    if request.method == "GET" and _is_fetch(request):
+        # review.js asks this when a page may have been built before a save arrived.
+        return JsonResponse({"version": review.version if review else 0})
     prev_id, next_id = selection.neighbours(items, item_id)
     conflict = False
     pair_cards = []

@@ -94,6 +94,16 @@ class StaleAndConcurrentSaves(ScreenFixture):
         self.assertEqual(settings.DATABASES["default"]["OPTIONS"].get("transaction_mode"), "IMMEDIATE")
 
 
+class VersionCheck(ScreenFixture):
+    def test_the_script_can_ask_for_an_items_current_version(self):
+        headers = {"HTTP_X_REQUESTED_WITH": "fetch"}
+        self.assertEqual(self.client.get(self.url("A"), **headers).json(), {"version": 0})
+        self.post("A", set_verdict="keep", version=0)
+        self.assertEqual(self.client.get(self.url("A"), **headers).json(), {"version": 1})
+        self.assertEqual(self.client.get(reverse("contributors:review_item", args=[self.theory.paper_id, "D1"]),
+                                         **headers).status_code, 404)        # other papers stay closed
+
+
 class RubricVersions(ScreenFixture):
     def test_answers_belong_to_the_rubric_version_they_were_given_on(self):
         self.post("A", set_verdict="reject", version=0)
