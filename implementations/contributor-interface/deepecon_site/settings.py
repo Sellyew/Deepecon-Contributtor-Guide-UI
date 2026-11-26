@@ -103,7 +103,11 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": DATA_DIR / "db.sqlite3",
-        "OPTIONS": {"init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL"},
+        # IMMEDIATE: a write transaction takes SQLite's write lock when it begins, so concurrent
+        # saves wait their turn (up to the 5 s timeout) and the version checks in contributors/review.py
+        # see each other, instead of failing with "database is locked" (Django 5.1+).
+        "OPTIONS": {"init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL",
+                    "transaction_mode": "IMMEDIATE"},
     }
 }
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

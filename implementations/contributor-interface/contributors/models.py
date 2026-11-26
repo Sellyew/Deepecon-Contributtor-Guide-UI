@@ -238,7 +238,9 @@ class ItemReview(AIHelpFields):
                       ("repair_or_acceptable_work_wrong", "Repair or acceptable work wrong"), ("other", "Other")]
     VARIANT_CHOICES = [("first", "First"), ("second", "Second"), ("both", "Both"), ("neither", "Neither")]
 
-    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name="reviews")
+    # PROTECT: a contributor's work is never deleted as a side effect of deleting an assignment
+    # (withdrawal is its own, logged step; plan §3).
+    assignment = models.ForeignKey(Assignment, on_delete=models.PROTECT, related_name="reviews")
     item = models.ForeignKey("papers.Item", on_delete=models.PROTECT, related_name="reviews")
     verdict = models.CharField(max_length=32, choices=VERDICTS)
     reject_reason = models.CharField(max_length=40, choices=REJECT_REASONS, blank=True)
@@ -281,12 +283,13 @@ class Proposal(AIHelpFields):
     """An additional item proposed by the contributor (MVP §3 step 5)."""
 
     public_id = models.CharField(max_length=32, unique=True, default=proposal_public_id)
-    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name="proposals")
+    assignment = models.ForeignKey(Assignment, on_delete=models.PROTECT, related_name="proposals")
     category = models.CharField(max_length=64, help_text="A category ID from the paper configuration, or 'unsure'.")
     location = models.CharField(max_length=500, blank=True)
     description = models.TextField()
     why_it_matters = models.TextField(blank=True)
     suggested_repair = models.TextField(blank=True)
+    version = models.PositiveIntegerField(default=1)     # optimistic, as for answers: two tabs never overwrite silently
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -309,7 +312,7 @@ class Question(models.Model):
     """'Ask the team' (MVP §4.2): a question stored on the site and answered in the admin. No AI, no e-mail."""
 
     public_id = models.CharField(max_length=32, unique=True, default=question_public_id)
-    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name="questions")
+    assignment = models.ForeignKey(Assignment, on_delete=models.PROTECT, related_name="questions")
     item = models.ForeignKey("papers.Item", null=True, blank=True, on_delete=models.PROTECT, related_name="questions")
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -338,9 +341,10 @@ class Confirmation(models.Model):
     """A numbered version of the contributor's review (MVP §3 step 6): the reviews and proposals
     exactly as confirmed, and their SHA-256."""
 
-    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name="confirmations")
+    assignment = models.ForeignKey(Assignment, on_delete=models.PROTECT, related_name="confirmations")
     version = models.PositiveIntegerField()
     confirmed_at = models.DateTimeField(auto_now_add=True)
+    language = models.CharField(max_length=16, blank=True, help_text="The interface language the contributor used.")
     content = models.JSONField()
     content_sha256 = models.CharField(max_length=64)
 

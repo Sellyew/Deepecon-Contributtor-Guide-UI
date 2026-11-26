@@ -397,8 +397,15 @@ class TripwireTests(SimpleTestCase):
             self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
             with self.assertRaises(CommandError):
                 call_command("make_tripwire", stdout=io.StringIO())
-            call_command("make_tripwire", "--replace", stdout=io.StringIO())
+            out = io.StringIO()
+            call_command("make_tripwire", "--replace", stdout=out)
             self.assertNotEqual(path.read_text(), guid)
+            # The retired GUID is kept (material built before still carries it), privately, and not printed.
+            from papers.management.commands.make_tripwire import retired_tripwires
+            retired = retired_tripwires()
+            self.assertEqual([r.read_text() for r in retired], [guid])
+            self.assertEqual(stat.S_IMODE(retired[0].stat().st_mode), 0o600)
+            self.assertNotIn(guid, out.getvalue())
 
 
 class RunserverTests(SimpleTestCase):

@@ -83,7 +83,7 @@ At Stage 0 the server refuses to listen on any address other than the loopback a
 .venv/bin/python manage.py import_candidate_package PAPER_ID path/to/candidate.zip
 ```
 
-The same imports are available on the team administration page (Papers, then "Import the team's files"). To offer a demo or development paper to every invited contributor, open the paper and tick "open to all contributors". Scored papers cannot be opened to all: offer them by creating assignments (D-047). Unticking it stops new choices only: contributors who already chose the paper keep it (Assignments, filtered by the paper and "Chosen by the contributor"); to withdraw it, delete those assignments.
+The same imports are available on the team administration page (Papers, then "Import the team's files"). To offer a demo or development paper to every invited contributor, open the paper and tick "open to all contributors". Scored papers cannot be opened to all: offer them by creating assignments (D-047). Unticking it stops new choices only: contributors who already chose the paper keep it, and their work (D-045). An assignment with no answers, proposals, questions, or confirmations can still be deleted (Assignments, filtered by the paper and "Chosen by the contributor"); one with work cannot be deleted, so a contributor's work is never lost as a side effect.
 
 To invite someone, create the link from an assignment (Assignments, action "Create a personal link, opening this paper unless the contributor has chosen one"), or from a contributor (Contributors, action "Create the personal link"), which opens their current paper, or the list of papers offered to them if they have none. To re-issue a link, use the contributor row: a paper the contributor chose stays theirs.
 
@@ -103,9 +103,11 @@ Before an evaluation run, and after the rules change, re-check every stored pape
 .venv/bin/python manage.py check_papers
 ```
 
-Set each paper's build date and team owner on its admin page. When a contributor has finished, freeze the review (Assignments, action "Freeze the selected reviews"); the contributor can then read it but not change it. Export it as JSON with the action "Export the selected review as JSON". Questions from contributors wait in Questions, oldest first; answer them there.
+Set each paper's build date and team owner on its admin page. When a contributor has finished, freeze the review (Assignments, action "Freeze the selected reviews"); the contributor can then read it but not change it. Freezing is refused without a build date or with items lacking provenance, and warns when items are unanswered or the answers changed after the last confirmed version; the event log records the hash of what was frozen and the confirmed version it matches. Export it as JSON with the action "Export the selected review as JSON", which needs the permission to view answers, proposals, questions, confirmations, and consent. Contributors' answers, proposals, questions, confirmations, and consent cannot be edited or deleted on the team pages. Questions from contributors wait in Questions, unanswered first, then oldest first; answer them there.
 
-Create the unpublished tripwire GUID once per installation. It is written to the data folder and never printed; never paste it into any AI service, this session included:
+Answers belong to the rubric version they were given on. After the team imports a new rubric version, its items are reviewed afresh: the review screen shows the contributor's answer to the earlier version as a note, and the export holds only answers to the current version.
+
+Create the unpublished tripwire GUID once per installation. It is written to the data folder and never printed; never paste it into any AI service, this session included. Replacing it (`--replace`) keeps the old one, renamed, for leak probes:
 
 ```bash
 .venv/bin/python manage.py make_tripwire

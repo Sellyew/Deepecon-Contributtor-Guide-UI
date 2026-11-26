@@ -50,14 +50,56 @@ def _validator(name):
     return Draft202012Validator(schema, format_checker=FormatChecker())
 
 
-def _validate(name, data):
+def schema_problems(name, data):
     errors = sorted(_validator(name).iter_errors(data), key=lambda e: list(e.absolute_path))
-    if errors:
-        problems = []
-        for e in errors[:25]:
-            where = "/".join(str(p) for p in e.absolute_path) or "(top level)"
-            problems.append(f"{name}: {where}: fails the '{e.validator}' rule")
+    problems = []
+    for e in errors[:25]:
+        where = "/".join(str(p) for p in e.absolute_path) or "(top level)"
+        problems.append(f"{name}: {where}: fails the '{e.validator}' rule")
+    return problems
+
+
+def _validate(name, data):
+    problems = schema_problems(name, data)
+    if problems:
         raise ImportRefused(problems)
+
+
+# The checks each import makes, without writing anything. The importers refuse a file that has
+# problems; check_papers applies the same checks to everything already stored (D-049).
+
+def config_problems(data):
+    problems = schema_problems("paper-config", data)
+    if problems:
+        return problems
+    groups = ([c["id"] for c in data["categories"]], [c["source_array"] for c in data["categories"]],
+              [m["id"] for m in data.get("materials_checklist", [])])
+    duplicates = sorted({x for group in groups for x in group if group.count(x) > 1})
+    if duplicates:
+        problems.append(f"duplicate category, source array, or checklist id: {', '.join(duplicates)}")
+    version = data.get("candidate_version")
+    if version is not None and not SAFE_VERSION.fullmatch(version):
+        problems.append("candidate_version may contain only letters, digits, '.', '_' and '-'")
+    return problems
+
+
+def rubric_problems(data, config):
+    problems = schema_problems("rubric-import", data)
+    if problems:
+        return problems
+    return rubric_checks().check_rubric(data, config)       # includes the normalization problems
+
+
+def item_map_problems(data, paper, rubric):
+    """`rubric` is the stored RubricVersion the map should belong to, or None if it is not imported."""
+    problems = schema_problems("item-map", data)
+    if problems:
+        return problems
+    if data["paper_id"] != paper.paper_id:
+        problems.append(f"item map is for paper {data['paper_id']}, not {paper.paper_id}")
+    if rubric is None or rubric.version != data["rubric_version"]:
+        return problems + [f"rubric version {data['rubric_version']} has not been imported for {paper.paper_id}"]
+    return problems + rubric_checks().check_item_map(data, [it.normalized for it in rubric.items.order_by("position")])
 
 
 def _load(content):
@@ -74,15 +116,9 @@ def _load(content):
 @transaction.atomic
 def import_paper_config(content, actor):
     data, sha = _load(content)
-    _validate("paper-config", data)
-    groups = ([c["id"] for c in data["categories"]], [c["source_array"] for c in data["categories"]],
-              [m["id"] for m in data.get("materials_checklist", [])])
-    duplicates = sorted({x for group in groups for x in group if group.count(x) > 1})
-    if duplicates:
-        raise ImportRefused([f"duplicate category, source array, or checklist id: {', '.join(duplicates)}"])
-    version = data.get("candidate_version")
-    if version is not None and not SAFE_VERSION.fullmatch(version):
-        raise ImportRefused(["candidate_version may contain only letters, digits, '.', '_' and '-'"])
+    problems = config_problems(data)
+    if problems:
+        raise ImportRefused(problems)
     status = data.get("publication_status", {"status": Paper.SCORED})
     designated = status.get("designated_on")
     new_date = date.fromisoformat(designated) if designated else None
@@ -136,12 +172,10 @@ def _recheck_stored_rubric(paper, config):
 @transaction.atomic
 def import_rubric(paper, content, actor):
     data, sha = _load(content)
-    _validate("rubric-import", data)
-    rc = rubric_checks()
-    items, _ = rc.normalize(data, paper.config)
-    problems = rc.check_rubric(data, paper.config)          # includes the normalization problems
+    problems = rubric_problems(data, paper.config)
     if problems:
         raise ImportRefused(problems)
+    items, _ = rubric_checks().normalize(data, paper.config)
     existing = paper.rubrics.filter(version=data["version"]).first()
     if existing and existing.sha256 == sha:
         return existing                     # the same file again: items and their origins are kept
@@ -164,16 +198,11 @@ def import_rubric(paper, content, actor):
 def import_item_map(paper, content, actor):
     data, sha = _load(content)
     _validate("item-map", data)
-    problems = []
-    if data["paper_id"] != paper.paper_id:
-        problems.append(f"item map is for paper {data['paper_id']}, not {paper.paper_id}")
     rubric = paper.rubrics.filter(version=data["rubric_version"]).first()
-    if rubric is None:
-        raise ImportRefused(problems + [f"rubric version {data['rubric_version']} has not been imported for {paper.paper_id}"])
-    items = list(rubric.items.order_by("position"))
-    problems += rubric_checks().check_item_map(data, [it.normalized for it in items])
+    problems = item_map_problems(data, paper, rubric)
     if problems:
         raise ImportRefused(problems)
+    items = list(rubric.items.order_by("position"))
     item_map, _ = ItemMap.objects.update_or_create(paper=paper, rubric=rubric, defaults={"raw": data, "sha256": sha})
     for it in items:
         it.origin = data["items"].get(it.item_id, {}).get("origin")

@@ -10,12 +10,12 @@ Kept apart from the views so the rules are tested once:
 import hashlib
 import json
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from papers.importers import _validator, rubric_checks
 
-from .models import Confirmation, ItemReview
+from .models import Assignment, Confirmation, ItemReview
 
 MINUTES_PER_ITEM = 2.5      # MVP §3 step 3: "about 2–3 minutes per item" [U: to be measured]
 
@@ -24,7 +24,7 @@ class Conflict(Exception):
     """The page was out of date: someone (another tab) saved this item since it was loaded."""
 
     def __init__(self, review):
-        super().__init__(review.version)
+        super().__init__(review.version if review is not None else 0)
         self.review = review
 
 
@@ -72,8 +72,27 @@ def item_views(paper, language="en"):
     return views
 
 
+def current_reviews(assignment):
+    """The answers given on the current rubric version. Answers belong to the rubric version
+    they were given on: after the team imports a new version, its items are reviewed afresh,
+    and earlier answers are kept and shown alongside (earlier_review), never as current."""
+    return assignment.reviews.filter(item__rubric=assignment.paper.current_rubric()).select_related("item")
+
+
 def reviews_by_item(assignment):
-    return {r.item.item_id: r for r in assignment.reviews.select_related("item")}
+    return {r.item.item_id: r for r in current_reviews(assignment)}
+
+
+def earlier_review(assignment, item_id):
+    """The latest answer this contributor gave on the same item ID under an earlier rubric version."""
+    return (assignment.reviews.filter(item__item_id=item_id).exclude(item__rubric=assignment.paper.current_rubric())
+            .select_related("item__rubric").order_by("-updated_at").first())
+
+
+def pairs(paper):
+    """{item_id: partner item_id} from the item map's paired variants."""
+    return {iid: ov["paired_with"] for iid, ov in ((item_map_for(paper) or {}).get("items", {})).items()
+            if ov.get("paired_with")}
 
 
 def progress(assignment):
@@ -83,20 +102,48 @@ def progress(assignment):
     return {"reviewed": done, "total": len(items), "minutes_left": round(left * MINUTES_PER_ITEM)}
 
 
-def map_for(assignment, language="en"):
-    """The whole-picture pane, with each marker's review status, or None without an item map."""
-    item_map = item_map_for(assignment.paper)
+def map_for(assignment, language="en", result=None):
+    """The whole-picture pane, with each marker's review status, or None without an item map.
+
+    Which results an item affects is shown only for categories whose configuration makes
+    `affected_results` visible, as on the item card (plan §3: only the configured fields).
+    A marker's place among the workflow stages is always shown: that is what the map is for.
+    `result` (a result node ID) highlights the items that affect it (MVP §4.1)."""
+    paper = assignment.paper
+    item_map = item_map_for(paper)
     if item_map is None:
         return None
     rc = rubric_checks()
     statuses = {iid: r.verdict for iid, r in reviews_by_item(assignment).items()}
-    view = rc.map_view(item_map, [it.normalized for it in paper_items(assignment.paper)], statuses)
-    palette = colours(assignment.paper)
+    view = rc.map_view(item_map, [it.normalized for it in paper_items(paper)], statuses)
+    shows_results = {c["id"] for c in paper.config["categories"] if "affected_results" in c["visible_roles"]}
+    palette = colours(paper)
+    partner = pairs(paper)
+    # Results are the nodes some item affects; they are listed apart from the workflow stages.
+    is_result = {n["id"] for n in view["nodes"] if n["affected_by"]}
+    highlighted = set()
+    for node in view["nodes"]:
+        if node["id"] == result and node["id"] in is_result:
+            highlighted = {m["item_id"] for m in node["affected_by"] if m["category"] in shows_results}
+    view["result"] = result if highlighted else None
     for node in view["nodes"]:
         node["label_text"] = rc.localize(node["label"], language)
+        node["affected_by"] = [m for m in node["affected_by"] if m["category"] in shows_results]
         for marker in node["items_here"] + node["affected_by"]:
             marker["colour"] = palette.get(marker["category"], 0)
             marker["done"] = marker["status"] != "not_reviewed"
+            marker["highlight"] = marker["item_id"] in highlighted
+            marker["paired_with"] = partner.get(marker["item_id"])
+        # Paired variants anchored at the same stage sit side by side, joined (MVP §4.1).
+        here, groups, seen = {m["item_id"]: m for m in node["items_here"]}, [], set()
+        for m in node["items_here"]:
+            if m["item_id"] in seen:
+                continue
+            mate = here.get(m["paired_with"])
+            group = [m, mate] if mate else [m]
+            seen.update(x["item_id"] for x in group)
+            groups.append(group)
+        node["marker_groups"] = groups
     # A stage whose children are all results (e.g. "Results in the paper") names the results
     # column instead of appearing as an empty stage in the workflow.
     children = {}
@@ -106,8 +153,9 @@ def map_for(assignment, language="en"):
     view["results_heading"] = None
     for node in view["nodes"]:
         kids = children.get(node["id"], [])
-        node["hidden"] = bool(node["affected_by"]) or (bool(kids) and all(k["affected_by"] for k in kids))
-        if kids and all(k["affected_by"] for k in kids) and view["results_heading"] is None:
+        node["is_result"] = node["id"] in is_result
+        node["hidden"] = node["is_result"] or (bool(kids) and all(k["id"] in is_result for k in kids))
+        if kids and all(k["id"] in is_result for k in kids) and view["results_heading"] is None:
             view["results_heading"] = node["label_text"]
     return view
 
@@ -118,12 +166,22 @@ def neighbours(items, item_id):
     return (ids[i - 1] if i > 0 else None), (ids[i + 1] if i + 1 < len(ids) else None)
 
 
+def check_not_frozen(assignment):
+    """Read the freeze from the database inside the transaction: the instance loaded at the start
+    of the request may be out of date if the team froze the review meanwhile."""
+    if Assignment.objects.filter(pk=assignment.pk, frozen_at__isnull=False).exists():
+        raise Frozen()
+
+
 @transaction.atomic
 def save_review(assignment, item, data, expected_version):
     """Create or update one answer. `expected_version` is the version the page was loaded with
-    (0 for an item never answered). Raises Conflict if it is out of date, Frozen if frozen."""
-    if assignment.is_frozen:
-        raise Frozen()
+    (0 for an item never answered). Raises Conflict if it is out of date, Frozen if frozen.
+
+    For paired variants, "first" and "second" refer to the pair in rubric order, the same on
+    both items' pages; the choice is one answer about the pair, so it is copied to the
+    partner's answer if there is one."""
+    check_not_frozen(assignment)
     review = ItemReview.objects.select_for_update().filter(assignment=assignment, item=item).first()
     current = review.version if review else 0
     if expected_version != current:
@@ -137,15 +195,28 @@ def save_review(assignment, item, data, expected_version):
     if not review.ai_used:
         review.ai_tool, review.ai_account_kind, review.ai_entered_items = "", "", None
     review.version = current + 1
-    review.save()
+    try:
+        with transaction.atomic():
+            review.save()
+    except IntegrityError:
+        # Two first saves of the same item raced (possible on a server database): the other won.
+        raise Conflict(ItemReview.objects.filter(assignment=assignment, item=item).first())
+    if "variant_choice" in data:
+        mate_id = pairs(assignment.paper).get(item.item_id)
+        mate = (ItemReview.objects.select_for_update()
+                .filter(assignment=assignment, item__rubric=item.rubric, item__item_id=mate_id).first()) if mate_id else None
+        if mate is not None and mate.variant_choice != review.variant_choice:
+            mate.variant_choice = review.variant_choice
+            mate.version += 1
+            mate.save(update_fields=["variant_choice", "version", "updated_at"])
     return review
 
 
 def snapshot(assignment):
-    """The reviews and proposals as they stand, in the export's form."""
+    """The reviews (on the current rubric version) and proposals as they stand, in the export's form."""
     return {
-        "reviews": [r.export() for r in assignment.reviews.select_related("item").order_by("item__position")],
-        "proposals": [p.export() for p in assignment.proposals.all()],
+        "reviews": [r.export() for r in current_reviews(assignment).order_by("item__position")],
+        "proposals": [p.export() for p in assignment.proposals.order_by("created_at", "pk")],
     }
 
 
@@ -155,14 +226,25 @@ def content_sha256(content):
 
 
 @transaction.atomic
-def confirm(assignment):
-    """Create the next numbered version. Raises Frozen if the team has frozen the review."""
-    if assignment.is_frozen:
-        raise Frozen()
+def confirm(assignment, language=""):
+    """Create the next numbered version. Raises Frozen if the team has frozen the review.
+    `language` is the interface language the contributor used (the export's `language`)."""
+    check_not_frozen(assignment)
     content = snapshot(assignment)
     last = assignment.confirmations.select_for_update().order_by("-version").first()
     return Confirmation.objects.create(assignment=assignment, version=(last.version + 1) if last else 1,
-                                       content=content, content_sha256=content_sha256(content))
+                                       content=content, content_sha256=content_sha256(content), language=language)
+
+
+def freeze_record(assignment):
+    """What a freeze covers, for the event log (plan §2.7: versions are logged): the hash of the
+    answers as they stand, and the latest confirmed version and whether it matches them."""
+    live = content_sha256(snapshot(assignment))
+    latest = assignment.confirmations.order_by("-version").first()
+    return {"content_sha256": live,
+            "confirmation_version": latest.version if latest else None,
+            "confirmation_sha256": latest.content_sha256 if latest else None,
+            "matches_confirmation": bool(latest and latest.content_sha256 == live)}
 
 
 def export(assignment):
@@ -175,13 +257,15 @@ def export(assignment):
             content["reviews"].append({"item_id": item.item_id, "category": item.category, "verdict": "not_reviewed",
                                        "updated_at": timezone.now().isoformat().replace("+00:00", "Z")})
     consent = assignment.latest_consent()
+    latest = assignment.confirmations.order_by("-version").first()
     data = {
         "schema_version": "0.3.0",
         "paper_id": paper.paper_id,
         "assignment_id": assignment.public_id,
         "contributor_id": assignment.contributor.public_id,
         "relationship_to_paper": assignment.relationship_to_paper,
-        "language": interface_tag(assignment.contributor.preferred_language),
+        "language": (latest.language if latest and latest.language
+                     else interface_tag(assignment.contributor.preferred_language)),
         "rubric_version": paper.config["rubric_version"],
         "reviews": content["reviews"],
         "proposals": content["proposals"],
@@ -218,6 +302,12 @@ def freeze_problems(assignment):
     prog = progress(assignment)
     if prog["reviewed"] < prog["total"]:
         warnings.append(f"{prog['total'] - prog['reviewed']} of {prog['total']} items are not answered")
-    if not assignment.confirmations.exists():
+    record = freeze_record(assignment)
+    if record["confirmation_version"] is None:
         warnings.append("the contributor has not confirmed a version")
+    elif not record["matches_confirmation"]:
+        warnings.append(f"the answers changed after version {record['confirmation_version']} was confirmed")
+    earlier = assignment.reviews.exclude(item__rubric=paper.current_rubric()).count()
+    if earlier:
+        warnings.append(f"{earlier} answer(s) belong to an earlier rubric version and are not in the export")
     return blocking, warnings

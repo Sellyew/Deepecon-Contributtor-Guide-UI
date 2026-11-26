@@ -7,13 +7,11 @@
   <div class="change">
     <div>
       <h3>{% translate "Original" %}</h3>
-      <p class="path">{{ it.change.original.path }}{% if it.change.original.line_start %}, {% blocktranslate with a=it.change.original.line_start b=it.change.original.line_end %}lines {{ a }}–{{ b }}{% endblocktranslate %}{% endif %}</p>
-      <pre>{{ it.change.original.text }}</pre>
+      {% include "contributors/_excerpt.html" with ex=it.change.original %}
     </div>
     <div>
       <h3>{% translate "Modified" %}</h3>
-      <p class="path">{{ it.change.modified.path }}{% if it.change.modified.line_start %}, {% blocktranslate with a=it.change.modified.line_start b=it.change.modified.line_end %}lines {{ a }}–{{ b }}{% endblocktranslate %}{% endif %}</p>
-      <pre>{{ it.change.modified.text }}</pre>
+      {% include "contributors/_excerpt.html" with ex=it.change.modified %}
     </div>
   </div>
   {% endif %}

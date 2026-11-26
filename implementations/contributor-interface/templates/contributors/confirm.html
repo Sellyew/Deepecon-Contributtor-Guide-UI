@@ -11,7 +11,7 @@
   {% for row in rows %}
   <tr>
     <th scope="row"><a href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=row.item.id %}">{{ row.item.id }}</a> {{ row.item.title|default:"" }}</th>
-    <td>{% if row.review %}{{ row.verdict_label }}{% if row.review.ai_used %} · {% translate "AI helped" %}{% endif %}{% else %}<span class="note">{% translate "Not reviewed yet" %}</span>{% endif %}</td>
+    <td>{% if row.review %}{{ row.verdict_label }}{% if row.reason_label %} ({{ row.reason_label }}){% endif %}{% if row.variant_label %}<br>{% translate "Version to keep:" %} {{ row.variant_label }}{% endif %}{% if row.review.ai_used %} · {% translate "AI helped" %}{% endif %}{% else %}<span class="note">{% translate "Not reviewed yet" %}</span>{% endif %}</td>
     <td>{% if row.review %}
       {% if row.review.suggested_title %}<p>{{ row.review.suggested_title }}</p>{% endif %}
       {% if row.review.suggested_description %}<p>{{ row.review.suggested_description|linebreaksbr }}</p>{% endif %}

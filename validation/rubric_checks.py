@@ -182,8 +182,13 @@ def contributor_view(items, config, item_map=None):
             if role in visible and role in ov:
                 v[role] = ov[role]
         if "change" in v:
-            ch = v["change"]
-            v["change"] = {**ch, "original": {**ch["original"], "path": _map_path(ch["original"].get("path"), file_map)}}
+            # Both sides show the author's own file name first (D-026); an excerpt without a
+            # path (a passage of the paper) keeps none.
+            ch = dict(v["change"])
+            for side in ("original", "modified"):
+                if isinstance(ch.get(side), dict) and ch[side].get("path"):
+                    ch[side] = {**ch[side], "path": _map_path(ch[side]["path"], file_map)}
+            v["change"] = ch
         if ov.get("paired_with"):
             v["paired_with"] = ov["paired_with"]
         view[it["category"]].append(v)

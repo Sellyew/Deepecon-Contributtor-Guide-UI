@@ -12,23 +12,26 @@ from papers.models import Paper
 
 
 def paper_problems(paper):
-    problems = []
-    try:
-        importers._validate("paper-config", paper.config)
-    except importers.ImportRefused as refused:
-        problems += refused.problems
+    """Every check the importers make, applied to what is stored, plus the stored items and package."""
+    problems = importers.config_problems(paper.config)
+    if problems:
+        return problems                     # the other checks read the configuration
     rc = importers.rubric_checks()
     rubric = paper.current_rubric()
     if rubric is None:
         problems.append(f"rubric version {paper.config.get('rubric_version')} is not imported")
     else:
-        problems += rc.check_rubric(rubric.raw, paper.config)
-        items, _ = rc.normalize(rubric.raw, paper.config)
+        problems += importers.rubric_problems(rubric.raw, paper.config)
+        if not problems:
+            items, _ = rc.normalize(rubric.raw, paper.config)
+            stored = set(rubric.items.values_list("item_id", flat=True))
+            if {it["id"] for it in items} != stored:
+                problems.append(f"the categories select different items from the stored rubric {rubric.version}")
         item_map = rubric.item_maps.first()
         if item_map is None:
             problems.append("no item map is imported for the current rubric")
         else:
-            problems += rc.check_item_map(item_map.raw, items)
+            problems += importers.item_map_problems(item_map.raw, paper, rubric)
         missing = list(rubric.items.filter(origin__isnull=True).values_list("item_id", flat=True))
         if missing:
             problems.append(f"items without provenance: {', '.join(missing)}")

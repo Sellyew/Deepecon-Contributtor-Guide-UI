@@ -12,6 +12,7 @@
 </div>
 {% if conflict %}<p class="conflict" role="alert">{% translate "This item was saved from another tab or window after you opened this page. The saved answer is shown below; please make your change again." %}</p>{% endif %}
 {% if frozen %}<p class="note">{% translate "The team has frozen your review; it can no longer be changed." %}</p>{% endif %}
+{% if earlier %}<p class="note">{% blocktranslate with verdict=earlier_verdict %}The team has updated the items since you answered this one. Your answer to the earlier version was: {{ verdict }}. Please answer this version.{% endblocktranslate %}{% if earlier.comment %} {% translate "Your comment then:" %} “{{ earlier.comment }}”{% endif %}</p>{% endif %}
 <div class="review-layout">
   {% if map %}
   <nav class="map" aria-label="{% translate 'Whole picture' %}">
@@ -20,18 +21,19 @@
       {% for node in map.nodes %}{% if not node.hidden %}
       <li class="{% if node.parent %}child{% else %}stage{% endif %}">
         <span class="node-label">{{ node.label_text }}</span>
-        {% for m in node.items_here %}<a class="marker colour-{{ m.colour }}{% if m.done %} done{% endif %}{% if m.item_id == item.id %} current{% endif %}" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=m.item_id %}" title="{{ m.item_id }}">{{ m.item_id }}</a>{% endfor %}
+        {% for group in node.marker_groups %}{% if group|length > 1 %}<span class="pair" title="{% translate 'Two versions of one key point' %}">{% endif %}{% for m in group %}{% include "contributors/_marker.html" %}{% endfor %}{% if group|length > 1 %}</span>{% endif %}{% endfor %}
       </li>
       {% endif %}{% endfor %}
     </ul>
     <h3>{% if map.results_heading %}{{ map.results_heading }}{% else %}{% translate "Results" %}{% endif %}</h3>
     <ul class="results">
-      {% for node in map.nodes %}{% if node.affected_by %}
-      <li><span class="node-label">{{ node.label_text }}</span> ←
-        {% for m in node.affected_by %}<a class="marker colour-{{ m.colour }}{% if m.done %} done{% endif %}{% if m.item_id == item.id %} current{% endif %}" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=m.item_id %}">{{ m.item_id }}</a>{% endfor %}
+      {% for node in map.nodes %}{% if node.is_result %}
+      <li{% if map.result == node.id %} class="selected"{% endif %}><a class="node-label" href="?result={{ node.id|urlencode }}"{% if map.result == node.id %} aria-current="true"{% endif %}>{{ node.label_text }}</a>{% if node.affected_by %} ←
+        {% for m in node.affected_by %}{% include "contributors/_marker.html" %}{% endfor %}{% endif %}
       </li>
       {% endif %}{% endfor %}
     </ul>
+    {% if map.result %}<p class="hint"><a href="?">{% translate "Clear the highlight" %}</a></p>{% else %}<p class="hint">{% translate "Select a result to highlight the items that affect it." %}</p>{% endif %}
   </nav>
   {% endif %}
   <article class="item-panel">
@@ -39,9 +41,9 @@
       {% if prev_id %}<a id="prev-link" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=prev_id %}">◀ {% translate "Previous" %}</a>{% endif %}
       {% if next_id %}<a id="next-link" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=next_id %}">{% translate "Next" %} ▶</a>{% endif %}
     </nav>
-    {% if partner %}
-    <p class="note">{% translate "This key point was prepared in two versions; both are shown with equal weight." %}</p>
-    <div class="paired">{% include "contributors/_item_card.html" with it=item %}{% include "contributors/_item_card.html" with it=partner %}</div>
+    {% if pair_cards %}
+    <p class="note">{% translate "This key point was prepared in two versions; both are shown with equal weight, in the same order on both items' pages." %}</p>
+    <div class="paired">{% for c in pair_cards %}<div class="pair-card{% if c.current %} this-item{% endif %}"><p class="pair-label">{{ c.label }}{% if c.current %} · {% translate "this item" %}{% endif %}</p>{% include "contributors/_item_card.html" with it=c.card %}</div>{% endfor %}</div>
     {% else %}
     {% include "contributors/_item_card.html" with it=item %}
     {% endif %}
@@ -51,20 +53,26 @@
           data-conflict="{% translate 'Not saved: this item was changed in another tab. Reload the page.' %}"
           data-offline="{% translate 'Not saved: no connection. Your text is still here; try again.' %}"
           data-invalid="{% translate 'Not saved: please check the highlighted fields.' %}"
-          data-frozen="{% translate 'Not saved: the review is frozen.' %}">
+          data-frozen="{% translate 'Not saved: the review is frozen.' %}"
+          data-session="{% translate 'Not saved: your session has ended. Copy your text, then open your personal link again.' %}"
+          data-server="{% translate 'Not saved: the site could not save this answer. Copy your text, then reload the page.' %}"
+          data-needs-answer="{% translate 'Not saved yet: choose an answer, and your notes are saved with it.' %}">
+      {# Pressing Enter in a text field submits the form's first button: make it a plain save, never an answer. #}
+      <button type="submit" name="save" value="1" class="visually-hidden" tabindex="-1" aria-hidden="true"{% if frozen %} disabled{% endif %}>{% translate "Save" %}</button>
       {% csrf_token %}
       {{ form.non_field_errors }}{{ form.verdict.errors }}
       <input type="hidden" name="verdict" value="{{ form.verdict.value|default_if_none:'' }}">
       {{ form.version }}
       <div class="verdicts" role="group" aria-label="{% translate 'Your answer' %}">
         {% for value, label in verdicts %}
-        <button type="submit" name="set_verdict" value="{{ value }}" class="verdict{% if form.verdict.value == value %} chosen{% endif %}"{% if frozen %} disabled{% endif %}>{{ label }}</button>
+        <button type="submit" name="set_verdict" value="{{ value }}" class="verdict{% if form.verdict.value == value %} chosen{% endif %}" aria-pressed="{% if form.verdict.value == value %}true{% else %}false{% endif %}"{% if frozen %} disabled{% endif %}>{% if form.verdict.value == value %}✓ {% endif %}{{ label }}</button>
         {% endfor %}
       </div>
       {% if form.verdict.value == "reject" %}
-      <fieldset class="reasons"><legend>{{ form.reject_reason.label }}</legend>{{ form.reject_reason }}</fieldset>
+      <p class="reasons"><label for="{{ form.reject_reason.id_for_label }}">{{ form.reject_reason.label }}</label> {{ form.reject_reason }}</p>
       {% endif %}
-      {% if partner %}<p><label for="{{ form.variant_choice.id_for_label }}">{{ form.variant_choice.label }}</label> {{ form.variant_choice }}</p>{% endif %}
+      {% if partner %}<p>{{ form.variant_choice.errors }}<label for="{{ form.variant_choice.id_for_label }}">{{ form.variant_choice.label }}</label> {{ form.variant_choice }}
+        <span class="hint">{% translate "“First” and “second” are the versions as shown above; your choice is one answer for the pair, shared by both items." %}</span></p>{% endif %}
       <details class="more"{% if form.errors or review.comment or review.suggested_title or review.suggested_description or review.other_valid_repairs %} open{% endif %}>
         <summary>{% translate "Reasons, ticks, and comments" %}</summary>
         <div class="ticks">

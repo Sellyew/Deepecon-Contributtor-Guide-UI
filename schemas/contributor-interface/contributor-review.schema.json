@@ -203,7 +203,7 @@
             "both",
             "neither"
           ],
-          "description": "Only for items shown as a paired error/missing key point."
+          "description": "Only for items shown as a paired error/missing key point. 'first' and 'second' refer to the two items of the pair in rubric order (the order shown on both items' pages); the choice is one answer about the pair and is the same on both items' reviews."
         },
         "suggested_title": {
           "type": "string",

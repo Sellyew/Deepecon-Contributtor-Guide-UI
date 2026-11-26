@@ -1,5 +1,5 @@
 # Interface catalogue for Simplified Chinese (D-030).
-# Machine-drafted by Claude (an LLM) on 2026-11-07 (strings for choosing a paper added the same day, D-044; Selection strings added 2026-11-26, M2); to be reviewed and corrected by the team
+# Machine-drafted by Claude (an LLM) on 2026-11-07 (strings for choosing a paper added the same day, D-044; Selection strings added 2026-11-26, M2, and revised the same day after the code review); to be reviewed and corrected by the team
 # before contributors see it (implementation plan M4). Interface text only: item text,
 # papers, and code are never translated.
 msgid ""
@@ -136,8 +136,17 @@ msgstr "不确定"
 msgid "Your question to the team"
 msgstr "您想问团队的问题"
 
+msgid "First version"
+msgstr "第一个版本"
+
+msgid "Second version"
+msgstr "第二个版本"
+
 msgid "The team has frozen your review; it can no longer be changed."
 msgstr "团队已冻结您的审阅，无法再修改。"
+
+msgid "This proposal was changed in another tab after you opened this page. The saved text is shown below; please make your change again."
+msgstr "在您打开此页面之后，此提议已在另一个标签页中被修改。下方显示的是已保存的内容；请重新进行您的修改。"
 
 msgid "The proposal was deleted."
 msgstr "提议已删除。"
@@ -187,11 +196,17 @@ msgstr "切换"
 msgid "This site sends nothing to AI services and loads nothing from other websites."
 msgstr "本网站不向任何 AI 服务发送内容，也不从其他网站加载任何内容。"
 
-msgid "Original"
-msgstr "原始版本"
-
 msgid "lines %(a)s–%(b)s"
 msgstr "第 %(a)s–%(b)s 行"
+
+msgid "line %(a)s"
+msgstr "第 %(a)s 行"
+
+msgid "(empty)"
+msgstr "（空）"
+
+msgid "Original"
+msgstr "原始版本"
 
 msgid "Modified"
 msgstr "修改后"
@@ -216,6 +231,9 @@ msgstr "关键要求"
 
 msgid "Weight: %(w)s"
 msgstr "权重：%(w)s"
+
+msgid "answered"
+msgstr "已回答"
 
 msgid "Work on this paper?"
 msgstr "要审阅这篇论文吗？"
@@ -249,6 +267,9 @@ msgstr "您的回答"
 
 msgid "Your words"
 msgstr "您的文字"
+
+msgid "Version to keep:"
+msgstr "保留的版本："
 
 msgid "AI helped"
 msgstr "AI 有协助"
@@ -462,11 +483,26 @@ msgstr "矩阵视图"
 msgid "This item was saved from another tab or window after you opened this page. The saved answer is shown below; please make your change again."
 msgstr "在您打开此页面之后，此条目已在另一个标签页或窗口中被保存。下方显示的是已保存的回答；请重新进行您的修改。"
 
+msgid "The team has updated the items since you answered this one. Your answer to the earlier version was: %(verdict)s. Please answer this version."
+msgstr "在您回答此条目之后，团队更新了条目。您对先前版本的回答是：%(verdict)s。请回答当前版本。"
+
+msgid "Your comment then:"
+msgstr "您当时的评论："
+
 msgid "Whole picture"
 msgstr "全局视图"
 
+msgid "Two versions of one key point"
+msgstr "同一关键点的两个版本"
+
 msgid "Results"
 msgstr "结果"
+
+msgid "Clear the highlight"
+msgstr "取消高亮"
+
+msgid "Select a result to highlight the items that affect it."
+msgstr "选择一项结果，即可高亮显示影响它的条目。"
 
 msgid "Previous"
 msgstr "上一项"
@@ -474,8 +510,11 @@ msgstr "上一项"
 msgid "Next"
 msgstr "下一项"
 
-msgid "This key point was prepared in two versions; both are shown with equal weight."
-msgstr "这个关键点准备了两个版本，两者以同等权重显示。"
+msgid "This key point was prepared in two versions; both are shown with equal weight, in the same order on both items' pages."
+msgstr "这个关键点准备了两个版本，两者以同等权重显示，并且在两个条目的页面上顺序相同。"
+
+msgid "this item"
+msgstr "本条目"
 
 msgid "Saving…"
 msgstr "正在保存…"
@@ -495,11 +534,23 @@ msgstr "未保存：请检查标出的字段。"
 msgid "Not saved: the review is frozen."
 msgstr "未保存：审阅已被冻结。"
 
-msgid "Reasons, ticks, and comments"
-msgstr "理由、勾选项和评论"
+msgid "Not saved: your session has ended. Copy your text, then open your personal link again."
+msgstr "未保存：您的会话已结束。请先复制您的文字，然后重新打开您的个人链接。"
+
+msgid "Not saved: the site could not save this answer. Copy your text, then reload the page."
+msgstr "未保存：网站无法保存此回答。请先复制您的文字，然后重新加载页面。"
+
+msgid "Not saved yet: choose an answer, and your notes are saved with it."
+msgstr "尚未保存：请选择一个回答，您的备注会随之一起保存。"
 
 msgid "Save"
 msgstr "保存"
+
+msgid "“First” and “second” are the versions as shown above; your choice is one answer for the pair, shared by both items."
+msgstr "“第一个”和“第二个”指上方显示的版本；您的选择是对这一对版本的同一个回答，两个条目共用。"
+
+msgid "Reasons, ticks, and comments"
+msgstr "理由、勾选项和评论"
 
 msgid "Shortcuts: arrow keys for previous and next; K, C, R, U for the four answers."
 msgstr "快捷键：左右方向键切换上一项和下一项；K、C、R、U 分别对应四种回答（保留、修改后保留、拒绝、不确定）。"

@@ -282,7 +282,7 @@ class ReviewScreenTests(SelectionTestCase):
         self.a_emp.save()
         page = self.client.get(self.url("A"))
         self.assertContains(page, "frozen")
-        self.assertContains(page, 'name="set_verdict" value="keep" class="verdict" disabled')
+        self.assertContains(page, 'name="set_verdict" value="keep" class="verdict" aria-pressed="false" disabled')
         self.post("A", set_verdict="keep", version=0)
         self.assertEqual(self.post("A", fetch=True, verdict="keep", version=0, save="1").status_code, 423)
         self.client.post(reverse("contributors:propose", args=[self.pid]), {"category": "unsure", "description": "x"})
@@ -294,15 +294,25 @@ class ReviewScreenTests(SelectionTestCase):
         self.client.post(propose, {"category": "conceptual", "description": "A missed robustness check.", "location": "Table 3"})
         proposal = self.a_emp.proposals.get()
         edit = reverse("contributors:proposal_edit", args=[self.pid, proposal.public_id])
-        self.client.post(edit, {"category": "unsure", "description": "Revised."})
+        self.client.post(edit, {"category": "unsure", "description": "Revised.", "version": "1"})
         proposal.refresh_from_db()
-        self.assertEqual((proposal.category, proposal.description), ("unsure", "Revised."))
+        self.assertEqual((proposal.category, proposal.description, proposal.version), ("unsure", "Revised.", 2))
+        # A second tab still holding version 1 does not overwrite the revision.
+        self.client.post(edit, {"category": "unsure", "description": "Stale tab text.", "version": "1"})
+        proposal.refresh_from_db()
+        self.assertEqual(proposal.description, "Revised.")
         other = self.client_class()
         self.open_link(self.bo_token, client=other)
         other.post(reverse("contributors:notice", args=[self.theory.paper_id]), {"acknowledge_evaluation": "on", "team_ai_use": "no"})
         self.assertEqual(other.get(reverse("contributors:proposal_edit", args=[self.theory.paper_id, proposal.public_id])).status_code, 404)
-        self.client.post(edit, {"delete": "1"})
+        self.client.post(edit, {"delete": "1", "version": "2"})
         self.assertFalse(self.a_emp.proposals.exists())
+        self.assertEqual(list(EventLog.objects.filter(operation__startswith="proposal_").values_list("operation", flat=True)
+                              .order_by("pk")), ["proposal_added", "proposal_edited", "proposal_deleted"])
+        # "Save" pressed twice creates one proposal.
+        for _ in range(2):
+            self.client.post(propose, {"category": "conceptual", "description": "Twice.", "location": ""})
+        self.assertEqual(self.a_emp.proposals.filter(description="Twice.").count(), 1)
 
     def test_questions_reach_the_team_and_answers_come_back(self):
         self.client.post(reverse("contributors:ask", args=[self.pid]), {"text": "Which sample?", "item_id": "A"})

@@ -73,8 +73,10 @@ class PaperAdmin(admin.ModelAdmin):
             chosen = obj.assignments.filter(added_by="contributor").count()
             if not obj.in_pool and chosen:
                 self.message_user(request, f"{obj.paper_id} is no longer open to all contributors, but {chosen} "
-                                  "contributor(s) who chose it keep access. To withdraw it, delete their assignments "
-                                  "(Assignments, filtered by this paper and 'Chosen by the contributor').", messages.WARNING)
+                                  "contributor(s) who chose it keep access and their work (D-045). An assignment with no "
+                                  "answers, proposals, questions or confirmations can be deleted (Assignments, filtered by "
+                                  "this paper and 'Chosen by the contributor'); one with work cannot, and is withdrawn only "
+                                  "at the contributor's request.", messages.WARNING)
 
     def get_urls(self):
         return [path("import/", self.admin_site.admin_view(self.import_view), name="papers_import")] + super().get_urls()

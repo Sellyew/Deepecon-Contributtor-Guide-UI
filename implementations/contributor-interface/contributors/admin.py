@@ -169,19 +169,28 @@ class AssignmentAdmin(InviteActionMixin, admin.ModelAdmin):
                 continue
             assignment.frozen_at, assignment.frozen_by = timezone.now(), request.user.get_username()
             assignment.save(update_fields=["frozen_at", "frozen_by"])
-            log_event(request.user.get_username(), "review_frozen", assignment, warnings=warnings)
+            # What was frozen (plan §2.7): the hash of the answers, and the confirmed version they match, if any.
+            log_event(request.user.get_username(), "review_frozen", assignment, warnings=warnings,
+                      **selection.freeze_record(assignment))
             note = f" Note: {'; '.join(warnings)}." if warnings else ""
             self.message_user(request, f"{assignment.public_id} frozen.{note}", messages.WARNING if warnings else messages.SUCCESS)
 
     @admin.action(description="Unfreeze the selected reviews", permissions=["change"])
     def unfreeze(self, request, queryset):
         for assignment in queryset.filter(frozen_at__isnull=False):
+            record = selection.freeze_record(assignment)
             assignment.frozen_at, assignment.frozen_by = None, ""
             assignment.save(update_fields=["frozen_at", "frozen_by"])
-            log_event(request.user.get_username(), "review_unfrozen", assignment)
+            log_event(request.user.get_username(), "review_unfrozen", assignment, **record)
             self.message_user(request, f"{assignment.public_id} unfrozen; the contributor can edit again.", messages.SUCCESS)
 
-    @admin.action(description="Export the selected review as JSON (contributor-review schema)", permissions=["view"])
+    def has_export_permission(self, request):
+        """The export holds the contributor's answers, proposals, messages, and consent, so it needs
+        the permission to view each of them, not only the assignment."""
+        return all(request.user.has_perm(f"contributors.view_{model}")
+                   for model in ("assignment", "itemreview", "proposal", "question", "consent", "confirmation"))
+
+    @admin.action(description="Export the selected review as JSON (contributor-review schema)", permissions=["export"])
     def export_review(self, request, queryset):
         if queryset.count() != 1:
             self.message_user(request, "Export one review at a time.", messages.ERROR)
@@ -243,14 +252,22 @@ class ConsentAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 class ReadOnlyRecordAdmin(admin.ModelAdmin):
-    """Contributors' own records: the team reads them here and exports them; it does not edit them."""
+    """Contributors' own records: the team reads them here and exports them; it neither edits nor
+    deletes them (deleting would silently change a frozen review, and a confirmed version number
+    could be given again). Withdrawal at a contributor's request is its own, logged step (plan §3)."""
 
     def has_add_permission(self, request):
         return False
 
     def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
         return False
 
 
@@ -291,6 +308,9 @@ class QuestionAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def has_delete_permission(self, request, obj=None):
+        return False        # a contributor's question is part of their record
+
     @admin.display(description="Paper")
     def paper(self, obj):
         return obj.assignment.paper.paper_id
@@ -311,7 +331,12 @@ class QuestionAdmin(admin.ModelAdmin):
         return "today" if days == 0 else f"{days} day(s)"
 
     def save_model(self, request, obj, form, change):
-        if "answer" in form.changed_data and obj.answer.strip():
-            obj.answered_at, obj.answered_by = timezone.now(), request.user.get_username()
+        operation = None
+        if "answer" in form.changed_data:
+            if obj.answer.strip():
+                obj.answered_at, obj.answered_by, operation = timezone.now(), request.user.get_username(), "question_answered"
+            else:           # an answer removed: the question is waiting again
+                obj.answer, obj.answered_at, obj.answered_by, operation = "", None, "", "question_answer_removed"
         super().save_model(request, obj, form, change)
-        log_event(request.user.get_username(), "question_answered", obj.assignment, question_id=obj.public_id)
+        if operation:
+            log_event(request.user.get_username(), operation, obj.assignment, question_id=obj.public_id)

@@ -97,3 +97,11 @@ summary { cursor: pointer; color: var(--accent); }
 }
 /* The tool and account fields appear once "AI helped with this" is ticked (no script needed). */
 .ai-help:not(:has(input[name=ai_used]:checked)) .ai-details { display: none; }
+/* Review fixes: hidden-but-announced text, joined paired markers, highlighted results, pair labels. */
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.pair { display: inline-block; border: 1px dashed var(--muted); border-radius: 999px; padding: 0 0.1rem; }
+.marker.highlight { box-shadow: 0 0 0 3px #ffd54f; }
+.results li.selected > .node-label { font-weight: 600; }
+.pair-label { font-weight: 600; margin: 0.25rem 0; }
+.pair-card.this-item { border-left: 3px solid var(--accent); padding-left: 0.5rem; }
+.errorlist.js-error { margin: 0.25rem 0; }

@@ -5,6 +5,7 @@ Every screen works without JavaScript. static/review.js adds autosave (the same 
 posted with X-Requested-With: fetch, answered in JSON) and keyboard shortcuts.
 """
 from django.contrib import messages
+from django.db import transaction
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone, translation
@@ -16,9 +17,11 @@ from papers.models import log_event
 
 from . import review as selection
 from .access import assignment_for, contributor_required
-from .forms import VERDICTS, ProposalForm, QuestionForm, ReviewForm
+from .forms import REJECT_REASONS, TRI_STATE, VARIANTS, VERDICTS, ProposalForm, QuestionForm, ReviewForm
 from .models import Proposal, Question
 
+PROPOSAL_FIELDS = ["category", "location", "description", "why_it_matters", "suggested_repair",
+                   "ai_used", "ai_tool", "ai_account_kind", "ai_entered_items"]
 REVIEW_FIELDS = ["verdict", "reject_reason", "variant_choice", "check_realistic", "check_consequential",
                  "check_repair_correct", "suggested_title", "suggested_description", "other_valid_repairs", "comment",
                  "ai_used", "ai_tool", "ai_account_kind", "ai_entered_items"]
@@ -81,9 +84,25 @@ def review_item(request, paper_id, item_id):
     views = selection.item_views(paper, _language())
     view = views[item_id]
     partner = views.get(view.get("paired_with"))
-    review = selection.reviews_by_item(assignment).get(item_id)
+    reviews = selection.reviews_by_item(assignment)
+    review = reviews.get(item_id)
     prev_id, next_id = selection.neighbours(items, item_id)
     conflict = False
+    pair_cards = []
+    if partner:
+        # The pair is shown in rubric order on both items' pages, so "the first" and "the
+        # second" mean the same thing wherever the contributor answers (contributors/review.py).
+        position = {it.item_id: it.position for it in items}
+        ordered = sorted([view, partner], key=lambda v: position.get(v["id"], 0))
+        pair_cards = [{"card": c, "label": label, "current": c["id"] == item_id}
+                      for c, label in zip(ordered, (_("First version"), _("Second version")))]
+
+    def initial(review):
+        data = _initial(review)
+        mate = reviews.get(partner["id"]) if partner else None
+        if partner and not data.get("variant_choice") and mate and mate.variant_choice:
+            data["variant_choice"] = mate.variant_choice      # one answer about the pair
+        return data
 
     if request.method == "POST":
         if assignment.is_frozen:
@@ -103,7 +122,7 @@ def review_item(request, paper_id, item_id):
                     return JsonResponse({"ok": False, "conflict": True,
                                          "version": clash.review.version if clash.review else 0}, status=409)
                 conflict, review = True, clash.review
-                form = ReviewForm(initial=_initial(review), paired=partner is not None)
+                form = ReviewForm(initial=initial(review), paired=partner is not None)
             except selection.Frozen:
                 return JsonResponse({"ok": False, "frozen": True}, status=423) if _is_fetch(request) else \
                     redirect("contributors:review_item", paper_id=paper_id, item_id=item_id)
@@ -121,14 +140,16 @@ def review_item(request, paper_id, item_id):
         elif _is_fetch(request):
             return JsonResponse({"ok": False, "errors": form.errors.get_json_data()}, status=400)
     else:
-        form = ReviewForm(initial=_initial(review), paired=partner is not None)
+        form = ReviewForm(initial=initial(review), paired=partner is not None)
 
+    earlier = selection.earlier_review(assignment, item_id) if review is None else None
     return render(request, "contributors/review_item.html", {
-        "assignment": assignment, "paper": paper, "item": view, "partner": partner, "form": form, "review": review,
-        "conflict": conflict, "prev_id": prev_id, "next_id": next_id, "verdicts": VERDICTS,
-        "map": selection.map_for(assignment, _language()), "progress": selection.progress(assignment),
-        "questions": assignment.questions.filter(item=item), "question_form": QuestionForm(),
-        "frozen": assignment.is_frozen,
+        "assignment": assignment, "paper": paper, "item": view, "partner": partner, "pair_cards": pair_cards,
+        "form": form, "review": review, "conflict": conflict, "prev_id": prev_id, "next_id": next_id,
+        "verdicts": VERDICTS, "map": selection.map_for(assignment, _language(), result=request.GET.get("result")),
+        "progress": selection.progress(assignment), "questions": assignment.questions.filter(item=item),
+        "question_form": QuestionForm(), "frozen": assignment.is_frozen,
+        "earlier": earlier, "earlier_verdict": dict(VERDICTS).get(earlier.verdict) if earlier else None,
     })
 
 
@@ -165,32 +186,47 @@ def propose(request, paper_id, proposal_id=None):
         return gate
     proposal = get_object_or_404(Proposal, public_id=proposal_id, assignment=assignment) if proposal_id else None
     categories = _categories(assignment.paper)
+    frozen_message = _("The team has frozen your review; it can no longer be changed.")
     if request.method == "POST":
-        if assignment.is_frozen:
-            messages.error(request, _("The team has frozen your review; it can no longer be changed."))
-            return redirect("contributors:propose", paper_id=paper_id)
-        if proposal and request.POST.get("delete"):
-            proposal.delete()
-            messages.success(request, _("The proposal was deleted."))
-            return redirect("contributors:propose", paper_id=paper_id)
         form = ProposalForm(request.POST, categories=categories)
-        if form.is_valid():
-            target = proposal or Proposal(assignment=assignment)
-            for field in ("category", "location", "description", "why_it_matters", "suggested_repair",
-                          "ai_used", "ai_tool", "ai_account_kind", "ai_entered_items"):
-                value = form.cleaned_data.get(field)
-                setattr(target, field, value.strip() if isinstance(value, str) else value)
-            target.save()
-            if proposal is None:
-                log_event(assignment.public_id, "proposal_added", assignment, proposal_id=target.public_id)
-            messages.success(request, _("Your proposal was saved."))
+        try:
+            with transaction.atomic():
+                selection.check_not_frozen(assignment)
+                current = Proposal.objects.select_for_update().get(pk=proposal.pk) if proposal else None
+                if current is not None and request.POST.get("version") != str(current.version):
+                    # Saved from another tab since this page was opened: show the saved text instead.
+                    messages.error(request, _("This proposal was changed in another tab after you opened this page. "
+                                              "The saved text is shown below; please make your change again."))
+                    return redirect("contributors:proposal_edit", paper_id=paper_id, proposal_id=current.public_id)
+                if current is not None and request.POST.get("delete"):
+                    current.delete()
+                    log_event(assignment.public_id, "proposal_deleted", assignment, proposal_id=current.public_id)
+                    messages.success(request, _("The proposal was deleted."))
+                    return redirect("contributors:propose", paper_id=paper_id)
+                if form.is_valid():
+                    values = {f: (v.strip() if isinstance(v, str) else v)
+                              for f, v in ((f, form.cleaned_data.get(f)) for f in PROPOSAL_FIELDS)}
+                    if current is None:
+                        duplicate = assignment.proposals.filter(category=values["category"], location=values["location"],
+                                                                description=values["description"]).first()
+                        if duplicate:          # e.g. "Save" pressed twice
+                            messages.success(request, _("Your proposal was saved."))
+                            return redirect("contributors:propose", paper_id=paper_id)
+                    target = current or Proposal(assignment=assignment)
+                    for field, value in values.items():
+                        setattr(target, field, value)
+                    if current is not None:
+                        target.version = current.version + 1
+                    target.save()
+                    log_event(assignment.public_id, "proposal_added" if current is None else "proposal_edited",
+                              assignment, proposal_id=target.public_id)
+                    messages.success(request, _("Your proposal was saved."))
+                    return redirect("contributors:propose", paper_id=paper_id)
+        except selection.Frozen:
+            messages.error(request, frozen_message)
             return redirect("contributors:propose", paper_id=paper_id)
     else:
-        initial = {}
-        if proposal:
-            initial = {f: getattr(proposal, f) for f in ("category", "location", "description", "why_it_matters",
-                                                         "suggested_repair", "ai_used", "ai_tool", "ai_account_kind",
-                                                         "ai_entered_items")}
+        initial = {f: getattr(proposal, f) for f in PROPOSAL_FIELDS} if proposal else {}
         form = ProposalForm(initial=initial, categories=categories)
     return render(request, "contributors/propose.html", {
         "assignment": assignment, "paper": assignment.paper, "form": form, "editing": proposal,
@@ -230,7 +266,7 @@ def confirm(request, paper_id):
         return gate
     if request.method == "POST":
         try:
-            version = selection.confirm(assignment)
+            version = selection.confirm(assignment, language=_language())
         except selection.Frozen:
             messages.error(request, _("The team has frozen your review; it can no longer be changed."))
         else:
@@ -242,10 +278,14 @@ def confirm(request, paper_id):
     paper = assignment.paper
     views = selection.item_views(paper, _language())
     reviews = selection.reviews_by_item(assignment)
-    labels = dict(VERDICTS)
-    rows = [{"item": views[it.item_id], "review": reviews.get(it.item_id),
-             "verdict_label": labels.get(reviews[it.item_id].verdict) if it.item_id in reviews else None}
-            for it in selection.paper_items(paper)]
+    labels, reasons, variants = dict(VERDICTS), dict(REJECT_REASONS), dict(VARIANTS)
+    rows = []
+    for it in selection.paper_items(paper):
+        r = reviews.get(it.item_id)
+        rows.append({"item": views[it.item_id], "review": r,
+                     "verdict_label": labels.get(r.verdict) if r else None,
+                     "reason_label": reasons.get(r.reject_reason) if r and r.verdict == "reject" else None,
+                     "variant_label": variants.get(r.variant_choice) if r else None})
     return render(request, "contributors/confirm.html", {
         "assignment": assignment, "paper": paper, "rows": rows, "proposals": assignment.proposals.all(),
         "confirmations": assignment.confirmations.order_by("-version"), "progress": selection.progress(assignment),
@@ -262,22 +302,36 @@ def my_review_download(request, paper_id):
     latest = assignment.confirmations.order_by("-version").first()
     if latest is None:
         raise Http404("Nothing confirmed yet.")
-    labels = dict(VERDICTS)
+    labels, reasons, variants, ticks = dict(VERDICTS), dict(REJECT_REASONS), dict(VARIANTS), dict(TRI_STATE)
+    categories = dict(_categories(assignment.paper))
+    categories["unsure"] = _("Not sure")
+    fields = ReviewForm.base_fields
+    check_labels = {"realistic": fields["check_realistic"].label, "consequential": fields["check_consequential"].label,
+                    "repair_correct": fields["check_repair_correct"].label}
     lines = [f"# {assignment.paper.title}", "",
              "> " + _("Confidential: these items are the benchmark's answers. Please do not publish or share them."), "",
              _("Version %(n)s, confirmed %(date)s UTC") % {"n": latest.version,
                                                           "date": latest.confirmed_at.strftime("%Y-%m-%d %H:%M")},
              f"SHA-256 {latest.content_sha256}", ""]
     for r in latest.content["reviews"]:
-        lines.append(f"## {r['item_id']} ({r['category']}): {labels.get(r['verdict'], r['verdict'])}")
-        for key in ("reject_reason", "suggested_title", "suggested_description", "other_valid_repairs", "comment"):
+        lines.append(f"## {r['item_id']} ({categories.get(r['category'], r['category'])}): "
+                     f"{labels.get(r['verdict'], r['verdict'])}")
+        if r.get("reject_reason"):
+            lines.append(f"- {fields['reject_reason'].label}: {reasons.get(r['reject_reason'], r['reject_reason'])}")
+        if r.get("variant_choice"):
+            lines.append(f"- {fields['variant_choice'].label} {variants.get(r['variant_choice'], r['variant_choice'])}")
+        for key, value in r.get("checks", {}).items():
+            lines.append(f"- {check_labels.get(key, key)}: {ticks.get(value, value)}")
+        for key in ("suggested_title", "suggested_description", "other_valid_repairs", "comment"):
             if r.get(key):
-                lines.append(f"- {key.replace('_', ' ')}: {r[key]}")
+                lines.append(f"- {fields[key].label}: {r[key]}")
+        if r.get("ai_help", {}).get("used"):
+            lines.append(f"- {fields['ai_used'].label}: {r['ai_help'].get('tool', '')}")
         lines.append("")
     if latest.content["proposals"]:
         lines.append("## " + _("Proposed additions"))
         for p in latest.content["proposals"]:
-            lines.append(f"- [{p['category']}] {p['description']}")
+            lines.append(f"- [{categories.get(p['category'], p['category'])}] {p['description']}")
     response = HttpResponse("\n".join(lines) + "\n", content_type="text/markdown; charset=utf-8")
     response["Content-Disposition"] = f'attachment; filename="{assignment.paper.paper_id}-my-review-v{latest.version}.md"'
     log_event(assignment.public_id, "own_review_downloaded", assignment, version=latest.version)
