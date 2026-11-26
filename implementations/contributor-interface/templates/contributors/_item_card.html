@@ -1,0 +1,32 @@
+{% load i18n %}
+<div class="item-card">
+  <p class="item-meta"><span class="badge colour-{{ it.colour }}">{{ it.category_label }}</span> <span class="item-id">{{ it.id }}</span></p>
+  {% if it.title %}<h2 class="item-title">{{ it.title }}</h2>{% endif %}
+  {% if it.summary %}<p class="item-summary">{{ it.summary }}</p>{% endif %}
+  {% if it.change %}
+  <div class="change">
+    <div>
+      <h3>{% translate "Original" %}</h3>
+      <p class="path">{{ it.change.original.path }}{% if it.change.original.line_start %}, {% blocktranslate with a=it.change.original.line_start b=it.change.original.line_end %}lines {{ a }}–{{ b }}{% endblocktranslate %}{% endif %}</p>
+      <pre>{{ it.change.original.text }}</pre>
+    </div>
+    <div>
+      <h3>{% translate "Modified" %}</h3>
+      <p class="path">{{ it.change.modified.path }}{% if it.change.modified.line_start %}, {% blocktranslate with a=it.change.modified.line_start b=it.change.modified.line_end %}lines {{ a }}–{{ b }}{% endblocktranslate %}{% endif %}</p>
+      <pre>{{ it.change.modified.text }}</pre>
+    </div>
+  </div>
+  {% endif %}
+  {% if it.locations %}<p><strong>{% translate "Where" %}</strong> {{ it.locations|join:"; " }}</p>{% endif %}
+  {% if it.affected_result_labels %}<p><strong>{% translate "Affects" %}</strong> {{ it.affected_result_labels|join:", " }}</p>{% endif %}
+  {% if it.consequence %}<p><strong>{% translate "Consequence" %}</strong> {{ it.consequence }}</p>{% endif %}
+  {% if it.description or it.acceptable_answer or it.critical_requirements %}
+  <details class="correct-answer">
+    <summary>{% translate "What a correct answer must do" %}</summary>
+    {% for d in it.description %}<p>{{ d }}</p>{% endfor %}
+    {% if it.acceptable_answer %}<h4>{% translate "Acceptable repair or work" %}</h4>{% for a in it.acceptable_answer %}<p>{{ a }}</p>{% endfor %}{% endif %}
+    {% if it.critical_requirements %}<h4>{% translate "Critical requirements" %}</h4><ul>{% for c in it.critical_requirements %}<li>{{ c }}</li>{% endfor %}</ul>{% endif %}
+  </details>
+  {% endif %}
+  {% if it.weight %}<p class="note">{% blocktranslate with w=it.weight %}Weight: {{ w }}{% endblocktranslate %}</p>{% endif %}
+</div>

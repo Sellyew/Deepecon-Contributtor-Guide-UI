@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<p><a href="{% url 'contributors:my_paper' paper_id=paper.paper_id %}">{{ paper.title }}</a></p>
+<h1>{% translate "Review and confirm" %}</h1>
+<p>{% translate "These are your answers, in your own words. Confirming saves them as a numbered version; you can still revise them until the team freezes your review." %}</p>
+<p class="progress">{% blocktranslate with done=progress.reviewed total=progress.total minutes=progress.minutes_left %}{{ done }} of {{ total }} reviewed, about {{ minutes }} minutes left{% endblocktranslate %}</p>
+<table class="summary-table">
+  <thead><tr><th scope="col">{% translate "Item" %}</th><th scope="col">{% translate "Your answer" %}</th><th scope="col">{% translate "Your words" %}</th></tr></thead>
+  <tbody>
+  {% for row in rows %}
+  <tr>
+    <th scope="row"><a href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=row.item.id %}">{{ row.item.id }}</a> {{ row.item.title|default:"" }}</th>
+    <td>{% if row.review %}{{ row.verdict_label }}{% if row.review.ai_used %} · {% translate "AI helped" %}{% endif %}{% else %}<span class="note">{% translate "Not reviewed yet" %}</span>{% endif %}</td>
+    <td>{% if row.review %}
+      {% if row.review.suggested_title %}<p>{{ row.review.suggested_title }}</p>{% endif %}
+      {% if row.review.suggested_description %}<p>{{ row.review.suggested_description|linebreaksbr }}</p>{% endif %}
+      {% if row.review.other_valid_repairs %}<p>{{ row.review.other_valid_repairs|linebreaksbr }}</p>{% endif %}
+      {% if row.review.comment %}<p>{{ row.review.comment|linebreaksbr }}</p>{% endif %}{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if proposals %}
+<h2>{% translate "Your proposals" %}</h2>
+<ul class="proposal-list">{% for p in proposals %}<li>{{ p.description|linebreaksbr }}</li>{% endfor %}</ul>
+{% endif %}
+{% if frozen %}
+<p class="note">{% translate "The team has frozen your review; it can no longer be changed." %}</p>
+{% else %}
+<form method="post">{% csrf_token %}<button type="submit" class="primary">{% translate "Confirm this version" %}</button></form>
+{% endif %}
+{% if confirmations %}
+<h2>{% translate "Confirmed versions" %}</h2>
+<ul>{% for c in confirmations %}<li>{% blocktranslate with n=c.version date=c.confirmed_at|date:"Y-m-d H:i" %}Version {{ n }}, {{ date }} UTC{% endblocktranslate %} <span class="hash">{{ c.content_sha256|slice:":12" }}</span></li>{% endfor %}</ul>
+<p><a href="{% url 'contributors:my_review' paper_id=paper.paper_id %}">{% translate "Download my review" %}</a></p>
+{% endif %}
+{% endblock %}

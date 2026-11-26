@@ -15,7 +15,9 @@ from django.views.decorators.http import require_GET, require_http_methods
 from papers.importers import package_path, rubric_checks
 from papers.models import log_event
 
+from . import review as selection
 from .access import assignment_for, contributor_required, current_invitation, sign_in
+from .forms import QuestionForm
 from .models import Consent, Invitation
 
 
@@ -183,6 +185,10 @@ def my_paper(request, paper_id):
     return render(request, "contributors/my_paper.html", {
         "assignment": assignment, "paper": paper, "citation": paper.config["citation"],
         "task_version": paper.config["task_version"], "categories": categories, "package": package,
+        "progress": selection.progress(assignment), "has_items": bool(rubric and rubric.items.exists()),
+        "general_questions": assignment.questions.filter(item__isnull=True), "question_form": QuestionForm(),
+        "proposal_count": assignment.proposals.count(), "latest": assignment.confirmations.order_by("-version").first(),
+        "frozen": assignment.is_frozen,
     })
 
 

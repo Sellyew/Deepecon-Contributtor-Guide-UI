@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{{ item.id }} · {{ paper.title }}{% endblock %}
+{% block extrahead %}<script src="{% static 'review.js' %}" defer></script>{% endblock %}
+{% block content %}
+<div class="review-head">
+  <a href="{% url 'contributors:my_paper' paper_id=paper.paper_id %}">{{ paper.title }}</a>
+  <span class="progress">{% blocktranslate with done=progress.reviewed total=progress.total minutes=progress.minutes_left %}{{ done }} of {{ total }} reviewed, about {{ minutes }} minutes left{% endblocktranslate %}</span>
+  {% if map %}<a href="{% url 'contributors:review_matrix' paper_id=paper.paper_id %}">{% translate "Matrix" %}</a>{% endif %}
+  <a href="{% url 'contributors:propose' paper_id=paper.paper_id %}">{% translate "Propose an addition" %}</a>
+  <a href="{% url 'contributors:confirm' paper_id=paper.paper_id %}">{% translate "Review and confirm" %}</a>
+</div>
+{% if conflict %}<p class="conflict" role="alert">{% translate "This item was saved from another tab or window after you opened this page. The saved answer is shown below; please make your change again." %}</p>{% endif %}
+{% if frozen %}<p class="note">{% translate "The team has frozen your review; it can no longer be changed." %}</p>{% endif %}
+<div class="review-layout">
+  {% if map %}
+  <nav class="map" aria-label="{% translate 'Whole picture' %}">
+    <h2>{% translate "Whole picture" %}</h2>
+    <ul class="nodes">
+      {% for node in map.nodes %}{% if not node.hidden %}
+      <li class="{% if node.parent %}child{% else %}stage{% endif %}">
+        <span class="node-label">{{ node.label_text }}</span>
+        {% for m in node.items_here %}<a class="marker colour-{{ m.colour }}{% if m.done %} done{% endif %}{% if m.item_id == item.id %} current{% endif %}" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=m.item_id %}" title="{{ m.item_id }}">{{ m.item_id }}</a>{% endfor %}
+      </li>
+      {% endif %}{% endfor %}
+    </ul>
+    <h3>{% if map.results_heading %}{{ map.results_heading }}{% else %}{% translate "Results" %}{% endif %}</h3>
+    <ul class="results">
+      {% for node in map.nodes %}{% if node.affected_by %}
+      <li><span class="node-label">{{ node.label_text }}</span> ←
+        {% for m in node.affected_by %}<a class="marker colour-{{ m.colour }}{% if m.done %} done{% endif %}{% if m.item_id == item.id %} current{% endif %}" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=m.item_id %}">{{ m.item_id }}</a>{% endfor %}
+      </li>
+      {% endif %}{% endfor %}
+    </ul>
+  </nav>
+  {% endif %}
+  <article class="item-panel">
+    <nav class="prev-next">
+      {% if prev_id %}<a id="prev-link" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=prev_id %}">◀ {% translate "Previous" %}</a>{% endif %}
+      {% if next_id %}<a id="next-link" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=next_id %}">{% translate "Next" %} ▶</a>{% endif %}
+    </nav>
+    {% if partner %}
+    <p class="note">{% translate "This key point was prepared in two versions; both are shown with equal weight." %}</p>
+    <div class="paired">{% include "contributors/_item_card.html" with it=item %}{% include "contributors/_item_card.html" with it=partner %}</div>
+    {% else %}
+    {% include "contributors/_item_card.html" with it=item %}
+    {% endif %}
+
+    <form method="post" id="review-form" class="review-form"
+          data-saving="{% translate 'Saving…' %}" data-saved="{% translate 'Saved' %}"
+          data-conflict="{% translate 'Not saved: this item was changed in another tab. Reload the page.' %}"
+          data-offline="{% translate 'Not saved: no connection. Your text is still here; try again.' %}"
+          data-invalid="{% translate 'Not saved: please check the highlighted fields.' %}"
+          data-frozen="{% translate 'Not saved: the review is frozen.' %}">
+      {% csrf_token %}
+      {{ form.non_field_errors }}{{ form.verdict.errors }}
+      <input type="hidden" name="verdict" value="{{ form.verdict.value|default_if_none:'' }}">
+      {{ form.version }}
+      <div class="verdicts" role="group" aria-label="{% translate 'Your answer' %}">
+        {% for value, label in verdicts %}
+        <button type="submit" name="set_verdict" value="{{ value }}" class="verdict{% if form.verdict.value == value %} chosen{% endif %}"{% if frozen %} disabled{% endif %}>{{ label }}</button>
+        {% endfor %}
+      </div>
+      {% if form.verdict.value == "reject" %}
+      <fieldset class="reasons"><legend>{{ form.reject_reason.label }}</legend>{{ form.reject_reason }}</fieldset>
+      {% endif %}
+      {% if partner %}<p><label for="{{ form.variant_choice.id_for_label }}">{{ form.variant_choice.label }}</label> {{ form.variant_choice }}</p>{% endif %}
+      <details class="more"{% if form.errors or review.comment or review.suggested_title or review.suggested_description or review.other_valid_repairs %} open{% endif %}>
+        <summary>{% translate "Reasons, ticks, and comments" %}</summary>
+        <div class="ticks">
+          {% for field in form %}{% if field.name == "check_realistic" or field.name == "check_consequential" or field.name == "check_repair_correct" %}
+          <label>{{ field.label }} {{ field }}</label>
+          {% endif %}{% endfor %}
+        </div>
+        {% for field in form %}{% if field.name == "suggested_title" or field.name == "suggested_description" or field.name == "other_valid_repairs" or field.name == "comment" %}
+        <p>{{ field.errors }}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</p>
+        {% endif %}{% endfor %}
+      </details>
+      <fieldset class="ai-help">
+        <label>{{ form.ai_used }} {{ form.ai_used.label }}</label>
+        <span class="ai-details">
+          {{ form.ai_tool.errors }}<label>{{ form.ai_tool.label }} {{ form.ai_tool }}</label>
+          <label>{{ form.ai_account_kind.label }} {{ form.ai_account_kind }}</label>
+          <label>{{ form.ai_entered_items }} {{ form.ai_entered_items.label }}</label>
+        </span>
+      </fieldset>
+      <p class="save-row">
+        <button type="submit" name="save" value="1"{% if frozen %} disabled{% endif %}>{% translate "Save" %}</button>
+        <span id="save-status" class="save-status" aria-live="polite"></span>
+      </p>
+      <p class="hint">{% translate "Shortcuts: arrow keys for previous and next; K, C, R, U for the four answers." %}</p>
+    </form>
+
+    <section class="questions">
+      <h3>{% translate "Ask the team" %}</h3>
+      {% for q in questions %}
+      <div class="question"><p><strong>{% translate "You" %}:</strong> {{ q.text|linebreaksbr }}</p>
+        {% if q.answer %}<p><strong>{% translate "Team" %}:</strong> {{ q.answer|linebreaksbr }}</p>{% else %}<p class="note">{% translate "Waiting for the team's answer." %}</p>{% endif %}</div>
+      {% endfor %}
+      <form method="post" action="{% url 'contributors:ask' paper_id=paper.paper_id %}" class="ask">
+        {% csrf_token %}<input type="hidden" name="item_id" value="{{ item.id }}">
+        <label for="item-question">{{ question_form.text.label }}</label>
+        <textarea id="item-question" name="text" rows="2" maxlength="2000"></textarea>
+        <button type="submit">{% translate "Send to the team" %}</button>
+      </form>
+    </section>
+  </article>
+</div>
+{% endblock %}

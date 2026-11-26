@@ -48,6 +48,11 @@ def item_map_for(paper):
     return item_map.raw if item_map else None
 
 
+def colours(paper):
+    """A colour slot (0 to 5) per category, by its order in the paper configuration (D-025)."""
+    return {c["id"]: i % 6 for i, c in enumerate(paper.config["categories"])}
+
+
 def item_views(paper, language="en"):
     """{item_id: what the contributor may see}, using only the configured visible roles."""
     rc = rubric_checks()
@@ -56,9 +61,11 @@ def item_views(paper, language="en"):
     grouped = rc.contributor_view(normalized, paper.config, item_map_for(paper))
     labels = {c["id"]: rc.localize(c["label"], language) for c in paper.config["categories"]}
     nodes = {n["id"]: rc.localize(n["label"], language) for n in (item_map_for(paper) or {}).get("nodes", [])}
+    palette = colours(paper)
     views = {}
     for category_items in grouped.values():
         for v in category_items:
+            v["colour"] = palette.get(v["category"], 0)
             v["category_label"] = labels.get(v["category"], v["category"])
             v["affected_result_labels"] = [nodes.get(r, r) for r in v.get("affected_results", [])]
             views[v["id"]] = v
@@ -84,8 +91,24 @@ def map_for(assignment, language="en"):
     rc = rubric_checks()
     statuses = {iid: r.verdict for iid, r in reviews_by_item(assignment).items()}
     view = rc.map_view(item_map, [it.normalized for it in paper_items(assignment.paper)], statuses)
+    palette = colours(assignment.paper)
     for node in view["nodes"]:
         node["label_text"] = rc.localize(node["label"], language)
+        for marker in node["items_here"] + node["affected_by"]:
+            marker["colour"] = palette.get(marker["category"], 0)
+            marker["done"] = marker["status"] != "not_reviewed"
+    # A stage whose children are all results (e.g. "Results in the paper") names the results
+    # column instead of appearing as an empty stage in the workflow.
+    children = {}
+    for node in view["nodes"]:
+        if node["parent"]:
+            children.setdefault(node["parent"], []).append(node)
+    view["results_heading"] = None
+    for node in view["nodes"]:
+        kids = children.get(node["id"], [])
+        node["hidden"] = bool(node["affected_by"]) or (bool(kids) and all(k["affected_by"] for k in kids))
+        if kids and all(k["affected_by"] for k in kids) and view["results_heading"] is None:
+            view["results_heading"] = node["label_text"]
     return view
 
 

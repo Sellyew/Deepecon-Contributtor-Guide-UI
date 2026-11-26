@@ -180,3 +180,179 @@ class CheckPapersTests(SelectionTestCase):
         with self.assertRaises(CommandError):
             call_command("check_papers", stdout=out)
         self.assertIn("no longer matches its SHA-256", out.getvalue())
+
+
+class ReviewScreenTests(SelectionTestCase):
+    """The contributor's screens (MVP §3 steps 3–6, §4; plan §5 acceptance tests)."""
+
+    def setUp(self):
+        super().setUp()
+        self.open_link(self.alice_token)
+        self.consent(self.empirical)
+        self.pid = self.empirical.paper_id
+        self.items = self.first_items()
+
+    def url(self, item_id):
+        return reverse("contributors:review_item", args=[self.pid, item_id])
+
+    def post(self, item_id, fetch=False, **data):
+        headers = {"HTTP_X_REQUESTED_WITH": "fetch"} if fetch else {}
+        return self.client.post(self.url(item_id), data, **headers)
+
+    def test_the_overview_shows_progress_and_the_way_in(self):
+        page = self.client.get(reverse("contributors:my_paper", args=[self.pid]))
+        self.assertContains(page, f"0 of {len(self.items)} reviewed")
+        self.assertContains(page, reverse("contributors:review", args=[self.pid]))
+        self.assertContains(page, "deliberate modifications made to build a benchmark task, not claims about the published paper")
+
+    def test_the_review_needs_consent_and_the_current_paper(self):
+        fresh = self.client_class()
+        self.open_link(self.bo_token, client=fresh)              # Bo has not consented to the theory paper
+        theory_item = self.first_items(self.theory)[0].item_id
+        self.assertRedirects(fresh.get(reverse("contributors:review_item", args=[self.theory.paper_id, theory_item])),
+                             reverse("contributors:notice", args=[self.theory.paper_id]))
+        self.assertEqual(self.client.get(reverse("contributors:review_item", args=[self.theory.paper_id, theory_item])).status_code, 404)
+        self.assertEqual(self.client.get(self.url("no-such-item")).status_code, 404)
+
+    def test_the_screen_shows_the_map_the_change_and_no_scoring_material(self):
+        page = self.client.get(self.url("A"))
+        self.assertContains(page, "Whole picture")
+        self.assertContains(page, 'class="marker colour-0 current"')
+        self.assertContains(page, "keep if first_treat")             # the local change from the item map
+        self.assertContains(page, "code/build/panel.do")              # shown under the author's own file name
+        for forbidden in ("allowed_scores", "scoring_method", "tiers", "calibration_status"):
+            self.assertNotContains(page, forbidden)
+        self.assertContains(page, "review.js")
+
+    def test_a_one_tap_answer_saves_and_moves_on(self):
+        response = self.post("A", set_verdict="keep", version=0)
+        self.assertRedirects(response, self.url(self.items[1].item_id))
+        self.assertEqual(self.a_emp.reviews.get().verdict, "keep")
+        page = self.client.get(self.url(self.items[1].item_id))
+        self.assertContains(page, 'class="marker colour-0 done"')
+
+    def test_reject_stays_and_offers_reasons(self):
+        self.assertRedirects(self.post("A", set_verdict="reject", version=0), self.url("A"))
+        page = self.client.get(self.url("A"))
+        self.assertContains(page, "Main reason")
+        self.post("A", verdict="reject", reject_reason="not_realistic", version=1, save="1")
+        self.assertEqual(self.a_emp.reviews.get().reject_reason, "not_realistic")
+
+    def test_keep_with_changes_needs_words(self):
+        page = self.post("A", set_verdict="keep_with_changes", version=0)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "Please say what should change")
+        self.assertFalse(self.a_emp.reviews.exists())
+        self.post("A", set_verdict="keep_with_changes", comment="Use the full sample.", version=0)
+        self.assertEqual(self.a_emp.reviews.get().comment, "Use the full sample.")
+
+    def test_change_then_undo_and_revisit(self):
+        self.post("A", set_verdict="reject", version=0)
+        self.post("A", set_verdict="keep", version=1)
+        review = self.a_emp.reviews.get()
+        self.assertEqual((review.verdict, review.reject_reason, review.version), ("keep", "", 2))
+
+    def test_two_tabs_never_overwrite_silently(self):
+        self.post("A", set_verdict="keep", comment="", version=0)
+        stale = self.post("A", set_verdict="reject", version=0)            # the other tab still has version 0
+        self.assertEqual(stale.status_code, 200)
+        self.assertContains(stale, "saved from another tab or window")
+        self.assertEqual(self.a_emp.reviews.get().verdict, "keep")
+
+    def test_autosave_answers_in_json(self):
+        self.post("A", set_verdict="keep", version=0)
+        ok = self.post("A", fetch=True, verdict="keep", comment="Fine.", version=1, save="1")
+        self.assertEqual((ok.status_code, ok.json()["version"]), (200, 2))
+        self.assertEqual(self.post("A", fetch=True, verdict="keep", version=1, save="1").status_code, 409)
+        bad = self.post("A", fetch=True, verdict="keep_with_changes", version=2, save="1")
+        self.assertEqual(bad.status_code, 400)
+        self.assertEqual(self.a_emp.reviews.get().comment, "Fine.")
+
+    def test_ai_disclosure_needs_the_tool_and_is_exported(self):
+        page = self.post("A", set_verdict="keep", ai_used="on", version=0)
+        self.assertContains(page, "Please name the tool.")
+        self.post("A", set_verdict="keep", ai_used="on", ai_tool="a chat assistant", ai_account_kind="personal",
+                  ai_entered_items="on", version=0)
+        exported = selection.export(self.a_emp)["reviews"][0]["ai_help"]
+        self.assertEqual(exported, {"used": True, "tool": "a chat assistant", "account_kind": "personal",
+                                    "entered_items_or_package": True})
+
+    def test_a_frozen_review_refuses_every_change(self):
+        self.a_emp.frozen_at = timezone.now()
+        self.a_emp.save()
+        page = self.client.get(self.url("A"))
+        self.assertContains(page, "frozen")
+        self.assertContains(page, 'name="set_verdict" value="keep" class="verdict" disabled')
+        self.post("A", set_verdict="keep", version=0)
+        self.assertEqual(self.post("A", fetch=True, verdict="keep", version=0, save="1").status_code, 423)
+        self.client.post(reverse("contributors:propose", args=[self.pid]), {"category": "unsure", "description": "x"})
+        self.client.post(reverse("contributors:confirm", args=[self.pid]))
+        self.assertEqual((self.a_emp.reviews.count(), self.a_emp.proposals.count(), self.a_emp.confirmations.count()), (0, 0, 0))
+
+    def test_proposals_can_be_added_edited_and_deleted_only_by_their_author(self):
+        propose = reverse("contributors:propose", args=[self.pid])
+        self.client.post(propose, {"category": "conceptual", "description": "A missed robustness check.", "location": "Table 3"})
+        proposal = self.a_emp.proposals.get()
+        edit = reverse("contributors:proposal_edit", args=[self.pid, proposal.public_id])
+        self.client.post(edit, {"category": "unsure", "description": "Revised."})
+        proposal.refresh_from_db()
+        self.assertEqual((proposal.category, proposal.description), ("unsure", "Revised."))
+        other = self.client_class()
+        self.open_link(self.bo_token, client=other)
+        other.post(reverse("contributors:notice", args=[self.theory.paper_id]), {"acknowledge_evaluation": "on", "team_ai_use": "no"})
+        self.assertEqual(other.get(reverse("contributors:proposal_edit", args=[self.theory.paper_id, proposal.public_id])).status_code, 404)
+        self.client.post(edit, {"delete": "1"})
+        self.assertFalse(self.a_emp.proposals.exists())
+
+    def test_questions_reach_the_team_and_answers_come_back(self):
+        self.client.post(reverse("contributors:ask", args=[self.pid]), {"text": "Which sample?", "item_id": "A"})
+        question = Question.objects.get()
+        self.assertEqual(question.item.item_id, "A")
+        self.assertTrue(EventLog.objects.filter(operation="question_asked").exists())
+        question.answer, question.answered_at, question.answered_by = "The main sample.", timezone.now(), "team"
+        question.save()
+        self.assertContains(self.client.get(self.url("A")), "The main sample.")
+        self.assertEqual(self.client.post(reverse("contributors:ask", args=[self.pid]), {"text": "x", "item_id": "nope"}).status_code, 404)
+
+    def test_confirmation_shows_own_words_and_the_download_follows(self):
+        self.assertEqual(self.client.get(reverse("contributors:my_review", args=[self.pid])).status_code, 404)
+        self.post("A", set_verdict="keep_with_changes", comment="My own words.", version=0)
+        page = self.client.get(reverse("contributors:confirm", args=[self.pid]))
+        self.assertContains(page, "My own words.")
+        self.client.post(reverse("contributors:confirm", args=[self.pid]))
+        self.assertEqual(self.a_emp.confirmations.get().version, 1)
+        download = self.client.get(reverse("contributors:my_review", args=[self.pid]))
+        self.assertIn("text/markdown", download["Content-Type"])
+        text = download.content.decode()
+        self.assertIn("Confidential", text)
+        self.assertIn("My own words.", text)
+
+    def test_the_matrix_lists_results_against_items(self):
+        page = self.client.get(reverse("contributors:review_matrix", args=[self.pid]))
+        self.assertContains(page, "Results and items")
+        self.assertContains(page, "●")
+
+    def test_paired_variants_are_shown_together_and_the_choice_is_saved(self):
+        item_map = self.empirical.current_rubric().item_maps.first()
+        raw = item_map.raw
+        first, second = self.items[0].item_id, self.items[1].item_id
+        raw["items"][first]["paired_with"], raw["items"][second]["paired_with"] = second, first
+        item_map.raw = raw
+        item_map.save()
+        page = self.client.get(self.url(first))
+        self.assertContains(page, "prepared in two versions")
+        self.assertContains(page, "Which version should the task keep?")
+        self.post(first, set_verdict="keep", variant_choice="second", version=0)
+        self.assertEqual(self.a_emp.reviews.get().variant_choice, "second")
+
+    def test_the_review_screen_is_bilingual_but_item_text_is_not_translated(self):
+        self.client.post(reverse("set_language"), {"language": "zh-hans", "next": "/"})
+        page = self.client.get(self.url("A"))
+        for text in ("全局视图", "修改后保留", "AI 协助了此项", "向团队提问"):
+            self.assertContains(page, text)
+        self.assertContains(page, "keep if first_treat")          # the item's own text stays as written
+        self.assertNotContains(page, "Whole picture")
+
+    def test_the_last_answer_leads_to_review_and_confirm(self):
+        last = self.items[-1].item_id
+        self.assertRedirects(self.post(last, set_verdict="unsure", version=0), reverse("contributors:confirm", args=[self.pid]))

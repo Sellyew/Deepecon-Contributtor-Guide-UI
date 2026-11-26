@@ -1,5 +1,5 @@
 # Interface catalogue for Simplified Chinese (D-030).
-# Machine-drafted by Claude (an LLM) on 2026-11-07 (strings for choosing a paper added the same day, D-044); to be reviewed and corrected by the team
+# Machine-drafted by Claude (an LLM) on 2026-11-07 (strings for choosing a paper added the same day, D-044; Selection strings added 2026-11-26, M2); to be reviewed and corrected by the team
 # before contributors see it (implementation plan M4). Interface text only: item text,
 # papers, and code are never translated.
 msgid ""
@@ -16,6 +16,153 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "Keep"
+msgstr "保留"
+
+msgid "Keep with changes"
+msgstr "修改后保留"
+
+msgid "Reject"
+msgstr "拒绝"
+
+msgid "Unsure"
+msgstr "不确定"
+
+msgid "Not realistic"
+msgstr "不现实"
+
+msgid "Not consequential"
+msgstr "影响不大"
+
+msgid "Repair or acceptable work wrong"
+msgstr "修正方法或可接受的工作有误"
+
+msgid "Other"
+msgstr "其他"
+
+msgid "The first"
+msgstr "第一个"
+
+msgid "The second"
+msgstr "第二个"
+
+msgid "Both"
+msgstr "两个都保留"
+
+msgid "Neither"
+msgstr "都不保留"
+
+msgid "Yes"
+msgstr "是"
+
+msgid "No"
+msgstr "否"
+
+msgid "Work or business"
+msgstr "工作或企业账户"
+
+msgid "Personal"
+msgstr "个人账户"
+
+msgid "API"
+msgstr "API"
+
+msgid "Unknown"
+msgstr "不清楚"
+
+msgid "AI helped with this"
+msgstr "AI 协助了此项"
+
+msgid "Which tool?"
+msgstr "哪个工具？"
+
+msgid "Type of account"
+msgstr "账户类型"
+
+msgid "I entered the items or the task package"
+msgstr "我输入了条目或任务包"
+
+msgid "Please name the tool."
+msgstr "请注明所用工具。"
+
+msgid "Main reason"
+msgstr "主要原因"
+
+msgid "Which version should the task keep?"
+msgstr "任务应保留哪个版本？"
+
+msgid "Realistic"
+msgstr "现实可信"
+
+msgid "Consequential"
+msgstr "有实质性影响"
+
+msgid "Repair correct"
+msgstr "修正正确"
+
+msgid "Suggested title"
+msgstr "建议的标题"
+
+msgid "Suggested description"
+msgstr "建议的描述"
+
+msgid "Other valid repairs"
+msgstr "其他有效的修正方法"
+
+msgid "Comment"
+msgstr "评论"
+
+msgid "Please say what should change: a suggested title or description, other valid repairs, or a comment."
+msgstr "请说明应修改什么：建议的标题或描述、其他有效的修正方法，或一条评论。"
+
+msgid "Category"
+msgstr "类别"
+
+msgid "Where (file and lines, or section)"
+msgstr "位置（文件和行号，或章节）"
+
+msgid "What would change"
+msgstr "会改变什么"
+
+msgid "Why it matters"
+msgstr "为什么重要"
+
+msgid "Suggested fix"
+msgstr "建议的修正"
+
+msgid "Not sure"
+msgstr "不确定"
+
+msgid "Your question to the team"
+msgstr "您想问团队的问题"
+
+msgid "The team has frozen your review; it can no longer be changed."
+msgstr "团队已冻结您的审阅，无法再修改。"
+
+msgid "The proposal was deleted."
+msgstr "提议已删除。"
+
+msgid "Your proposal was saved."
+msgstr "您的提议已保存。"
+
+msgid "Your question was sent to the team. Their answer will appear here."
+msgstr "您的问题已发送给团队。团队的回答将显示在这里。"
+
+msgid "Please write your question first."
+msgstr "请先写下您的问题。"
+
+msgid "Version %(n)s confirmed. You can still revise it until the team freezes your review."
+msgstr "已确认第 %(n)s 版。在团队冻结您的审阅之前，您仍可修改。"
+
+msgid "Confidential: these items are the benchmark's answers. Please do not publish or share them."
+msgstr "保密：这些条目是评测基准的答案。请勿公开或分享。"
+
+msgid "Version %(n)s, confirmed %(date)s UTC"
+msgstr "第 %(n)s 版，确认于 %(date)s（UTC）"
+
+msgid "Proposed additions"
+msgstr "提议新增的条目"
+
 msgid "I understand that the finished task, built from my package, will be sent through their APIs to each AI company whose models are evaluated, which receives it and may keep it."
 msgstr "我了解：根据我的材料构建的最终任务，将通过各家 AI 公司的 API 发送给模型接受评测的每一家公司；这些公司会收到并可能保存该任务。"
 
@@ -28,12 +175,6 @@ msgstr "我了解：根据这篇论文的材料和审阅意见构建的最终任
 msgid "May the team use AI services with my unpublished materials and my responses?"
 msgstr "团队可以将 AI 服务用于我未公开的材料和我的回复吗？"
 
-msgid "No"
-msgstr "否"
-
-msgid "Yes"
-msgstr "是"
-
 msgid "DeepEcon contributor site"
 msgstr "DeepEcon 贡献者网站"
 
@@ -45,6 +186,36 @@ msgstr "切换"
 
 msgid "This site sends nothing to AI services and loads nothing from other websites."
 msgstr "本网站不向任何 AI 服务发送内容，也不从其他网站加载任何内容。"
+
+msgid "Original"
+msgstr "原始版本"
+
+msgid "lines %(a)s–%(b)s"
+msgstr "第 %(a)s–%(b)s 行"
+
+msgid "Modified"
+msgstr "修改后"
+
+msgid "Where"
+msgstr "位置"
+
+msgid "Affects"
+msgstr "影响"
+
+msgid "Consequence"
+msgstr "后果"
+
+msgid "What a correct answer must do"
+msgstr "正确答案必须做到什么"
+
+msgid "Acceptable repair or work"
+msgstr "可接受的修正或工作"
+
+msgid "Critical requirements"
+msgstr "关键要求"
+
+msgid "Weight: %(w)s"
+msgstr "权重：%(w)s"
 
 msgid "Work on this paper?"
 msgstr "要审阅这篇论文吗？"
@@ -61,6 +232,45 @@ msgstr "审阅这篇论文"
 msgid "Back to the list of papers"
 msgstr "返回论文列表"
 
+msgid "Review and confirm"
+msgstr "检查并确认"
+
+msgid "These are your answers, in your own words. Confirming saves them as a numbered version; you can still revise them until the team freezes your review."
+msgstr "以下是您用自己的话写下的回答。确认后会保存为一个带编号的版本；在团队冻结您的审阅之前，您仍可修改。"
+
+msgid "%(done)s of %(total)s reviewed, about %(minutes)s minutes left"
+msgstr "已审阅 %(done)s / %(total)s 项，约剩 %(minutes)s 分钟"
+
+msgid "Item"
+msgstr "条目"
+
+msgid "Your answer"
+msgstr "您的回答"
+
+msgid "Your words"
+msgstr "您的文字"
+
+msgid "AI helped"
+msgstr "AI 有协助"
+
+msgid "Not reviewed yet"
+msgstr "尚未审阅"
+
+msgid "Your proposals"
+msgstr "您的提议"
+
+msgid "Confirm this version"
+msgstr "确认此版本"
+
+msgid "Confirmed versions"
+msgstr "已确认的版本"
+
+msgid "Version %(n)s, %(date)s UTC"
+msgstr "第 %(n)s 版，%(date)s（UTC）"
+
+msgid "Download my review"
+msgstr "下载我的审阅"
+
 msgid "This link does not work"
 msgstr "此链接无法使用"
 
@@ -73,6 +283,12 @@ msgstr "我的论文"
 msgid "Task version: %(version)s"
 msgstr "任务版本：%(version)s"
 
+msgid "What we ask"
+msgstr "我们请您做什么"
+
+msgid "We are building a benchmark that tests whether AI systems can do economics research well. For this paper the team prepared items: deliberate modifications made to build a benchmark task, not claims about the published paper. Please judge whether each item is realistic and consequential, and whether its repair is right."
+msgstr "我们正在构建一个评测基准，检验 AI 系统能否胜任经济学研究。团队为这篇论文准备了若干条目：这些是为构建评测任务而有意做出的修改，并非对已发表论文的论断。请判断每个条目是否现实可信、是否有实质性影响，以及其修正是否正确。"
+
 msgid "The prepared items"
 msgstr "已准备的条目"
 
@@ -80,8 +296,39 @@ msgid "%(counter)s item"
 msgid_plural "%(counter)s items"
 msgstr[0] "%(counter)s 个条目"
 
+msgid "Continue the review"
+msgstr "继续审阅"
+
+msgid "Start the review"
+msgstr "开始审阅"
+
+msgid "Propose an addition"
+msgstr "提议新增条目"
+
+msgid "%(counter)s proposal so far."
+msgid_plural "%(counter)s proposals so far."
+msgstr[0] "目前有 %(counter)s 条提议。"
+
+msgid "Last confirmed: version %(n)s."
+msgstr "最近确认：第 %(n)s 版。"
+
 msgid "The review screen is not available yet; the team will tell you when it opens."
 msgstr "审阅页面尚未开放；开放时团队会通知您。"
+
+msgid "Ask the team"
+msgstr "向团队提问"
+
+msgid "You"
+msgstr "您"
+
+msgid "Team"
+msgstr "团队"
+
+msgid "Waiting for the team's answer."
+msgstr "等待团队回答。"
+
+msgid "Send to the team"
+msgstr "发送给团队"
 
 msgid "The task package"
 msgstr "任务包"
@@ -190,3 +437,81 @@ msgstr "目前没有其他可供您选择的论文。有新的论文时，团队
 
 msgid "No papers are open to you yet. The team will tell you when there are some."
 msgstr "目前还没有可供您选择的论文。有可选论文时，团队会通知您。"
+
+msgid "Edit your proposal"
+msgstr "编辑您的提议"
+
+msgid "Propose an error or a missing step that the team did not prepare: where it is, what would change, why it matters, and how to fix it."
+msgstr "提议团队未准备的错误或缺失步骤：它在哪里、会改变什么、为什么重要，以及如何修正。"
+
+msgid "Save the proposal"
+msgstr "保存提议"
+
+msgid "Delete it"
+msgstr "删除"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Edit"
+msgstr "编辑"
+
+msgid "Matrix"
+msgstr "矩阵视图"
+
+msgid "This item was saved from another tab or window after you opened this page. The saved answer is shown below; please make your change again."
+msgstr "在您打开此页面之后，此条目已在另一个标签页或窗口中被保存。下方显示的是已保存的回答；请重新进行您的修改。"
+
+msgid "Whole picture"
+msgstr "全局视图"
+
+msgid "Results"
+msgstr "结果"
+
+msgid "Previous"
+msgstr "上一项"
+
+msgid "Next"
+msgstr "下一项"
+
+msgid "This key point was prepared in two versions; both are shown with equal weight."
+msgstr "这个关键点准备了两个版本，两者以同等权重显示。"
+
+msgid "Saving…"
+msgstr "正在保存…"
+
+msgid "Saved"
+msgstr "已保存"
+
+msgid "Not saved: this item was changed in another tab. Reload the page."
+msgstr "未保存：此条目已在另一个标签页中被修改。请重新加载页面。"
+
+msgid "Not saved: no connection. Your text is still here; try again."
+msgstr "未保存：没有网络连接。您的文字仍保留在这里，请重试。"
+
+msgid "Not saved: please check the highlighted fields."
+msgstr "未保存：请检查标出的字段。"
+
+msgid "Not saved: the review is frozen."
+msgstr "未保存：审阅已被冻结。"
+
+msgid "Reasons, ticks, and comments"
+msgstr "理由、勾选项和评论"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Shortcuts: arrow keys for previous and next; K, C, R, U for the four answers."
+msgstr "快捷键：左右方向键切换上一项和下一项；K、C、R、U 分别对应四种回答（保留、修改后保留、拒绝、不确定）。"
+
+msgid "Back to the map"
+msgstr "返回全局视图"
+
+msgid "Results and items"
+msgstr "结果与条目"
+
+msgid "Each mark shows an item that affects a result. Select an item to review it."
+msgstr "每个标记表示一个影响该结果的条目。选择一个条目即可审阅。"
+
+msgid "Result"
+msgstr "结果"

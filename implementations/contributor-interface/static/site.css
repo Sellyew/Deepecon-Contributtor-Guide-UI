@@ -34,3 +34,66 @@ button { font: inherit; padding: 0.4rem 1rem; border: 1px solid var(--accent); b
 ul.papers { list-style: none; padding: 0; }
 ul.papers li { border-top: 1px solid var(--line, #ddd); padding: 0.75rem 0; }
 ul.papers li p { margin: 0.25rem 0; }
+
+/* Selection (M2): review screen, matrix, forms. Category colours are slots 0-5 (contributors/review.py). */
+:root { --c0: #0b5cad; --c1: #b35900; --c2: #2e7d32; --c3: #8e24aa; --c4: #c62828; --c5: #00838f; --warn: #b42318; }
+main:has(.review-layout) { max-width: 76rem; }
+.messages { list-style: none; padding: 0; }
+.messages li { padding: 0.5rem 0.75rem; border: 1px solid var(--line); background: var(--soft); margin: 0.5rem 0; }
+.messages li.error, .conflict { border: 1px solid var(--warn); color: var(--warn); background: #fff5f5; padding: 0.5rem 0.75rem; }
+.button, a.button { display: inline-block; padding: 0.4rem 1rem; border: 1px solid var(--accent); border-radius: 4px; text-decoration: none; margin: 0.25rem 0.25rem 0.25rem 0; }
+.button.primary, button.primary { background: var(--accent); color: #fff; }
+button.danger { background: #fff; color: var(--warn); border-color: var(--warn); }
+.review-head { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: baseline; font-size: 0.925rem; margin: 0.5rem 0 1rem; }
+.progress { color: var(--muted); }
+.review-layout { display: grid; grid-template-columns: minmax(14rem, 1fr) minmax(0, 2fr); gap: 1.5rem; align-items: start; }
+.map { border: 1px solid var(--line); border-radius: 6px; padding: 0.5rem 0.75rem; position: sticky; top: 0.5rem; max-height: 95vh; overflow: auto; }
+.map h2 { margin-top: 0.25rem; font-size: 1rem; }
+.map h3 { font-size: 0.95rem; margin: 1rem 0 0.25rem; }
+.nodes, .results { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; }
+.nodes li, .results li { padding: 0.15rem 0; }
+.nodes li.stage { font-weight: 600; margin-top: 0.4rem; }
+.nodes li.child { padding-left: 1rem; font-weight: normal; }
+.marker { display: inline-block; min-width: 1.9rem; text-align: center; margin: 0.1rem 0.15rem; padding: 0 0.3rem; border-radius: 999px;
+          border: 2px solid currentColor; text-decoration: none; font-size: 0.8rem; font-weight: 600; background: #fff; }
+.marker.done { color: #fff !important; }
+.marker.current { outline: 3px solid var(--text); outline-offset: 2px; }
+.colour-0 { color: var(--c0); } .colour-1 { color: var(--c1); } .colour-2 { color: var(--c2); }
+.colour-3 { color: var(--c3); } .colour-4 { color: var(--c4); } .colour-5 { color: var(--c5); }
+.marker.done.colour-0 { background: var(--c0); } .marker.done.colour-1 { background: var(--c1); } .marker.done.colour-2 { background: var(--c2); }
+.marker.done.colour-3 { background: var(--c3); } .marker.done.colour-4 { background: var(--c4); } .marker.done.colour-5 { background: var(--c5); }
+.badge { display: inline-block; padding: 0 0.5rem; border: 1px solid currentColor; border-radius: 4px; font-size: 0.85rem; }
+.item-id { color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.item-title { margin-top: 0.25rem; }
+.item-summary { font-size: 1.05rem; }
+.prev-next { display: flex; justify-content: space-between; }
+.change { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.change h3 { font-size: 0.9rem; margin: 0.5rem 0 0; }
+.change .path { color: var(--muted); font-size: 0.85rem; margin: 0; overflow-wrap: anywhere; }
+.change pre { background: var(--soft); border: 1px solid var(--line); padding: 0.5rem; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.85rem; }
+.paired { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+details { margin: 0.75rem 0; }
+summary { cursor: pointer; color: var(--accent); }
+.verdicts { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 0.5rem; }
+.verdict { background: #fff; color: var(--accent); }
+.verdict.chosen { background: var(--accent); color: #fff; }
+.review-form textarea, .proposal-form textarea, .ask textarea { width: 100%; font: inherit; }
+.review-form input[type=text], .proposal-form input[type=text], .proposal-form select { width: 100%; font: inherit; }
+.review-form label, .proposal-form label { display: block; }
+.ticks { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+.ticks label, .ai-help label { display: inline-block; margin-right: 1rem; }
+.ai-help { margin-top: 0.75rem; }
+.save-status { color: var(--muted); margin-left: 0.75rem; }
+.save-status.problem { color: var(--warn); font-weight: 600; }
+.question { border-left: 3px solid var(--line); padding-left: 0.75rem; margin: 0.5rem 0; }
+.matrix-wrap { overflow-x: auto; }
+.matrix, .summary-table { border-collapse: collapse; font-size: 0.9rem; }
+.matrix th, .matrix td, .summary-table th, .summary-table td { border: 1px solid var(--line); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
+.matrix td { text-align: center; }
+.summary-table { width: 100%; }
+@media (max-width: 52rem) {
+  .review-layout, .change, .paired { grid-template-columns: 1fr; }
+  .map { position: static; max-height: none; }
+}
+/* The tool and account fields appear once "AI helped with this" is ticked (no script needed). */
+.ai-help:not(:has(input[name=ai_used]:checked)) .ai-details { display: none; }

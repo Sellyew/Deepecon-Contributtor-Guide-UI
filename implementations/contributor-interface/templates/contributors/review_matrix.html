@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="review-head">
+  <a href="{% url 'contributors:my_paper' paper_id=paper.paper_id %}">{{ paper.title }}</a>
+  <span class="progress">{% blocktranslate with done=progress.reviewed total=progress.total minutes=progress.minutes_left %}{{ done }} of {{ total }} reviewed, about {{ minutes }} minutes left{% endblocktranslate %}</span>
+  <a href="{% url 'contributors:review' paper_id=paper.paper_id %}">{% translate "Back to the map" %}</a>
+</div>
+<h1>{% translate "Results and items" %}</h1>
+<p class="note">{% translate "Each mark shows an item that affects a result. Select an item to review it." %}</p>
+<div class="matrix-wrap">
+<table class="matrix">
+  <thead><tr><th scope="col">{% translate "Result" %}</th>
+    {% for c in columns %}<th scope="col"><a class="marker colour-{{ c.colour }}{% if c.reviewed %} done{% endif %}" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=c.id %}">{{ c.id }}</a></th>{% endfor %}</tr></thead>
+  <tbody>
+    {% for row in rows %}<tr><th scope="row">{{ row.label }}</th>{% for cell in row.cells %}<td>{% if cell %}●{% endif %}</td>{% endfor %}</tr>{% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

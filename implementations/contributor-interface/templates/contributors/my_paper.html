@@ -7,6 +7,10 @@
   <p>{{ citation.authors|join:"; " }}{% if citation.journal %} · {{ citation.journal }}{% endif %}{% if citation.year %} · {{ citation.year }}{% endif %}</p>
   <p>{% blocktranslate with version=task_version %}Task version: {{ version }}{% endblocktranslate %}</p>
 </section>
+<section class="overview">
+  <h2>{% translate "What we ask" %}</h2>
+  <p>{% translate "We are building a benchmark that tests whether AI systems can do economics research well. For this paper the team prepared items: deliberate modifications made to build a benchmark task, not claims about the published paper. Please judge whether each item is realistic and consequential, and whether its repair is right." %}</p>
+</section>
 <section class="categories">
   <h2>{% translate "The prepared items" %}</h2>
   <ul>
@@ -18,7 +22,32 @@
     </li>
     {% endfor %}
   </ul>
+  {% if has_items %}
+  <p class="progress">{% blocktranslate with done=progress.reviewed total=progress.total minutes=progress.minutes_left %}{{ done }} of {{ total }} reviewed, about {{ minutes }} minutes left{% endblocktranslate %}</p>
+  {% if frozen %}<p class="note">{% translate "The team has frozen your review; it can no longer be changed." %}</p>{% endif %}
+  <p class="actions">
+    <a class="button primary" href="{% url 'contributors:review' paper_id=paper.paper_id %}">{% if progress.reviewed %}{% translate "Continue the review" %}{% else %}{% translate "Start the review" %}{% endif %}</a>
+    <a class="button" href="{% url 'contributors:propose' paper_id=paper.paper_id %}">{% translate "Propose an addition" %}</a>
+    <a class="button" href="{% url 'contributors:confirm' paper_id=paper.paper_id %}">{% translate "Review and confirm" %}</a>
+  </p>
+  <p class="note">{% blocktranslate count counter=proposal_count %}{{ counter }} proposal so far.{% plural %}{{ counter }} proposals so far.{% endblocktranslate %}
+  {% if latest %}{% blocktranslate with n=latest.version %}Last confirmed: version {{ n }}.{% endblocktranslate %} <a href="{% url 'contributors:my_review' paper_id=paper.paper_id %}">{% translate "Download my review" %}</a>{% endif %}</p>
+  {% else %}
   <p class="note">{% translate "The review screen is not available yet; the team will tell you when it opens." %}</p>
+  {% endif %}
+</section>
+<section class="questions">
+  <h2>{% translate "Ask the team" %}</h2>
+  {% for q in general_questions %}
+  <div class="question"><p><strong>{% translate "You" %}:</strong> {{ q.text|linebreaksbr }}</p>
+    {% if q.answer %}<p><strong>{% translate "Team" %}:</strong> {{ q.answer|linebreaksbr }}</p>{% else %}<p class="note">{% translate "Waiting for the team's answer." %}</p>{% endif %}</div>
+  {% endfor %}
+  <form method="post" action="{% url 'contributors:ask' paper_id=paper.paper_id %}" class="ask">
+    {% csrf_token %}
+    <label for="general-question">{{ question_form.text.label }}</label>
+    <textarea id="general-question" name="text" rows="2" maxlength="2000"></textarea>
+    <button type="submit">{% translate "Send to the team" %}</button>
+  </form>
 </section>
 {% if package %}
 <section class="package">
