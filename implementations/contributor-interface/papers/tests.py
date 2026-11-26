@@ -12,7 +12,7 @@ from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import CommandError, call_command
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from deepecon_site.testing import PrivateStorageMixin, example_bytes, example_json, import_example
@@ -381,6 +381,24 @@ class AdminPermissionTests(PrivateStorageMixin, TestCase):
         self.assertEqual(response.status_code, 403)
         entry.refresh_from_db()
         self.assertEqual((entry.occurred_on, entry.developer, entry.route), (date(2026, 11, 7), "Example Labs", "construction"))
+
+
+class TripwireTests(SimpleTestCase):
+    def test_tripwire_is_stored_privately_and_never_printed(self):
+        import re
+        import stat
+        with tempfile.TemporaryDirectory() as folder, override_settings(DATA_DIR=Path(folder)):
+            out = io.StringIO()
+            call_command("make_tripwire", stdout=out)
+            path = Path(folder) / "canary_tripwire"
+            guid = path.read_text()
+            self.assertRegex(guid, r"^[0-9a-f-]{36}$")
+            self.assertNotIn(guid, out.getvalue())
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
+            with self.assertRaises(CommandError):
+                call_command("make_tripwire", stdout=io.StringIO())
+            call_command("make_tripwire", "--replace", stdout=io.StringIO())
+            self.assertNotEqual(path.read_text(), guid)
 
 
 class RunserverTests(SimpleTestCase):

@@ -131,6 +131,7 @@ The conversational protocol is specified in [Deliverable 3](../interview/expert-
 4. Record the contributor's **predicted consequence** before any flawed code is run (P-PRED, including "changes the standard error or confidence interval without moving the estimate"), to test understanding and prevent post-hoc rationalization.
 5. Record look-alike choices that are valid (P-VALID); they seed the decision space.
 6. Record the contributor's **P-1FACT** answer only as a prediction; the test needs agents and runs at Stage 6 as the hint ladder (SP-3).
+7. **Classify the candidate by what its answer key gives away** (D-049, from evidence note [R15](../research/evidence/R15-lessons-from-terminal-bench-science.md) §2). The team records two things in its notes for the item. (a) **Fact-keyed:** the key is a short fact, such as a planted error's location and category, or a repair that is a short edit. **Procedure-keyed:** the work must be implemented and is graded by re-running it on data the agent never sees (VVP §5). (b) Whether the paper's data route allows hidden variants at all. Fact-keyed tasks rely entirely on unpublished keys (D-040) and are reported as their own score; long-lived comparisons rest mainly on procedure-keyed tasks. The classification uses the task's structure, never trial results (Rule 7). It informs O-004.
 
 **Gate:** RV-3. **Automatable:** citation retrieval and verification in a fresh context, consistency checks. **Human judgment:** layers, realism, consequentiality.
 
@@ -153,6 +154,8 @@ The conversational protocol is specified in [Deliverable 3](../interview/expert-
 ### Stage 5 — Task construction
 
 **Goal.** Turn source materials into a task: a brief, human-authored instruction; a controlled environment; a benchmark-wide output contract; and a hidden verifier design.
+
+**Key type** (D-049): build procedure-keyed tasks wherever the data route allows hidden variants, and keep the Stage 3 classification with the task's metadata.
 
 **Task-type patterns (proposed for the first release; see §6):**
 
@@ -190,7 +193,7 @@ The release editor, with the benchmark reviewer, admits tasks to a release or to
 
 **Gate:** LK-1, LK-5.
 
-**Release policy:** answers of scored tasks stay unpublished until the task is retired; demo and development tasks may be published (D-040, 2026-11-07, which replaced the tiers of D-032).
+**Release policy:** answers of scored tasks stay unpublished until the task is retired; demo and development tasks may be published (D-040, 2026-11-07, which replaced the tiers of D-032). Everything published carries the project's public canary, and evaluation internals carry the unpublished tripwire ([canary rules](canary.md), D-049).
 
 ## 5. Automation versus human judgment (summary)
 
