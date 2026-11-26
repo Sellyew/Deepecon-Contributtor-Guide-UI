@@ -1,6 +1,6 @@
 # Contributor interface (implementation)
 
-**Status: milestone M1 (skeleton) built on 2026-11-07**, after the research lead approved the [implementation plan](../../docs/architecture/mvp-implementation-plan.md) (D-043). The site runs with the fictional examples only. Next is M2, the Selection screens.
+**Status: milestone M2 (Selection) built on 2026-11-26**, after M1 (skeleton, 2026-11-07). The research lead approved the [implementation plan](../../docs/architecture/mvp-implementation-plan.md) (D-043) and started M2 with D-049. The site runs with the fictional examples only. Next is M3, guidance and uploads.
 
 One Django application (Django 5.2, a long-term-support release) for the [MVP contributor interface](../../docs/architecture/mvp-contributor-interface.md). Pages are rendered on the server. It uses SQLite in WAL mode and private file storage, and loads nothing from other websites. It sends nothing to AI services: the model gateway refuses every call (D-042). It follows the [AI use and integrity rules](../../docs/architecture/llm-use-policy.md).
 
@@ -18,7 +18,22 @@ One Django application (Django 5.2, a long-term-support release) for the [MVP co
 | Interface languages: English and Simplified Chinese. The Chinese catalogue is **machine-drafted by Claude and awaits the team's review** (M4) | `locale/zh_Hans/LC_MESSAGES/django.po` |
 | Demo loader: the fictional empirical (scored) and theory (demo) examples, synthetic packages, and three demo contributors: two authors whose link opens their paper, and an invited expert, assigned the scored example, who chooses between it and the demo paper, the only one open to all | `contributors/management/commands/load_demo.py` |
 | Exposure log (Rule 10): entries are added and viewed, never edited or deleted; the recorder's name comes from the account, and an evaluation run needs the pinned model version and its release date | `papers/models.py`, `papers/admin.py` |
-| Tests (101): importers, links and revocation, choosing and changing paper, consent, access to other papers, admin permissions, language switching, the link migration, security headers, external assets, private storage, the gateway, network imports, and log redaction | `*/tests.py` |
+| Tests: importers, links and revocation, choosing and changing paper, consent, access to other papers, admin permissions, language switching, the link migration, security headers, external assets, private storage, the gateway, network imports, and log redaction | `*/tests.py` |
+
+## What M2 adds
+
+| Part | Where |
+|---|---|
+| Answers, proposals, questions, and confirmations. Each answer has an optimistic version, so a page that is out of date (another tab saved since) is told so and never overwrites. The per-answer AI disclosure (D-039) records the tool, the type of account, and whether the items or package were entered | `contributors/models.py` (`ItemReview`, `Proposal`, `Question`, `Confirmation`) |
+| The Selection rules in one place: what the contributor may see of each item (only the roles the paper configuration marks visible), saving with conflicts, numbered confirmations holding the SHA-256 of what was confirmed, the review export (validated against `contributor-review.schema.json` before it is returned), and the checks before freezing | `contributors/review.py` |
+| Overview ("My paper"): what we ask, the paper's categories, progress with an estimate of the time left, and the ways to start, continue, propose, confirm, and ask the team | `contributors/views.py`, `templates/contributors/my_paper.html` |
+| Review screen: the whole-picture map with a coloured marker per item (filled once answered), one item at a time with the original and modified change side by side (paired variants side by side), the four answers (Keep, Keep with changes, Reject, Unsure), the main reason for a rejection, the three ticks, suggested wording, and the AI disclosure. An answer other than Reject moves to the next item; after the last, to the confirmation page. A matrix view lists every item and its answer | `contributors/selection_views.py`, `templates/contributors/review_item.html`, `review_matrix.html` |
+| Everything works as plain form posts. `review.js` (from the site's own files, as the security policy requires) adds autosave and keyboard shortcuts: ← and → move between items; K, C, R, and U answer | `static/review.js` |
+| Proposals of new items (any configured category, or "Not sure"), questions to the team (general or about one item, answered on the team pages), confirmation of a numbered version, and a Markdown copy of the contributor's own review | `selection_views.py`, `templates/contributors/propose.html`, `confirm.html` |
+| Team pages: each paper's build date (needed by the exposure log, Rule 10) and team owner; reviews with progress; freezing (refused if the paper has no build date or an item lacks provenance; warns about unanswered items or no confirmation), unfreezing, and the JSON export; the question queue with the waiting time and owner | `papers/admin.py`, `contributors/admin.py` |
+| `check_papers` re-runs today's import checks on every stored paper and fails if one has a problem; `make_tripwire` writes the unpublished tripwire GUID to the data folder (mode 0600) and prints only its path ([canary rules](../../docs/methodology/canary.md)) | `papers/management/commands/` |
+| Chinese interface strings for M2, **machine-drafted by Claude and awaiting the team's review** | `locale/zh_Hans/LC_MESSAGES/django.po` |
+| Tests for the Selection rules, the export, freezing, the admin actions, `check_papers`, `make_tripwire`, and the contributor screens in both languages | `contributors/test_selection.py`, `papers/tests.py` |
 
 ## Run the demo (Stage 0)
 
@@ -80,6 +95,22 @@ If a contributor asks the team to move their link (to another paper offered to t
 
 Each contributor has one link at a time: a new link revokes the earlier ones.
 
+## Check, freeze, and export reviews
+
+Before an evaluation run, and after the rules change, re-check every stored paper:
+
+```bash
+.venv/bin/python manage.py check_papers
+```
+
+Set each paper's build date and team owner on its admin page. When a contributor has finished, freeze the review (Assignments, action "Freeze the selected reviews"); the contributor can then read it but not change it. Export it as JSON with the action "Export the selected review as JSON". Questions from contributors wait in Questions, oldest first; answer them there.
+
+Create the unpublished tripwire GUID once per installation. It is written to the data folder and never printed; never paste it into any AI service, this session included:
+
+```bash
+.venv/bin/python manage.py make_tripwire
+```
+
 ## Tests and translations
 
 ```bash
@@ -102,7 +133,6 @@ Stage 1 is set by environment variables: `DEEPECON_STAGE=1`, `DEEPECON_SECRET_KE
 
 ## Not yet built
 
-- **M2:** the overview, the review screen, answers with the per-item AI disclosure, proposals, "Ask the team", autosave, confirmation, and export; each task's build date for the exposure log (Rule 10, D-044).
 - **M3:** guidance, uploads, and the submission manifest.
 - **M4:** the reviewed Chinese catalogue, the data quarantine, and the remaining §3 controls.
 - **M5:** the demo paper.
