@@ -11,9 +11,9 @@
 <div class="matrix-wrap">
 <table class="matrix">
   <thead><tr><th scope="col">{% translate "Result" %}</th>
-    {% for c in columns %}<th scope="col"><a class="marker colour-{{ c.colour }}{% if c.reviewed %} done{% endif %}" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=c.id %}">{{ c.id }}</a></th>{% endfor %}</tr></thead>
+    {% for c in columns %}<th scope="col"><a class="marker colour-{{ c.colour }}{% if c.reviewed %} done{% endif %}" href="{% url 'contributors:review_item' paper_id=paper.paper_id item_id=c.id %}">{{ c.id }}{% if c.reviewed %}<span class="visually-hidden"> ({% translate "answered" %})</span>{% endif %}</a></th>{% endfor %}</tr></thead>
   <tbody>
-    {% for row in rows %}<tr><th scope="row">{{ row.label }}</th>{% for cell in row.cells %}<td>{% if cell %}●{% endif %}</td>{% endfor %}</tr>{% endfor %}
+    {% for row in rows %}<tr><th scope="row">{{ row.label }}</th>{% for cell in row.cells %}<td>{% if cell %}<span aria-hidden="true">●</span><span class="visually-hidden">{% translate "affects" %}</span>{% endif %}</td>{% endfor %}</tr>{% endfor %}
   </tbody>
 </table>
 </div>

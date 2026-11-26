@@ -71,7 +71,8 @@
       {% if form.verdict.value == "reject" %}
       <p class="reasons"><label for="{{ form.reject_reason.id_for_label }}">{{ form.reject_reason.label }}</label> {{ form.reject_reason }}</p>
       {% endif %}
-      {% if partner %}<p>{{ form.variant_choice.errors }}<label for="{{ form.variant_choice.id_for_label }}">{{ form.variant_choice.label }}</label> {{ form.variant_choice }}
+      {% if partner %}<input type="hidden" name="partner_version" value="{{ partner_version }}">
+      <p>{{ form.variant_choice.errors }}<label for="{{ form.variant_choice.id_for_label }}">{{ form.variant_choice.label }}</label> {{ form.variant_choice }}
         <span class="hint">{% translate "“First” and “second” are the versions as shown above; your choice is one answer for the pair, shared by both items." %}</span></p>{% endif %}
       <details class="more"{% if form.errors or review.comment or review.suggested_title or review.suggested_description or review.other_valid_repairs %} open{% endif %}>
         <summary>{% translate "Reasons, ticks, and comments" %}</summary>

@@ -1,0 +1,51 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin_danger.css' %}">{% endblock %}
+{% block extrahead %}{{ block.super }}<script src="{% static 'admin_danger.js' %}" defer></script>{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> › <a href="{% url 'admin:contributors_assignment_changelist' %}">Assignments</a> › <a href="{{ change_url }}">{{ assignment }}</a> › Withdraw</div>
+{% endblock %}
+{% block content_title %}{% endblock %}
+{% block content %}
+<div class="danger-dialog">
+  <h1>Withdraw <code>{{ assignment.public_id }}</code></h1>
+  <p class="danger-current">{{ assignment.contributor }} on <code>{{ assignment.paper.paper_id }}</code>: {{ assignment.paper.title }}.
+  {% for label, n in counts.items %}{{ n }} {{ label }}{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
+
+  {% if step == "1" %}
+  <p>The notice tells contributors they may withdraw at any time by telling the team, and that their reviews, proposals, and uploads are then deleted. Use this only when the contributor has asked.</p>
+  <form method="get">
+    <input type="hidden" name="step" value="2">
+    <button type="submit" class="danger-button">The contributor has asked to withdraw from this paper</button>
+  </form>
+
+  {% elif step == "2" %}
+  <div class="danger-warning">
+    <p><strong>Please read this before you continue.</strong></p>
+    <ul>
+      <li>Their answers, proposals, questions (with the team's answers), confirmed versions, and consent on this paper are deleted permanently. This cannot be undone.</li>
+      {% if assignment.is_frozen %}<li>This review is frozen. If a task built from it has been evaluated, the exposure log keeps its own record; the review itself is still deleted.</li>{% endif %}
+      <li>The assignment is deleted. If this was the paper their link opens, it opens the list of papers instead.</li>
+      <li>Their other papers, and their link, are not affected.</li>
+      <li>The event log records your user name, the date and channel of their request, and how many records were deleted, not their content.</li>
+    </ul>
+  </div>
+  <form method="get">
+    <input type="hidden" name="step" value="3">
+    <button type="submit" class="danger-button">I have read and understand these effects</button>
+  </form>
+
+  {% else %}
+  <form method="post" class="danger-form" data-confirm="{{ assignment.public_id }}">
+    {% csrf_token %}
+    <input type="hidden" name="step" value="3">
+    {{ form.non_field_errors }}
+    <p>{{ form.requested_on.errors }}<label for="{{ form.requested_on.id_for_label }}">{{ form.requested_on.label }}</label><br>{{ form.requested_on }}</p>
+    <p>{{ form.request_channel.errors }}<label for="{{ form.request_channel.id_for_label }}">{{ form.request_channel.label }}</label><br>{{ form.request_channel }}</p>
+    <p>{{ form.confirmation.errors }}<label for="{{ form.confirmation.id_for_label }}">To confirm, type “<code>{{ assignment.public_id }}</code>” in the box below</label><br>{{ form.confirmation }}</p>
+    <button type="submit" class="danger-button" id="danger-submit">Delete this work and withdraw</button>
+  </form>
+  {% endif %}
+  <p><a href="{{ change_url }}">Cancel</a></p>
+</div>
+{% endblock %}

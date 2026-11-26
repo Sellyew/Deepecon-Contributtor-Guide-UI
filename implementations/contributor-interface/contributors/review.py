@@ -174,18 +174,28 @@ def check_not_frozen(assignment):
 
 
 @transaction.atomic
-def save_review(assignment, item, data, expected_version):
+def save_review(assignment, item, data, expected_version, partner_version=None):
     """Create or update one answer. `expected_version` is the version the page was loaded with
     (0 for an item never answered). Raises Conflict if it is out of date, Frozen if frozen.
 
     For paired variants, "first" and "second" refer to the pair in rubric order, the same on
     both items' pages; the choice is one answer about the pair, so it is copied to the
-    partner's answer if there is one."""
+    partner's answer if there is one. `partner_version` is the partner's version the page was
+    loaded with: a page that has not seen a newer choice made on the partner's page cannot
+    replace it (a Conflict, like any stale page)."""
     check_not_frozen(assignment)
     review = ItemReview.objects.select_for_update().filter(assignment=assignment, item=item).first()
     current = review.version if review else 0
     if expected_version != current:
         raise Conflict(review)
+    mate = None
+    if "variant_choice" in data:
+        mate_id = pairs(assignment.paper).get(item.item_id)
+        mate = (ItemReview.objects.select_for_update()
+                .filter(assignment=assignment, item__rubric=item.rubric, item__item_id=mate_id).first()) if mate_id else None
+        if (mate is not None and partner_version is not None and mate.version != partner_version
+                and mate.variant_choice != data["variant_choice"]):
+            raise Conflict(review)
     if review is None:
         review = ItemReview(assignment=assignment, item=item, version=0)
     for field, value in data.items():
@@ -201,14 +211,11 @@ def save_review(assignment, item, data, expected_version):
     except IntegrityError:
         # Two first saves of the same item raced (possible on a server database): the other won.
         raise Conflict(ItemReview.objects.filter(assignment=assignment, item=item).first())
-    if "variant_choice" in data:
-        mate_id = pairs(assignment.paper).get(item.item_id)
-        mate = (ItemReview.objects.select_for_update()
-                .filter(assignment=assignment, item__rubric=item.rubric, item__item_id=mate_id).first()) if mate_id else None
-        if mate is not None and mate.variant_choice != review.variant_choice:
-            mate.variant_choice = review.variant_choice
-            mate.version += 1
-            mate.save(update_fields=["variant_choice", "version", "updated_at"])
+    if mate is not None and mate.variant_choice != review.variant_choice:
+        mate.variant_choice = review.variant_choice
+        mate.version += 1
+        mate.save(update_fields=["variant_choice", "version", "updated_at"])
+    review.partner_version = mate.version if mate is not None else 0
     return review
 
 

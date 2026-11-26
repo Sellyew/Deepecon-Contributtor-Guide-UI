@@ -3,8 +3,9 @@
 //
 // Saves are sent one at a time (a change made while a save is under way is sent after it, with
 // the new version), so the page never reports a conflict with itself. Before the page is left
-// by a link, a shortcut, or closing the tab, pending changes are saved first; text that cannot
-// be saved (no answer chosen yet, or a failed save) makes the browser ask before leaving.
+// by a link, a shortcut, or another form on the page (language, "Ask the team"), pending changes
+// are saved first. On reload or closing, the save starts at once and the browser asks before
+// leaving while anything is unsaved, so the next page is never built before the save arrives.
 (function () {
   "use strict";
   var form = document.getElementById("review-form");
@@ -30,6 +31,8 @@
   var dirty = false;      // the form has changes the server has not stored
   var failed = false;     // the last save did not succeed
   var leaving = false;    // the page is being left on purpose (a form post or a saved navigation)
+  var unloading = false;  // the page is going away (pagehide)
+  var partnerVersion = form.querySelector("input[name=partner_version]");
 
   function show(text, problem) {
     if (!status) return;
@@ -79,6 +82,7 @@
       clearFieldErrors();
       if (r.status === 200 && body.ok) {
         version.value = body.version;
+        if (partnerVersion && body.partner_version !== undefined) partnerVersion.value = body.partner_version;
         show(labels.saved + " " + body.saved_at, false);
         return;
       }
@@ -140,26 +144,35 @@
   document.addEventListener("click", function (e) {
     var a = e.target.closest ? e.target.closest("a[href]") : null;
     if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target) return;
-    if (!verdict || !verdict.value || !(timer || dirty || inflight)) return;
+    // After a failed save, let the contributor leave: the browser asks first (beforeunload).
+    if (!verdict || !verdict.value || failed || !(timer || dirty || inflight)) return;
     e.preventDefault();
     autosave().then(function () {
       if (!failed) { leaving = true; window.location.href = a.href; }
     });
   });
 
-  // Closing the tab, reloading, or going back: send what is pending, and ask before losing text.
-  document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "hidden" && !leaving) autosave(true);
+  // The page's other forms (the language switch, "Ask the team"): save first, then send them.
+  document.addEventListener("submit", function (e) {
+    var other = e.target;
+    if (other === form || e.defaultPrevented) return;
+    if (!verdict || !verdict.value || failed || !(timer || dirty || inflight)) return;
+    e.preventDefault();
+    autosave().then(function () { if (!failed) { leaving = true; other.submit(); } });
   });
-  window.addEventListener("pagehide", function () {
-    if (!leaving && !inflight && verdict && verdict.value && (timer || dirty)) {
-      clearTimeout(timer); timer = null; dirty = false;
-      send(true);
-    }
-  });
+
+  // Reloading, closing, or the address bar: start the save now and ask before leaving while
+  // anything is unsaved. The question holds the navigation until the save has arrived, so the
+  // next page shows it (sending it later, on pagehide, would race the next page's request).
   window.addEventListener("beforeunload", function (e) {
     if (leaving) return;
-    if (dirty && (!verdict || !verdict.value || failed)) { e.preventDefault(); e.returnValue = ""; }
+    if ((timer || dirty) && verdict && verdict.value && !inflight && !failed) autosave(true);
+    if (inflight || dirty) { e.preventDefault(); e.returnValue = ""; }
+  });
+  // Switching tabs: save, since the page may not come back (phones discard background tabs).
+  window.addEventListener("pagehide", function () { unloading = true; });
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden" && !leaving && !unloading) autosave(true);
   });
 
   var keys = { k: "keep", c: "keep_with_changes", r: "reject", u: "unsure" };

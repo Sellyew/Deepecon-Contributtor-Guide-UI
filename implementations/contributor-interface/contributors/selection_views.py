@@ -97,11 +97,15 @@ def review_item(request, paper_id, item_id):
         pair_cards = [{"card": c, "label": label, "current": c["id"] == item_id}
                       for c, label in zip(ordered, (_("First version"), _("Second version")))]
 
+    def current_mate():
+        return assignment.reviews.filter(item__rubric=item.rubric, item__item_id=partner["id"]).first() if partner else None
+
     def initial(review):
+        # The pair's choice is one answer: show the most recent one given on either item's page.
         data = _initial(review)
-        mate = reviews.get(partner["id"]) if partner else None
-        if partner and not data.get("variant_choice") and mate and mate.variant_choice:
-            data["variant_choice"] = mate.variant_choice      # one answer about the pair
+        mate = current_mate()
+        if mate and mate.variant_choice and (not data.get("variant_choice") or (review and mate.updated_at > review.updated_at)):
+            data["variant_choice"] = mate.variant_choice
         return data
 
     if request.method == "POST":
@@ -116,7 +120,12 @@ def review_item(request, paper_id, item_id):
         form = ReviewForm(data, paired=partner is not None)
         if form.is_valid():
             try:
-                saved = selection.save_review(assignment, item, form.review_data(), form.cleaned_data["version"])
+                try:
+                    partner_version = int(request.POST.get("partner_version", "")) if partner else None
+                except ValueError:
+                    partner_version = None
+                saved = selection.save_review(assignment, item, form.review_data(), form.cleaned_data["version"],
+                                              partner_version=partner_version)
             except selection.Conflict as clash:
                 if _is_fetch(request):
                     return JsonResponse({"ok": False, "conflict": True,
@@ -128,7 +137,7 @@ def review_item(request, paper_id, item_id):
                     redirect("contributors:review_item", paper_id=paper_id, item_id=item_id)
             else:
                 if _is_fetch(request):
-                    return JsonResponse({"ok": True, "version": saved.version,
+                    return JsonResponse({"ok": True, "version": saved.version, "partner_version": saved.partner_version,
                                          "saved_at": timezone.localtime(saved.updated_at).strftime("%H:%M")})
                 # A one-tap answer moves on, except Reject, whose optional reasons appear next (MVP §4.2).
                 # After the last item it moves on to "Review and confirm" (step 6).
@@ -143,6 +152,7 @@ def review_item(request, paper_id, item_id):
         form = ReviewForm(initial=initial(review), paired=partner is not None)
 
     earlier = selection.earlier_review(assignment, item_id) if review is None else None
+    mate = current_mate()
     return render(request, "contributors/review_item.html", {
         "assignment": assignment, "paper": paper, "item": view, "partner": partner, "pair_cards": pair_cards,
         "form": form, "review": review, "conflict": conflict, "prev_id": prev_id, "next_id": next_id,
@@ -150,6 +160,7 @@ def review_item(request, paper_id, item_id):
         "progress": selection.progress(assignment), "questions": assignment.questions.filter(item=item),
         "question_form": QuestionForm(), "frozen": assignment.is_frozen,
         "earlier": earlier, "earlier_verdict": dict(VERDICTS).get(earlier.verdict) if earlier else None,
+        "partner_version": mate.version if mate else 0,
     })
 
 
@@ -193,6 +204,14 @@ def propose(request, paper_id, proposal_id=None):
             with transaction.atomic():
                 selection.check_not_frozen(assignment)
                 current = Proposal.objects.select_for_update().get(pk=proposal.pk) if proposal else None
+                values = ({f: (v.strip() if isinstance(v, str) else v)
+                           for f, v in ((f, form.cleaned_data.get(f)) for f in PROPOSAL_FIELDS)}
+                          if form.is_valid() else None)
+                if (current is not None and values is not None and not request.POST.get("delete")
+                        and all(getattr(current, f) == v for f, v in values.items())):
+                    # Nothing to change, e.g. "Save" pressed twice: the first press saved it.
+                    messages.success(request, _("Your proposal was saved."))
+                    return redirect("contributors:propose", paper_id=paper_id)
                 if current is not None and request.POST.get("version") != str(current.version):
                     # Saved from another tab since this page was opened: show the saved text instead.
                     messages.error(request, _("This proposal was changed in another tab after you opened this page. "
@@ -203,13 +222,10 @@ def propose(request, paper_id, proposal_id=None):
                     log_event(assignment.public_id, "proposal_deleted", assignment, proposal_id=current.public_id)
                     messages.success(request, _("The proposal was deleted."))
                     return redirect("contributors:propose", paper_id=paper_id)
-                if form.is_valid():
-                    values = {f: (v.strip() if isinstance(v, str) else v)
-                              for f, v in ((f, form.cleaned_data.get(f)) for f in PROPOSAL_FIELDS)}
+                if values is not None:
                     if current is None:
-                        duplicate = assignment.proposals.filter(category=values["category"], location=values["location"],
-                                                                description=values["description"]).first()
-                        if duplicate:          # e.g. "Save" pressed twice
+                        duplicate = assignment.proposals.filter(**values).first()
+                        if duplicate:          # every field the same: "Save" pressed twice
                             messages.success(request, _("Your proposal was saved."))
                             return redirect("contributors:propose", paper_id=paper_id)
                     target = current or Proposal(assignment=assignment)

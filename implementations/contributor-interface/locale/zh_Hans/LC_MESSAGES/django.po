@@ -145,14 +145,14 @@ msgstr "第二个版本"
 msgid "The team has frozen your review; it can no longer be changed."
 msgstr "团队已冻结您的审阅，无法再修改。"
 
+msgid "Your proposal was saved."
+msgstr "您的提议已保存。"
+
 msgid "This proposal was changed in another tab after you opened this page. The saved text is shown below; please make your change again."
 msgstr "在您打开此页面之后，此提议已在另一个标签页中被修改。下方显示的是已保存的内容；请重新进行您的修改。"
 
 msgid "The proposal was deleted."
 msgstr "提议已删除。"
-
-msgid "Your proposal was saved."
-msgstr "您的提议已保存。"
 
 msgid "Your question was sent to the team. Their answer will appear here."
 msgstr "您的问题已发送给团队。团队的回答将显示在这里。"
@@ -231,6 +231,12 @@ msgstr "关键要求"
 
 msgid "Weight: %(w)s"
 msgstr "权重：%(w)s"
+
+msgid "Two versions of one key point, with %(mate)s"
+msgstr "同一关键点的两个版本，另一版本为 %(mate)s"
+
+msgid "paired with %(mate)s"
+msgstr "与 %(mate)s 成对"
 
 msgid "answered"
 msgstr "已回答"
@@ -566,3 +572,6 @@ msgstr "每个标记表示一个影响该结果的条目。选择一个条目即
 
 msgid "Result"
 msgstr "结果"
+
+msgid "affects"
+msgstr "影响"

@@ -17,6 +17,7 @@ import json
 from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -89,6 +90,30 @@ class MoveLinkForm(forms.Form):
         return typed
 
 
+class WithdrawForm(forms.Form):
+    """Step 3 of a withdrawal at the contributor's request: their request, typed confirmation."""
+
+    requested_on = forms.DateField(label="Date of the contributor's request", widget=forms.DateInput(attrs={"type": "date"}))
+    request_channel = forms.ChoiceField(label="How they asked", choices=MoveLinkForm.CHANNELS)
+    confirmation = forms.CharField(label="Confirmation", max_length=64, strip=False)
+
+    def __init__(self, *args, assignment, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.assignment = assignment
+
+    def clean_requested_on(self):
+        day = self.cleaned_data["requested_on"]
+        if day > timezone.localdate():
+            raise forms.ValidationError("The request cannot be in the future.")
+        return day
+
+    def clean_confirmation(self):
+        typed = self.cleaned_data["confirmation"]
+        if typed != self.assignment.public_id:
+            raise forms.ValidationError(f"Type {self.assignment.public_id} exactly to confirm.")
+        return typed
+
+
 @admin.register(Contributor)
 class ContributorAdmin(InviteActionMixin, admin.ModelAdmin):
     list_display = ("display_name", "public_id", "current_assignment", "preferred_language", "created_at")
@@ -152,6 +177,49 @@ class AssignmentAdmin(InviteActionMixin, admin.ModelAdmin):
     list_filter = ("paper", "relationship_to_paper", "added_by")
     readonly_fields = ("public_id", "added_by", "created_at", "frozen_at", "frozen_by")
     actions = ["create_invitation", "freeze", "unfreeze", "export_review"]
+    change_form_template = "admin/contributors/assignment_change_form.html"
+
+    def get_urls(self):
+        withdraw = path("<int:pk>/withdraw/", self.admin_site.admin_view(self.withdraw_view),
+                        name="contributors_assignment_withdraw")
+        return [withdraw] + super().get_urls()
+
+    def withdraw_view(self, request, pk):
+        """Withdrawal at the contributor's request (the notice; plan §3): deletes their work on this
+        paper and the assignment, in GitHub's three confirmation steps, and logs counts, not content."""
+        assignment = get_object_or_404(Assignment.objects.select_related("contributor", "paper"), pk=pk)
+        if not self.has_delete_permission(request, assignment):
+            raise PermissionDenied
+        step = request.POST.get("step") or request.GET.get("step") or "1"
+        form = None
+        if step == "3":
+            form = WithdrawForm(request.POST or None, assignment=assignment)
+            if request.method == "POST" and form.is_valid():
+                self._withdraw(request, assignment, form.cleaned_data)
+                return redirect("admin:contributors_contributor_change", assignment.contributor.pk)
+        counts = {"answers": assignment.reviews.count(), "proposals": assignment.proposals.count(),
+                  "questions": assignment.questions.count(), "confirmed versions": assignment.confirmations.count()}
+        return TemplateResponse(request, "admin/contributors/withdraw.html", {
+            **self.admin_site.each_context(request), "opts": self.model._meta, "original": assignment,
+            "title": f"Withdraw {assignment.public_id}", "assignment": assignment, "counts": counts,
+            "step": step if step in ("1", "2", "3") else "1", "form": form,
+            "change_url": reverse("admin:contributors_assignment_change", args=[assignment.pk]),
+        })
+
+    @transaction.atomic
+    def _withdraw(self, request, assignment, data):
+        contributor = assignment.contributor
+        details = {"assignment_id": assignment.public_id, "paper_id": assignment.paper.paper_id,
+                   "requested_on": data["requested_on"].isoformat(), "request_channel": data["request_channel"],
+                   "was_frozen": assignment.is_frozen}
+        for name in ("reviews", "proposals", "questions", "confirmations", "consents"):
+            related = getattr(assignment, name)
+            details[f"{name}_deleted"] = related.count()
+            related.all().delete()
+        assignment.delete()             # the contributor's link falls back to the list of papers if it was current
+        log_event(request.user.get_username(), "withdrawn_on_request", contributor, **details)
+        messages.success(request, f"Done: {details['assignment_id']} and the contributor's work on "
+                                  f"{details['paper_id']} were deleted, as they asked.")
 
     @admin.display(description="Reviewed")
     def progress(self, obj):
@@ -243,6 +311,10 @@ class InvitationAdmin(admin.ModelAdmin):
 
 @admin.register(Consent)
 class ConsentAdmin(admin.ModelAdmin):
+    """Consent is never deleted on its own. It goes with its assignment: when a work-free assignment
+    is deleted, or in a withdrawal. (Django checks the delete permission of every record a deletion
+    cascades to, so this keeps the permission and closes the direct ways instead.)"""
+
     list_display = ("assignment", "evaluation_through_apis_acknowledged", "team_ai_use_of_unpublished_material", "notice_version", "recorded_at")
     readonly_fields = list_display
 
@@ -252,8 +324,13 @@ class ConsentAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
-    def has_delete_permission(self, request, obj=None):
-        return False
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop("delete_selected", None)
+        return actions
+
+    def delete_view(self, request, object_id, extra_context=None):
+        raise PermissionDenied
 
 
 class ReadOnlyRecordAdmin(admin.ModelAdmin):
