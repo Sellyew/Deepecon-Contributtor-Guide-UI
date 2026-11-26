@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{% translate "Submit your materials" %} · {{ paper.title }}{% endblock %}
+{% block extrahead %}<script src="{% static 'upload.js' %}" defer></script>{% endblock %}
+{% block content %}
+<p><a href="{% url 'contributors:my_paper' paper_id=paper.paper_id %}">{{ paper.title }}</a> · <a href="{% url 'submissions:guidance' paper_id=paper.paper_id %}">{% translate "Materials guidance" %}</a></p>
+<h1>{% translate "Submit your materials" %}</h1>
+<p>{% translate "Your answers are saved as a draft until you submit. Each submission is a numbered version; you can change your answers and submit again." %}</p>
+
+{% if versions %}
+<section class="receipts">
+  <h2>{% translate "Submitted versions" %}</h2>
+  <ul>{% for v in versions %}<li>{% blocktranslate with n=v.version date=v.submitted_at|date:"Y-m-d H:i" %}Version {{ n }}, {{ date }} UTC{% endblocktranslate %}
+    {% if v.received_at %} · {% translate "received by the team" %}{% endif %}{% if v.verification_status == "verified" %} · {% translate "checked by the team" %}{% endif %}
+    <span class="hash">{% translate "Manifest SHA-256" %} {{ v.manifest_sha256 }}</span></li>{% endfor %}</ul>
+</section>
+{% endif %}
+
+{% if problems %}
+<div class="conflict" role="alert"><p>{% translate "Before you submit:" %}</p><ul>{% for p in problems %}<li>{{ p }}</li>{% endfor %}</ul></div>
+{% endif %}
+
+{% if "upload" in channels %}
+<section class="uploads">
+  <h2>{% translate "Your uploads" %}</h2>
+  {% if uploads %}
+  <div class="table-wrap">
+  <table class="summary-table">
+    <thead><tr><th scope="col">{% translate "File" %}</th><th scope="col">{% translate "Size" %}</th><th scope="col">{% translate "Status" %}</th><th scope="col">SHA-256</th><th scope="col"></th></tr></thead>
+    <tbody>
+    {% for u in uploads %}
+    <tr>
+      <td>{{ u.original_name }}{% if u.status == "received" %}<br><span class="note">{% blocktranslate count counter=u.entries|length %}{{ counter }} file inside{% plural %}{{ counter }} files inside{% endblocktranslate %}</span>{% endif %}</td>
+      <td>{{ u.size_bytes|filesizeformat }}</td>
+      <td>{% if u.status == "received" %}{% translate "Received" %}{% elif u.status == "checking" %}{% translate "Being checked" %}{% else %}{% blocktranslate with done=u.received_bytes|filesizeformat %}Unfinished: {{ done }} received. Choose the same file again to continue.{% endblocktranslate %}{% endif %}</td>
+      <td><span class="hash">{{ u.sha256|default:"—" }}</span></td>
+      <td>{% if not u.versions.all and u.status != "checking" %}<form method="post" action="{% url 'submissions:upload_remove' paper_id=paper.paper_id upload_id=u.public_id %}">{% csrf_token %}<button type="submit" class="danger">{% translate "Remove" %}</button></form>{% endif %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="note">{% translate "No upload yet." %}</p>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data" id="upload-form" class="upload-form"
+        action="{% url 'submissions:upload_plain' paper_id=paper.paper_id %}"
+        data-start="{% url 'submissions:upload_start' paper_id=paper.paper_id %}"
+        data-base="{% url 'submissions:submit' paper_id=paper.paper_id %}uploads/"
+        data-max="{{ max_upload }}"
+        data-sending="{% translate 'Sending…' %}"
+        data-checking="{% translate 'Received; computing its SHA-256…' %}"
+        data-done="{% translate 'Received. SHA-256:' %}"
+        data-paused="{% translate 'Paused: the connection was lost. Choose the same file again to continue where it stopped.' %}"
+        data-failed="{% translate 'Not received:' %}">
+    {% csrf_token %}
+    <p><label for="id_package">{% blocktranslate with size=max_upload|filesizeformat %}Choose your ZIP file (up to {{ size }}){% endblocktranslate %}</label><br>
+      <input type="file" name="package" id="id_package" accept=".zip,application/zip">
+      <button type="submit">{% translate "Upload" %}</button></p>
+    <p><progress id="upload-progress" max="100" value="0" hidden></progress> <span id="upload-status" class="save-status" aria-live="polite"></span></p>
+  </form>
+  <p class="hint">{% translate "To compare the SHA-256 with your own copy: on macOS or Linux, run shasum -a 256 followed by the file name; on Windows, run certutil -hashfile followed by the file name and SHA256." %}</p>
+</section>
+{% endif %}
+
+<form method="post" class="submission-form" autocomplete="off">
+  {% csrf_token %}{{ form.version }}
+  {{ form.non_field_errors }}
+  <section>
+    <h2>{% translate "How the materials reach us" %}</h2>
+    {{ form.channel.errors }}{{ form.channel }}
+    {% if "public_reference" in channels %}
+    <fieldset class="public-reference"><legend>{% translate "The public package" %}</legend>
+      {% for field in form %}{% if field.name == "pub_repository" or field.name == "pub_identifier" or field.name == "pub_version" or field.name == "pub_url" or field.name == "pub_doi" %}
+      <p>{{ field.errors }}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</p>
+      {% endif %}{% endfor %}
+    </fieldset>
+    {% endif %}
+    {% if "other_agreed" in channels %}<p>{{ form.other_channel_note.errors }}<label for="{{ form.other_channel_note.id_for_label }}">{{ form.other_channel_note.label }}</label>{{ form.other_channel_note }}</p>{% endif %}
+  </section>
+
+  {% if runnable %}
+  <section>
+    <h2>{% translate "The package" %}</h2>
+    {% for field in form %}{% if field.name == "master_script" or field.name == "readme" or field.name == "software" or field.name == "dependencies_included" or field.name == "author_run_log_included" or field.name == "expected_outputs_included" or field.name == "run_time" or field.name == "hardware_note" %}
+    <p>{{ field.errors }}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</p>
+    {% endif %}{% endfor %}
+  </section>
+
+  <section>
+    <h2>{% translate "Datasets" %}</h2>
+    <p class="note">{% translate "One row per dataset the code uses. Save to add another row." %}</p>
+    {{ datasets.management_form }}{{ datasets.non_form_errors }}
+    {% for d in datasets %}
+    <fieldset class="dataset"><legend>{% blocktranslate with n=forloop.counter %}Dataset {{ n }}{% endblocktranslate %}</legend>
+      {% for field in d %}{% if field.name != "DELETE" %}<p>{{ field.errors }}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</p>{% endif %}{% endfor %}
+      {% if d.initial %}<p><label>{{ d.DELETE }} {% translate "Remove this dataset" %}</label></p>{% endif %}
+    </fieldset>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <section>
+    <h2>{% translate "Checklist" %}</h2>
+    {% for e in checklist %}
+    <fieldset class="checklist-entry"><legend>{{ e.status_field.label }} <span class="note">({% for key, label in requirement_labels.items %}{% if key == e.requirement %}{{ label }}{% endif %}{% endfor %})</span></legend>
+      {% if e.help %}<p class="summary">{{ e.help }}</p>{% endif %}
+      <p>{{ e.status_field.errors }}<label for="{{ e.status_field.id_for_label }}">{% translate "Status" %}</label> {{ e.status_field }}
+        <label for="{{ e.note_field.id_for_label }}">{% translate "Note" %}</label> {{ e.note_field }}</p>
+    </fieldset>
+    {% endfor %}
+  </section>
+
+  <section>
+    <h2>{% translate "Declarations" %}</h2>
+    <p>{{ form.no_restricted_included.errors }}<label>{{ form.no_restricted_included }} {{ form.no_restricted_included.label }}</label></p>
+    {% if runnable %}<p>{{ form.permission_to_share.errors }}<label>{{ form.permission_to_share }} {{ form.permission_to_share.label }}</label>
+      <br><span class="note">{% translate "Needed only if you include data. A team member checks each dataset's terms before anyone opens it." %}</span></p>{% endif %}
+  </section>
+
+  <p><button type="submit" name="save" value="1">{% translate "Save" %}</button>
+     <button type="submit" name="submit" value="1" class="primary">{% translate "Submit" %}</button></p>
+</form>
+{% endblock %}

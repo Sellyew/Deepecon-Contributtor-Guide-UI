@@ -1,5 +1,5 @@
 # Interface catalogue for Simplified Chinese (D-030).
-# Machine-drafted by Claude (an LLM) on 2026-11-07 (strings for choosing a paper added the same day, D-044; Selection strings added 2026-11-26, M2, and revised the same day after the code review); to be reviewed and corrected by the team
+# Machine-drafted by Claude (an LLM) on 2026-11-07 (strings for choosing a paper added the same day, D-044; Selection strings added 2026-11-26, M2, and revised the same day after the code review; Guidance and Submit strings added 2026-11-26, M3); to be reviewed and corrected by the team
 # before contributors see it (implementation plan M4). Interface text only: item text,
 # papers, and code are never translated.
 msgid ""
@@ -184,6 +184,249 @@ msgstr "我了解：根据这篇论文的材料和审阅意见构建的最终任
 msgid "May the team use AI services with my unpublished materials and my responses?"
 msgstr "团队可以将 AI 服务用于我未公开的材料和我的回复吗？"
 
+msgid "Upload a ZIP file here"
+msgstr "在此上传一个 ZIP 文件"
+
+msgid "The package is public: give its reference (and upload only what is missing)"
+msgstr "材料包已公开：请提供其引用信息（只需上传缺少的部分）"
+
+msgid "Another channel agreed with the team (for example, for a very large package)"
+msgstr "与团队商定的其他渠道（例如用于非常大的材料包）"
+
+msgid "less than 10 minutes"
+msgstr "少于 10 分钟"
+
+msgid "10–60 minutes"
+msgstr "10–60 分钟"
+
+msgid "1–2 hours"
+msgstr "1–2 小时"
+
+msgid "2–8 hours"
+msgstr "2–8 小时"
+
+msgid "8–24 hours"
+msgstr "8–24 小时"
+
+msgid "1–3 days"
+msgstr "1–3 天"
+
+msgid "3–14 days"
+msgstr "3–14 天"
+
+msgid "more than 14 days"
+msgstr "超过 14 天"
+
+msgid "Included in my upload"
+msgstr "包含在我的上传中"
+
+msgid "Public elsewhere"
+msgstr "在其他地方公开"
+
+msgid "Restricted: not included"
+msgstr "受限：未包含"
+
+msgid "Confidential: not included"
+msgstr "保密：未包含"
+
+msgid "I or my RA run the team's versions and return the outputs (no data)"
+msgstr "由我或我的研究助理运行团队的各个版本并返回输出（不含数据）"
+
+msgid "The team applies to the provider for access"
+msgstr "由团队向数据提供方申请访问权限"
+
+msgid "A secure environment where authorized team members run it"
+msgstr "在安全环境中由获得授权的团队成员运行"
+
+msgid "A fully synthetic substitute built from the codebook"
+msgstr "根据编码手册构建的完全合成的替代数据"
+
+msgid "To be decided"
+msgstr "待定"
+
+msgid "Provided"
+msgstr "已提供"
+
+msgid "In the public package"
+msgstr "在公开的材料包中"
+
+msgid "Not available"
+msgstr "无法提供"
+
+msgid "Not applicable"
+msgstr "不适用"
+
+msgid "How the materials reach us"
+msgstr "材料如何送达我们"
+
+msgid "Repository (for example openICPSR, Dataverse, Zenodo)"
+msgstr "存储库（例如 openICPSR、Dataverse、Zenodo）"
+
+msgid "Identifier"
+msgstr "标识符"
+
+msgid "Version"
+msgstr "版本"
+
+msgid "URL (optional)"
+msgstr "网址（可选）"
+
+msgid "DOI (optional)"
+msgstr "DOI（可选）"
+
+msgid "A DOI starts with 10. followed by a prefix and a suffix."
+msgstr "DOI 以“10.”开头，后接前缀和后缀。"
+
+msgid "Which channel, as agreed with the team"
+msgstr "与团队商定的是哪个渠道"
+
+msgid "Master script (path in your package)"
+msgstr "主脚本（在您材料包中的路径）"
+
+msgid "README (path in your package)"
+msgstr "README（在您材料包中的路径）"
+
+msgid "Software and versions, one per line, for example: Stata, 18"
+msgstr "软件及其版本，每行一项，例如：Stata, 18"
+
+msgid "User-written packages included or pinned"
+msgstr "已附上或固定版本的用户编写程序包"
+
+msgid "The log of your own complete run is included"
+msgstr "已包含您本人完整运行一次的日志"
+
+msgid "The outputs of that run are included"
+msgstr "已包含该次运行的输出"
+
+msgid "Expected run time"
+msgstr "预计运行时间"
+
+msgid "Hardware or memory it needs (optional)"
+msgstr "所需的硬件或内存（可选）"
+
+msgid "I confirm that nothing restricted or confidential is included in what I send."
+msgstr "我确认我发送的材料中不包含任何受限或保密的内容。"
+
+msgid "I confirm that I may share the data I include with the project."
+msgstr "我确认我有权与本项目共享我所包含的数据。"
+
+msgid "Write each line as name, version (for example: Stata, 18)."
+msgstr "请按“名称, 版本”的格式填写每一行（例如：Stata, 18）。"
+
+msgid "Dataset"
+msgstr "数据集"
+
+msgid "Source or provider"
+msgstr "来源或提供方"
+
+msgid "Licence or terms of use"
+msgstr "许可或使用条款"
+
+msgid "Availability"
+msgstr "可得性"
+
+msgid "Where it is (URL, DOI, or provider)"
+msgstr "所在位置（网址、DOI 或提供方）"
+
+msgid "How the team can still run the code"
+msgstr "团队如何仍能运行代码"
+
+msgid "Notes"
+msgstr "备注"
+
+msgid "Restricted or confidential data need a route, or 'To be decided'."
+msgstr "受限或保密的数据需要选择一种途径，或选择“待定”。"
+
+msgid "Say where the public data are."
+msgstr "请说明公开数据所在的位置。"
+
+msgid "Note"
+msgstr "备注"
+
+msgid "Choose how the materials reach us."
+msgstr "请选择材料送达我们的方式。"
+
+msgid "Upload your package (a ZIP file), or choose another way to send it."
+msgstr "请上传您的材料包（一个 ZIP 文件），或选择其他发送方式。"
+
+msgid "Give the public package's repository, identifier, and version."
+msgstr "请提供公开材料包的存储库、标识符和版本。"
+
+msgid "Say which channel you agreed with the team."
+msgstr "请说明您与团队商定的渠道。"
+
+msgid "An upload is not finished. Finish it, or remove it."
+msgstr "有一个上传尚未完成。请完成或删除它。"
+
+msgid "Name the master script, the README, and the software with its version."
+msgstr "请写明主脚本、README 以及软件及其版本。"
+
+msgid "Answer every required entry of the checklist."
+msgstr "请回答清单中的每一个必填项。"
+
+msgid "Confirm that nothing restricted or confidential is included."
+msgstr "请确认其中不包含任何受限或保密的内容。"
+
+msgid "Confirm that you may share the data you include with the project."
+msgstr "请确认您有权与本项目共享您所包含的数据。"
+
+msgid "Some answers are incomplete; please check the form."
+msgstr "部分回答尚不完整，请检查表单。"
+
+msgid "Please upload one ZIP file (a name ending in .zip)."
+msgstr "请上传一个 ZIP 文件（文件名以 .zip 结尾）。"
+
+msgid "This file is not a ZIP archive, so it was not kept."
+msgstr "此文件不是 ZIP 压缩包，因此未被保存。"
+
+msgid "The file is empty."
+msgstr "文件为空。"
+
+msgid "The file is larger than %(limit)s. Please send it through another channel agreed with the team."
+msgstr "文件大于 %(limit)s。请通过与团队商定的其他渠道发送。"
+
+msgid "There are already many uploads for this paper. Please remove one you no longer need."
+msgstr "这篇论文的上传已经很多。请删除一个您不再需要的上传。"
+
+msgid "An unfinished upload of this file exists. Finish it with the upload button (with JavaScript on), or remove it."
+msgstr "此文件有一个未完成的上传。请使用上传按钮（需开启 JavaScript）完成它，或将其删除。"
+
+msgid "This file belongs to a submitted version and stays with the team."
+msgstr "此文件属于一个已提交的版本，将由团队保留。"
+
+msgid "This file is still being checked. Please wait a moment."
+msgstr "此文件仍在核验中，请稍候。"
+
+msgid "The upload could not continue. Please try again."
+msgstr "上传无法继续，请重试。"
+
+msgid "These answers were saved from another tab after you opened this page. The saved answers are shown below; please make your change again."
+msgstr "在您打开此页面之后，这些回答已在另一个标签页中被保存。下方显示的是已保存的回答；请重新进行您的修改。"
+
+msgid "Submitted: version %(n)s. Thank you. You can still change your answers and submit again."
+msgstr "已提交：第 %(n)s 版。谢谢。您仍可修改回答并再次提交。"
+
+msgid "Saved. Nothing is sent to the team until you submit."
+msgstr "已保存。在您提交之前，不会向团队发送任何内容。"
+
+msgid "required"
+msgstr "必填"
+
+msgid "confirm if already in your public package"
+msgstr "如已在您的公开材料包中，请确认"
+
+msgid "optional"
+msgstr "可选"
+
+msgid "Please choose a file first."
+msgstr "请先选择一个文件。"
+
+msgid "Received %(name)s. SHA-256: %(sha)s"
+msgstr "已收到 %(name)s。SHA-256：%(sha)s"
+
+msgid "Removed %(name)s."
+msgstr "已删除 %(name)s。"
+
 msgid "DeepEcon contributor site"
 msgstr "DeepEcon 贡献者网站"
 
@@ -341,6 +584,21 @@ msgstr "最近确认：第 %(n)s 版。"
 
 msgid "The review screen is not available yet; the team will tell you when it opens."
 msgstr "审阅页面尚未开放；开放时团队会通知您。"
+
+msgid "Your materials"
+msgstr "您的材料"
+
+msgid "What to provide, how to prepare it, and how to send it."
+msgstr "需要提供什么、如何准备以及如何发送。"
+
+msgid "Submitted: version %(n)s, %(date)s."
+msgstr "已提交：第 %(n)s 版，%(date)s。"
+
+msgid "Materials guidance"
+msgstr "材料指南"
+
+msgid "Submit your materials"
+msgstr "提交您的材料"
 
 msgid "Ask the team"
 msgstr "向团队提问"
@@ -581,3 +839,229 @@ msgstr "结果"
 
 msgid "affects"
 msgstr "影响"
+
+msgid "We need a full replication package that runs from the raw inputs to every table and figure, as a journal data editor would accept it. Code and documentation without the data, or without a way to run with the data, let us read the work but not run it."
+msgstr "我们需要一份完整的复现材料包，能够从原始输入一直运行到每一张表格和图形，达到期刊数据编辑可以接受的标准。只有代码和文档而没有数据，或者没有使用数据运行的途径，我们只能阅读这些工作，而无法运行。"
+
+msgid "We need the sources of the paper as listed below, with your original file names."
+msgstr "我们需要下列论文源文件，并保留您的原始文件名。"
+
+msgid "What to provide"
+msgstr "需要提供什么"
+
+msgid "Your public package (%(repo)s %(ident)s, %(version)s) may already contain several of these. Confirm those, and send only what is missing."
+msgstr "您的公开材料包（%(repo)s %(ident)s，%(version)s）可能已包含其中若干项。请确认这些项目，只发送缺少的部分。"
+
+msgid "The list follows the journals' Data and Code Availability Standard and its template README, so a package prepared for publication usually needs little more."
+msgstr "此清单遵循期刊的《数据与代码可得性标准》及其 README 模板，因此为发表而准备的材料包通常只需少量补充。"
+
+msgid "How to prepare it"
+msgstr "如何准备"
+
+msgid "Keep your original folder structure and file names. We map them to the task files ourselves."
+msgstr "请保留原有的文件夹结构和文件名。我们会自行将其与任务文件对应。"
+
+msgid "Do not tidy the code: we need it as it produced your results."
+msgstr "请不要整理代码：我们需要的是产生您结果时的原样代码。"
+
+msgid "Use relative paths, so that the package runs from any folder."
+msgstr "请使用相对路径，使材料包可以在任何文件夹中运行。"
+
+msgid "Run the master script once from a clean copy, and keep the log and the outputs it produced."
+msgstr "请从一份干净的副本运行一次主脚本，并保留日志及其产生的输出。"
+
+msgid "Data"
+msgstr "数据"
+
+msgid "For each dataset, choose one route:"
+msgstr "请为每个数据集选择一种途径："
+
+msgid "The dataset"
+msgstr "数据集"
+
+msgid "What to do"
+msgstr "怎么做"
+
+msgid "You may share it"
+msgstr "您可以共享它"
+
+msgid "Include it in the upload. It is stored encrypted on the project's server, for the team only."
+msgstr "请将其包含在上传中。它会加密保存在项目服务器上，仅供团队使用。"
+
+msgid "It is public elsewhere"
+msgstr "它在其他地方公开"
+
+msgid "Give its source and version; we download it ourselves."
+msgstr "请提供其来源和版本；我们会自行下载。"
+
+msgid "Restricted or confidential"
+msgstr "受限或保密"
+
+msgid "Never upload it. Choose a route: you or your RA run our versions where the data are and return only the outputs; we apply to the provider for access; a secure environment where authorized team members run it; or a fully synthetic substitute built from the codebook (then we check only that the code runs)."
+msgstr "切勿上传。请选择一种途径：由您或您的研究助理在数据所在之处运行我们的各个版本，只返回输出；由我们向数据提供方申请访问权限；在安全环境中由获得授权的团队成员运行；或者使用根据编码手册构建的完全合成的替代数据（此时我们只检查代码能否运行）。"
+
+msgid "Not yet decided"
+msgstr "尚未决定"
+
+msgid "Record it as to be decided; we will follow up with you."
+msgstr "请记为“待定”；我们会与您跟进。"
+
+msgid "If you include data, you confirm that you may share them with the project. A team member checks each dataset's terms before anyone opens it."
+msgstr "如果您包含数据，即表示您确认有权与本项目共享这些数据。在任何人打开数据之前，会由一名团队成员核查每个数据集的条款。"
+
+msgid "How to send it"
+msgstr "如何发送"
+
+msgid "Upload one ZIP file of up to %(size)s. If the connection breaks, choose the same file again and the upload continues where it stopped. You receive its SHA-256, a fingerprint you can compare with your own copy."
+msgstr "上传一个最大 %(size)s 的 ZIP 文件。如果连接中断，请再次选择同一个文件，上传会从中断处继续。您会收到它的 SHA-256，这是一个可与您自己的副本核对的指纹。"
+
+msgid "Or give the public package's reference (repository, identifier, version) and upload only what is missing."
+msgstr "或者提供公开材料包的引用信息（存储库、标识符、版本），只上传缺少的部分。"
+
+msgid "Or use another channel agreed with the team, for example an institutional transfer for a very large package."
+msgstr "或者使用与团队商定的其他渠道，例如对非常大的材料包使用机构传输服务。"
+
+msgid "Go to Submit"
+msgstr "前往提交"
+
+msgid "Using AI tools"
+msgstr "使用 AI 工具"
+
+msgid "You may use AI tools such as ChatGPT or DeepSeek while you review the items and prepare your materials. Please follow three rules."
+msgstr "您在审阅条目和准备材料时，可以使用 ChatGPT、DeepSeek 等 AI 工具。请遵守以下三条规则。"
+
+msgid "Your judgment, in your own words."
+msgstr "您的判断，您自己的表述。"
+
+msgid "Everything you write for us (each decision, reason, comment, and proposed error, and any README text you write) should state your own judgment and be written, or rewritten, by you. This does not apply to your original code and data, which we need exactly as they are. Please do not paste AI output as it is."
+msgstr "您为我们撰写的每项内容（每个决定、理由、评论、新提出的错误，以及您撰写的 README 文字）都应表达您本人的判断，并由您亲自撰写或改写。此规则不适用于您原有的代码和数据：我们需要它们保持原样。请不要直接粘贴 AI 的输出。"
+
+msgid "Tell us if AI helped."
+msgstr "如有 AI 协助，请告诉我们。"
+
+msgid "Tick “AI helped with this”, name the tool and the type of account (work or personal), and say whether you entered the items or the task package."
+msgstr "请勾选“AI 协助了此项”，注明所用工具和账户类型（工作账户或个人账户），并说明是否输入了条目或任务包。"
+
+msgid "Never put restricted, confidential, or licensed data into any AI tool."
+msgstr "任何情况下都不要将受限、保密或受许可限制的数据输入任何 AI 工具。"
+
+msgid "If you put the items or the task package into an AI tool, we recommend a work or business account, or a personal account with model training switched off; please do not use the rating or feedback buttons in those conversations, and do not share them publicly. This lowers the chance that the material is used to train future models, but it does not stop the AI company from receiving and keeping it. That is why we ask you to tell us."
+msgstr "如果您将条目或任务包输入 AI 工具，我们建议使用工作或企业账户，或已关闭模型训练的个人账户；请不要在这些对话中使用评分或反馈按钮，也不要公开分享对话。这样可以降低这些材料被用于训练未来模型的可能性，但无法阻止 AI 公司接收并保存这些材料。因此，我们请您告诉我们。"
+
+msgid "Why this matters"
+msgstr "为什么这很重要"
+
+msgid "The benchmark tests whether AI systems can do economics research well: for example, whether they find and correct mistakes that economists consider plausible and consequential, or notice and supply a necessary step that was removed. Your judgment is the standard the AI is measured against. If AI-written reasoning entered the tasks unchanged, the benchmark would partly measure agreement with another AI rather than with an economist."
+msgstr "本评测基准检验 AI 系统能否胜任经济学研究，例如能否发现并纠正经济学家认为确实可能出现且有实质性影响的失误，或发现并补上被删除的必要步骤。您的判断就是衡量 AI 的标准。如果 AI 撰写的推理原封不动地进入任务，评测基准在一定程度上衡量的就成了与另一个 AI 的一致程度，而非与经济学家的一致程度。"
+
+msgid "AI-written text has recognizable patterns. An AI being tested could use them to find the answers without doing the economics."
+msgstr "AI 撰写的文字有可辨认的模式。接受测试的 AI 可能借助这些模式找到答案，而无需进行经济学推理。"
+
+msgid "Tasks shaped by one AI model can be easier or harder for models of the same family, which would make comparisons between AI systems unfair."
+msgstr "由某个 AI 模型塑造的任务，对同一系列的模型可能更容易或更难，这会使不同 AI 系统之间的比较有失公平。"
+
+msgid "The items are the benchmark's answers. If an AI company trains on them, its future models could score well by memory rather than by reasoning. We cannot rule this out entirely, so we record which companies have seen which items and report those results separately."
+msgstr "这些条目就是本评测基准的标准答案。如果某家 AI 公司用它们训练模型，其未来的模型就可能靠记忆而非推理取得高分。我们无法完全排除这种可能，因此会记录哪些公司接触过哪些条目，并单独报告相应的结果。"
+
+msgid "Your answers are saved as a draft until you submit. Each submission is a numbered version; you can change your answers and submit again."
+msgstr "在您提交之前，您的回答会保存为草稿。每次提交都是一个编号的版本；您可以修改回答并再次提交。"
+
+msgid "Submitted versions"
+msgstr "已提交的版本"
+
+msgid "received by the team"
+msgstr "团队已收到"
+
+msgid "checked by the team"
+msgstr "团队已核验"
+
+msgid "Manifest SHA-256"
+msgstr "清单 SHA-256"
+
+msgid "Before you submit:"
+msgstr "提交之前："
+
+msgid "Your uploads"
+msgstr "您的上传"
+
+msgid "File"
+msgstr "文件"
+
+msgid "Size"
+msgstr "大小"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "%(counter)s file inside"
+msgid_plural "%(counter)s files inside"
+msgstr[0] "内含 %(counter)s 个文件"
+
+msgid "Received"
+msgstr "已收到"
+
+msgid "Being checked"
+msgstr "正在核验"
+
+msgid "Unfinished: %(done)s received. Choose the same file again to continue."
+msgstr "未完成：已收到 %(done)s。请再次选择同一个文件以继续。"
+
+msgid "Remove"
+msgstr "删除"
+
+msgid "No upload yet."
+msgstr "尚无上传。"
+
+msgid "Sending…"
+msgstr "正在发送…"
+
+msgid "Received; computing its SHA-256…"
+msgstr "已收到；正在计算其 SHA-256…"
+
+msgid "Received. SHA-256:"
+msgstr "已收到。SHA-256："
+
+msgid "Paused: the connection was lost. Choose the same file again to continue where it stopped."
+msgstr "已暂停：连接中断。请再次选择同一个文件，从中断处继续。"
+
+msgid "Not received:"
+msgstr "未收到："
+
+msgid "Choose your ZIP file (up to %(size)s)"
+msgstr "选择您的 ZIP 文件（最大 %(size)s）"
+
+msgid "Upload"
+msgstr "上传"
+
+msgid "To compare the SHA-256 with your own copy: on macOS or Linux, run shasum -a 256 followed by the file name; on Windows, run certutil -hashfile followed by the file name and SHA256."
+msgstr "如需与您自己的副本核对 SHA-256：在 macOS 或 Linux 上运行 shasum -a 256 加文件名；在 Windows 上运行 certutil -hashfile 加文件名和 SHA256。"
+
+msgid "The public package"
+msgstr "公开的材料包"
+
+msgid "The package"
+msgstr "材料包"
+
+msgid "Datasets"
+msgstr "数据集"
+
+msgid "One row per dataset the code uses. Save to add another row."
+msgstr "代码使用的每个数据集占一行。保存后可再添加一行。"
+
+msgid "Dataset %(n)s"
+msgstr "数据集 %(n)s"
+
+msgid "Remove this dataset"
+msgstr "删除此数据集"
+
+msgid "Checklist"
+msgstr "清单"
+
+msgid "Declarations"
+msgstr "声明"
+
+msgid "Needed only if you include data. A team member checks each dataset's terms before anyone opens it."
+msgstr "仅在您包含数据时需要。在任何人打开数据之前，会由一名团队成员核查每个数据集的条款。"
+
+msgid "Submit"
+msgstr "提交"

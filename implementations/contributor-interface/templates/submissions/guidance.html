@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Materials guidance" %} · {{ paper.title }}{% endblock %}
+{% block content %}
+<p><a href="{% url 'contributors:my_paper' paper_id=paper.paper_id %}">{{ paper.title }}</a></p>
+<h1>{% translate "Materials guidance" %}</h1>
+{% if runnable %}
+<p>{% translate "We need a full replication package that runs from the raw inputs to every table and figure, as a journal data editor would accept it. Code and documentation without the data, or without a way to run with the data, let us read the work but not run it." %}</p>
+{% else %}
+<p>{% translate "We need the sources of the paper as listed below, with your original file names." %}</p>
+{% endif %}
+
+<section>
+  <h2>{% translate "What to provide" %}</h2>
+  <ol class="checklist">
+    {% for e in entries %}
+    <li><strong>{{ e.label }}</strong>
+      <span class="note">({% if e.requirement == "required" %}{% translate "required" %}{% elif e.requirement == "confirm_existing" %}{% translate "confirm if already in your public package" %}{% else %}{% translate "optional" %}{% endif %})</span>
+      {% if e.help %}<br><span class="summary">{{ e.help }}</span>{% endif %}</li>
+    {% endfor %}
+  </ol>
+  {% if public_package %}<p class="note">{% blocktranslate with repo=public_package.repository ident=public_package.identifier version=public_package.version %}Your public package ({{ repo }} {{ ident }}, {{ version }}) may already contain several of these. Confirm those, and send only what is missing.{% endblocktranslate %}</p>{% endif %}
+  {% if runnable %}<p class="note">{% translate "The list follows the journals' Data and Code Availability Standard and its template README, so a package prepared for publication usually needs little more." %}</p>{% endif %}
+</section>
+
+<section>
+  <h2>{% translate "How to prepare it" %}</h2>
+  <ul>
+    <li>{% translate "Keep your original folder structure and file names. We map them to the task files ourselves." %}</li>
+    <li>{% translate "Do not tidy the code: we need it as it produced your results." %}</li>
+    <li>{% translate "Use relative paths, so that the package runs from any folder." %}</li>
+    {% if runnable %}<li>{% translate "Run the master script once from a clean copy, and keep the log and the outputs it produced." %}</li>{% endif %}
+  </ul>
+</section>
+
+{% if runnable %}
+<section>
+  <h2>{% translate "Data" %}</h2>
+  <p>{% translate "For each dataset, choose one route:" %}</p>
+  <table class="summary-table">
+    <thead><tr><th scope="col">{% translate "The dataset" %}</th><th scope="col">{% translate "What to do" %}</th></tr></thead>
+    <tbody>
+      <tr><td>{% translate "You may share it" %}</td><td>{% translate "Include it in the upload. It is stored encrypted on the project's server, for the team only." %}</td></tr>
+      <tr><td>{% translate "It is public elsewhere" %}</td><td>{% translate "Give its source and version; we download it ourselves." %}</td></tr>
+      <tr><td>{% translate "Restricted or confidential" %}</td><td>{% translate "Never upload it. Choose a route: you or your RA run our versions where the data are and return only the outputs; we apply to the provider for access; a secure environment where authorized team members run it; or a fully synthetic substitute built from the codebook (then we check only that the code runs)." %}</td></tr>
+      <tr><td>{% translate "Not yet decided" %}</td><td>{% translate "Record it as to be decided; we will follow up with you." %}</td></tr>
+    </tbody>
+  </table>
+  <p class="note">{% translate "If you include data, you confirm that you may share them with the project. A team member checks each dataset's terms before anyone opens it." %}</p>
+</section>
+{% endif %}
+
+<section>
+  <h2>{% translate "How to send it" %}</h2>
+  <ul>
+    {% if "upload" in channels %}<li>{% blocktranslate with size=max_upload|filesizeformat %}Upload one ZIP file of up to {{ size }}. If the connection breaks, choose the same file again and the upload continues where it stopped. You receive its SHA-256, a fingerprint you can compare with your own copy.{% endblocktranslate %}</li>{% endif %}
+    {% if "public_reference" in channels %}<li>{% translate "Or give the public package's reference (repository, identifier, version) and upload only what is missing." %}</li>{% endif %}
+    {% if "other_agreed" in channels %}<li>{% translate "Or use another channel agreed with the team, for example an institutional transfer for a very large package." %}</li>{% endif %}
+  </ul>
+  <p><a class="button primary" href="{% url 'submissions:submit' paper_id=paper.paper_id %}">{% translate "Go to Submit" %}</a></p>
+</section>
+
+<section class="ai-rules">
+  <h2>{% translate "Using AI tools" %}</h2>
+  <p>{% translate "You may use AI tools such as ChatGPT or DeepSeek while you review the items and prepare your materials. Please follow three rules." %}</p>
+  <ol>
+    <li><strong>{% translate "Your judgment, in your own words." %}</strong> {% translate "Everything you write for us (each decision, reason, comment, and proposed error, and any README text you write) should state your own judgment and be written, or rewritten, by you. This does not apply to your original code and data, which we need exactly as they are. Please do not paste AI output as it is." %}</li>
+    <li><strong>{% translate "Tell us if AI helped." %}</strong> {% translate "Tick “AI helped with this”, name the tool and the type of account (work or personal), and say whether you entered the items or the task package." %}</li>
+    <li><strong>{% translate "Never put restricted, confidential, or licensed data into any AI tool." %}</strong></li>
+  </ol>
+  <p>{% translate "If you put the items or the task package into an AI tool, we recommend a work or business account, or a personal account with model training switched off; please do not use the rating or feedback buttons in those conversations, and do not share them publicly. This lowers the chance that the material is used to train future models, but it does not stop the AI company from receiving and keeping it. That is why we ask you to tell us." %}</p>
+  <details>
+    <summary>{% translate "Why this matters" %}</summary>
+    <ul>
+      <li>{% translate "The benchmark tests whether AI systems can do economics research well: for example, whether they find and correct mistakes that economists consider plausible and consequential, or notice and supply a necessary step that was removed. Your judgment is the standard the AI is measured against. If AI-written reasoning entered the tasks unchanged, the benchmark would partly measure agreement with another AI rather than with an economist." %}</li>
+      <li>{% translate "AI-written text has recognizable patterns. An AI being tested could use them to find the answers without doing the economics." %}</li>
+      <li>{% translate "Tasks shaped by one AI model can be easier or harder for models of the same family, which would make comparisons between AI systems unfair." %}</li>
+      <li>{% translate "The items are the benchmark's answers. If an AI company trains on them, its future models could score well by memory rather than by reasoning. We cannot rule this out entirely, so we record which companies have seen which items and report those results separately." %}</li>
+    </ul>
+  </details>
+</section>
+{% endblock %}

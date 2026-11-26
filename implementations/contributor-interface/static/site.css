@@ -105,3 +105,13 @@ summary { cursor: pointer; color: var(--accent); }
 .pair-label { font-weight: 600; margin: 0.25rem 0; }
 .pair-card.this-item { border-left: 3px solid var(--accent); padding-left: 0.5rem; }
 .errorlist.js-error { margin: 0.25rem 0; }
+/* Guidance and Submit (M3). Fieldsets shrink with the screen (their default minimum is their content). */
+fieldset { min-width: 0; }
+.table-wrap { overflow-x: auto; position: relative; }
+.submission-form input[type=text], .submission-form input[type=url], .submission-form select,
+.submission-form textarea { width: 100%; max-width: 100%; font: inherit; }
+.submission-form label { display: block; }
+.submission-form ul { list-style: none; padding-left: 0; }
+.submission-form .dataset, .submission-form .checklist-entry, .submission-form .public-reference { margin: 0.75rem 0; }
+.upload-form input[type=file] { max-width: 100%; }
+.ai-rules { border-top: 1px solid var(--line); margin-top: 2rem; }

@@ -1,15 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://deepecon.example/schemas/contributor-interface/submission-manifest/0.2.0",
+  "$id": "https://deepecon.example/schemas/contributor-interface/submission-manifest/0.3.0",
   "title": "Submission manifest",
-  "description": "What a contributor provided for one paper: a full runnable replication package (D-027) by upload, public reference, or another agreed channel; files with SHA-256; software and run information; the status of every dataset and, for data that cannot be shared, the route by which the team can still run the code.",
+  "description": "What a contributor provided for one paper: a full runnable replication package (D-027) by upload, public reference, or another agreed channel; files with SHA-256; software and run information; the status of every dataset and, for data that cannot be shared, the route by which the team can still run the code. The package block (master script, README, software) is required when the paper configuration asks for a runnable package (submission.runnable_package_required); the site enforces it. A theory paper whose checklist has no runnable code may omit it.",
   "type": "object",
   "required": [
     "schema_version",
     "paper_id",
     "assignment_id",
     "channel",
-    "package",
     "datasets",
     "checklist_coverage",
     "declarations",
@@ -17,7 +16,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.2.0"
+      "const": "0.3.0"
     },
     "paper_id": {
       "type": "string",
@@ -58,7 +57,8 @@
           }
         },
         "additionalProperties": false
-      }
+      },
+      "description": "The archives the contributor uploaded, each with its size and SHA-256. Their contents are listed by name and size only; nothing is extracted or run."
     },
     "public_reference": {
       "type": "object",
@@ -305,6 +305,11 @@
     },
     "verified_by": {
       "type": "string"
+    },
+    "submitted_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The contributor's numbered submission; each new submission is a new version."
     }
   },
   "additionalProperties": false,

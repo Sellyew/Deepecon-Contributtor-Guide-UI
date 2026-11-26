@@ -25,6 +25,12 @@
 - `localize`: interface text in the requested language, falling back to the base language and then English.
 - `map_view`: every node with markers for the items anchored to it and the items that affect it; markers carry only ID, category, and status.
 
+## Changes in the submission manifest 0.3.0 (2026-11-26, Proposed)
+
+- `package` (master script, README, software) is no longer required by the schema: a theory paper whose checklist asks for LaTeX sources has none. The site requires it whenever the paper configuration asks for a runnable package (`submission.runnable_package_required`).
+- `files` lists the uploaded archives with their size and SHA-256; the site lists their contents by name and size only and never extracts or runs them.
+- `submitted_version`: each submission is a numbered version.
+
 ## Changes in 0.3.0 (2026-11-07)
 
 Fields that the [AI use and integrity rules](../../docs/architecture/llm-use-policy.md) (D-039, D-040, D-042) need, each with an example and a test:

@@ -201,7 +201,8 @@ class AssignmentAdmin(InviteActionMixin, admin.ModelAdmin):
                     return redirect("admin:contributors_contributor_change", contributor.pk)
                 return redirect("admin:index")
         counts = {"answers": assignment.reviews.count(), "proposals": assignment.proposals.count(),
-                  "questions": assignment.questions.count(), "confirmed versions": assignment.confirmations.count()}
+                  "questions": assignment.questions.count(), "confirmed versions": assignment.confirmations.count(),
+                  "uploads": assignment.uploads.count(), "submitted versions": assignment.submission_versions.count()}
         return TemplateResponse(request, "admin/contributors/withdraw.html", {
             **self.admin_site.each_context(request), "opts": self.model._meta, "original": assignment,
             "title": f"Withdraw {assignment.public_id}", "assignment": assignment, "counts": counts,
@@ -215,6 +216,15 @@ class AssignmentAdmin(InviteActionMixin, admin.ModelAdmin):
         details = {"assignment_id": assignment.public_id, "paper_id": assignment.paper.paper_id,
                    "requested_on": data["requested_on"].isoformat(), "request_channel": data["request_channel"],
                    "was_frozen": assignment.is_frozen}
+        from submissions.models import Submission
+        from submissions.storage import delete_files
+        details["uploads_deleted"] = assignment.uploads.count()
+        for upload in assignment.uploads.all():
+            delete_files(upload)            # the archives themselves, not only their records
+        details["submission_versions_deleted"] = assignment.submission_versions.count()
+        assignment.submission_versions.all().delete()
+        assignment.uploads.all().delete()
+        Submission.objects.filter(assignment=assignment).delete()
         for name in ("reviews", "proposals", "questions", "confirmations", "consents"):
             related = getattr(assignment, name)
             details[f"{name}_deleted"] = related.count()

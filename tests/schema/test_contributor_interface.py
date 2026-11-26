@@ -239,6 +239,11 @@ def test_submission_requires_a_runnable_description_and_data_routes():
     bad = copy.deepcopy(base)
     bad["datasets"][0]["availability"] = "public_elsewhere"
     assert not valid("submission-manifest", bad)         # needs where
+    theory = copy.deepcopy(base)                          # 0.3.0: no package block for a theory paper's sources
+    del theory["package"]
+    theory["datasets"] = []
+    del theory["declarations"]["permission_to_share_included_data"]
+    assert valid("submission-manifest", theory)
 
 
 def test_ai_help_and_consent_fields():

@@ -29,6 +29,12 @@ if STAGE not in ("0", "1"):
 
 DATA_DIR = Path(os.environ.get("DEEPECON_DATA_DIR", BASE_DIR / "data")).resolve()
 PRIVATE_STORAGE_ROOT = DATA_DIR / "private"
+# Uploads (M3, plan §2.5): chunks of at most 8 MiB, so an interrupted upload resumes where it stopped;
+# 20 GiB per archive unless the paper configuration says otherwise; anything larger goes by another agreed channel.
+UPLOAD_CHUNK_BYTES = 8 * 1024 * 1024
+DEFAULT_MAX_UPLOAD_BYTES = 20 * 1024 ** 3
+MAX_UPLOADS_PER_ASSIGNMENT = 20
+UPLOAD_LIST_LIMIT = 20000       # entries read from an archive's directory (names and sizes only)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -60,6 +66,7 @@ INSTALLED_APPS = [
     # overrides the staticfiles version.
     "papers",
     "contributors",
+    "submissions",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

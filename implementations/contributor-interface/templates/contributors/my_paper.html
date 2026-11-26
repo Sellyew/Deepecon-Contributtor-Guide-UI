@@ -36,6 +36,15 @@
   <p class="note">{% translate "The review screen is not available yet; the team will tell you when it opens." %}</p>
   {% endif %}
 </section>
+<section class="materials">
+  <h2>{% translate "Your materials" %}</h2>
+  <p>{% translate "What to provide, how to prepare it, and how to send it." %}</p>
+  {% if submitted %}<p class="note">{% blocktranslate with n=submitted.version date=submitted.submitted_at|date:"Y-m-d" %}Submitted: version {{ n }}, {{ date }}.{% endblocktranslate %}</p>{% endif %}
+  <p class="actions">
+    <a class="button" href="{% url 'submissions:guidance' paper_id=paper.paper_id %}">{% translate "Materials guidance" %}</a>
+    <a class="button" href="{% url 'submissions:submit' paper_id=paper.paper_id %}">{% translate "Submit your materials" %}</a>
+  </p>
+</section>
 <section class="questions">
   <h2>{% translate "Ask the team" %}</h2>
   {% for q in general_questions %}

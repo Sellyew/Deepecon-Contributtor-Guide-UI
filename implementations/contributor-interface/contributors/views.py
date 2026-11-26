@@ -189,6 +189,7 @@ def my_paper(request, paper_id):
         "general_questions": assignment.questions.filter(item__isnull=True), "question_form": QuestionForm(),
         "proposal_count": assignment.proposals.count(), "latest": assignment.confirmations.order_by("-version").first(),
         "frozen": assignment.is_frozen,
+        "submitted": assignment.submission_versions.order_by("-version").first(),
     })
 
 
