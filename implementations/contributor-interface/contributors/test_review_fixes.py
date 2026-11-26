@@ -183,6 +183,23 @@ class TheReviewForm(ScreenFixture):
         self.assertContains(page, 'value="reject" class="verdict chosen" aria-pressed="true"')
         self.assertContains(page, '<label for="id_reject_reason">')
 
+    def test_paired_markers_are_not_styled_as_the_pair_card_grid(self):
+        self.pair("A", "M1")
+        page = self.client.get(self.url("A")).content.decode()
+        self.assertIn("marker-paired", page)
+        self.assertNotRegex(page, r'class="marker[^"]* paired[ "]')        # .paired is the side-by-side card grid
+
+    def test_an_invalid_post_keeps_the_partner_version_the_page_was_loaded_with(self):
+        self.pair("A", "M1")
+        stale = self.client.get(self.url("M1")).context["partner_version"]          # 0: A not answered yet
+        self.post("A", set_verdict="keep", variant_choice="second", version=0, partner_version=0)
+        invalid = self.post("M1", set_verdict="keep_with_changes", variant_choice="", version=0, partner_version=stale)
+        self.assertEqual(int(invalid.context["partner_version"]), stale)      # not refreshed behind the stale choice
+        again = self.post("M1", fetch=True, save="1", verdict="keep", variant_choice="", version=0,
+                          partner_version=invalid.context["partner_version"])
+        self.assertEqual(again.status_code, 409)
+        self.assertEqual(self.a_emp.reviews.get(item__item_id="A").variant_choice, "second")
+
     def test_paired_versions_keep_one_order_and_one_answer(self):
         self.pair("A", "M1")
         for item_id in ("A", "M1"):
@@ -250,30 +267,62 @@ class ConfirmationAndDownload(ScreenFixture):
 
 
 class ScoringMaterialStaysHidden(ScreenFixture):
-    def test_tier_texts_never_reach_a_contributor_page(self):
-        def mark_tiers(node):
-            if isinstance(node, dict):
-                for key, value in node.items():
-                    if key == "tiers" and isinstance(value, dict):
-                        node[key] = {score: f"TIER-TEXT-{score}" for score in value}
-                    else:
-                        mark_tiers(value)
-            elif isinstance(node, list):
-                for value in node:
-                    mark_tiers(value)
-        import_new_rubric_version(self.empirical, "example_rubric_tiers", change_rubric=mark_tiers)
-        self.assertIn("TIER-TEXT-", json.dumps(self.empirical.current_rubric().raw))      # the marker is stored
+    """Scoring material and the roles a configuration hides never reach a contributor page,
+    checked by their values (distinctive markers), not by key names."""
+
+    def pages(self):
         self.post("A", set_verdict="keep", version=0)
         self.client.post(reverse("contributors:confirm", args=[self.pid]))
-        pages = [self.url(i.item_id) for i in self.first_items()] + [
+        return [self.url(i.item_id) for i in self.first_items()] + [
             reverse(f"contributors:{name}", args=[self.pid])
             for name in ("my_paper", "review_matrix", "propose", "confirm", "my_review")]
-        for url in pages:
-            with self.subTest(url=url):
-                page = self.client.get(url)
-                self.assertEqual(page.status_code, 200)
-                self.assertNotContains(page, "TIER-TEXT-")
-                self.assertNotContains(page, "Weight:")
+
+    def assert_absent(self, markers):
+        for url in self.pages():
+            page = self.client.get(url)
+            self.assertEqual(page.status_code, 200)
+            for marker in markers:
+                with self.subTest(url=url, marker=marker):
+                    self.assertNotContains(page, marker)
+
+    def test_tiers_scoring_method_calibration_and_scores_never_reach_a_page(self):
+        def mark(rubric):
+            rubric["calibration_status"] = "CALIBRATION-MARK"
+            total = 0
+            for group in ("conceptual", "missing", "technical"):
+                for item in rubric[group]:
+                    # Distinctive scores that still pass the import checks (points = the largest score,
+                    # tier keys = the allowed scores, the maximum = the sum of points).
+                    item["allowed_scores"], item["points"] = [0, 7777], 7777
+                    item["tiers"] = {"0": "TIER-TEXT-0", "7777": "TIER-TEXT-7777"}
+                    item["scoring_method"] = f"SCORING-METHOD-{item['id']}"
+                    total += 7777
+            rubric["maximum"] = total
+        import_new_rubric_version(self.empirical, "example_rubric_marked", change_rubric=mark)
+        self.assertIn("SCORING-METHOD-", json.dumps(self.empirical.current_rubric().raw))   # the markers are stored
+        self.assert_absent(["TIER-TEXT-", "SCORING-METHOD-", "CALIBRATION-MARK", "7777", "23331", "Weight:"])
+
+    def test_roles_a_category_hides_never_reach_a_page(self):
+        config = example_json("empirical", "paper-config")
+        config["candidate_package_sha256"] = self.empirical.config["candidate_package_sha256"]
+        missing = next(c for c in config["categories"] if c["id"] == "missing")
+        missing["visible_roles"] = [r for r in missing["visible_roles"] if r not in ("description", "acceptable_answer")]
+        importers.import_paper_config(json.dumps(config).encode("utf-8"), "test")
+        rubric = self.empirical.current_rubric()
+        raw = rubric.raw
+        for item in raw["missing"]:
+            item["available_evidence_and_boundary"] = "HIDDEN-DESCRIPTION-MARK"
+            item["acceptable_work"] = "HIDDEN-ACCEPTABLE-MARK"
+        config["rubric_version"] = raw["version"] = "example_rubric_hidden_roles"
+        importers.import_paper_config(json.dumps(config).encode("utf-8"), "test")
+        self.empirical.refresh_from_db()
+        importers.import_rubric(self.empirical, json.dumps(raw).encode("utf-8"), "test")
+        item_map = example_json("empirical", "item-map")
+        item_map["rubric_version"] = raw["version"]
+        importers.import_item_map(self.empirical, json.dumps(item_map).encode("utf-8"), "test")
+        self.empirical.refresh_from_db()
+        self.assertEqual([it.category for it in self.first_items() if it.item_id == "M1"], ["missing"])
+        self.assert_absent(["HIDDEN-DESCRIPTION-MARK", "HIDDEN-ACCEPTABLE-MARK"])
 
 
 class EndpointsAreGated(ScreenFixture):
@@ -410,6 +459,21 @@ class Withdrawal(SelectionTestCase):
         event = EventLog.objects.get(operation="withdrawn_on_request")
         self.assertEqual((event.details["reviews_deleted"], event.details["questions_deleted"]), (1, 1))
         self.assertNotIn("private words", json.dumps(event.details))
+
+    def test_a_team_member_who_cannot_see_contributors_lands_on_the_index(self):
+        member = get_user_model().objects.create_user("member", "m@example.org", "a-long-test-password", is_staff=True)
+        member.user_permissions.add(*Permission.objects.filter(codename__in=["view_assignment", "delete_assignment"]))
+        self.client.force_login(member)
+        response = self.client.post(self.url, {"step": "3", "requested_on": timezone.localdate().isoformat(),
+                                               "request_channel": "email", "confirmation": self.a_emp.public_id})
+        self.assertRedirects(response, reverse("admin:index"))
+        self.assertFalse(Assignment.objects.filter(pk=self.a_emp.pk).exists())
+
+    def test_a_consent_page_offers_no_delete_button(self):
+        consent = Consent.objects.filter(assignment=self.a_emp).first()
+        page = self.client.get(reverse("admin:contributors_consent_change", args=[consent.pk]))
+        self.assertEqual(page.status_code, 200)
+        self.assertNotContains(page, "deletelink")
 
     def test_withdrawal_needs_the_delete_permission(self):
         viewer = get_user_model().objects.create_user("viewer", "v@example.org", "a-long-test-password", is_staff=True)

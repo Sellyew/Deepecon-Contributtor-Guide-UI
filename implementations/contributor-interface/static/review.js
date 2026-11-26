@@ -5,7 +5,9 @@
 // the new version), so the page never reports a conflict with itself. Before the page is left
 // by a link, a shortcut, or another form on the page (language, "Ask the team"), pending changes
 // are saved first. On reload or closing, the save starts at once and the browser asks before
-// leaving while anything is unsaved, so the next page is never built before the save arrives.
+// leaving while anything is unsaved. The question does not hold the next page's request until
+// the save has arrived, so a note in sessionStorage records the version the save started from:
+// a page built before the save arrived (its version is not newer) reloads itself, at most 3 times.
 (function () {
   "use strict";
   var form = document.getElementById("review-form");
@@ -23,7 +25,8 @@
     frozen: d.frozen || "Not saved: the review is frozen.",
     session: d.session || "Not saved: your session has ended. Copy your text, then open your personal link again.",
     server: d.server || "Not saved: the site could not save this answer. Copy your text, then reload the page.",
-    needsAnswer: d.needsAnswer || "Not saved yet: choose an answer, and your notes are saved with it."
+    needsAnswer: d.needsAnswer || "Not saved yet: choose an answer, and your notes are saved with it.",
+    refreshing: d.refreshing || "Loading your latest saved answer…"
   };
   var timer = null;       // a scheduled autosave
   var inflight = null;    // the promise of the save under way
@@ -33,6 +36,30 @@
   var leaving = false;    // the page is being left on purpose (a form post or a saved navigation)
   var unloading = false;  // the page is going away (pagehide)
   var partnerVersion = form.querySelector("input[name=partner_version]");
+  var noteKey = "review-saving:" + window.location.pathname;
+
+  function readNote() {
+    try { return JSON.parse(window.sessionStorage.getItem(noteKey) || "null"); } catch (err) { return null; }
+  }
+  function writeNote(note) {
+    try {
+      if (note) window.sessionStorage.setItem(noteKey, JSON.stringify(note));
+      else window.sessionStorage.removeItem(noteKey);
+    } catch (err) { /* storage unavailable: the page still works, without this check */ }
+  }
+  // Was this page built before a save started on the previous page had arrived?
+  var note = readNote();
+  if (note) {
+    if (Number(version.value) > Number(note.version) || note.tries >= 3) {
+      writeNote(null);
+    } else {
+      writeNote({ version: note.version, tries: (note.tries || 0) + 1 });
+      leaving = true;                       // do not save from this out-of-date page, and lock it
+      Array.prototype.forEach.call(form.elements, function (el) { el.disabled = true; });
+      if (status) { status.textContent = labels.refreshing; }
+      window.setTimeout(function () { window.location.reload(); }, 700);
+    }
+  }
 
   function show(text, problem) {
     if (!status) return;
@@ -167,6 +194,7 @@
   window.addEventListener("beforeunload", function (e) {
     if (leaving) return;
     if ((timer || dirty) && verdict && verdict.value && !inflight && !failed) autosave(true);
+    if (inflight) writeNote({ version: version.value, tries: 0 });
     if (inflight || dirty) { e.preventDefault(); e.returnValue = ""; }
   });
   // Switching tabs: save, since the page may not come back (phones discard background tabs).

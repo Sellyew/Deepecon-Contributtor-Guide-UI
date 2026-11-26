@@ -195,8 +195,11 @@ class AssignmentAdmin(InviteActionMixin, admin.ModelAdmin):
         if step == "3":
             form = WithdrawForm(request.POST or None, assignment=assignment)
             if request.method == "POST" and form.is_valid():
+                contributor = assignment.contributor
                 self._withdraw(request, assignment, form.cleaned_data)
-                return redirect("admin:contributors_contributor_change", assignment.contributor.pk)
+                if self.admin_site._registry[Contributor].has_view_or_change_permission(request, contributor):
+                    return redirect("admin:contributors_contributor_change", contributor.pk)
+                return redirect("admin:index")
         counts = {"answers": assignment.reviews.count(), "proposals": assignment.proposals.count(),
                   "questions": assignment.questions.count(), "confirmed versions": assignment.confirmations.count()}
         return TemplateResponse(request, "admin/contributors/withdraw.html", {
@@ -331,6 +334,9 @@ class ConsentAdmin(admin.ModelAdmin):
 
     def delete_view(self, request, object_id, extra_context=None):
         raise PermissionDenied
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        return super().change_view(request, object_id, form_url, {**(extra_context or {}), "show_delete": False})
 
 
 class ReadOnlyRecordAdmin(admin.ModelAdmin):

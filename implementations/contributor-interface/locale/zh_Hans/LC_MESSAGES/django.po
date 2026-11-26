@@ -549,6 +549,9 @@ msgstr "未保存：网站无法保存此回答。请先复制您的文字，然
 msgid "Not saved yet: choose an answer, and your notes are saved with it."
 msgstr "尚未保存：请选择一个回答，您的备注会随之一起保存。"
 
+msgid "Loading your latest saved answer…"
+msgstr "正在加载您最近保存的回答…"
+
 msgid "Save"
 msgstr "保存"
 

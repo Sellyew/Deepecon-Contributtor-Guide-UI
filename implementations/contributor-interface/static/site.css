@@ -86,7 +86,7 @@ summary { cursor: pointer; color: var(--accent); }
 .save-status { color: var(--muted); margin-left: 0.75rem; }
 .save-status.problem { color: var(--warn); font-weight: 600; }
 .question { border-left: 3px solid var(--line); padding-left: 0.75rem; margin: 0.5rem 0; }
-.matrix-wrap { overflow-x: auto; }
+.matrix-wrap { overflow-x: auto; position: relative; }   /* relative: hidden labels stay inside the scroll area */
 .matrix, .summary-table { border-collapse: collapse; font-size: 0.9rem; }
 .matrix th, .matrix td, .summary-table th, .summary-table td { border: 1px solid var(--line); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
 .matrix td { text-align: center; }

@@ -56,7 +56,8 @@
           data-frozen="{% translate 'Not saved: the review is frozen.' %}"
           data-session="{% translate 'Not saved: your session has ended. Copy your text, then open your personal link again.' %}"
           data-server="{% translate 'Not saved: the site could not save this answer. Copy your text, then reload the page.' %}"
-          data-needs-answer="{% translate 'Not saved yet: choose an answer, and your notes are saved with it.' %}">
+          data-needs-answer="{% translate 'Not saved yet: choose an answer, and your notes are saved with it.' %}"
+          data-refreshing="{% translate 'Loading your latest saved answer…' %}">
       {# Pressing Enter in a text field submits the form's first button: make it a plain save, never an answer. #}
       <button type="submit" name="save" value="1" class="visually-hidden" tabindex="-1" aria-hidden="true"{% if frozen %} disabled{% endif %}>{% translate "Save" %}</button>
       {% csrf_token %}

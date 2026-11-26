@@ -160,7 +160,10 @@ def review_item(request, paper_id, item_id):
         "progress": selection.progress(assignment), "questions": assignment.questions.filter(item=item),
         "question_form": QuestionForm(), "frozen": assignment.is_frozen,
         "earlier": earlier, "earlier_verdict": dict(VERDICTS).get(earlier.verdict) if earlier else None,
-        "partner_version": mate.version if mate else 0,
+        # After an invalid post the page shows the posted (possibly stale) choice again, so it keeps
+        # the partner's version it was loaded with; otherwise the page shows the stored answers.
+        "partner_version": (request.POST.get("partner_version", "0") if request.method == "POST" and not conflict
+                            else (mate.version if mate else 0)),
     })
 
 
